@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:gm1:run-events:v1",
+  "title": "gm1.run-events/v1: one record of a Cartesian run's --events log",
+  "description": "gpuwm-cm1 cartesian --events PATH writes one JSON object per line and flushes each line. This schema is one line. The file as a whole is checked by cm1core.run_events.validate_file: seq counts up from 0 without gaps, and the one end record is the last line.",
+  "type": "object",
+  "required": ["schema", "seq", "kind", "time_utc", "elapsed_s", "pid"],
+  "properties": {
+    "schema": {"const": "gm1.run-events/v1"},
+    "seq": {"type": "integer", "minimum": 0},
+    "kind": {"enum": ["admitted", "startup", "progress", "stats", "frame", "restart", "warning", "refused", "end"]},
+    "time_utc": {"type": "string"},
+    "elapsed_s": {"type": "number", "minimum": 0},
+    "pid": {"type": "integer", "minimum": 1}
+  },
+  "allOf": [
+    {"if": {"properties": {"kind": {"const": "admitted"}}}, "then": {"$ref": "#/$defs/admitted"}},
+    {"if": {"properties": {"kind": {"const": "startup"}}}, "then": {"$ref": "#/$defs/startup"}},
+    {"if": {"properties": {"kind": {"const": "progress"}}}, "then": {"$ref": "#/$defs/progress"}},
+    {"if": {"properties": {"kind": {"const": "stats"}}}, "then": {"$ref": "#/$defs/stats"}},
+    {"if": {"properties": {"kind": {"const": "frame"}}}, "then": {"$ref": "#/$defs/frame"}},
+    {"if": {"properties": {"kind": {"const": "restart"}}}, "then": {"$ref": "#/$defs/restart"}},
+    {"if": {"properties": {"kind": {"const": "warning"}}}, "then": {"$ref": "#/$defs/warning"}},
+    {"if": {"properties": {"kind": {"const": "refused"}}}, "then": {"$ref": "#/$defs/refused"}},
+    {"if": {"properties": {"kind": {"const": "end"}}}, "then": {"$ref": "#/$defs/end"}}
+  ],
+  "$defs": {
+    "count": {"type": "integer", "minimum": 0},
+    "seconds": {"type": "number", "minimum": 0},
+    "optional_seconds": {"type": ["number", "null"], "minimum": 0},
+    "optional_count": {"type": ["integer", "null"], "minimum": 0},
+    "optional_path": {"type": ["string", "null"]},
+    "grid": {
+      "type": "object",
+      "required": ["nx", "ny", "nz", "dx_m", "dy_m", "stretch_z"],
+      "properties": {
+        "nx": {"type": "integer", "minimum": 1},
+        "ny": {"type": "integer", "minimum": 1},
+        "nz": {"type": "integer", "minimum": 1},
+        "dx_m": {"type": "number", "minimum": 0},
+        "dy_m": {"type": "number", "minimum": 0},
+        "dz_m": {"type": ["number", "null"], "minimum": 0},
+        "stretch_z": {"type": "integer", "minimum": 0},
+        "ztop_m": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "last_io": {
+      "type": ["object", "null"],
+      "required": ["kind", "seconds", "bytes"],
+      "properties": {
+        "kind": {"type": "string"},
+        "label": {"type": "string"},
+        "seconds": {"type": "number", "minimum": 0},
+        "bytes": {"type": "integer", "minimum": 0},
+        "background": {"type": "boolean"},
+        "blocking_seconds": {"type": "number", "minimum": 0}
+      }
+    },
+    "gpu": {
+      "type": ["object", "null"],
+      "properties": {
+        "utilization_percent": {"type": "integer", "minimum": 0},
+        "power_w": {"type": "number", "minimum": 0},
+        "memory_used_bytes": {"type": "integer", "minimum": 0},
+        "memory_total_bytes": {"type": "integer", "minimum": 0},
+        "name": {"type": "string"},
+        "uuid": {"type": ["string", "null"]}
+      }
+    },
+    "admitted": {
+      "required": [
+        "config", "config_sha256", "grid", "microphysics", "steps", "start_step",
+        "dt_s", "nsound", "duration_s", "history_interval_s", "frames_expected",
+        "restart_interval_s", "restarts_expected", "history_directory",
+        "restart_directory", "receipt", "control_directory", "history_envelope",
+        "history_initial", "host"
+      ],
+      "properties": {
+        "config": {"type": "string"},
+        "config_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "grid": {"$ref": "#/$defs/grid"},
+        "microphysics": {"type": "string"},
+        "steps": {"$ref": "#/$defs/optional_count"},
+        "start_step": {"$ref": "#/$defs/count"},
+        "dt_s": {"type": "number", "exclusiveMinimum": 0},
+        "nsound": {"type": "integer", "minimum": 1},
+        "adaptive_timestep": {"type": "boolean"},
+        "duration_s": {"type": "number", "minimum": 0},
+        "history_interval_s": {"type": "number", "exclusiveMinimum": 0},
+        "frames_expected": {"$ref": "#/$defs/count"},
+        "restart_interval_s": {"type": ["number", "null"], "exclusiveMinimum": 0},
+        "restarts_expected": {"$ref": "#/$defs/count"},
+        "history_directory": {"type": "string"},
+        "restart_directory": {"$ref": "#/$defs/optional_path"},
+        "resumed_from": {"$ref": "#/$defs/optional_path"},
+        "receipt": {"type": "string"},
+        "control_directory": {"$ref": "#/$defs/optional_path"},
+        "history_envelope": {"enum": ["on", "off"]},
+        "history_initial": {"type": "boolean"},
+        "host": {"type": "string"},
+        "gpu_uuid_requested": {"type": ["string", "null"]}
+      }
+    },
+    "startup": {
+      "required": ["stages", "seconds"],
+      "properties": {
+        "stages": {
+          "type": "object",
+          "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "nvrtc_compile_s": {"$ref": "#/$defs/optional_seconds"},
+        "nvrtc_programs": {"$ref": "#/$defs/optional_count"},
+        "seconds": {"$ref": "#/$defs/seconds"},
+        "gpu": {"$ref": "#/$defs/gpu"}
+      }
+    },
+    "progress": {
+      "required": [
+        "phase", "heartbeat", "step", "total_steps", "model_time_s", "duration_s",
+        "s_per_step_recent", "s_per_step_mean", "model_s_per_wall_s", "eta_s",
+        "last_io", "gpu"
+      ],
+      "properties": {
+        "phase": {"enum": ["waiting-for-gpu", "starting", "stepping", "finishing"]},
+        "heartbeat": {"type": "boolean"},
+        "step": {"type": ["integer", "null"], "minimum": 0},
+        "total_steps": {"$ref": "#/$defs/optional_count"},
+        "model_time_s": {"type": ["number", "null"], "minimum": 0},
+        "duration_s": {"$ref": "#/$defs/optional_seconds"},
+        "s_per_step_recent": {"$ref": "#/$defs/optional_seconds"},
+        "s_per_step_mean": {"$ref": "#/$defs/optional_seconds"},
+        "model_s_per_wall_s": {"type": ["number", "null"]},
+        "eta_s": {"$ref": "#/$defs/optional_seconds"},
+        "last_io": {"$ref": "#/$defs/last_io"},
+        "gpu": {"$ref": "#/$defs/gpu"}
+      }
+    },
+    "stats": {
+      "required": ["step", "model_time_s", "values"],
+      "properties": {
+        "step": {"$ref": "#/$defs/count"},
+        "model_time_s": {"type": "number", "minimum": 0},
+        "values": {"type": "object"}
+      }
+    },
+    "frame": {
+      "required": ["index", "step", "model_time_s", "directory", "bytes", "restart_written"],
+      "properties": {
+        "index": {"$ref": "#/$defs/count"},
+        "step": {"$ref": "#/$defs/count"},
+        "model_time_s": {"type": "number", "minimum": 0},
+        "directory": {"type": "string"},
+        "bytes": {"$ref": "#/$defs/count"},
+        "initial_condition": {"type": "boolean"},
+        "restart_written": {"$ref": "#/$defs/optional_count"}
+      }
+    },
+    "restart": {
+      "required": ["number", "step", "model_time_s", "directory", "bytes"],
+      "properties": {
+        "number": {"type": "integer", "minimum": 1},
+        "step": {"$ref": "#/$defs/count"},
+        "model_time_s": {"type": "number", "minimum": 0},
+        "directory": {"type": "string"},
+        "bytes": {"$ref": "#/$defs/count"},
+        "next_history_index": {"$ref": "#/$defs/count"}
+      }
+    },
+    "warning": {
+      "required": ["code", "message"],
+      "properties": {
+        "code": {"type": "string"},
+        "message": {"type": "string"}
+      }
+    },
+    "refused": {
+      "required": ["code", "gate", "reason", "remedy"],
+      "properties": {
+        "code": {"type": "string"},
+        "gate": {"type": "string"},
+        "reason": {"type": "string"},
+        "remedy": {"type": "string"},
+        "option": {"type": ["string", "null"]}
+      }
+    },
+    "end": {
+      "required": ["reason", "rc", "receipt", "step", "model_time_s", "frames_published"],
+      "properties": {
+        "reason": {"enum": ["completed", "stopped", "paused", "courant-stop", "refused", "error"]},
+        "rc": {"type": "integer", "minimum": 0},
+        "receipt": {"$ref": "#/$defs/optional_path"},
+        "step": {"$ref": "#/$defs/optional_count"},
+        "model_time_s": {"type": ["number", "null"], "minimum": 0},
+        "frames_published": {"$ref": "#/$defs/count"},
+        "restarts_published": {"$ref": "#/$defs/count"},
+        "signal": {"type": ["string", "null"]},
+        "request": {"enum": ["stop", "pause", null]},
+        "message": {"type": ["string", "null"]}
+      }
+    }
+  }
+}

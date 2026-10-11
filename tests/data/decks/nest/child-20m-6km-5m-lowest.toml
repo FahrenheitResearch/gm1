@@ -1,0 +1,124 @@
+# The 20 m child of a ONE-WAY DOWNSCALE, on its OWN 5 m lowest layer.
+#
+# This is child-20m-6km.toml with one change: the vertical deck.  Everything
+# that document says about the one-way limit (W/(2U) = 150 s), the exact
+# dt = 0.125 s under the translating frame, and the mass1 caveat holds here
+# unchanged; read it there.
+#
+# THE VERTICAL DECK IS THE CHILD'S OWN
+#
+#                      nz  dz_bot  str_bot  str_top  dz_top   ztop
+#     parent 100 m     75   20 m    200 m   7000 m   320 m   15000
+#     this child      102    5 m    170 m   7320 m   320 m   15000
+#
+# CM1's own stretch_z = 1 generator builds it (param.F:7819-7953; segment
+# counts 34 + 44 + 24 pass param.F:7828-7877), the model top is the parent's
+# word, and no child layer is thicker than any parent layer it overlaps.
+# tools/nest_downscale_init.py --child-config THIS_FILE refuses otherwise
+# (CM1-NEST-DOWNSCALE-VERTICAL).
+#
+# The transfer is CM1 r21.1's own interp_on_restart column rule
+# (restart_read.F:564-609 search over the parent's ghosted sigma/sigmaf,
+# 3302-3406 plane state machine, 3414-3470 do_interp weights) on each parent
+# column of a parent-resolution window, then the nest's horizontal operator,
+# in WRF's vertical-then-horizontal order (force_domain_em_part2.F:126,
+# 141-147).  u, v and the scalars go through sigma, w and rf through sigmaf.
+# The two child levels at 2.5 m and 7.5 m lie below the parent's first 10 m
+# level and take CM1's constant extension.  TKE is NOT transferred: CM1 does
+# not read tkea when it interpolates to a new grid (restart_read.F:1207), so
+# the child keeps its own initial TKE.  prs, rho and rf go through the same
+# column rule; CM1 would derive them, and the receipt says so.
+#
+# THE CLOCK
+#
+# psolver = 3 treats the vertical acoustic terms implicitly, so the 5 m layer
+# does not change dtsm = 0.60*20/360 = 0.0333 s (misclibs.F:857-868) or
+# nsound = 6.  It does change CM1's advective stop: calccfl
+# (misclibs.F:2584-2718) includes w*dt/dz_k and stops at 1.50 (:2714).  At
+# dt = 0.125 s a 5 m layer reaches 1.50 at w = 60 m/s (240 m/s on the 20 m
+# deck); with a 60 m/s horizontal wind contributing 0.375 the admissible w is
+# 58.1 m/s through the lowest 170 m.
+#
+# THE COST
+#
+# The door prices a 300 x 300 child's peak phase payload at 2.86 GiB on 102
+# levels against 2.11 GiB on 75 (cartesian_door.nest_allocation_plan, the
+# same dynamics tables a standalone run is priced by): memory_budget_mib is
+# raised from 3072 to 4096 accordingly.
+[run]
+lane = "cartesian"
+duration_s = 300.0
+dt_s = 0.125
+history_interval_s = 15.0
+restart_interval_s = 300.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 300
+ny = 300
+nz = 102
+dx_m = 20.0
+dy_m = 20.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 15000.0
+str_bot_m = 170.0
+str_top_m = 7320.0
+dz_bot_m = 5.0
+dz_top_m = 320.0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 4096
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+output_dbz = true
+dbz_level_m = 1000.0

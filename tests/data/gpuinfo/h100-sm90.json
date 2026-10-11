@@ -1,0 +1,18 @@
+{
+ "_about": "An H100 (sm_90, an architecture GM1 has never run on)",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-66666666-7777-8888-9999-000000000000",
+   "name": "NVIDIA H100 80GB HBM3",
+   "memory.total": 81559,
+   "memory.used": 0,
+   "memory.free": 81059,
+   "memory.reserved": 500,
+   "compute_cap": "9.0",
+   "driver_version": "580.65",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

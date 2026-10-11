@@ -1,0 +1,114 @@
+# The window declaration for a ONE-WAY DOWNSCALE, not a live nest.
+#
+# tools/nest_downscale_init.py reads only the [nest] table here, and only for
+# its geometry: the window origin, the span and the refinement ratio.  Nothing
+# in this document is integrated.  The child it produces is an ordinary
+# standalone run with CM1's own open radiative laterals, written beside this
+# file as child-20m-4km.toml.
+#
+# ratio 5 over 60 parent cells is 20 m over 6 x 6 km, centred on the peak
+# cyclonic low-level vortex of the archived 100 m run: parent cell (204, 322)
+# = (20.4 km, 32.2 km), zeta +0.2656 /s at 10 m AGL at T+78 min (frame 26).
+# The door prices the child at 2.14 GiB on a 10 GiB RTX 3080.
+#
+# Six kilometres is chosen against the ONE-WAY limit rather than against the
+# card: with nothing feeding the laterals after t0, the interior is clean only
+# until the boundary reaches it, which is W/(2U) = 6000/(2*20) = 150 s for a
+# domain-relative wind of about 20 m/s.  A smaller window would be cheaper and
+# would buy less usable model time; a larger one buys more time than the
+# vortex itself lasts.
+#
+[run]
+lane = "cartesian"
+duration_s = 5400.0
+dt_s = 0.5
+history_interval_s = 180.0
+# A whole multiple of history_interval_s: CM1-CFG-CARTESIAN-CADENCE refuses
+# any other, and tools/nest_downscale_init.py parses this document through
+# parse_mapping, so an inadmissible cadence here would make the window
+# unusable even though nothing in it is integrated.
+restart_interval_s = 360.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 640
+ny = 640
+nz = 75
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 15000.0
+str_bot_m = 200.0
+str_top_m = 7000.0
+dz_bot_m = 20.0
+dz_top_m = 320.0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[nest]
+refinement_ratio = 5
+time_refinement_ratio = 5
+parent_i0 = 174
+parent_j0 = 292
+parent_span_x = 60
+parent_span_y = 60
+spec_zone = 1
+relax_zone = 4
+feedback = 1
+acoustic_substeps = 6
+follow_storm = true
+follow_interval_s = 270.0
+follow_max_speed_m_s = 15.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 30720
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

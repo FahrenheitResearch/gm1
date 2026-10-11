@@ -1,0 +1,53 @@
+{
+  "schema": "gpuwm-cm1.rust-scientific-comparison-receipt/v1",
+  "claim_limit": "CM1 r21.1 flat-grid sealed 120x120x40 initialization through first nonrestart GETSET only; no timestep, forecast, restart, CUDA, alternate namelist, or portable libm bit-identity claim",
+  "command": "cargo run --manifest-path rust/cm1-state/Cargo.toml --release -- compare-scientific NATIVE_POST_GETSET_DIR RUST_OUTPUT_DIR (the native O0 post-GETSET capture of CM1's official supercell deck at zero steps, and the Rust initializer's release-build output)",
+  "reference": {
+    "receipt_sha256": "b567df22a9e263f9d1701ccd30cda3d00ff47b417b9d83e4d010da84b99aa2e",
+    "layout_sha256": "c75b49a11dbe0e4ad436e0654ff18bf9510e9b95e63c4fa8c9986091a4de7763",
+    "region_manifest_sha256": "ca2c116675e0b5f857d66a67f548fd67ae7ae8d100b3a665acb9144342901300",
+    "phase": "post_getset",
+    "call_ordinal": 1,
+    "storage": "raw f32 little-endian, Fortran i-fastest",
+    "index_policy": "identical native indices, no regridding"
+  },
+  "result": {
+    "fields_compared": 19,
+    "fields_bit_exact": 17,
+    "max_ulp": 2,
+    "max_abs": 5.9604644775390625e-08,
+    "bit_exact_groups": [
+      {"fields": ["pi0"], "sha256": "d42c803ce2504ea53dc30c7aa8c69c8ff12e7702866756a660b512d2e9774fea"},
+      {"fields": ["prs0"], "sha256": "8a87fe5924fb448df4585e0d3924b4fb4a5e7f1e21c78752d6d951455f0c7d17"},
+      {"fields": ["rho0"], "sha256": "63c59c3bd636b34d52ae5d2ea446bb089548241177f46b477d0de934d4df1574"},
+      {"fields": ["thv0"], "sha256": "50587bd806b46e86dea0b97582b52775941ec20a14399911aebba8a3f7e96a70"},
+      {"fields": ["th0"], "sha256": "bf24af683b2b996b172d5fd1cbf72a2365261dc9d3b2f6d246200f41182b0b36"},
+      {"fields": ["rth0"], "sha256": "0db0fa9236451c07635ea740afa7bb304b7b6c47e4414c4cc85ca316d4f9dc05"},
+      {"fields": ["qv0"], "sha256": "adb8078739bbe07420a36081a22c03beb7dc7538812d69d4f2a9ec13458a7df2"},
+      {"fields": ["u0", "ua", "u3d"], "sha256": "500ea844df5364ba472a3af7adf640ee590eac1b68813c2715c17158f7d60fee"},
+      {"fields": ["v0", "va", "v3d"], "sha256": "8688b50a40626e5af6813ffb353930ef9ae5679ad2fad8e9f17b270145bf72b8"},
+      {"fields": ["wa", "w3d"], "sha256": "59192fc97f6e8ef19e8d27a223b4009f8725ab49aad249bc312c5956c182b740"},
+      {"fields": ["ppi", "pp3d"], "sha256": "6ac6adac114cf5439e5d3658f9bbc76f3bbbb710fe44f4a78a5b6e1cc7da44c3"}
+    ],
+    "bounded_libm_fields": {
+      "fields": ["tha", "th3d"],
+      "shape_ijk": [126, 126, 42],
+      "words_each": 666792,
+      "exact_bits_each": 666768,
+      "interior_exact_bits_each": 575976,
+      "interior_words_each": 576000,
+      "boundary_exact_bits_each": 90792,
+      "boundary_words_each": 90792,
+      "max_ulp": 2,
+      "max_abs_k": 5.9604644775390625e-08,
+      "rust_sha256": "94cce62b7ede9d87019536b90937e061db5ec094ba08c3b34ef7e8751856656f",
+      "native_sha256": "941bc237b1110d73a184a86c65d3b6a0d143f478857315cac7155b9a76ea9298"
+    }
+  },
+  "ignored_outputs": {
+    "manifest_sha256": "33d5bd8ec92b35d30feeb5c33ba9fe2b06fb522c91d09229b23470750fc967e4",
+    "comparison_sha256": "c0f79c64ed4098a27f780ea4b316883a26e7554c59c03cfe154554fafa180517",
+    "png_sha256": "ef2b6a779ff58c3f1bebfd28410914ca94b2cce56911d28be1e7bc9cce58482f",
+    "png_path": "comparison.png beside the comparison output (not tracked)"
+  }
+}

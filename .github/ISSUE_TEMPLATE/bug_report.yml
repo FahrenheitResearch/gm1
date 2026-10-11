@@ -1,0 +1,33 @@
+name: Something does not work
+description: GM1 did not install, did not start, or a storm failed.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before you write: [TROUBLESHOOTING](https://github.com/FahrenheitResearch/gm1/blob/main/docs/TROUBLESHOOTING.md) has the common problems, each with its fix, and `gpuwm-cm1 doctor --plain` prints one fix line for each problem it finds.
+  - type: textarea
+    id: report
+    attributes:
+      label: The doctor report
+      description: |
+        On Windows, open "GM1 check" from the Start menu: it saves gm1-report.txt on your desktop and copies it, so paste it here (or drag the file in).
+        On Linux, type `gpuwm-cm1 doctor --report` in a terminal and paste everything it prints. It names no user and no computer.
+        If `gpuwm-cm1` is not found, paste the last lines the installer printed instead.
+      placeholder: "### GM1 doctor report"
+    validations:
+      required: true
+  - type: textarea
+    id: what-you-did
+    attributes:
+      label: What you did
+      description: The steps, for example "pasted the Windows installer line", or "picked Supercell, 250 m with About 1 hour and pressed Start".
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you saw, and what you expected instead. A screenshot helps.
+    validations:
+      required: true

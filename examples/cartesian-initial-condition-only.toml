@@ -1,0 +1,83 @@
+# CM1's iconly: build the initial condition, write it, and stop.
+#
+# README.namelist:233-235 -- "1 = creates initial conditions, but does not run
+# model" -- and cm1.F:4341-4350, which stops with "User has requested initial
+# conditions only".  A run on this deck costs GPU-hours; this is how a user
+# checks that the sounding, the warm bubble and the grid are what they
+# intended before spending them.
+#
+#   gpuwm-cm1 cartesian examples/cartesian-initial-condition-only.toml \
+#     --restart-dir initial --history-dir initial-frame --output ic.json
+#
+# What it writes into --restart-dir is restart-000001: a complete CM1FCP1
+# envelope of the initialized state at nstep=0, which is both inspectable and
+# resumable, so the integration can be started from it later without paying
+# for the initializer again.  With --history-dir it also publishes frame-000000,
+# an ordinary history frame of the same state, labelled as the initial
+# condition rather than as a completed forecast.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 900.0
+iconly = 1
+
+[initialization]
+isnd = 7
+iwnd = 0
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

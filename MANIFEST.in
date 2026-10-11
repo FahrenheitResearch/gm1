@@ -1,0 +1,65 @@
+include LICENSE
+include NOTICE
+include README.md
+include build_rust.py
+include constraints/gpu-cu13-validated.txt
+include setup.py
+recursive-include rust/cm1-state Cargo.lock Cargo.toml README.md *.rs
+recursive-include rust/cm1-state/evidence *.json
+# forecast.rs's crate test reads the two sealed envelopes with include_bytes!.
+include rust/cm1-state/evidence/generic-forecast-envelope-v1.cm1fcp
+include rust/cm1-state/evidence/generic-forecast-envelope-v1.cm1fhs
+# analytic_soundings.rs's crate test reads CM1's base-state columns with include_str!.
+include rust/cm1-state/evidence/cm1-base-columns.txt
+# cm1_namelist.rs embeds the support schema with include_bytes!; without it the
+# sdist cannot build its own wheel.
+recursive-include rust/cm1-state/schema *.json
+recursive-include rust/cm1-render Cargo.lock Cargo.toml *.rs
+recursive-include src/cm1core/data *
+recursive-include src/cm1core/records *.json *.md *.csv
+include src/cm1core/gui/static/index.html
+recursive-include src/cm1core/gui/static/css *.css
+recursive-include src/cm1core/gui/static/js *.js
+recursive-include src/cm1core/gui/static/img *.png
+recursive-include src/cm1core/quicklook/fonts *.ttf LICENSE-DejaVu.txt
+recursive-include src/cm1core/gui/static/guided *.js *.css
+recursive-include src/cm1core/gui/copy *.json
+recursive-include src/cm1core/presets namelist.input preset.json picture.png picture.json input_sounding *.png *.json
+prune src/cm1core/gui/static/mock
+# Only the distributable documents: the user guides, the release notes and
+# the reference documents the code and the notes cite.  Planning, status
+# and working documents are repository history, not distribution content.
+include docs/GM1-CARTESIAN-RUNTIME.md
+include docs/ARWEN-WSM6-CAPACITY-256-AUTHORITY.md
+include docs/RELEASE-NOTES.md
+include docs/WRF-DOWNSCALING.md
+include docs/INSTALL.md
+include docs/QUICKSTART.md
+include docs/TROUBLESHOOTING.md
+include docs/CM1-USERS.md
+include docs/COMMANDS.md
+include docs/ORACLE-DIFFERENTIAL-HARNESS.md
+recursive-include examples *.toml
+prune tests
+prune tools
+# evidence/ (measurement receipts) and tools/oracle/ (the CM1 differential
+# oracle's transcriptions) stay in the development repository.
+prune evidence
+include tools/inspect_artifacts.py
+include tools/release/build_manylinux.sh
+include tools/release/smoke_cm1_user.sh
+include tools/release/cm1_user_script.py
+include tools/release/doc_commands.py
+include tools/release/commands_page.py
+include tools/smoke_installed_cuda_wheel.py
+include tools/smoke_installed_wheel.py
+include tools/verify_authority.py
+include tools/authority/cm1r21.1-content-sha256.tsv
+include tools/build_cm1_gm1_keymap.py
+include tools/authority/fetch_cm1_21_1.py
+prune upstream
+prune work
+# Distribution receipts describe already-built artifacts, so embedding them
+# would create a self-referential sdist hash. They remain tracked in Git.
+prune evidence/distribution
+global-exclude __pycache__ *.py[cod] *.o *.mod *.exe

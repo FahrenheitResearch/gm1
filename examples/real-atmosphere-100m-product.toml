@@ -1,0 +1,53 @@
+[run]
+lane = "real-product"
+duration_s = 3600.0
+dt_s = 0.5
+history_interval_s = 300.0
+restart_interval_s = 900.0
+
+[grid]
+nx = 300
+ny = 300
+nz = 75
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 200.0
+terrain = true
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 3000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

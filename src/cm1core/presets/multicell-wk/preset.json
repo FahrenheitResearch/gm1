@@ -1,0 +1,75 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "multicell-wk",
+  "order": 22,
+  "group": "explore",
+  "name": "Clusters of short-lived storms (multicells)",
+  "line": "Weaker wind shear: new storms keep forming along the spreading cold air as the old ones rain out.",
+  "budget": "10m",
+  "note": "CM1's own analytic sounding with its multicell wind profile. The area is not made smaller than 120 km, because CM1's parcel grid covers 120 km; the fit makes the grid coarser or the storm shorter instead.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "iwnd",
+        "from": 2,
+        "to": 4,
+        "why": "CM1's multicell wind profile (Weisman and Klemp 1982)"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "iprcl",
+        "from": 0,
+        "to": 1,
+        "why": "follow air parcels, so Results can show air rising into the storm"
+      },
+      {
+        "key": "nparcels",
+        "from": 1,
+        "to": 36000,
+        "why": "CM1's own parcel grid: 60 x 60 across, every 2 km, and 10 levels, every 1 km"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 20.5,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 3.0,
+        "to": -5.125,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 120
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "gm1_settings": {
+    "initialization.bubble_center_x_m": 7600.0,
+    "initialization.bubble_center_y_m": -7800.0
+  },
+  "gm1_settings_why": "The warm bubble that starts the storm sits 7.6 km east and 7.8 km south of the centre, the storm-track check's recommended place for this sounding, so the storm keeps the most room to every side. CM1 keeps the bubble in its code, not the namelist, so this is a GM1 setting."
+}

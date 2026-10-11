@@ -1,0 +1,70 @@
+/* Guided mode's screens, in the Recast skin (gm1.css): glass cards with the
+   top-lit sheen, 8 px corners, the cyan accent for the primary action and the fitted time. A card's picture sits
+   6 px inside the card with square corners, as drawn: no clipping by the card's corners (an unoffered card's picture
+   is dimmed to grey). */
+
+/* the gallery */
+.g-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 16px; }
+.g-card { background: var(--gm1-sheen), var(--gm1-panel); border: 1px solid var(--gm1-rule); border-radius: var(--gm1-r-lg);
+  box-shadow: var(--gm1-shadow); display: flex; flex-direction: column; min-width: 0;
+  transition: border-color var(--gm1-dur) var(--gm1-ease); }
+.g-card:not(.off):hover { border-color: var(--gm1-faint); }
+.g-card .g-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.g-card h2 { margin: 0; font-size: 15px; font-weight: 700; color: var(--gm1-title); letter-spacing: .01em; }
+.g-card .g-line { margin: 0; color: var(--gm1-text); }
+.g-card .g-facts { margin: 0; color: var(--gm1-muted); font-size: var(--fs-small); }
+.g-card .g-fit { margin: 0; color: var(--gm1-accent); font-weight: 600; }
+.g-card .g-why { margin: 0; color: var(--gm1-muted); font-size: var(--fs-small); }
+.g-card .g-why:empty, .g-card .g-fit:empty { display: none; }
+.g-card .btns { margin-top: auto; padding-top: 6px; }
+/* An unoffered card: its picture is dimmed and grey as before ("a greyed card says why"); its words are greyed by
+   colour, not by opacity, so the reason it is not offered keeps AA contrast. */
+.g-card.off { box-shadow: none; }
+.g-card.off > .g-pic img { opacity: .62; filter: grayscale(1); }
+.g-card.off h2, .g-card.off .g-line { color: var(--gm1-muted); }
+.g-card.off .g-fit { color: var(--gm1-muted); font-weight: 400; }
+
+.g-pic { margin: 0; background: var(--gm1-void); border-bottom: 1px solid var(--gm1-rule); }
+.g-card > .g-pic { margin: 6px 6px 0; border: 1px solid var(--gm1-rule-soft); border-radius: 0; }
+.g-pic img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border: 0; }
+.g-pic figcaption { display: block; padding: 5px 10px 6px; font-size: var(--fs-micro); color: var(--gm1-dim); }
+.g-pic figcaption:empty { display: none; }
+.g-pic.none { aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; color: var(--gm1-dim);
+  font-family: var(--gm1-font-mono); font-size: var(--fs-micro); letter-spacing: .04em; text-transform: uppercase;
+  border: 1px dashed var(--gm1-faint); background: rgba(0, 0, 0, 0.25); }
+.panel .g-pic { border: 1px solid var(--gm1-rule); }
+.g-foot { margin-top: 16px; }
+
+/* how long can it run */
+.g-budgets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.g-budgets .btn { padding: 8px 16px; }
+.g-budgets .btn.on { border-color: var(--gm1-accent-line); color: var(--gm1-accent); background: var(--gm1-accent-dim); }
+.g-summary { font-size: 14px; margin: 4px 0 12px; }
+.g-got td:first-child { width: 42%; }
+.panel .cap + .tablewrap, .panel .tablewrap + .cap, .panel .tablewrap + h2.cap { margin-top: 14px; }
+.g-live img { max-width: 1280px; }
+.g-changes { margin: 0 0 12px; padding-left: 18px; color: var(--gm1-text); }
+.g-changes li { margin-bottom: 4px; }
+.g-go { margin: 14px 0 6px; }
+.g-start { padding: 8px 22px; font-size: 14px; }
+
+/* watching and results */
+.g-state { margin: 10px 0 8px; color: var(--gm1-text); }
+.g-state:empty { display: none; }
+.g-live { margin: 0; }
+.g-live img { width: 100%; border: 1px solid var(--gm1-rule); background: var(--gm1-void); }
+.g-live figcaption { margin-top: 5px; }
+.g-empty { padding: 28px 12px; text-align: center; border: 1px dashed var(--gm1-faint); border-radius: var(--gm1-r-md);
+  background: rgba(0, 0, 0, 0.25); }
+.g-what h3.g-look { margin: 0 0 6px; font-size: 15px; color: var(--gm1-title); }
+.g-what p { margin: 0 0 10px; }
+.g-strongest:empty { display: none; }
+
+@media (max-width: 760px) {
+  .g-cards { grid-template-columns: minmax(0, 1fr); }
+  .g-got td:first-child { width: auto; }
+}
+
+/* The hidden attribute always hides: a class that sets display (a copy line is a grid) must not show what a
+   "Show command" link has not opened yet. */
+[hidden] { display: none !important; }

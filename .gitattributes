@@ -1,0 +1,14 @@
+# Evidence and configuration hashes are repository-byte identities. Keep their
+# text representation stable across Windows and POSIX checkouts.
+* text=auto eol=lf
+
+*.bin binary
+*.dat binary
+*.exe binary
+*.gz binary
+*.nc binary
+*.png binary
+*.whl binary
+
+# Oracle patches preserve source-byte whitespace as provenance.
+evidence/oracles/**/*.patch -whitespace

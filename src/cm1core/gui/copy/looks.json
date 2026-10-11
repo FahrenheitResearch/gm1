@@ -1,0 +1,178 @@
+{
+  "schema": "gpuwm-cm1.gui-looks/v1",
+  "about": "The looks guided Results opens on and the More looks row, with their 'What am I looking at' panels. {name} fields are filled with the run's own numbers; a clause whose number is unknown is left out (clause_if).",
+  "looks": [
+    {
+      "id": "reflectivity",
+      "title": "Reflectivity",
+      "short": "What a weather radar would see",
+      "text": "What a weather radar would see 1 km above the ground: rain and hail, heaviest in red and purple. A hook-shaped tail at the back of the storm marks where its rotation wraps rain around the updraft. Colours follow the National Weather Service scale. At {dx} grid spacing, details smaller than about {six_dx}, such as a thin hook, are smoothed out. Simulated, not observed.",
+      "unit": "dBZ"
+    },
+    {
+      "id": "spin-near-ground",
+      "title": "Spin near the ground",
+      "short": "How fast the air spins near the ground",
+      "text": "How fast the air spins about a vertical axis at the lowest model level ({height} m), red one way and blue the other, with the wind drawn as streaks. The strongest spin sits where the storm's cold outflow meets the warm inflow. At {dx} grid spacing, features smaller than about {six_dx} are not resolved.",
+      "clause_if": {
+        "height": " ({height} m)"
+      },
+      "unit": "per second"
+    },
+    {
+      "id": "updraft-5km",
+      "title": "Updraft at 5 km",
+      "short": "Rising air 5 km up",
+      "text": "Rising air 5 km up, in metres per second. The ring marks the strongest updraft. A supercell keeps one long-lived updraft; a squall line has many short ones along the line. At {dx} grid spacing, updrafts narrower than about {six_dx} are smoothed out, so the smallest and fastest are missing.",
+      "unit": "metres per second"
+    },
+    {
+      "id": "swath",
+      "title": "Wind swath",
+      "short": "The strongest near-ground wind so far",
+      "text": "The strongest near-ground wind each place has had since the start, so it grows as the storm moves. It shows the storm's track and where its strongest gusts went. At {dx} grid spacing, gusts smaller than about {six_dx} are smoothed out, so the strongest local gusts are missing.",
+      "unit": "metres per second, ground-relative"
+    }
+  ],
+  "this_run": "This run: {dx} grid spacing, a {width} × {depth} km area, {duration} of storm time, a saved time every {interval}.",
+  "picture_rules": "Every picture carries its facts in its footer: simulated, the GM1 version, the rain and hail scheme and whether it is checked against CM1, the grid spacing, the real height of the level shown, the wind frame and the storm time.",
+  "more_looks": [
+    {
+      "id": "surface",
+      "kind": "frames",
+      "title": "Cold air near the ground and gust fronts",
+      "short": "Where rain-cooled air spreads out",
+      "text": "The air at the lowest model level ({height} m up): violet where rain-cooled air has spread out from the storm (the cold pool), amber where the air is warmer than it started. The bright lines are gust fronts, where the cold air pushes under the warm air and lifts it.",
+      "clause_if": {
+        "height": " ({height} m up)"
+      },
+      "note": "Gust fronts narrower than about 6 grid spacings ({six_dx}) are smoothed out."
+    },
+    {
+      "id": "rain",
+      "kind": "frames",
+      "title": "Rain so far",
+      "short": "Rain on the ground since the start",
+      "text": "How much rain has reached the ground since the start, in centimetres. The heaviest rain falls beside the updraft, and the grey line marks 1 mm.",
+      "note": "Each grid cell ({dx} across) holds the rain that fell into it since the start.",
+      "note_moving": "This run's domain moves with the storm, so its cells move too: this is not a map of rain on the ground (the wind swath is)."
+    },
+    {
+      "id": "clouds-from-above",
+      "kind": "frames",
+      "title": "Clouds seen from above",
+      "short": "A picture made from the model's clouds",
+      "text": "The storm as a camera high above it might see it, made from the model's cloud water, ice, snow, hail and rain, lit by a low sun from the west-south-west. The wide flat top is the anvil; bumps on it are where the updraft punches through. Long shadows fall to the east-north-east. Simulated, not satellite data.",
+      "note": "At {dx}, small cumulus clouds are missing and cloud edges are blocky."
+    },
+    {
+      "id": "updraft-slice",
+      "kind": "frames",
+      "title": "Slice through the strongest updraft",
+      "short": "The updraft cut open, west to east and south to north",
+      "text": "Two cuts straight down through the column with the strongest rising air 5 km up: one from west to east, one from south to north, from the ground to 16 km. Amber is air going up, blue is air coming down, in metres per second. The silver line is the cloud's edge and the yellow line is where a radar would see 40 dBZ.",
+      "note": "The slices move with the strongest updraft at each saved time. Drafts narrower than about 6 grid spacings ({six_dx}) are smoothed out."
+    },
+    {
+      "id": "hail-track",
+      "kind": "frames",
+      "title": "Hail near the ground so far",
+      "short": "Where hail came down",
+      "text": "The most hail in the air near the ground each place has had since the start, on a log scale from 0.01 to 10 grams per kilogram of air. It shows the storm's hail track. It is the amount of hail, not the size of the stones; in a run without a hail category it is graupel (soft hail).",
+      "note": "The most hail in the air near the ground, not hail size. Each value is one {dx} grid cell's, so hail cores narrower than about {six_dx} are smoothed out.",
+      "note_sampled": "Sampled at each saved time ({interval}), so short bursts between them are missed."
+    },
+    {
+      "id": "spin-track",
+      "kind": "frames",
+      "title": "Strongest near-ground spin so far",
+      "short": "Where the air near the ground spun hardest",
+      "text": "The strongest counter-clockwise spin near the ground each place has had since the start, so it grows into a track as the storm moves. The brightest streaks are where the storm's low-level rotation passed.",
+      "note": "Features smaller than about 6 grid spacings ({six_dx}) are not resolved.",
+      "note_sampled": "Sampled at each saved time ({interval}), so short bursts between them are missed."
+    },
+    {
+      "id": "environment",
+      "kind": "once",
+      "title": "The storm's environment",
+      "short": "The air the storm starts in",
+      "text": "The air the storm grows in, as a weather balloon would measure it. Left: temperature (red) and dewpoint (green) with height; where they are close together the air is moist. Middle: how the wind changes with height (the hodograph); a long, curved line means the wind turns and strengthens with height, which lets storms rotate. Right: the energy for rising air (CAPE), the lid on it (CIN), the cloud base, the wind shear and the helicity, as the run computed them before it started.",
+      "note": "The air the storm starts in, the same everywhere in the domain.",
+      "note_varies": "This run starts from a weather model's 3D state, so the air differs from place to place: the curves are the south-west corner of the domain at the start, and the numbers are for the domain's average sounding."
+    },
+    {
+      "id": "parcels",
+      "kind": "once",
+      "title": "Air rising into the storm",
+      "short": "The model's own air parcels climbing into the storm",
+      "text": "Air parcels the model followed through the whole run: from above on the left, and from the side on the right. The bright ones rise more than 3 km, coloured by how high they are now, with their last 10 minutes as a trail; they flow in near the ground and shoot up through the updraft into the anvil. The faint dots are other parcels. Save as film to watch them climb.",
+      "note": "Parcels move with the model's resolved wind only; turbulence smaller than {dx} does not move them."
+    },
+    {
+      "id": "swirl",
+      "kind": "film",
+      "title": "Swirl near the ground",
+      "short": "The spin near the ground, moving",
+      "text": "The spin look set in motion: the lowest-level wind drawn as streaks that flow with the air, coloured by spin, red one way and blue the other. Watch the air wrap around the storm's rotation and the gust fronts sweep outward.",
+      "note": "Between saved times (every {interval}) the picture is blended, not computed. At {dx}, the swirl shows the storm's broad circulation, not small vortices."
+    }
+  ],
+  "guided_titles": {
+    "surface": "Cold air near the ground and gust fronts",
+    "rain": "Rain so far"
+  },
+  "why_not": {
+    "no_cloud": {
+      "text": "This run saved no cloud water or ice."
+    },
+    "no_rain": {
+      "text": "This run did not save the rain that reached the ground.",
+      "hint": "output_rain = 1"
+    },
+    "no_hail": {
+      "text": "This run has no hail or graupel to follow.",
+      "hint": "a scheme with graupel or hail, such as ptype = 5 or 7"
+    },
+    "no_parcels": {
+      "text": "This run did not follow air parcels. To follow them in your next run, turn on Follow air parcels under Customize this storm before Start (or, in Advanced, CM1's parcel tracking in Namelist).",
+      "hint": "iprcl = 1"
+    },
+    "parcels_later": {
+      "text": "Parcels arrive when the run ends."
+    },
+    "not_yet": {
+      "text": "Not drawn yet: pictures appear as the saved times arrive."
+    },
+    "older_run": {
+      "text": "This run's pictures were drawn before this look existed. Draw the new looks to add it."
+    },
+    "film_first": {
+      "text": "This look is a film. Make the film to watch it."
+    },
+    "film_needs_frames": {
+      "text": "A film needs at least two saved times."
+    }
+  },
+  "ui": {
+    "more_looks": "More looks",
+    "new": "new",
+    "save_film": "Save as film",
+    "make_film": "Make the film",
+    "making": "Making the film: {done} of {total} pictures",
+    "making_start": "Making the film…",
+    "stop": "Stop",
+    "stopped": "The film was stopped after {done} pictures.",
+    "failed": "The film was not made: {message}",
+    "ready": "The film is ready:",
+    "play_here": "It plays above; press Play.",
+    "download_mp4": "MP4 video",
+    "download_gif": "GIF",
+    "download_apng": "Animated picture (PNG)",
+    "no_mp4": "An MP4 needs the optional film extra; the animated picture plays everywhere.",
+    "draw_new": "Draw the new looks",
+    "draw_new_about": "Draws the looks this run does not have yet on the computer's processor, not the graphics card. About {seconds} s.",
+    "drawing": "Drawing the new looks…",
+    "draw": "Draw it",
+    "film_about": "A film of every saved time, made on the computer's processor. About {seconds} s."
+  }
+}

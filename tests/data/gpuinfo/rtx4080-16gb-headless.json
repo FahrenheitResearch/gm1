@@ -1,0 +1,18 @@
+{
+ "_about": "A headless 16 GB card",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-22222222-3333-4444-5555-666666666666",
+   "name": "NVIDIA GeForce RTX 4080",
+   "memory.total": 16376,
+   "memory.used": 4,
+   "memory.free": 16122,
+   "memory.reserved": 250,
+   "compute_cap": "8.9",
+   "driver_version": "610.74",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

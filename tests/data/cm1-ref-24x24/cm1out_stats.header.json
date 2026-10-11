@@ -1,0 +1,2385 @@
+{
+ "file": "cm1out_stats.nc",
+ "data_model": "NETCDF4_CLASSIC",
+ "dimensions": [
+  [
+   "xh",
+   1,
+   false
+  ],
+  [
+   "yh",
+   1,
+   false
+  ],
+  [
+   "zh",
+   1,
+   false
+  ],
+  [
+   "time",
+   3,
+   true
+  ]
+ ],
+ "global_attributes": [
+  [
+   "CM1 version",
+   {
+    "type": "str",
+    "value": "cm1r21.1"
+   }
+  ],
+  [
+   "Conventions",
+   {
+    "type": "str",
+    "value": "CF-1.7"
+   }
+  ],
+  [
+   "missing_value",
+   {
+    "type": "float32",
+    "value": -999999.875
+   }
+  ]
+ ],
+ "variables": [
+  {
+   "name": "xh",
+   "dimensions": [
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "west-east location",
+    "units": "degree_east",
+    "axis": "X"
+   },
+   "float32_words": [
+    "00000000"
+   ]
+  },
+  {
+   "name": "yh",
+   "dimensions": [
+    "yh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "south-north location",
+    "units": "degree_north",
+    "axis": "Y"
+   },
+   "float32_words": [
+    "00000000"
+   ]
+  },
+  {
+   "name": "zh",
+   "dimensions": [
+    "zh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "height",
+    "units": "m",
+    "axis": "Z"
+   },
+   "float32_words": [
+    "00000000"
+   ]
+  },
+  {
+   "name": "time",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "time",
+    "units": "seconds",
+    "axis": "T"
+   },
+   "float32_words": [
+    "00000000",
+    "42700000",
+    "42f00000"
+   ]
+  },
+  {
+   "name": "mtime",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "model time (seconds since beginning of s",
+    "units": "s"
+   },
+   "float32_words": [
+    "00000000",
+    "42700000",
+    "42f00000"
+   ]
+  },
+  {
+   "name": "wmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3e4a8f48",
+    "3ec337e4"
+   ]
+  },
+  {
+   "name": "wmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bd44c8e8",
+    "bdc0ce47"
+   ]
+  },
+  {
+   "name": "zwmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "level of max vertical velocity",
+    "units": "m AGL"
+   },
+   "float32_words": [
+    "00000000",
+    "44fa0000",
+    "44fa0000"
+   ]
+  },
+  {
+   "name": "zwmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "level of min vertical velocity",
+    "units": "m AGL"
+   },
+   "float32_words": [
+    "00000000",
+    "44bb8000",
+    "44bb8000"
+   ]
+  },
+  {
+   "name": "wmax500",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity at 500 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3dabb8b2",
+    "3e24b194"
+   ]
+  },
+  {
+   "name": "wmin500",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity at 500 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bcb24613",
+    "bd2bec86"
+   ]
+  },
+  {
+   "name": "wmax1000",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity at 1000 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3e1da423",
+    "3e97c1f3"
+   ]
+  },
+  {
+   "name": "wmin1000",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity at 1000 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bd236a9c",
+    "bd9e3dec"
+   ]
+  },
+  {
+   "name": "wmax2500",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity at 2500 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3e34cc22",
+    "3eac9a20"
+   ]
+  },
+  {
+   "name": "wmin2500",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity at 2500 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bd0e5485",
+    "bd8c8db9"
+   ]
+  },
+  {
+   "name": "wmax5000",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity at 5000 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3d9cf053",
+    "3e0c9f59"
+   ]
+  },
+  {
+   "name": "wmin5000",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity at 5000 m AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bc24a1b7",
+    "bc9051e5"
+   ]
+  },
+  {
+   "name": "wmax10k",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vertical velocity at 10 km AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3c9bcc79",
+    "3ce3eda6"
+   ]
+  },
+  {
+   "name": "wmin10k",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vertical velocity at 10 km AGL",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "bbcb827f",
+    "ba987908"
+   ]
+  },
+  {
+   "name": "umax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max u velocity (grid-rel)",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "41940000",
+    "41943eb8",
+    "419471af"
+   ]
+  },
+  {
+   "name": "umin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min u velocity (grid-rel)",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "c145d913",
+    "c149b741",
+    "c14d5dc4"
+   ]
+  },
+  {
+   "name": "sumax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max u velocity at lowst mod lev (grid-re",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "c145d913",
+    "c141fdb5",
+    "c13e64a4"
+   ]
+  },
+  {
+   "name": "sumin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min u velocity at lowst mod lev (grid-re",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "c145d913",
+    "c149b741",
+    "c14d5dc4"
+   ]
+  },
+  {
+   "name": "vmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max v velocity (grid-rel)",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "40800000",
+    "4083378d",
+    "4086ab0c"
+   ]
+  },
+  {
+   "name": "vmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min v velocity (grid-rel)",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "bfd132f6",
+    "bff06121",
+    "c0070e97"
+   ]
+  },
+  {
+   "name": "svmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max v velocity at lowst mod lev (grid-re",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "bfd132f6",
+    "bfb29d4b",
+    "bf9673f0"
+   ]
+  },
+  {
+   "name": "svmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min v velocity at lowst mod lev (grid-re",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "bfd132f6",
+    "bff06121",
+    "c0070e97"
+   ]
+  },
+  {
+   "name": "ppimax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max nondimensional pressure perturbation",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "00000000",
+    "3807a9cf",
+    "382202b7"
+   ]
+  },
+  {
+   "name": "ppimin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min nondimensional pressure perturbation",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "00000000",
+    "b8bc73a0",
+    "b8a7825e"
+   ]
+  },
+  {
+   "name": "ppmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max pressure perturbation",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "00000000",
+    "410ce000",
+    "412c4000"
+   ]
+  },
+  {
+   "name": "ppmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min pressure perturbation",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "00000000",
+    "c1f6e000",
+    "c1db6000"
+   ]
+  },
+  {
+   "name": "thpmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max potential temperature perturbation",
+    "units": "K"
+   },
+   "float32_words": [
+    "3f75bb1e",
+    "3f73f63c",
+    "3f68185d"
+   ]
+  },
+  {
+   "name": "thpmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min potential temperature perturbation",
+    "units": "K"
+   },
+   "float32_words": [
+    "00000000",
+    "bc6c722b",
+    "bd5f40b4"
+   ]
+  },
+  {
+   "name": "sthpmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max pot. temp. pert. at lowest model lev",
+    "units": "K"
+   },
+   "float32_words": [
+    "3d97cb60",
+    "3d932789",
+    "3d7e40f6"
+   ]
+  },
+  {
+   "name": "sthpmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min pot. temp. pert. at lowest model lev",
+    "units": "K"
+   },
+   "float32_words": [
+    "00000000",
+    "b980d7f6",
+    "bad2deb0"
+   ]
+  },
+  {
+   "name": "maxqv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qv",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "3c656042",
+    "3c656047",
+    "3c656054"
+   ]
+  },
+  {
+   "name": "minqv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qv",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "37d749d7",
+    "37d749c7",
+    "37d7497d"
+   ]
+  },
+  {
+   "name": "maxqc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qc",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minqc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qc",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxqr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qr",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minqr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qr",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxqi",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qi",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minqi",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qi",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxqs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qs",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minqs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qs",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxqg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qg",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minqg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min qg",
+    "units": "kg/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxnci",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max nci",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minnci",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min nci",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxncs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max ncs",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minncs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min ncs",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxncr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max ncr",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minncr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min ncr",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "maxncg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max ncg",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "minncg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min ncg",
+    "units": "#/kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "pratemax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "maximum surface precipitation rate",
+    "units": "kg/m2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "pratemin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "minimum surface precipitation rate",
+    "units": "kg/m2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "tkemax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max subgrid tke",
+    "units": "m^2/s^2"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "tkemin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min subgrid tke",
+    "units": "m^2/s^2"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "kmhmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max horiz eddy viscosity for momentum",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "32085b53",
+    "32e342e2",
+    "336342e2"
+   ]
+  },
+  {
+   "name": "kmhmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min horiz eddy viscosity for momentum",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "kmvmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert eddy viscosity for momentum",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "32085b53",
+    "32e342e2",
+    "336342e2"
+   ]
+  },
+  {
+   "name": "kmvmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vert eddy viscosity for momentum",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "khhmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max horiz eddy diffusivity for scalars",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "3208a123",
+    "32e3b73d",
+    "3363b73d"
+   ]
+  },
+  {
+   "name": "khhmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min horiz eddy diffusivity for scalars",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "khvmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert eddy diffusivity for scalars",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "3208a123",
+    "32e3b73d",
+    "3363b73d"
+   ]
+  },
+  {
+   "name": "khvmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min vert eddy diffusivity for scalars",
+    "units": "m^2/s"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "divmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max 3d divergence",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "3680cb14",
+    "3640fb57"
+   ]
+  },
+  {
+   "name": "divmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min 3d divergence",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "b682cc8f",
+    "b60d5660"
+   ]
+  },
+  {
+   "name": "rhmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max relative humidity wrt liquid",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "3f74e27a",
+    "3f74e31d",
+    "3f74e0c1"
+   ]
+  },
+  {
+   "name": "rhmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min relative humidity wrt liquid",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "3e80040f",
+    "3e7fb8a0",
+    "3e8000f0"
+   ]
+  },
+  {
+   "name": "rhimax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min relative humidity wrt ice",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "3f53ee4c",
+    "3f546db6",
+    "3f56221b"
+   ]
+  },
+  {
+   "name": "rhimin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min relative humidity wrt ice",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "3edde8e4",
+    "3edd8614",
+    "3edddf9b"
+   ]
+  },
+  {
+   "name": "themax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max theta-e below 10 km",
+    "units": "K"
+   },
+   "float32_words": [
+    "43ac5e0d",
+    "43ac5e87",
+    "43ac5ba7"
+   ]
+  },
+  {
+   "name": "themin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min theta-e below 10 km",
+    "units": "K"
+   },
+   "float32_words": [
+    "43a1a6b9",
+    "43a1a6b6",
+    "43a1a6b5"
+   ]
+  },
+  {
+   "name": "sthemax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max theta-e at lowest model level",
+    "units": "K"
+   },
+   "float32_words": [
+    "43aabf46",
+    "43aabf0c",
+    "43aabd9e"
+   ]
+  },
+  {
+   "name": "sthemin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min theta-e at lowest model level",
+    "units": "K"
+   },
+   "float32_words": [
+    "43aab48a",
+    "43aab48a",
+    "43aab45e"
+   ]
+  },
+  {
+   "name": "qctop",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max cloud top height",
+    "units": "m"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "qcbot",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min cloud base height",
+    "units": "m"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "sprsmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max pressure at lowest model level",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "47bdde54",
+    "47bdde41",
+    "47bddea5"
+   ]
+  },
+  {
+   "name": "sprsmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min pressure at lowest model level",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "47bdde54",
+    "47bdcee6",
+    "47bdd09e"
+   ]
+  },
+  {
+   "name": "psfcmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max pressure at surface",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "47c35306",
+    "47c352f3",
+    "47c35356"
+   ]
+  },
+  {
+   "name": "psfcmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min pressure at surface",
+    "units": "Pa"
+   },
+   "float32_words": [
+    "47c35306",
+    "47c3434f",
+    "47c34525"
+   ]
+  },
+  {
+   "name": "wspmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max grid-rel horiz wind speed",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "41fe3e75",
+    "41fe7d13",
+    "41feae39"
+   ]
+  },
+  {
+   "name": "wspmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min grid-rel horiz wind speed",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "3fafa590",
+    "3f90ffc0",
+    "3f66807c"
+   ]
+  },
+  {
+   "name": "zwspmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "level of max grid-rel horiz wind speed",
+    "units": "m AGL"
+   },
+   "float32_words": [
+    "45c35000",
+    "45c35000",
+    "45c35000"
+   ]
+  },
+  {
+   "name": "zwspmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "level of min grid-rel horiz wind speed",
+    "units": "m AGL"
+   },
+   "float32_words": [
+    "437a0000",
+    "437a0000",
+    "437a0000"
+   ]
+  },
+  {
+   "name": "swspmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max grid-rel horiz wind speed at l.m.l.",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "3fafa590",
+    "3fcdf178",
+    "3fea616e"
+   ]
+  },
+  {
+   "name": "swspmin",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min grid-rel horiz wind speed at l.m.l.",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "3fafa590",
+    "3f90ffc0",
+    "3f66807c"
+   ]
+  },
+  {
+   "name": "cflmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max Courant number",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "3de894bf",
+    "3de8f4f9",
+    "3de940cc"
+   ]
+  },
+  {
+   "name": "kshmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max horiz K stability factor",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "2956e648",
+    "2a33153e",
+    "2ab3153e"
+   ]
+  },
+  {
+   "name": "ksvmax",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert K stability factor",
+    "units": "nondimensional"
+   },
+   "float32_words": [
+    "2a56e648",
+    "2b33153e",
+    "2bb3153e"
+   ]
+  },
+  {
+   "name": "vortsfc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at lowest model level",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "35d16040",
+    "36c7cee0"
+   ]
+  },
+  {
+   "name": "vort1km",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at 1 km AGL",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "36dfa9fc",
+    "37d5849c"
+   ]
+  },
+  {
+   "name": "vort2km",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at 2 km AGL",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "36fb3128",
+    "37f3ec8c"
+   ]
+  },
+  {
+   "name": "vort3km",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at 3 km AGL",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "36b3ef9e",
+    "37ab449c"
+   ]
+  },
+  {
+   "name": "vort4km",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at 4 km AGL",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "367624de",
+    "37653b66"
+   ]
+  },
+  {
+   "name": "vort5km",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at 5 km AGL",
+    "units": "1/s"
+   },
+   "float32_words": [
+    "00000000",
+    "362ce560",
+    "371dbb65"
+   ]
+  },
+  {
+   "name": "tmass",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of dry air",
+    "units": "kg"
+   },
+   "float32_words": [
+    "54a03e96",
+    "54a03e97",
+    "54a03e97"
+   ]
+  },
+  {
+   "name": "tmois",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of moisture",
+    "units": "kg"
+   },
+   "float32_words": [
+    "50c45c72",
+    "50c45d67",
+    "50c461bc"
+   ]
+  },
+  {
+   "name": "massqv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qv",
+    "units": "kg"
+   },
+   "float32_words": [
+    "50c45c72",
+    "50c45d67",
+    "50c461bc"
+   ]
+  },
+  {
+   "name": "massqc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qc",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "massqr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qr",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "massqi",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qi",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "massqs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qs",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "massqg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total mass of qg",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "ek",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total kinetic energy",
+    "units": "kg m^2/s^2"
+   },
+   "float32_words": [
+    "580868dc",
+    "5808689d",
+    "58086b1f"
+   ]
+  },
+  {
+   "name": "ei",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total internal energy",
+    "units": "kg m^2/s^2"
+   },
+   "float32_words": [
+    "5d65bd67",
+    "5d65bd2d",
+    "5d65bd24"
+   ]
+  },
+  {
+   "name": "ep",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total potential energy",
+    "units": "kg m^2/s^2"
+   },
+   "float32_words": [
+    "5c99b663",
+    "5c99b6c4",
+    "5c99b66b"
+   ]
+  },
+  {
+   "name": "le",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total latent energy",
+    "units": "kg m^2/s^2"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "et",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total energy",
+    "units": "kg m^2/s^2"
+   },
+   "float32_words": [
+    "5d995d5a",
+    "5d995d55",
+    "5d995d3a"
+   ]
+  },
+  {
+   "name": "tmu",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total E-W momentum",
+    "units": "kg m/s"
+   },
+   "float32_words": [
+    "56cdfd02",
+    "56cdfbb8",
+    "56cdfa55"
+   ]
+  },
+  {
+   "name": "tmv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total N-S momentum",
+    "units": "kg m/s"
+   },
+   "float32_words": [
+    "56014db4",
+    "56014d62",
+    "56014d2e"
+   ]
+  },
+  {
+   "name": "tmw",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total vertical momentum",
+    "units": "kg m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "502f932a",
+    "50ef6172"
+   ]
+  },
+  {
+   "name": "tmfu",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total upward dry-air mass flux",
+    "units": "kg m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "4cac4d1d",
+    "4d2434c7"
+   ]
+  },
+  {
+   "name": "tmfd",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "total downward dry-air mass flux",
+    "units": "kg m/s"
+   },
+   "float32_words": [
+    "00000000",
+    "cc7f2dbf",
+    "ccce3d06"
+   ]
+  },
+  {
+   "name": "tcond",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "tcond",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "tevac",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "tevac",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "tauto",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "tauto",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "taccr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "taccr",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "tevar",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "tevar",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "train",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "train",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "erain",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "erain",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "qsfc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qsfc",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "esfc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "esfc",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "erad",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "erad",
+    "units": "unk"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qv",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qc",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qr",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqi",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qi",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qs",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asqg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of qg",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asnci",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of nci",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asncs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of ncs",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asncr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of ncr",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "asncg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "artificial source of ncg",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsqv",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qv",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "49140c45",
+    "4a3b7742"
+   ]
+  },
+  {
+   "name": "bsqc",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qc",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsqr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qr",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsqi",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qi",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsqs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qs",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsqg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of qg",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsnci",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of nci",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsncs",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of ncs",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsncr",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of ncr",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  },
+  {
+   "name": "bsncg",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "bndry source/sink of ncg",
+    "units": "kg"
+   },
+   "float32_words": [
+    "00000000",
+    "00000000",
+    "00000000"
+   ]
+  }
+ ]
+}

@@ -1,0 +1,95 @@
+# The same supercell on aerosol-aware Thompson, which CM1 r21.1 does not have.
+#
+# src/param.F:3141-4509 dispatches ptype 0,1,2,3,4,5,6,7,26,27,28,50,51,52,53
+# and 55.  Its ptype=3 is the CLASSIC Thompson scheme; CM1 numbers no
+# aerosol-aware variant, so this document selects a capability the CM1
+# authority has no counterpart for and no CM1 differential exists for it in
+# either direction.  The axis is transcribed from ArWen's own state reads
+# (gpuwm/core/microphysics_aerosol.py): CM1's six mass mixing ratios, then
+# cloud-ice, rain and cloud-droplet number, then the water- and ice-friendly
+# aerosol numbers the scheme activates droplets and nucleates ice from.
+#
+# What changes against cartesian-supercell-thompson.toml:
+#
+#   physics.component = "thompson-aerosol-mp28"
+#     ArWen mp_physics=28.  Eleven transported scalars rather than eight, and
+#     two further component-owned surface carriers, nwfa2d and nifa2d, WRF's
+#     two-dimensional aerosol emission rates.  This lane models no surface
+#     aerosol source, so both are allocated at zero and the receipt says so.
+#
+# TWO THINGS THIS RUN IS NOT:
+#
+#   It is not initialized from a WRF global aerosol emission profile.  This
+#   seam reaches the scheme through gpuwm.core.microphysics.apply without
+#   gpuwm.core.microphysics.microphysics_init, so nwfa and nifa take ArWen's
+#   own declared fallback profile, which ArWen fills on the first call.
+#
+#   It is not validated, and it cannot be validated against CM1 at all.  The
+#   run receipt and `gpuwm-cm1 doctor` both carry the unvalidated marker
+#   naming exactly that.
+#
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "thompson-aerosol-mp28"
+equation_set = 2

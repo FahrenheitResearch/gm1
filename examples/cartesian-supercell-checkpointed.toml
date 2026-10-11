@@ -1,0 +1,91 @@
+# CM1 r21.1's two-hour idealized supercell deck, checkpointed.
+#
+# This is examples/cartesian-supercell-translating-frame.toml with one thing
+# changed: run.restart_interval_s is 900 s instead of the whole run, so the
+# integration writes a complete restart every fifteen model minutes as well as
+# one at the end.  CM1 does this with rstfrq (README.namelist:103-104);
+# cm1.F:3186 fires the write when the model clock reaches rsttim and
+# cm1.F:4247-4252 advances rsttim by rstfrq afterwards.
+#
+#   gpuwm-cm1 cartesian examples/cartesian-supercell-checkpointed.toml \
+#     --integrate --history-dir frames --restart-dir restarts \
+#     --output run.json
+#
+# The run leaves restarts/restart-000001 .. restart-000008, each a complete
+# CM1FCP1 envelope of everything carried from one timestep to the next.  If
+# the run stops at hour two, continue from the newest one with irst/rstnum
+# (README.namelist:227-231, cm1.F:2660):
+#
+#   gpuwm-cm1 cartesian examples/cartesian-supercell-resume.toml \
+#     --integrate --history-dir frames-2 --restart-dir restarts-2 \
+#     --restart-from restarts --output resumed.json
+#
+# A resumed run continues bit-for-bit: run.restart_reset_frqtim is left
+# undeclared, which is this lane's .false. -- README.namelist:1505-1510 names
+# that as the branch that may be needed for bit-identical restarts -- so the
+# frames and restarts stay on the model-time grid the first run declared.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 900.0
+
+[initialization]
+isnd = 7
+iwnd = 0
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

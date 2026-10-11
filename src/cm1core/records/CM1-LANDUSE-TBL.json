@@ -1,0 +1,691 @@
+{
+  "authority": {
+    "file": "run/LANDUSE.TBL",
+    "release": "CM1 r21.1",
+    "sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+    "source_anchor": "src/init_surface.F:365-466"
+  },
+  "columns": [
+    "albd",
+    "slmo",
+    "sfem",
+    "sfz0",
+    "therin",
+    "scfx",
+    "sfhc"
+  ],
+  "max_categories": 33,
+  "max_seasons": 2,
+  "schema": "gm1.cm1-landuse-table/v1",
+  "season_names": [
+    "summer",
+    "winter"
+  ],
+  "seasons": [
+    [
+      {
+        "albd": 15.0,
+        "description": "Urban and Built-Up Land",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 17.0,
+        "description": "Dryland Cropland and Pasture",
+        "scfx": 2.71,
+        "sfem": 0.985,
+        "sfhc": 2500000.0,
+        "sfz0": 15.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 18.0,
+        "description": "Irrigated Cropland and Pasture",
+        "scfx": 2.2,
+        "sfem": 0.985,
+        "sfhc": 2500000.0,
+        "sfz0": 10.0,
+        "slmo": 0.5,
+        "therin": 4.0
+      },
+      {
+        "albd": 18.0,
+        "description": "Mixed Dryland/Irrigated Cropland and Pasture",
+        "scfx": 2.56,
+        "sfem": 0.985,
+        "sfhc": 2500000.0,
+        "sfz0": 15.0,
+        "slmo": 0.25,
+        "therin": 4.0
+      },
+      {
+        "albd": 18.0,
+        "description": "Cropland/Grassland Mosaic",
+        "scfx": 2.56,
+        "sfem": 0.98,
+        "sfhc": 2500000.0,
+        "sfz0": 14.0,
+        "slmo": 0.25,
+        "therin": 4.0
+      },
+      {
+        "albd": 16.0,
+        "description": "Cropland/Woodland Mosaic",
+        "scfx": 3.19,
+        "sfem": 0.985,
+        "sfhc": 2500000.0,
+        "sfz0": 20.0,
+        "slmo": 0.35,
+        "therin": 4.0
+      },
+      {
+        "albd": 19.0,
+        "description": "Grassland",
+        "scfx": 2.37,
+        "sfem": 0.96,
+        "sfhc": 2080000.0,
+        "sfz0": 12.0,
+        "slmo": 0.15,
+        "therin": 3.0
+      },
+      {
+        "albd": 22.0,
+        "description": "Shrubland",
+        "scfx": 1.56,
+        "sfem": 0.93,
+        "sfhc": 2080000.0,
+        "sfz0": 5.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Mixed Shrubland/Grassland",
+        "scfx": 2.14,
+        "sfem": 0.95,
+        "sfhc": 2080000.0,
+        "sfz0": 6.0,
+        "slmo": 0.15,
+        "therin": 3.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Savanna",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2500000.0,
+        "sfz0": 15.0,
+        "slmo": 0.15,
+        "therin": 3.0
+      },
+      {
+        "albd": 16.0,
+        "description": "Deciduous Broadleaf Forest",
+        "scfx": 2.63,
+        "sfem": 0.93,
+        "sfhc": 2500000.0,
+        "sfz0": 50.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Deciduous Needleleaf Forest",
+        "scfx": 2.86,
+        "sfem": 0.94,
+        "sfhc": 2500000.0,
+        "sfz0": 50.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 12.0,
+        "description": "Evergreen Broadleaf Forest",
+        "scfx": 1.67,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 50.0,
+        "slmo": 0.5,
+        "therin": 5.0
+      },
+      {
+        "albd": 12.0,
+        "description": "Evergreen Needleleaf Forest",
+        "scfx": 3.33,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 50.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 13.0,
+        "description": "Mixed Forest",
+        "scfx": 2.11,
+        "sfem": 0.97,
+        "sfhc": 4180000.0,
+        "sfz0": 50.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 8.0,
+        "description": "Water Bodies",
+        "scfx": 0.0,
+        "sfem": 0.98,
+        "sfhc": 9e+25,
+        "sfz0": 0.01,
+        "slmo": 1.0,
+        "therin": 6.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Herbaceous Wetland",
+        "scfx": 1.5,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 20.0,
+        "slmo": 0.6,
+        "therin": 6.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Wooded Wetland",
+        "scfx": 1.14,
+        "sfem": 0.95,
+        "sfhc": 4180000.0,
+        "sfz0": 40.0,
+        "slmo": 0.35,
+        "therin": 5.0
+      },
+      {
+        "albd": 25.0,
+        "description": "Barren or Sparsely Vegetated",
+        "scfx": 0.81,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.02,
+        "therin": 2.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Herbaceous Tundra",
+        "scfx": 2.87,
+        "sfem": 0.92,
+        "sfhc": 9e+25,
+        "sfz0": 10.0,
+        "slmo": 0.5,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Wooded Tundra",
+        "scfx": 2.67,
+        "sfem": 0.93,
+        "sfhc": 9e+25,
+        "sfz0": 30.0,
+        "slmo": 0.5,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Mixed Tundra",
+        "scfx": 2.67,
+        "sfem": 0.92,
+        "sfhc": 9e+25,
+        "sfz0": 15.0,
+        "slmo": 0.5,
+        "therin": 5.0
+      },
+      {
+        "albd": 25.0,
+        "description": "Bare Ground Tundra",
+        "scfx": 1.6,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 10.0,
+        "slmo": 0.02,
+        "therin": 2.0
+      },
+      {
+        "albd": 55.0,
+        "description": "Snow or Ice",
+        "scfx": 0.0,
+        "sfem": 0.95,
+        "sfhc": 9e+25,
+        "sfz0": 0.1,
+        "slmo": 0.95,
+        "therin": 5.0
+      },
+      {
+        "albd": 30.0,
+        "description": "Playa",
+        "scfx": 0.62,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.4,
+        "therin": 5.0
+      },
+      {
+        "albd": 18.0,
+        "description": "Lava",
+        "scfx": 0.62,
+        "sfem": 0.95,
+        "sfhc": 1200000.0,
+        "sfz0": 15.0,
+        "slmo": 0.5,
+        "therin": 6.0
+      },
+      {
+        "albd": 70.0,
+        "description": "White Sand",
+        "scfx": 0.0,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.4,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.02,
+        "therin": 3.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.02,
+        "therin": 3.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "Low Intensity Residential",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "High Intensity Residential",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "Industrial or Commercial",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      }
+    ],
+    [
+      {
+        "albd": 15.0,
+        "description": "Urban and Built-Up Land",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Dryland Cropland and Pasture",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2500000.0,
+        "sfz0": 5.0,
+        "slmo": 0.6,
+        "therin": 4.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Irrigated Cropland and Pasture",
+        "scfx": 1.76,
+        "sfem": 0.93,
+        "sfhc": 2500000.0,
+        "sfz0": 2.0,
+        "slmo": 0.5,
+        "therin": 4.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Mixed Dryland/Irrigated Cropland and Pasture",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2500000.0,
+        "sfz0": 5.0,
+        "slmo": 0.5,
+        "therin": 4.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Cropland/Grassland Mosaic",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2500000.0,
+        "sfz0": 5.0,
+        "slmo": 0.4,
+        "therin": 4.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Cropland/Woodland Mosaic",
+        "scfx": 2.0,
+        "sfem": 0.93,
+        "sfhc": 2500000.0,
+        "sfz0": 20.0,
+        "slmo": 0.6,
+        "therin": 4.0
+      },
+      {
+        "albd": 23.0,
+        "description": "Grassland",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2080000.0,
+        "sfz0": 10.0,
+        "slmo": 0.3,
+        "therin": 4.0
+      },
+      {
+        "albd": 22.0,
+        "description": "Shrubland",
+        "scfx": 1.3,
+        "sfem": 0.93,
+        "sfhc": 2080000.0,
+        "sfz0": 1.0,
+        "slmo": 0.2,
+        "therin": 4.0
+      },
+      {
+        "albd": 22.0,
+        "description": "Mixed Shrubland/Grassland",
+        "scfx": 1.24,
+        "sfem": 0.93,
+        "sfhc": 2080000.0,
+        "sfz0": 1.0,
+        "slmo": 0.25,
+        "therin": 4.0
+      },
+      {
+        "albd": 20.0,
+        "description": "Savanna",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 2500000.0,
+        "sfz0": 15.0,
+        "slmo": 0.15,
+        "therin": 3.0
+      },
+      {
+        "albd": 17.0,
+        "description": "Deciduous Broadleaf Forest",
+        "scfx": 2.4,
+        "sfem": 0.93,
+        "sfhc": 2500000.0,
+        "sfz0": 50.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Deciduous Needleleaf Forest",
+        "scfx": 2.6,
+        "sfem": 0.93,
+        "sfhc": 2500000.0,
+        "sfz0": 50.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 12.0,
+        "description": "Evergreen Broadleaf Forest",
+        "scfx": 1.67,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 50.0,
+        "slmo": 0.5,
+        "therin": 5.0
+      },
+      {
+        "albd": 12.0,
+        "description": "Evergreen Needleleaf Forest",
+        "scfx": 3.0,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 50.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Mixed Forest",
+        "scfx": 1.12,
+        "sfem": 0.93,
+        "sfhc": 4180000.0,
+        "sfz0": 20.0,
+        "slmo": 0.6,
+        "therin": 6.0
+      },
+      {
+        "albd": 8.0,
+        "description": "Water Bodies",
+        "scfx": 0.0,
+        "sfem": 0.98,
+        "sfhc": 9e+25,
+        "sfz0": 0.01,
+        "slmo": 1.0,
+        "therin": 6.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Herbaceous Wetland",
+        "scfx": 1.5,
+        "sfem": 0.95,
+        "sfhc": 2920000.0,
+        "sfz0": 20.0,
+        "slmo": 0.75,
+        "therin": 6.0
+      },
+      {
+        "albd": 14.0,
+        "description": "Wooded Wetland",
+        "scfx": 1.14,
+        "sfem": 0.95,
+        "sfhc": 4180000.0,
+        "sfz0": 40.0,
+        "slmo": 0.7,
+        "therin": 6.0
+      },
+      {
+        "albd": 23.0,
+        "description": "Barren or Sparsely Vegetated",
+        "scfx": 0.81,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.05,
+        "therin": 2.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Herbaceous Tundra",
+        "scfx": 2.0,
+        "sfem": 0.92,
+        "sfhc": 9e+25,
+        "sfz0": 10.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Wooded Tundra",
+        "scfx": 1.75,
+        "sfem": 0.93,
+        "sfhc": 9e+25,
+        "sfz0": 30.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Mixed Tundra",
+        "scfx": 1.75,
+        "sfem": 0.92,
+        "sfhc": 9e+25,
+        "sfz0": 15.0,
+        "slmo": 0.6,
+        "therin": 5.0
+      },
+      {
+        "albd": 25.0,
+        "description": "Bare Ground Tundra",
+        "scfx": 1.8,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 5.0,
+        "slmo": 0.05,
+        "therin": 5.0
+      },
+      {
+        "albd": 70.0,
+        "description": "Snow or Ice",
+        "scfx": 0.0,
+        "sfem": 0.95,
+        "sfhc": 9e+25,
+        "sfz0": 0.1,
+        "slmo": 0.95,
+        "therin": 5.0
+      },
+      {
+        "albd": 40.0,
+        "description": "Playa",
+        "scfx": 0.62,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.4,
+        "therin": 5.0
+      },
+      {
+        "albd": 18.0,
+        "description": "Lava",
+        "scfx": 0.62,
+        "sfem": 0.95,
+        "sfhc": 1200000.0,
+        "sfz0": 15.0,
+        "slmo": 0.4,
+        "therin": 5.0
+      },
+      {
+        "albd": 70.0,
+        "description": "White Sand",
+        "scfx": 0.0,
+        "sfem": 0.9,
+        "sfhc": 1200000.0,
+        "sfz0": 1.0,
+        "slmo": 0.4,
+        "therin": 5.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.02,
+        "therin": 3.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.02,
+        "therin": 3.0
+      },
+      {
+        "albd": 15.0,
+        "description": "Unassigned",
+        "scfx": 1.67,
+        "sfem": 0.88,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "Low Intensity Residential",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "High Intensity Residential",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      },
+      {
+        "albd": 10.0,
+        "description": "Industrial or Commercial",
+        "scfx": 1.67,
+        "sfem": 0.97,
+        "sfhc": 1890000.0,
+        "sfz0": 80.0,
+        "slmo": 0.1,
+        "therin": 3.0
+      }
+    ]
+  ],
+  "water_category": 16
+}

@@ -1,0 +1,104 @@
+# The ihail differential: CM1 r21.1's own WSM6 against GM1's, with CM1's
+# dense-ice selector set both ways.
+#
+# CM1 src/param.F:3697-3706 passes ihail straight into mp_wsm6_init as
+# hail_opt, and src/mp_wsm6.F:86-100 turns it into n0g, deng, avtg, bvtg and
+# lamdagmax -- the constants that set the dense precipitating ice category's
+# fall speed.  GM1 selects it; before it could, its WSM6 ran
+# the graupel branch on every storm it has ever produced, and CM1's own decks
+# ship ihail=1 (run/namelist.input:56).
+#
+# Horizon: the term is dense-ice sedimentation, whose timescale is one layer
+# depth over one fall speed.  At dz=500 m and roughly 6 m/s that is about 80 s,
+# so 240 s is three layer crossings of the term under test.  The cheaper and
+# strictly more decisive column form of this measurement already exists and
+# does not need a storm:
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+#   $HARNESS/wsm6_dense_ice_sedimentation_harness.f90   (CM1's own WSM6)
+#   $HARNESS/wsm6_dense_ice_sedimentation_gm1.py        (GM1's own seam)
+#
+# Run those first.  This case is here for the whole-trajectory question the
+# column form cannot answer: what the ihail branch does to a storm's cold pool.
+# Flip [cm1] ihail alone: the keymap maps ihail -> physics.ihail, so the
+# translator gives both halves the same integer and [gm1] must not repeat it.
+
+[case]
+name = "wsm6-ihail-32"
+term = "microphysics"
+notes = """CM1 ptype=7 (WSM6) with ihail=1, the hail-like dense ice branch
+CM1's own decks select and GM1 could not reach. Compare against the same case
+with ihail=0 in both halves: the difference between those two differences is
+what the selector does."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 240.0
+tapfrq = 20.0
+rstfrq = 240.0
+statfrq = 20.0
+
+ptype = 7
+ihail = 1
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

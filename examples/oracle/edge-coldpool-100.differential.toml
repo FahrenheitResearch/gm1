@@ -1,0 +1,101 @@
+# Open radiative edges with cold outflow leaving and a gust front arriving.
+#
+# A 100 m El Reno storm deck's keys (100 m, its stretch_z=1 column, Morrison with hail, bbc=3
+# cnstcd=0.005, icor=1 lspgrad=1 f=8.47e-5, irbc=4 on all four sides) on a
+# 12.8 x 12.8 km box.  iinit=2 is CM1's dam-break cold pool (init3d.F:489-512,
+# -6 K, 2.5 km deep, x <= centerx), so no CM1 source edit is needed.  It
+# touches the S and N edges from t=0; umove = -15 makes that deck's sounding's
+# low-level frame-relative u about +12 m/s, which carries the gust front to
+# the east edge at about 240-300 s; vmove = 16.5 keeps that deck's weak southward
+# frame-relative flow at the south edge.  The sounding is that deck's
+# input_sounding (sha256 eabada6c...), passed to both codes.
+#
+# This is the case that found the scalar ring defect, since fixed (every
+# open edge's outer three cells got no scalar advection), and the one that
+# shows the fix.
+
+[case]
+name = "edge-coldpool-100"
+term = "boundary"
+notes = """128x128x80, 100 m stretched column; dam-break cold pool; open irbc=4 on all sides;
+frame (umove, 16.5) m/s; icor=1 lspgrad=1; 900 s, frames every 30 s."""
+
+[cm1]
+nx = 128
+ny = 128
+nz = 80
+dx = 100.0
+dy = 100.0
+dz = 100.0
+dtl = 0.375
+timax = 900.0
+tapfrq = 30.0
+rstfrq = 900.0
+statfrq = 30.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+ramp_sgs = 0
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 14600.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 3
+tbc = 1
+irbc = 4
+roflux = 0
+nudgeobc = 0
+
+icor = 1
+lspgrad = 1
+fcor = 8.47e-5
+imove = 1
+umove = -15.0
+vmove = 16.5
+
+isnd = 7
+iwnd = 0
+iinit = 2
+irandp = 0
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 1
+ztop = 17600.0
+str_bot = 200.0
+str_top = 7400.0
+dz_bot = 20.0
+dz_top = 340.0
+
+isfcflx = 0
+sfcmodel = 1
+cecd = 1
+cnstcd = 0.005
+
+ihail = 1
+ndcnst = 250.0
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "morrison-mp10"
+"runtime.tile_nx" = 128
+"runtime.tile_ny" = 128
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 6144
+"runtime.capacity_profile" = "default"

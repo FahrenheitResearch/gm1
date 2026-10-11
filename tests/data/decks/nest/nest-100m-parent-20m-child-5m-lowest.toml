@@ -1,0 +1,165 @@
+# A 20 m live nest on a 5 m lowest layer inside the 100 m analytic supercell parent.
+#
+# WHAT IS NEW HERE: THE CHILD'S OWN VERTICAL DECK
+#
+# Until vertical refinement the child copied the parent's column word for
+# word, so a 20 m child still had a 20 m lowest layer.  The nest.child_* keys
+# give it CM1's own stretch_z = 1 deck (param.F:7819-7953) with a 5 m lowest
+# layer under the parent's model top:
+#
+#                      nz  dz_bot  str_bot  str_top  dz_top   ztop    layers
+#     parent (grid.*)  75   20 m    200 m   7000 m   320 m   15000   10 + 34 + 25
+#     child (child_*) 102    5 m    170 m   7320 m   320 m   15000   34 + 44 + 24
+#
+# The child's segment counts satisfy CM1's own feasibility checks
+# (param.F:7828-7877: 34*5 = 170, 44*(5+320)/2 = 7150 = 7320-170,
+# 24*320 = 7680 = 15000-7320), its three lowest and three highest layers share
+# one depth, and no child layer is thicker than any parent layer it overlaps:
+# config.py refuses the deck otherwise (CM1-CFG-NEST-VERTICAL-REFINEMENT).
+# Below 170 m the child has 34 levels where the parent has 8.
+#
+# HOW THE TWO DECKS MEET
+#
+#   parent -> child  CM1 r21.1 interp_on_restart (restart_read.F:564-609,
+#                    3302-3470) on each parent column of a parent-resolution
+#                    window, then the nest's horizontal capture: WRF's
+#                    intermediate-grid order (force_domain_em_part2.F:126,
+#                    141-147).  The two child levels below the parent's first
+#                    10 m level take CM1's constant extension.
+#   child -> parent  feedback = 1 is admitted with a rho0-and-overlap-weighted
+#                    restriction that keeps the child's column mass, water and
+#                    heat.  This is GM1's own choice: WRF refuses feedback with
+#                    vertical nesting (module_check_a_mundo.F:2711-2722).
+#
+# THE CLOCK, BY CM1'S OWN RULES
+#
+# psolver = 3 solves the vertical acoustic terms implicitly, so a 5 m layer
+# does not shorten the small step: misclibs.F:857-868 gives
+# dtsm = 0.60*min(dx,dy)/360 = 0.0333 s at 20 m whatever dz is.  The child's
+# large step is 0.5/5 = 0.1 s and acoustic_substeps = 6 gives 0.0167 s.
+#
+# What the 5 m layer does shorten is the advective limit.  calccfl
+# (misclibs.F:2584-2718) forms
+#   sqrt((u dt/dx)^2 + (v dt/dy)^2 + (w dt/dz_k)^2)
+# per point (dz_k through mh) and stops the run at 1.50 (:2714).  At
+# dt = 0.1 s the vertical term alone reaches 1.50 at w = 75 m/s in a 5 m layer
+# (parent deck at the same step: 300 m/s in its 20 m layer); with a 60 m/s
+# horizontal wind already contributing 0.30 the admissible w is 73.5 m/s.
+# Every child level below 170 m is 5 m thick, so that bound holds through the
+# whole lowest 170 m where tornadic updrafts are strongest.
+#
+# WHAT THIS COSTS
+#
+# Priced by the door's own cartesian_door.nest_allocation_plan (measured on
+# this document and on the same document without the child_* keys): the
+# 300x300 child's peak listed phase payload is 3,072,979,572 bytes = 2.86 GiB
+# at 102 levels against 2,266,960,128 bytes = 2.11 GiB on the parent's 75,
+# a factor of 1.356 (102/75 = 1.36, less the fixed 2-D surface state).  The
+# parent is unchanged.  The four vertical window scratches (102-103 levels
+# over the 62-63 point window, float32) are 6.05 MiB together and the maps
+# and feedback rows under 10 KiB.
+#
+# --integrate refuses follow_storm = true by name
+# (CM1-CARTESIAN-NEST-FOLLOW-INTEGRATION), so this nest is fixed over the
+# surface vortex at T+78 min of the archived 100 m run: parent cell (204, 322).
+[run]
+lane = "cartesian"
+duration_s = 600.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 600.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 640
+ny = 640
+nz = 75
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 15000.0
+str_bot_m = 200.0
+str_top_m = 7000.0
+dz_bot_m = 20.0
+dz_top_m = 320.0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[nest]
+refinement_ratio = 5
+time_refinement_ratio = 5
+parent_i0 = 174
+parent_j0 = 292
+parent_span_x = 60
+parent_span_y = 60
+spec_zone = 1
+relax_zone = 4
+feedback = 1
+acoustic_substeps = 6
+follow_storm = false
+follow_interval_s = 0.0
+follow_max_speed_m_s = 0.0
+child_nz = 102
+child_stretch_z = 1
+child_str_bot_m = 170.0
+child_str_top_m = 7320.0
+child_dz_bot_m = 5.0
+child_dz_top_m = 320.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 30720
+capacity_profile = "default"
+
+[physics]
+# Double-moment Morrison (CM1 ptype=5), not single-moment WSM6: a single-
+# moment scheme fixes the rain intercept, so evaporation in the downdraft
+# over-cools the cold pool, and cold-pool strength controls whether a
+# low-level mesocyclone becomes a tornado. Double-moment microphysics is the
+# tornado-research standard. GPU run of this lane on Morrison: pending.
+component = "morrison-mp10"
+equation_set = 2

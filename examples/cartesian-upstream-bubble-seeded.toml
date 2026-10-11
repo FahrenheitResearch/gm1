@@ -1,0 +1,98 @@
+# A warm bubble placed where the storm will still be in the domain an hour
+# later, on a horizontally perturbed base state.
+#
+# Two things here are new configuration, and both exist because of a concrete
+# failure: a bubble frozen at the domain centre drifts downstream with the
+# mean wind and leaves a small domain before it organises, and a perfectly
+# horizontally homogeneous state has nothing to break its symmetry.
+#
+#   init3d.F:456-457  ric / rjc, the bubble centre.  CM1 defaults them to
+#                     centerx / centery; declare them and the trigger goes
+#                     where you put it.  Here it sits 30 km upwind of centre
+#                     in x, so a right-moving storm has the whole domain to
+#                     cross.
+#   init3d.F:458-461  zc / bhrad / bvrad / bptpert.  A 2 K bubble, because a
+#                     1 K one on this sounding takes longer to fire.
+#   init3d.F:1446-1482  irandp=1, 0.25 K of seeded random theta on every
+#                     level.  The seed is required and is recorded in the run
+#                     receipt: CM1's own alternative (init3d.F:417) reseeds
+#                     from the wall clock, and a run that cannot be reproduced
+#                     from its own receipt is not evidence of anything.
+#
+# The perturbation field is UNVALIDATED against CM1 by construction -- CM1
+# draws from gfortran's generator, which is a property of one compiler build,
+# not of CM1 -- and both the receipt and `gpuwm-cm1 doctor` say so by name.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+iinit = 1
+bubble_center_x_m = 30000.0
+bubble_center_y_m = 60000.0
+zc_m = 1400.0
+bhrad_m = 10000.0
+bvrad_m = 1400.0
+bptpert_k = 2.0
+irandp = 1
+random_seed = 20240611
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

@@ -1,0 +1,897 @@
+{
+ "schema": "gm1.cm1-value-rules/v1",
+ "source": "src/cm1core/config.py (_choice, _integer_choice, _optional_integer_choice sites)",
+ "generator": "tools/generate_cm1_value_rules.py",
+ "counts": {
+  "cartesian": 28,
+  "conditional": 14,
+  "dynamic": 6,
+  "when-declared": 28
+ },
+ "rules": [
+  {
+   "option": "dynamics.lspgrad",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "solve1.F:538 enters the block for lspgrad>=1 but dispatches only on 1, 2, 3 and 4 (solve1.F:590-678), so any other value adds nothing and would be the lspgrad=0 identity wearing a label",
+   "function": "_parse_lspgrad",
+   "applies": "when-declared"
+  },
+  {
+   "option": "run.lane",
+   "allowed": [
+    "cartesian",
+    "dry-dycore",
+    "native-context",
+    "product",
+    "real-product"
+   ],
+   "integer": false,
+   "reason": "an unknown lane could compare substituted physics against the wrong oracle",
+   "function": "_document_lane",
+   "applies": "conditional",
+   "guard": "in _document_lane"
+  },
+  {
+   "option": "f\"output.{key}\"",
+   "allowed": [],
+   "integer": true,
+   "reason": "f\"CM1 admits only {switch.allowed} for this word ({switch.cm1_ref})\"",
+   "function": "_parse_output",
+   "applies": "dynamic"
+  },
+  {
+   "option": "runtime.pdefq_launch",
+   "allowed": [],
+   "integer": false,
+   "reason": "an unadmitted layout would regroup misclibs.F:1082's left-associated west-to-east budj carry or misclibs.F:1065-1081's per-column k order and publish an asq moisture-correction ledger that differs from the authority in its trailing bits",
+   "function": "_parse_runtime",
+   "applies": "dynamic"
+  },
+  {
+   "option": "runtime.capacity_profile",
+   "allowed": [],
+   "integer": false,
+   "reason": "an unpinned column capacity could overrun per-thread WSM6 arrays",
+   "function": "_parse_runtime",
+   "applies": "dynamic"
+  },
+  {
+   "option": "initialization.iinit",
+   "allowed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13
+   ],
+   "integer": true,
+   "reason": "init3d.F:450-1416's arms are 0 (undisturbed), 1 (warm bubble), 2 (dam-break cold pool), 3 (line of bubbles), 4 (Bryan-Fritsch moist benchmark bubble), 5 (Straka cold blob), 7 (tropical-cyclone vortex), 8 (line thermal with random noise), 9 (forced convergence), 10 (momentum forcing), 11 (Skamarock-Klemp IG wave), 12 (updraft nudging) and 13 (near-surface theta wave); the chain has no else arm, so any other value would start the run undisturbed under a receipt naming a trigger",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.random_generator",
+   "allowed": [
+    "cm1",
+    "gm1"
+   ],
+   "integer": false,
+   "reason": "the perturbation streams are GM1's own seeded splitmix64 ('gm1') and CM1's own libgfortran xoshiro256** as init3d.F:427-440 seeds it ('cm1'); any other name would draw from one of them under a receipt naming neither",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.irandp",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:692-695 admits irandp=0 or 1; init3d.F's chain has no else arm, so any other value would add no perturbation at all and the run would stay laminar under a receipt naming a random field",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.isnd",
+   "allowed": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23
+   ],
+   "integer": true,
+   "reason": "base.F:134-2036's sounding branches are isnd = 1-5, 7-15 and 17-23; 6 stops CM1 ('isnd = 6 code has been removed', base.F:455-460), 15 (DYCOMS-II) runs only with testcase = 4 or 5 (base.F:1491-1510), whose constants.F:78-98 changes rd, cp and xlv for the whole model while GM1's kernels and ArWen's physics are built with the default constants, and any other value has no arm, so base.F would leave the base state at its allocation zero",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.testcase",
+   "allowed": [
+    0,
+    1,
+    2,
+    3,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+   ],
+   "integer": true,
+   "reason": "param.F reads testcase in 0..15 (README.namelist:216-232), and an unlisted value falls through base.F's and init3d.F's else arms and would silently select the default deck under another name; testcase = 4 and 5 make constants.F:78-98 set rd = 287.0, cp = 1015.0 or 1004.0 and xlv = 2.47e6 or 2.50e6 (and constants.F:161-164 lv1 = xlv, lv2 = 0) for the whole CM1 run, while GM1's base state, dynamics kernels and ArWen's physics are built with constants.F's defaults (rd = 287.04, cp = 1005.7, xlv = 2.501e6), so such a run would carry other thermodynamics than the CM1 run its receipt names",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.iorigin",
+   "allowed": [
+    1,
+    2
+   ],
+   "integer": true,
+   "reason": "param.F:7212-7213 places the horizontal origin at the domain corner (1) or its centre (2); any other value would leave xh/yh at the corner while every absolute-coordinate parameter in the document -- ric, rjc, the IG wave centre -- was written for a different frame",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.ibalance",
+   "allowed": [
+    0,
+    1,
+    2
+   ],
+   "integer": true,
+   "reason": "README.namelist:697-705 and init3d.F:1735-1917 implement ibalance=0 (initial pressure perturbation exactly zero, which is what all 23 shipped CM1 decks select), 1 (hydrostatic top-down integration) and 2 (the anelastic buoyancy pressure, init3d.F:1893's poiss); the chain has no else arm, so any other value would leave the pressure at zero under a receipt naming a balance",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.imoist",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:308 admits imoist=0 or 1; any other value leaves base.F:389-397's rh0 and base.F:592-609's qvsnd undefined, so the base state would carry no defined moisture",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.irst",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "param.F:891-903 reads irst as 0 or 1 and forces iinit=0 on a restart",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "initialization.iwnd",
+   "allowed": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    8,
+    9,
+    10,
+    11
+   ],
+   "integer": true,
+   "reason": "base.F:2286-2640 implements these eleven wind branches and no else arm; iwnd=7 does not exist upstream, and any unimplemented value would leave base.F:2263-2280's zero wind in place while the receipt named a shear profile",
+   "function": "_parse_initialization",
+   "applies": "when-declared"
+  },
+  {
+   "option": "nest.feedback",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "only one-way (0: the parent forces the child and reads nothing back) and two-way (1: the child's interior block means replace the parent's covered cells) are implemented; another value would run one-way while the receipt named a feedback direction the run did not use",
+   "function": "_parse_nest",
+   "applies": "conditional",
+   "guard": "in _parse_nest"
+  },
+  {
+   "option": "nest.child_stretch_z",
+   "allowed": [
+    1,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "a child deck is one of CM1 r21.1's generated branches (param.F:7814-8139); stretch_z=0 fixes its top at dz*nk (param.F:2608) and would need a child dz_m of its own, and stretch_z=2 is refused for every grid",
+   "function": "_parse_nest_child_vertical",
+   "applies": "conditional",
+   "guard": "in _parse_nest_child_vertical"
+  },
+  {
+   "option": "diagnostics.storm_motion",
+   "allowed": [
+    "bunkers-left",
+    "bunkers-right"
+   ],
+   "integer": false,
+   "reason": "storm-relative helicity is a line integral taken against one storm motion, and CM1 r21.1 computes none anywhere in its source tree. An unnamed or unimplemented method would publish a helicity that cannot be reproduced or compared with any other estimate, and the sign of the reported SRH flips between the right and left mover. Only Bunkers et al. (2000) internal dynamics is transcribed",
+   "function": "_parse_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.adiabat",
+   "allowed": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "getcape.F:419-423 stops CM1 on any other formulation; an unrecognized adiabat would leave the condensate neither removed nor carried, so the lifted parcel would follow neither a pseudoadiabat nor a reversible adiabat and the published CAPE would belong to no thermodynamic path. getcape.F:73 ships 1, pseudoadiabatic with liquid only",
+   "function": "_parse_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.parcel_source",
+   "allowed": [
+    1,
+    2,
+    3
+   ],
+   "integer": true,
+   "reason": "getcape.F:242-250 stops CM1 on any other source; an unrecognized parcel would leave kmax at whatever the previous column left it and lift a parcel from an arbitrary level, so every published CAPE, CIN, LCL and LFC would describe a parcel this document never named. writeout.F:2921 uses 3, the mixed-layer parcel",
+   "function": "_parse_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_uh",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_vort",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_pv",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_sws",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_svs",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_sps",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_srs",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_sgs",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_sus",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "diagnostics.output_shs",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:4677 clamps this switch with max(0,min(1,...)), so any other value would select the same branch as 0 or 1 while the sealed document recorded a number CM1 never ran",
+   "function": "_parse_tornado_diagnostics",
+   "applies": "when-declared"
+  },
+  {
+   "option": "physics.ihail",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "CM1 param.F:1567-1580 stops the model outside 0..1; the value selects which dense-ice constants the scheme is initialized with, so an unadmitted value would silently execute the unselected category's fall speeds",
+   "function": "parse_mapping",
+   "applies": "when-declared"
+  },
+  {
+   "option": "closures.rterm",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "src/solve1.F:1006 tests rterm against 1 and nothing else, so any other value is the rterm=0 identity wearing a label",
+   "function": "parse_mapping",
+   "applies": "when-declared"
+  },
+  {
+   "option": "dynamics.difforder",
+   "allowed": [
+    2,
+    6
+   ],
+   "integer": true,
+   "reason": "README.namelist:297-307 defines second and sixth order only; adv.F:962 tests difforder==6 and cm1.F:3791 tests difforder==2, so any other value diffuses nothing",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.mdiff",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:290-296 defines the Xue monotonic variant as on or off and nothing between",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.idiff",
+   "allowed": [
+    0,
+    1,
+    2
+   ],
+   "integer": true,
+   "reason": "README.namelist:281-284 defines 0, 1 (all variables) and 2 (winds only) and adv.F/diff2.F have no other branch",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.beta_plane",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "param.F:8955 builds f2d for betaplane=1 and leaves the f-plane constant otherwise; there is no third branch",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.coriolis",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "solve2.F:632 dispatches on icor=1 and nothing else; any other value would silently integrate no rotation",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.weno_order",
+   "allowed": [
+    5
+   ],
+   "integer": true,
+   "reason": "only fifth-order WENO is in the first source/oracle campaign",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.velocity_weno",
+   "allowed": [
+    0
+   ],
+   "integer": true,
+   "reason": "the first profile does not select velocity WENO",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.scalar_weno",
+   "allowed": [
+    0,
+    2
+   ],
+   "integer": true,
+   "reason": "only off for a reduced bootstrap or final-stage target cadence is mapped",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.velocity_vertical_order",
+   "allowed": [
+    5
+   ],
+   "integer": true,
+   "reason": "other velocity stencil orders have no source-mapped operator deck",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.velocity_horizontal_order",
+   "allowed": [
+    5
+   ],
+   "integer": true,
+   "reason": "other velocity stencil orders have no source-mapped operator deck",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.scalar_vertical_order",
+   "allowed": [
+    5
+   ],
+   "integer": true,
+   "reason": "other scalar stencil orders have no source-mapped operator deck",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.scalar_horizontal_order",
+   "allowed": [
+    5
+   ],
+   "integer": true,
+   "reason": "other scalar stencil orders have no source-mapped operator deck",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.psolver",
+   "allowed": [
+    2,
+    3
+   ],
+   "integer": true,
+   "reason": "only the internal dry bootstrap and product pressure paths are in scope",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "grid.stretch_z",
+   "allowed": [
+    0,
+    1,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "CM1 r21.1 param.F:7814-8139 dispatches on 1, 2, 3 and 4 and treats everything below 1 as the uniform coordinate; true names no branch and an out-of-range value would leave the uniform coordinate in place while the receipt claimed a stretched one, and for stretch_z=2 specifically: CM1 r21.1 param.F:9897-9937 accepts whatever geometric ratio its fifty-step bisection is holding and never bounds the residual, so the generated top face sigmaf(nk+1) and the namelist ztop are two different heights; init_terrain.F:175-196 uses the second and param.F:8633-8650 uses the first, while a GM1 grid carries exactly one model top, so one of the terrain coordinate and the Rayleigh layer would sit at the wrong height",
+   "function": "parse_mapping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "run.iconly",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:233-235 makes iconly a two-valued switch; any other value would leave it ambiguous whether cm1.F:4341's stop applies, and the run would integrate for hours when the caller asked only to see the initial condition",
+   "function": "parse_mapping",
+   "applies": "when-declared"
+  },
+  {
+   "option": "run.irst",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "cm1.F:2660 reads a restart file only when irst=1; any other value is neither CM1's fresh start nor its restart, and the run would silently take the branch the port happened to default to",
+   "function": "parse_mapping",
+   "applies": "when-declared"
+  },
+  {
+   "option": "boundaries.west",
+   "allowed": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "src/bc.F:180-1143 has exactly four lateral branches; any other value would leave that side's ngxy ghost planes holding whatever the previous step left there, and the 5th-order advection stencil reads three of them",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.east",
+   "allowed": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "src/bc.F:180-1143 has exactly four lateral branches; any other value would leave that side's ngxy ghost planes holding whatever the previous step left there, and the 5th-order advection stencil reads three of them",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.south",
+   "allowed": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "src/bc.F:180-1143 has exactly four lateral branches; any other value would leave that side's ngxy ghost planes holding whatever the previous step left there, and the 5th-order advection stencil reads three of them",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.north",
+   "allowed": [
+    1,
+    2,
+    3,
+    4
+   ],
+   "integer": true,
+   "reason": "src/bc.F:180-1143 has exactly four lateral branches; any other value would leave that side's ngxy ghost planes holding whatever the previous step left there, and the 5th-order advection stencil reads three of them",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.radiative_order",
+   "allowed": [
+    1,
+    2,
+    4
+   ],
+   "integer": true,
+   "reason": "README.namelist:589-594 names exactly three radiative schemes: Klemp-Wilhelmson on large steps (1), on small steps (2), and Durran-Klemp (4); another value would leave radbcw/e/s/n at their previous words and the open faces would advance on the tendency alone, which is a reflecting boundary wearing a radiative name",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.top",
+   "allowed": [
+    1
+   ],
+   "integer": true,
+   "reason": "src/turb.F:3311-3360 and :4515-4702 give tbc=2/3 their own upper t13/t23 face and tkebc branch; this port's stress kernel clamps the top face to the level below it with no branch, so a declared no-slip or semi-slip lid would produce no drag at all while the receipt named one",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.roflux",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:595-602 is a flag; src/bc.F:2180-2391 either rescales the outward normal mass flux or does not",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "boundaries.nudgeobc",
+   "allowed": [
+    0,
+    1
+   ],
+   "integer": true,
+   "reason": "README.namelist:603-610 is a flag; src/solve2.F:726-822 either adds the inflow nudging tendency or does not",
+   "function": "_validate_boundary_family",
+   "applies": "cartesian"
+  },
+  {
+   "option": "closures.hrdamp",
+   "allowed": [
+    0,
+    1,
+    2
+   ],
+   "integer": true,
+   "reason": "README.namelist:401-403 and src/solve1.F:404-438 have exactly three branches: off, damp toward the base state, damp toward the evolving horizontal average",
+   "function": "_validate_horizontal_damping",
+   "applies": "cartesian"
+  },
+  {
+   "option": "grid.terrain",
+   "allowed": [
+    false
+   ],
+   "integer": false,
+   "reason": "terrain changes CM1 metrics and lower-boundary operators and is admitted only by the separately identified real-atmosphere profile",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "config.grid.terrain and config.run.lane is not Lane.REAL_PRODUCT"
+  },
+  {
+   "option": "grid.stretch_x",
+   "allowed": [
+    false
+   ],
+   "integer": false,
+   "reason": "horizontal stretching changes uh/uf and vh/vf, which every advection, deformation and open-boundary operator in this port carries as exactly one; a stretched row would be advected and damped with the wrong horizontal metric at every column",
+   "function": "_validate_first_slice",
+   "applies": "cartesian"
+  },
+  {
+   "option": "grid.stretch_y",
+   "allowed": [
+    false
+   ],
+   "integer": false,
+   "reason": "horizontal stretching changes uh/uf and vh/vf, which every advection, deformation and open-boundary operator in this port carries as exactly one; a stretched row would be advected and damped with the wrong horizontal metric at every column",
+   "function": "_validate_first_slice",
+   "applies": "cartesian"
+  },
+  {
+   "option": "closures.sgs_model",
+   "allowed": [
+    0
+   ],
+   "integer": false,
+   "reason": "the periodic dry bootstrap disables SGS",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "config.run.lane is Lane.DRY_DYCORE and config.closures.sgs_model != 0"
+  },
+  {
+   "option": "closures.sgs_model",
+   "allowed": [
+    1,
+    3,
+    4
+   ],
+   "integer": false,
+   "reason": "README.namelist:334-352: this lane integrates the Deardorff TKE closure (1) and CM1's two two-part near-wall variants (3, 4); the Smagorinsky and NBA models have no kernels, so the TKE closure would mix every column while the receipt named another model",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE) and config.closures.sgs_model not in (1, 3, 4)"
+  },
+  {
+   "option": "closures.upper_damping",
+   "allowed": [
+    0
+   ],
+   "integer": false,
+   "reason": "the dry operator bootstrap builds no Rayleigh coefficients at all",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "config.run.lane is Lane.DRY_DYCORE"
+  },
+  {
+   "option": "closures.upper_damping",
+   "allowed": [
+    0,
+    1,
+    2
+   ],
+   "integer": true,
+   "reason": "src/solve1.F:404-438 has exactly three branches: off, damp toward the base state, damp toward the horizontal average; another value would leave uten1/vten1/wten1/thten1 holding the previous step's words while the receipt named a damper",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE)"
+  },
+  {
+   "option": "closures.vertical_implicit_diffusion",
+   "allowed": [],
+   "integer": false,
+   "reason": "the dry operator bootstrap disables turbulence diffusion while the official SGS branch requires it",
+   "function": "_validate_first_slice",
+   "applies": "dynamic"
+  },
+  {
+   "option": "physics.component",
+   "allowed": [
+    "off"
+   ],
+   "integer": false,
+   "reason": "a dry-dycore comparison cannot include substituted column physics",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "config.run.lane is Lane.DRY_DYCORE"
+  },
+  {
+   "option": "physics.equation_set",
+   "allowed": [
+    1
+   ],
+   "integer": false,
+   "reason": "the dry bootstrap is a separately identified eqtset=1 profile",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "config.run.lane is Lane.DRY_DYCORE"
+  },
+  {
+   "option": "physics.component",
+   "allowed": [],
+   "integer": false,
+   "reason": "\"the Cartesian runtime binds only the column components whose CM1 \"\n            \"q3d scalar table, persistence inventory and dense-ice branch this \"\n            \"port has transcribed\"\n            + (\n                \"; with run.iconly = 1 it also admits 'off', because \"\n                \"nothing is compiled or launched\"\n                if inspecting_only\n                else \"\"\n            )",
+   "function": "_validate_first_slice",
+   "applies": "dynamic"
+  },
+  {
+   "option": "physics.equation_set",
+   "allowed": [],
+   "integer": false,
+   "reason": "the Cartesian large step executes the eqtset=2 source order only",
+   "function": "_validate_first_slice",
+   "applies": "dynamic"
+  },
+  {
+   "option": "physics.component",
+   "allowed": [
+    "wsm6-mp6"
+   ],
+   "integer": false,
+   "reason": "the first product seam is measured only for the semantic ArWen WSM6 component",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE) and not (config.run.lane is Lane.CARTESIAN) and config.run.lane in {Lane.PRODUCT, Lane.REAL_PRODUCT}"
+  },
+  {
+   "option": "physics.equation_set",
+   "allowed": [
+    2
+   ],
+   "integer": false,
+   "reason": "the product target is CM1 eqtset=2 and remains red until its energy oracle passes",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE) and not (config.run.lane is Lane.CARTESIAN) and config.run.lane in {Lane.PRODUCT, Lane.REAL_PRODUCT}"
+  },
+  {
+   "option": "physics.component",
+   "allowed": [
+    "native-cm1-ptype5"
+   ],
+   "integer": false,
+   "reason": "native context preserves CM1's own component identity and never enters production",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE) and not (config.run.lane is Lane.CARTESIAN) and not (config.run.lane in {Lane.PRODUCT, Lane.REAL_PRODUCT})"
+  },
+  {
+   "option": "physics.equation_set",
+   "allowed": [
+    2
+   ],
+   "integer": false,
+   "reason": "the official native context selects eqtset=2",
+   "function": "_validate_first_slice",
+   "applies": "conditional",
+   "guard": "not (config.run.lane is Lane.DRY_DYCORE) and not (config.run.lane is Lane.CARTESIAN) and not (config.run.lane in {Lane.PRODUCT, Lane.REAL_PRODUCT})"
+  },
+  {
+   "option": "dynamics.psolver",
+   "allowed": [
+    3
+   ],
+   "integer": false,
+   "reason": "the Cartesian dynamics composes the vertically implicit acoustic path only",
+   "function": "_require_cartesian_envelope",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.scalar_weno",
+   "allowed": [
+    2
+   ],
+   "integer": false,
+   "reason": "the Cartesian scalar stage is bound to the final-RK-stage WENO cadence",
+   "function": "_require_cartesian_envelope",
+   "applies": "cartesian"
+  },
+  {
+   "option": "dynamics.dry_mass_correction",
+   "allowed": [
+    true
+   ],
+   "integer": false,
+   "reason": "the Cartesian large step always closes with the dry-air mass correction",
+   "function": "_require_cartesian_envelope",
+   "applies": "cartesian"
+  }
+ ]
+}

@@ -1,0 +1,45 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+.venv/
+venv/
+
+# Authority trees and build products are preserved locally but are not
+# distributed as package source. Their byte identities live in receipts.
+upstream/*
+!upstream/README.md
+work/
+*.mod
+*.o
+*.exe
+
+# Rust build products
+rust/**/target/
+
+# Evidence may contain large native-model output. Receipts and manifests are
+# tracked explicitly; transient model products are ignored.
+evidence/**/scratch/
+evidence/**/*.nc
+evidence/**/*.dat
+evidence/**/*.bin
+evidence/**/*.log
+!evidence/**/*.receipt.log
+
+# Preserved local scratch: audited dependency estates, detached capture
+# worktrees and oracle trees.  Their byte identities live in receipts; they
+# are far too large to enter a forward-only history.
+tmp/
+.ruff_cache/
+
+# A GPU-mutex test on a POSIX host materialises the Windows lock path as a
+# literal directory name; it is a transient test artifact, never source.
+C:\\*
+
+# Local copies of remote run receipts written by tools/launch_cartesian_storm.sh
+runs/
+.pkg-scratch/

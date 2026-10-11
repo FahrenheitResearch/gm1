@@ -1,0 +1,3933 @@
+{
+ "authority": {
+  "files": {
+   "run/namelist.input": "3cf17aa1ac513544d4695994013fd30ea89c2bb0f7d926e41e348635882a6ca5",
+   "src/cm1.F": "7650be7688b45288997b4a869f5c996869aa22eae0c3c1cffa04c372e7deedb4",
+   "src/input.F": "e8b3bb25e0b624d79da7d361a2027431b55f98434abfe19b4385d7c7e1692663",
+   "src/module_mp_nssl_2mom.F": "e2b152281cb1d3b79dbcbd5209d27cc67a1d3dc289bb63b766862fae997a29e4",
+   "src/module_ra_etc.F": "9b3d51a1945b3ce73628fc5c922e5f2f294d37e5335f1b549cb7fde57cb02e90"
+  },
+  "release": "r21.1",
+  "tarball_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7"
+ },
+ "bases": {
+  "cm1-assignment": "assigned before the namelist is read: src/cm1.F's start-up block for the param groups (the read of param0 is at src/cm1.F:480), init_module_wrf_error for logging",
+  "declaration-initializer": "the initializer on the module variable's declaration; for the NSSL groups, nssl_2mom_init may still adjust some of them before its own read",
+  "static-zero": "r21.1 sets no value before the read; the module variable is static storage, which gfortran and ifort zero-fill, so an unset key reads 0, 0.0, .false. or blanks. The Fortran standard leaves it undefined."
+ },
+ "counts": {
+  "cm1-assignment": 23,
+  "declaration-initializer": 236,
+  "distributed": 346,
+  "fields": 583,
+  "groups": 25,
+  "static-zero": 324
+ },
+ "groups": {
+  "logging": {
+   "buffer_size": {
+    "basis": "cm1-assignment",
+    "code_default": 0,
+    "source": "src/module_ra_etc.F:100",
+    "type": "integer"
+   },
+   "compute_tasks_silent": {
+    "basis": "cm1-assignment",
+    "code_default": false,
+    "source": "src/module_ra_etc.F:98",
+    "type": "logical"
+   },
+   "io_servers_silent": {
+    "basis": "cm1-assignment",
+    "code_default": false,
+    "source": "src/module_ra_etc.F:99",
+    "type": "logical"
+   },
+   "stderr_logging": {
+    "basis": "cm1-assignment",
+    "code_default": 0,
+    "source": "src/module_ra_etc.F:108",
+    "type": "integer"
+   }
+  },
+  "nssl2mom_params": {
+   "alphah": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:746",
+    "type": "real32"
+   },
+   "alphahl": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "distributed_value": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:747",
+    "type": "real32"
+   },
+   "ccn": {
+    "basis": "declaration-initializer",
+    "code_default": 600000000.0,
+    "distributed_value": 600000000.0,
+    "source": "src/module_mp_nssl_2mom.F:238",
+    "type": "real32"
+   },
+   "cnoh": {
+    "basis": "declaration-initializer",
+    "code_default": 400000.0,
+    "distributed_value": 40000.0,
+    "source": "src/module_mp_nssl_2mom.F:224",
+    "type": "real32"
+   },
+   "cnor": {
+    "basis": "declaration-initializer",
+    "code_default": 800000.0,
+    "distributed_value": 8000000.0,
+    "source": "src/module_mp_nssl_2mom.F:222",
+    "type": "real32"
+   },
+   "cnos": {
+    "basis": "declaration-initializer",
+    "code_default": 3000000.0,
+    "source": "src/module_mp_nssl_2mom.F:223",
+    "type": "real32"
+   },
+   "dfrz": {
+    "basis": "declaration-initializer",
+    "code_default": 0.00015,
+    "source": "src/module_mp_nssl_2mom.F:478",
+    "type": "real32"
+   },
+   "dmrauto": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:573",
+    "type": "integer"
+   },
+   "ehlw0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.9,
+    "source": "src/module_mp_nssl_2mom.F:406",
+    "type": "real32"
+   },
+   "ehw0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.9,
+    "source": "src/module_mp_nssl_2mom.F:404",
+    "type": "real32"
+   },
+   "hldnmn": {
+    "basis": "declaration-initializer",
+    "code_default": 500.0,
+    "source": "src/module_mp_nssl_2mom.F:228",
+    "type": "real32"
+   },
+   "icdx": {
+    "basis": "declaration-initializer",
+    "code_default": 6,
+    "source": "src/module_mp_nssl_2mom.F:287",
+    "type": "integer"
+   },
+   "icdxhl": {
+    "basis": "declaration-initializer",
+    "code_default": 6,
+    "source": "src/module_mp_nssl_2mom.F:289",
+    "type": "integer"
+   },
+   "iehlw": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:399",
+    "type": "integer"
+   },
+   "iehw": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:397",
+    "type": "integer"
+   },
+   "iferwisventr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:564",
+    "type": "integer"
+   },
+   "ihlcnh": {
+    "basis": "declaration-initializer",
+    "code_default": -1,
+    "source": "src/module_mp_nssl_2mom.F:538",
+    "type": "integer"
+   },
+   "imurain": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:557",
+    "type": "integer"
+   },
+   "infall": {
+    "basis": "declaration-initializer",
+    "code_default": 4,
+    "source": "src/module_mp_nssl_2mom.F:274",
+    "type": "integer"
+   },
+   "inucopt": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:309",
+    "type": "integer"
+   },
+   "ioldlimiter": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:598",
+    "type": "integer"
+   },
+   "irenuc": {
+    "basis": "declaration-initializer",
+    "code_default": 7,
+    "source": "src/module_mp_nssl_2mom.F:342",
+    "type": "integer"
+   },
+   "rho_qh": {
+    "basis": "declaration-initializer",
+    "code_default": 500.0,
+    "source": "src/module_mp_nssl_2mom.F:224",
+    "type": "real32"
+   },
+   "rho_qhl": {
+    "basis": "declaration-initializer",
+    "code_default": 800.0,
+    "source": "src/module_mp_nssl_2mom.F:225",
+    "type": "real32"
+   },
+   "rho_qr": {
+    "basis": "declaration-initializer",
+    "code_default": 1000.0,
+    "source": "src/module_mp_nssl_2mom.F:222",
+    "type": "real32"
+   },
+   "rho_qs": {
+    "basis": "declaration-initializer",
+    "code_default": 100.0,
+    "source": "src/module_mp_nssl_2mom.F:223",
+    "type": "real32"
+   }
+  },
+  "nssl_mp_params": {
+   "alphahacx": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:466",
+    "type": "real32"
+   },
+   "alphai": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:743",
+    "type": "real32"
+   },
+   "alphamax": {
+    "basis": "declaration-initializer",
+    "code_default": 15.0,
+    "source": "src/module_mp_nssl_2mom.F:752",
+    "type": "real32"
+   },
+   "alphamin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:753",
+    "type": "real32"
+   },
+   "alphar": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:745",
+    "type": "real32"
+   },
+   "alphas": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:744",
+    "type": "real32"
+   },
+   "axf": {
+    "basis": "declaration-initializer",
+    "code_default": 75.7149,
+    "source": "src/module_mp_nssl_2mom.F:292",
+    "type": "real32"
+   },
+   "axh": {
+    "basis": "declaration-initializer",
+    "code_default": 75.7149,
+    "source": "src/module_mp_nssl_2mom.F:291",
+    "type": "real32"
+   },
+   "axhl": {
+    "basis": "declaration-initializer",
+    "code_default": 206.984,
+    "source": "src/module_mp_nssl_2mom.F:293",
+    "type": "real32"
+   },
+   "binmlrmxdia": {
+    "basis": "declaration-initializer",
+    "code_default": 0.04,
+    "source": "src/module_mp_nssl_2mom.F:632",
+    "type": "real32"
+   },
+   "binmlrzrrfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:633",
+    "type": "real32"
+   },
+   "bxf": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:292",
+    "type": "real32"
+   },
+   "bxh": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:291",
+    "type": "real32"
+   },
+   "bxhl": {
+    "basis": "declaration-initializer",
+    "code_default": 0.6384,
+    "source": "src/module_mp_nssl_2mom.F:293",
+    "type": "real32"
+   },
+   "cck": {
+    "basis": "declaration-initializer",
+    "code_default": 0.6,
+    "source": "src/module_mp_nssl_2mom.F:351",
+    "type": "real32"
+   },
+   "ccntimeconst": {
+    "basis": "declaration-initializer",
+    "code_default": 3600.0,
+    "source": "src/module_mp_nssl_2mom.F:255",
+    "type": "real32"
+   },
+   "cdhdnmax": {
+    "basis": "declaration-initializer",
+    "code_default": 800.0,
+    "source": "src/module_mp_nssl_2mom.F:295",
+    "type": "real32"
+   },
+   "cdhdnmin": {
+    "basis": "declaration-initializer",
+    "code_default": 500.0,
+    "source": "src/module_mp_nssl_2mom.F:295",
+    "type": "real32"
+   },
+   "cdhldnmax": {
+    "basis": "declaration-initializer",
+    "code_default": 800.0,
+    "source": "src/module_mp_nssl_2mom.F:297",
+    "type": "real32"
+   },
+   "cdhldnmin": {
+    "basis": "declaration-initializer",
+    "code_default": 500.0,
+    "source": "src/module_mp_nssl_2mom.F:297",
+    "type": "real32"
+   },
+   "cdhlmax": {
+    "basis": "declaration-initializer",
+    "code_default": 0.6,
+    "source": "src/module_mp_nssl_2mom.F:296",
+    "type": "real32"
+   },
+   "cdhlmin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.45,
+    "source": "src/module_mp_nssl_2mom.F:296",
+    "type": "real32"
+   },
+   "cdhmax": {
+    "basis": "declaration-initializer",
+    "code_default": 0.8,
+    "source": "src/module_mp_nssl_2mom.F:294",
+    "type": "real32"
+   },
+   "cdhmin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.45,
+    "source": "src/module_mp_nssl_2mom.F:294",
+    "type": "real32"
+   },
+   "cfnfac": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:392",
+    "type": "real32"
+   },
+   "ciintmx": {
+    "basis": "declaration-initializer",
+    "code_default": 1000000.0,
+    "source": "src/module_mp_nssl_2mom.F:352",
+    "type": "real32"
+   },
+   "cimas0": {
+    "basis": "declaration-initializer",
+    "code_default": 6.62e-11,
+    "source": "src/module_mp_nssl_2mom.F:388",
+    "type": "real32"
+   },
+   "cimas1": {
+    "basis": "declaration-initializer",
+    "code_default": 6.88e-13,
+    "source": "src/module_mp_nssl_2mom.F:390",
+    "type": "real32"
+   },
+   "cnohmn": {
+    "basis": "declaration-initializer",
+    "code_default": 0.01,
+    "source": "src/module_mp_nssl_2mom.F:230",
+    "type": "real32"
+   },
+   "cnu": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:758",
+    "type": "real32"
+   },
+   "cwfrz2snowfrac": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:370",
+    "type": "real32"
+   },
+   "cwfrz2snowratio": {
+    "basis": "declaration-initializer",
+    "code_default": 5.0,
+    "source": "src/module_mp_nssl_2mom.F:371",
+    "type": "real32"
+   },
+   "cxmin": {
+    "basis": "declaration-initializer",
+    "code_default": 1e-08,
+    "source": "src/module_mp_nssl_2mom.F:588",
+    "type": "real32"
+   },
+   "decayufccn": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:259",
+    "type": "logical"
+   },
+   "delta_alphamlr": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:636",
+    "type": "real32"
+   },
+   "depfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:620",
+    "type": "real32"
+   },
+   "dfrz": {
+    "basis": "declaration-initializer",
+    "code_default": 0.00015,
+    "source": "src/module_mp_nssl_2mom.F:478",
+    "type": "real32"
+   },
+   "dg0thresh": {
+    "basis": "declaration-initializer",
+    "code_default": 0.15,
+    "source": "src/module_mp_nssl_2mom.F:552",
+    "type": "real32"
+   },
+   "dhmn": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dhmx": {
+    "basis": "declaration-initializer",
+    "code_default": -1.0,
+    "source": "src/module_mp_nssl_2mom.F:896",
+    "type": "real32"
+   },
+   "dmhlopt": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:580",
+    "type": "integer"
+   },
+   "dmlt": {
+    "basis": "declaration-initializer",
+    "code_default": 0.003,
+    "source": "src/module_mp_nssl_2mom.F:480",
+    "type": "real32"
+   },
+   "dmrauto": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:573",
+    "type": "integer"
+   },
+   "dmropt": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:579",
+    "type": "integer"
+   },
+   "do_accurate_sedimentation": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:270",
+    "type": "logical"
+   },
+   "dwehwmin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:551",
+    "type": "real32"
+   },
+   "dwmax": {
+    "basis": "declaration-initializer",
+    "code_default": 0.015,
+    "source": "src/module_mp_nssl_2mom.F:549",
+    "type": "real32"
+   },
+   "dwmin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.005,
+    "source": "src/module_mp_nssl_2mom.F:547",
+    "type": "real32"
+   },
+   "dwtempmin": {
+    "basis": "declaration-initializer",
+    "code_default": 242.0,
+    "source": "src/module_mp_nssl_2mom.F:550",
+    "type": "real32"
+   },
+   "ecollmx": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:454",
+    "type": "real32"
+   },
+   "ehimax": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:452",
+    "type": "real32"
+   },
+   "ehimin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:451",
+    "type": "real32"
+   },
+   "ehlr0": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:410",
+    "type": "real32"
+   },
+   "ehlw0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.9,
+    "source": "src/module_mp_nssl_2mom.F:406",
+    "type": "real32"
+   },
+   "ehr0": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:408",
+    "type": "real32"
+   },
+   "ehs0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:438",
+    "type": "real32"
+   },
+   "ehs1": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:438",
+    "type": "real32"
+   },
+   "ehsmax": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:453",
+    "type": "real32"
+   },
+   "ehw0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.9,
+    "source": "src/module_mp_nssl_2mom.F:404",
+    "type": "real32"
+   },
+   "eii0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:429",
+    "type": "real32"
+   },
+   "eii0hl": {
+    "basis": "declaration-initializer",
+    "code_default": 0.2,
+    "source": "src/module_mp_nssl_2mom.F:431",
+    "type": "real32"
+   },
+   "eii1": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:429",
+    "type": "real32"
+   },
+   "eii1hl": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:431",
+    "type": "real32"
+   },
+   "eqtot": {
+    "basis": "declaration-initializer",
+    "code_default": 1e-09,
+    "source": "src/module_mp_nssl_2mom.F:332",
+    "type": "real32"
+   },
+   "eri0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:435",
+    "type": "real32"
+   },
+   "eri_cimin": {
+    "basis": "declaration-initializer",
+    "code_default": 1e-05,
+    "source": "src/module_mp_nssl_2mom.F:436",
+    "type": "real32"
+   },
+   "erw0": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:405",
+    "type": "real32"
+   },
+   "esi0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.1,
+    "source": "src/module_mp_nssl_2mom.F:437",
+    "type": "real32"
+   },
+   "ess0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:442",
+    "type": "real32"
+   },
+   "ess1": {
+    "basis": "declaration-initializer",
+    "code_default": 0.05,
+    "source": "src/module_mp_nssl_2mom.F:442",
+    "type": "real32"
+   },
+   "esstem1": {
+    "basis": "declaration-initializer",
+    "code_default": -25.0,
+    "source": "src/module_mp_nssl_2mom.F:444",
+    "type": "real32"
+   },
+   "esstem2": {
+    "basis": "declaration-initializer",
+    "code_default": -20.0,
+    "source": "src/module_mp_nssl_2mom.F:445",
+    "type": "real32"
+   },
+   "evapfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:619",
+    "type": "real32"
+   },
+   "ewfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:428",
+    "type": "real32"
+   },
+   "exwmindiam": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:411",
+    "type": "real32"
+   },
+   "fconv": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:468",
+    "type": "real32"
+   },
+   "ffrzs": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:321",
+    "type": "real32"
+   },
+   "fscni": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:394",
+    "type": "real32"
+   },
+   "fwmh": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:524",
+    "type": "real32"
+   },
+   "fwmhl": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:525",
+    "type": "real32"
+   },
+   "fwmlarge": {
+    "basis": "declaration-initializer",
+    "code_default": 0.2,
+    "source": "src/module_mp_nssl_2mom.F:526",
+    "type": "real32"
+   },
+   "fwms": {
+    "basis": "declaration-initializer",
+    "code_default": 0.5,
+    "source": "src/module_mp_nssl_2mom.F:523",
+    "type": "real32"
+   },
+   "graupelfallfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:284",
+    "type": "real32"
+   },
+   "hailfallfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:285",
+    "type": "real32"
+   },
+   "hdnmn": {
+    "basis": "declaration-initializer",
+    "code_default": 170.0,
+    "source": "src/module_mp_nssl_2mom.F:227",
+    "type": "real32"
+   },
+   "hlcnhdia": {
+    "basis": "declaration-initializer",
+    "code_default": 0.001,
+    "source": "src/module_mp_nssl_2mom.F:542",
+    "type": "real32"
+   },
+   "hlcnhqmin": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0001,
+    "source": "src/module_mp_nssl_2mom.F:543",
+    "type": "real32"
+   },
+   "hldia1": {
+    "basis": "declaration-initializer",
+    "code_default": 0.01,
+    "source": "src/module_mp_nssl_2mom.F:544",
+    "type": "real32"
+   },
+   "hldnmn": {
+    "basis": "declaration-initializer",
+    "code_default": 500.0,
+    "source": "src/module_mp_nssl_2mom.F:228",
+    "type": "real32"
+   },
+   "hlssflg": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:303",
+    "type": "integer"
+   },
+   "hssflg": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:302",
+    "type": "integer"
+   },
+   "iacr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:373",
+    "type": "integer"
+   },
+   "iacrsize": {
+    "basis": "declaration-initializer",
+    "code_default": 5,
+    "source": "src/module_mp_nssl_2mom.F:382",
+    "type": "integer"
+   },
+   "ibfc": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:369",
+    "type": "integer"
+   },
+   "ibfr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:378",
+    "type": "integer"
+   },
+   "ibiggopt": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:380",
+    "type": "integer"
+   },
+   "ibiggsmallrain": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:381",
+    "type": "integer"
+   },
+   "ibiggsnow": {
+    "basis": "declaration-initializer",
+    "code_default": 3,
+    "source": "src/module_mp_nssl_2mom.F:607",
+    "type": "integer"
+   },
+   "ibinhlmlr": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:625",
+    "type": "integer"
+   },
+   "ibinhmlr": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:623",
+    "type": "integer"
+   },
+   "ibinnum": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:627",
+    "type": "integer"
+   },
+   "icdx": {
+    "basis": "declaration-initializer",
+    "code_default": 6,
+    "source": "src/module_mp_nssl_2mom.F:287",
+    "type": "integer"
+   },
+   "icdxhl": {
+    "basis": "declaration-initializer",
+    "code_default": 6,
+    "source": "src/module_mp_nssl_2mom.F:289",
+    "type": "integer"
+   },
+   "icefallfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:282",
+    "type": "real32"
+   },
+   "icefallopt": {
+    "basis": "declaration-initializer",
+    "code_default": 3,
+    "source": "src/module_mp_nssl_2mom.F:286",
+    "type": "integer"
+   },
+   "icenucopt": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:365",
+    "type": "integer"
+   },
+   "icfn": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:367",
+    "type": "integer"
+   },
+   "icnuclimit": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:341",
+    "type": "integer"
+   },
+   "icracr": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:376",
+    "type": "integer"
+   },
+   "icracrthresh": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:377",
+    "type": "integer"
+   },
+   "icvhl2h": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:555",
+    "type": "integer"
+   },
+   "idbzci": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:215",
+    "type": "integer"
+   },
+   "idiagnosecnu": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:337",
+    "type": "integer"
+   },
+   "iehlr0c": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:403",
+    "type": "integer"
+   },
+   "iehr0c": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:402",
+    "type": "integer"
+   },
+   "iehw": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:397",
+    "type": "integer"
+   },
+   "ierw": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:401",
+    "type": "integer"
+   },
+   "iessopt": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:440",
+    "type": "integer"
+   },
+   "iferwisventr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:564",
+    "type": "integer"
+   },
+   "ifiacrg": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:319",
+    "type": "real32"
+   },
+   "ifrzg": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:318",
+    "type": "real32"
+   },
+   "ifrzs": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:320",
+    "type": "real32"
+   },
+   "ifwmfall": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:527",
+    "type": "integer"
+   },
+   "ifwmhopt": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:516",
+    "type": "integer"
+   },
+   "iglcnvi": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:455",
+    "type": "integer"
+   },
+   "iglcnvs": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:456",
+    "type": "integer"
+   },
+   "ihlcnh": {
+    "basis": "declaration-initializer",
+    "code_default": -1,
+    "source": "src/module_mp_nssl_2mom.F:538",
+    "type": "integer"
+   },
+   "ihmlt": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:485",
+    "type": "integer"
+   },
+   "ihxw2rain": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:520",
+    "type": "integer"
+   },
+   "imaxdiaopt": {
+    "basis": "declaration-initializer",
+    "code_default": 3,
+    "source": "src/module_mp_nssl_2mom.F:567",
+    "type": "integer"
+   },
+   "imeyers5": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:395",
+    "type": "logical"
+   },
+   "imltshddmr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:486",
+    "type": "integer"
+   },
+   "imurain": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:557",
+    "type": "integer"
+   },
+   "in_freeze_rain_first": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:364",
+    "type": "integer"
+   },
+   "infall": {
+    "basis": "declaration-initializer",
+    "code_default": 4,
+    "source": "src/module_mp_nssl_2mom.F:274",
+    "type": "integer"
+   },
+   "interval_sedi_vt": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:273",
+    "type": "integer"
+   },
+   "ioldlimiter": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:598",
+    "type": "integer"
+   },
+   "iqcinit": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:420",
+    "type": "integer"
+   },
+   "iqhacrmlr": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:628",
+    "type": "integer"
+   },
+   "iqhlacrmlr": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:629",
+    "type": "integer"
+   },
+   "iqvsopt": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:638",
+    "type": "integer"
+   },
+   "ircnw": {
+    "basis": "declaration-initializer",
+    "code_default": 5,
+    "source": "src/module_mp_nssl_2mom.F:417",
+    "type": "integer"
+   },
+   "irenuc": {
+    "basis": "declaration-initializer",
+    "code_default": 7,
+    "source": "src/module_mp_nssl_2mom.F:342",
+    "type": "integer"
+   },
+   "irescalerainopt": {
+    "basis": "declaration-initializer",
+    "code_default": 3,
+    "source": "src/module_mp_nssl_2mom.F:581",
+    "type": "integer"
+   },
+   "iresetmoments": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:566",
+    "type": "integer"
+   },
+   "irfall": {
+    "basis": "declaration-initializer",
+    "code_default": -1,
+    "source": "src/module_mp_nssl_2mom.F:268",
+    "type": "integer"
+   },
+   "irimdenopt": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:327",
+    "type": "integer"
+   },
+   "iscfall": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:267",
+    "type": "integer"
+   },
+   "iscni": {
+    "basis": "declaration-initializer",
+    "code_default": 4,
+    "source": "src/module_mp_nssl_2mom.F:393",
+    "type": "integer"
+   },
+   "isedonly": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:563",
+    "type": "integer"
+   },
+   "isfall": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:269",
+    "type": "integer"
+   },
+   "isnowdens": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:603",
+    "type": "integer"
+   },
+   "isnowfall": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:599",
+    "type": "integer"
+   },
+   "isnwfrac": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:499",
+    "type": "integer"
+   },
+   "itfall": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:266",
+    "type": "integer"
+   },
+   "ithompsoncnoh": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:591",
+    "type": "integer"
+   },
+   "iturbenhance": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:559",
+    "type": "integer"
+   },
+   "itype1": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:363",
+    "type": "integer"
+   },
+   "itype2": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:363",
+    "type": "integer"
+   },
+   "iusedw": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:546",
+    "type": "integer"
+   },
+   "iusewetgraupel": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:216",
+    "type": "integer"
+   },
+   "iusewethail": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:218",
+    "type": "integer"
+   },
+   "iusewetsnow": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:219",
+    "type": "integer"
+   },
+   "ivhmltsoak": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:595",
+    "type": "integer"
+   },
+   "ixtaltype": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:612",
+    "type": "integer"
+   },
+   "izwisventr": {
+    "basis": "declaration-initializer",
+    "code_default": 2,
+    "source": "src/module_mp_nssl_2mom.F:565",
+    "type": "integer"
+   },
+   "lawson_splinter_fac": {
+    "basis": "declaration-initializer",
+    "code_default": 2.5e-11,
+    "source": "src/module_mp_nssl_2mom.F:498",
+    "type": "real32"
+   },
+   "maxsupersat": {
+    "basis": "declaration-initializer",
+    "code_default": 1.9,
+    "source": "src/module_mp_nssl_2mom.F:645",
+    "type": "real32"
+   },
+   "mltdiam05": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0045,
+    "source": "src/module_mp_nssl_2mom.F:495",
+    "type": "real32"
+   },
+   "mltdiam1": {
+    "basis": "declaration-initializer",
+    "code_default": 0.009,
+    "source": "src/module_mp_nssl_2mom.F:495",
+    "type": "real32"
+   },
+   "mltdiam2": {
+    "basis": "declaration-initializer",
+    "code_default": 0.016,
+    "source": "src/module_mp_nssl_2mom.F:495",
+    "type": "real32"
+   },
+   "mltdiam3": {
+    "basis": "declaration-initializer",
+    "code_default": 0.019,
+    "source": "src/module_mp_nssl_2mom.F:495",
+    "type": "real32"
+   },
+   "mltdiam4": {
+    "basis": "declaration-initializer",
+    "code_default": 0.2,
+    "source": "src/module_mp_nssl_2mom.F:495",
+    "type": "real32"
+   },
+   "naer": {
+    "basis": "declaration-initializer",
+    "code_default": 1000000.0,
+    "source": "src/module_mp_nssl_2mom.F:366",
+    "type": "real32"
+   },
+   "ncdebug": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:307",
+    "type": "integer"
+   },
+   "ndebug": {
+    "basis": "declaration-initializer",
+    "code_default": -1,
+    "source": "src/module_mp_nssl_2mom.F:307",
+    "type": "integer"
+   },
+   "nsplinter": {
+    "basis": "declaration-initializer",
+    "code_default": 0,
+    "source": "src/module_mp_nssl_2mom.F:497",
+    "type": "integer"
+   },
+   "old_cccn": {
+    "basis": "declaration-initializer",
+    "code_default": -1.0,
+    "source": "src/module_mp_nssl_2mom.F:253",
+    "type": "real32"
+   },
+   "qhacidn": {
+    "basis": "declaration-initializer",
+    "code_default": -1.0,
+    "source": "src/module_mp_nssl_2mom.F:504",
+    "type": "real32"
+   },
+   "qhdenmod": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:510",
+    "type": "logical"
+   },
+   "qhdpvdn": {
+    "basis": "declaration-initializer",
+    "code_default": -1.0,
+    "source": "src/module_mp_nssl_2mom.F:503",
+    "type": "real32"
+   },
+   "qminrncw": {
+    "basis": "declaration-initializer",
+    "code_default": 0.002,
+    "source": "src/module_mp_nssl_2mom.F:418",
+    "type": "real32"
+   },
+   "qsdenmod": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:509",
+    "type": "logical"
+   },
+   "qsvtmod": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:511",
+    "type": "logical"
+   },
+   "rainfallfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:281",
+    "type": "real32"
+   },
+   "rescale_high_alpha": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:530",
+    "type": "logical"
+   },
+   "rescale_low_alpha": {
+    "basis": "declaration-initializer",
+    "code_default": true,
+    "source": "src/module_mp_nssl_2mom.F:531",
+    "type": "logical"
+   },
+   "rescale_low_alphah": {
+    "basis": "declaration-initializer",
+    "code_default": true,
+    "source": "src/module_mp_nssl_2mom.F:533",
+    "type": "logical"
+   },
+   "rescale_low_alphahl": {
+    "basis": "declaration-initializer",
+    "code_default": true,
+    "source": "src/module_mp_nssl_2mom.F:534",
+    "type": "logical"
+   },
+   "rescale_low_alphar": {
+    "basis": "declaration-initializer",
+    "code_default": true,
+    "source": "src/module_mp_nssl_2mom.F:532",
+    "type": "logical"
+   },
+   "rescale_tempthresh": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:586",
+    "type": "real32"
+   },
+   "rescale_wthresh": {
+    "basis": "declaration-initializer",
+    "code_default": 3.0,
+    "source": "src/module_mp_nssl_2mom.F:585",
+    "type": "real32"
+   },
+   "restoreccn": {
+    "basis": "declaration-initializer",
+    "code_default": true,
+    "source": "src/module_mp_nssl_2mom.F:254",
+    "type": "logical"
+   },
+   "rimc1": {
+    "basis": "declaration-initializer",
+    "code_default": 300.0,
+    "source": "src/module_mp_nssl_2mom.F:328",
+    "type": "real32"
+   },
+   "rimc2": {
+    "basis": "declaration-initializer",
+    "code_default": 0.44,
+    "source": "src/module_mp_nssl_2mom.F:328",
+    "type": "real32"
+   },
+   "rimc3": {
+    "basis": "declaration-initializer",
+    "code_default": 170.0,
+    "source": "src/module_mp_nssl_2mom.F:329",
+    "type": "real32"
+   },
+   "rimc4": {
+    "basis": "declaration-initializer",
+    "code_default": 900.0,
+    "source": "src/module_mp_nssl_2mom.F:330",
+    "type": "real32"
+   },
+   "rimdenvwgt": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:333",
+    "type": "real32"
+   },
+   "rssflg": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:300",
+    "type": "integer"
+   },
+   "sheddiam": {
+    "basis": "declaration-initializer",
+    "code_default": 0.008,
+    "source": "src/module_mp_nssl_2mom.F:512",
+    "type": "real32"
+   },
+   "sheddiam0": {
+    "basis": "declaration-initializer",
+    "code_default": 0.02,
+    "source": "src/module_mp_nssl_2mom.F:514",
+    "type": "real32"
+   },
+   "sheddiamlg": {
+    "basis": "declaration-initializer",
+    "code_default": 0.01,
+    "source": "src/module_mp_nssl_2mom.F:513",
+    "type": "real32"
+   },
+   "snowfallfac": {
+    "basis": "declaration-initializer",
+    "code_default": 1.0,
+    "source": "src/module_mp_nssl_2mom.F:283",
+    "type": "real32"
+   },
+   "snowmeltdia": {
+    "basis": "declaration-initializer",
+    "code_default": 0.0,
+    "source": "src/module_mp_nssl_2mom.F:634",
+    "type": "real32"
+   },
+   "splintermass": {
+    "basis": "declaration-initializer",
+    "code_default": 6.88e-13,
+    "source": "src/module_mp_nssl_2mom.F:391",
+    "type": "real32"
+   },
+   "ssmxinit": {
+    "basis": "declaration-initializer",
+    "code_default": 0.4,
+    "source": "src/module_mp_nssl_2mom.F:425",
+    "type": "real32"
+   },
+   "sssflg": {
+    "basis": "declaration-initializer",
+    "code_default": 1,
+    "source": "src/module_mp_nssl_2mom.F:301",
+    "type": "integer"
+   },
+   "switchccn": {
+    "basis": "declaration-initializer",
+    "code_default": false,
+    "source": "src/module_mp_nssl_2mom.F:252",
+    "type": "logical"
+   },
+   "ufccntimeconst": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "vtmaxsed": {
+    "basis": "declaration-initializer",
+    "code_default": 70.0,
+    "source": "src/module_mp_nssl_2mom.F:298",
+    "type": "real32"
+   },
+   "xvdmx": {
+    "basis": "declaration-initializer",
+    "code_default": -1.0,
+    "source": "src/module_mp_nssl_2mom.F:912",
+    "type": "real32"
+   },
+   "zxmin": {
+    "basis": "declaration-initializer",
+    "code_default": 1e-28,
+    "source": "src/module_mp_nssl_2mom.F:589",
+    "type": "real32"
+   }
+  },
+  "param0": {
+   "nx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 60,
+    "source": null,
+    "type": "integer"
+   },
+   "ny": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 60,
+    "source": null,
+    "type": "integer"
+   },
+   "nz": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 40,
+    "source": null,
+    "type": "integer"
+   },
+   "outunits": {
+    "basis": "cm1-assignment",
+    "code_default": 1,
+    "distributed_value": 1,
+    "source": "src/cm1.F:308",
+    "type": "integer"
+   },
+   "ppnode": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 128,
+    "source": null,
+    "type": "integer"
+   },
+   "procfiles": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "terrain_flag": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "timeformat": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "timestats": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   }
+  },
+  "param1": {
+   "dtl": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7.5,
+    "source": null,
+    "type": "real32"
+   },
+   "dx": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 2000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dy": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 2000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dz": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 500.0,
+    "source": null,
+    "type": "real32"
+   },
+   "prclfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 60.0,
+    "source": null,
+    "type": "real64"
+   },
+   "rstfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": -3600.0,
+    "source": null,
+    "type": "real64"
+   },
+   "run_time": {
+    "basis": "cm1-assignment",
+    "code_default": -999.0,
+    "distributed_value": -999.9,
+    "source": "src/cm1.F:365",
+    "type": "real32"
+   },
+   "statfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 60.0,
+    "source": null,
+    "type": "real64"
+   },
+   "tapfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 900.0,
+    "source": null,
+    "type": "real64"
+   },
+   "timax": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7200.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param10": {
+   "stat_cfl": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_cloud": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_div": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_kh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_km": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_mo": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_pcn": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_pipert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_prspert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_q": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_qmass": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_qsrc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_rh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_rhi": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_rmw": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_sfcprs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_tenerg": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_the": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_thpert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_tke": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_tmass": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_tmf": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_tmois": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_u": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_v": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_vort": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_w": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_wlevs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "stat_wsp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   }
+  },
+  "param11": {
+   "ctrlat": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 36.68,
+    "source": null,
+    "type": "real32"
+   },
+   "ctrlon": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": -98.35,
+    "source": null,
+    "type": "real32"
+   },
+   "day": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 15,
+    "source": null,
+    "type": "integer"
+   },
+   "dtrad": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 300.0,
+    "source": null,
+    "type": "real32"
+   },
+   "hour": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 21,
+    "source": null,
+    "type": "integer"
+   },
+   "minute": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 38,
+    "source": null,
+    "type": "integer"
+   },
+   "month": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "radopt": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "second": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "year": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2009,
+    "source": null,
+    "type": "integer"
+   }
+  },
+  "param12": {
+   "cecd": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 3,
+    "source": null,
+    "type": "integer"
+   },
+   "cnst_lhflx": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 5.2e-05,
+    "source": null,
+    "type": "real32"
+   },
+   "cnst_shflx": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.24,
+    "source": null,
+    "type": "real32"
+   },
+   "cnst_ust": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.25,
+    "source": null,
+    "type": "real32"
+   },
+   "cnst_znt": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.16,
+    "source": null,
+    "type": "real32"
+   },
+   "cnstcd": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.001,
+    "source": null,
+    "type": "real32"
+   },
+   "cnstce": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.001,
+    "source": null,
+    "type": "real32"
+   },
+   "initsfc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "isfcflx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "isftcflx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iz0tlnd": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "lu0": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 16,
+    "source": null,
+    "type": "integer"
+   },
+   "oceanmodel": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "oml_gamma": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.14,
+    "source": null,
+    "type": "real32"
+   },
+   "oml_hml0": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 50.0,
+    "source": null,
+    "type": "real32"
+   },
+   "pertflx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "ramp_sgs": {
+    "basis": "cm1-assignment",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": "src/cm1.F:355",
+    "type": "integer"
+   },
+   "ramp_time": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 1800.0,
+    "source": "src/cm1.F:356",
+    "type": "real32"
+   },
+   "season": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "set_flx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "set_ust": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "set_znt": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "sfcmodel": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "t2p_avg": {
+    "basis": "cm1-assignment",
+    "code_default": 1,
+    "distributed_value": 1,
+    "source": "src/cm1.F:357",
+    "type": "integer"
+   },
+   "tmn0": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 297.28,
+    "source": null,
+    "type": "real32"
+   },
+   "tsk0": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 299.28,
+    "source": null,
+    "type": "real32"
+   },
+   "xland0": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 2.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param13": {
+   "prcl_b": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_dbz": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_kh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_km": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_nc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_prs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_ptra": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_q": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_qsat": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_rho": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_sfc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_t": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_th": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_tke": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_vort": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "prcl_vpg": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   }
+  },
+  "param14": {
+   "diagfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 60.0,
+    "source": null,
+    "type": "real64"
+   },
+   "dodomaindiag": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   }
+  },
+  "param15": {
+   "adapt_move_frq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 3600.0,
+    "source": null,
+    "type": "real32"
+   },
+   "azimavgfrq": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 3600.0,
+    "source": null,
+    "type": "real64"
+   },
+   "do_adapt_move": {
+    "basis": "cm1-assignment",
+    "code_default": false,
+    "distributed_value": false,
+    "source": "src/cm1.F:371",
+    "type": "logical"
+   },
+   "doazimavg": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "rlen": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 300000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param16": {
+   "restart_file_dbz": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_diags": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_pi0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_prs0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_qv0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_rho0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_th0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_theta": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_u0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_v0": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_zf": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_zh": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_file_zs": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "restart_filetype": {
+    "basis": "cm1-assignment",
+    "code_default": 1,
+    "distributed_value": 2,
+    "source": "src/cm1.F:362",
+    "type": "integer"
+   },
+   "restart_format": {
+    "basis": "cm1-assignment",
+    "code_default": 1,
+    "distributed_value": 1,
+    "source": "src/cm1.F:361",
+    "type": "integer"
+   },
+   "restart_reset_frqtim": {
+    "basis": "cm1-assignment",
+    "code_default": true,
+    "distributed_value": true,
+    "source": "src/cm1.F:363",
+    "type": "logical"
+   },
+   "restart_use_theta": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   }
+  },
+  "param17": {
+   "les_subdomain_dlen": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 200000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "les_subdomain_shape": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "les_subdomain_trnslen": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 5000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "les_subdomain_xlen": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 200000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "les_subdomain_ylen": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 200000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param18": {
+   "do_recycle_e": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_recycle_n": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_recycle_s": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_recycle_w": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "recycle_cap_loc_m": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 4000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "recycle_depth_m": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 1500.0,
+    "source": null,
+    "type": "real32"
+   },
+   "recycle_inj_loc_m": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "recycle_width_dx": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 6.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param19": {
+   "do_lsnudge": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_lsnudge_qv": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_lsnudge_th": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_lsnudge_u": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "do_lsnudge_v": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "lsnudge_end": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7200.0,
+    "source": null,
+    "type": "real32"
+   },
+   "lsnudge_ramp_time": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 600.0,
+    "source": null,
+    "type": "real32"
+   },
+   "lsnudge_start": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 3600.0,
+    "source": null,
+    "type": "real32"
+   },
+   "lsnudge_tau": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 1800.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param2": {
+   "adapt_dt": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "advwenos": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "advwenov": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "apmasscon": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "axisymm": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "bbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "bcturbs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "betaplane": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "cm1setup": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "cuparam": {
+    "basis": "cm1-assignment",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": "src/cm1.F:373",
+    "type": "integer"
+   },
+   "difforder": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 6,
+    "source": null,
+    "type": "integer"
+   },
+   "doimpl": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "ebc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "efall": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "eqtset": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "hadvordrs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "hadvordrv": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "horizturb": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "hrdamp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iautoc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "ibalance": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iconly": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "icor": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "idiff": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "idiss": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "ihail": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "iinit": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "imoist": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "imove": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "iorigin": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "ipbl": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iprcl": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iptra": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "irandp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "irbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 4,
+    "source": null,
+    "type": "integer"
+   },
+   "irdamp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "irst": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "isnd": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "itern": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "iwnd": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "lspgrad": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "mdiff": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "nbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "nparcels": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "npt": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "nudgeobc": {
+    "basis": "cm1-assignment",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": "src/cm1.F:345",
+    "type": "integer"
+   },
+   "pdtra": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "psolver": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 3,
+    "source": null,
+    "type": "integer"
+   },
+   "ptype": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "roflux": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "rstnum": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "rterm": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "sbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "sgsmodel": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "tbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "tconfig": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "testcase": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "vadvordrs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "vadvordrv": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   },
+   "wbc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 2,
+    "source": null,
+    "type": "integer"
+   },
+   "weno_order": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 5,
+    "source": null,
+    "type": "integer"
+   }
+  },
+  "param20": {
+   "do_ib": {
+    "basis": "static-zero",
+    "code_default": false,
+    "distributed_value": false,
+    "source": null,
+    "type": "logical"
+   },
+   "ib_init": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 4,
+    "source": null,
+    "type": "integer"
+   },
+   "side_cd": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 0.4,
+    "source": "src/cm1.F:351",
+    "type": "real32"
+   },
+   "top_cd": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 0.4,
+    "source": "src/cm1.F:350",
+    "type": "real32"
+   }
+  },
+  "param21": {
+   "hurr_rad": {
+    "basis": "cm1-assignment",
+    "code_default": 1e+30,
+    "distributed_value": 40000.0,
+    "source": "src/cm1.F:366",
+    "type": "real32"
+   },
+   "hurr_rotate": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "hurr_vg": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 40.0,
+    "source": null,
+    "type": "real32"
+   },
+   "hurr_vgpl": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": -0.7,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param3": {
+   "alph": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.6,
+    "source": null,
+    "type": "real32"
+   },
+   "alphobc": {
+    "basis": "cm1-assignment",
+    "code_default": 60.0,
+    "distributed_value": 60.0,
+    "source": "src/cm1.F:346",
+    "type": "real32"
+   },
+   "csound": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 300.0,
+    "source": "src/cm1.F:327",
+    "type": "real32"
+   },
+   "cstar": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 30.0,
+    "source": "src/cm1.F:328",
+    "type": "real32"
+   },
+   "fcor": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 5e-05,
+    "source": null,
+    "type": "real32"
+   },
+   "kdiff2": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 75.0,
+    "source": null,
+    "type": "real32"
+   },
+   "kdiff6": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.04,
+    "source": null,
+    "type": "real32"
+   },
+   "kdiv": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.1,
+    "source": null,
+    "type": "real32"
+   },
+   "l_h": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 100.0,
+    "source": null,
+    "type": "real32"
+   },
+   "l_inf": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 75.0,
+    "source": null,
+    "type": "real32"
+   },
+   "lhref1": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 100.0,
+    "source": null,
+    "type": "real32"
+   },
+   "lhref2": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 1000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "ndcnst": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 250.0,
+    "source": "src/cm1.F:320",
+    "type": "real32"
+   },
+   "nt_c": {
+    "basis": "cm1-assignment",
+    "code_default": 0.0,
+    "distributed_value": 250.0,
+    "source": "src/cm1.F:321",
+    "type": "real32"
+   },
+   "rdalpha": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0033333333333,
+    "source": null,
+    "type": "real32"
+   },
+   "umove": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 12.5,
+    "source": null,
+    "type": "real32"
+   },
+   "v_t": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7.0,
+    "source": null,
+    "type": "real32"
+   },
+   "vmove": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 3.0,
+    "source": null,
+    "type": "real32"
+   },
+   "xhd": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 100000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "zd": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 15000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param4": {
+   "dx_inner": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 1000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dx_outer": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "nos_x_len": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 40000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "stretch_x": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "tot_x_len": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 120000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param5": {
+   "dy_inner": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 1000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dy_outer": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 7000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "nos_y_len": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 40000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "stretch_y": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "tot_y_len": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 120000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param6": {
+   "dz_bot": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 125.0,
+    "source": null,
+    "type": "real32"
+   },
+   "dz_top": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 500.0,
+    "source": null,
+    "type": "real32"
+   },
+   "str_bot": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "str_top": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 2000.0,
+    "source": null,
+    "type": "real32"
+   },
+   "stretch_z": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "ztop": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 18000.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param7": {
+   "bc_temp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "pr_num": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.72,
+    "source": null,
+    "type": "real32"
+   },
+   "ptc_bot": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 300.0,
+    "source": null,
+    "type": "real32"
+   },
+   "ptc_top": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 250.0,
+    "source": null,
+    "type": "real32"
+   },
+   "viscosity": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 25.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param8": {
+   "var1": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var10": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var11": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var12": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var13": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var14": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var15": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var16": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var17": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var18": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var19": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var2": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var20": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var3": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var4": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var5": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var6": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var7": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var8": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   },
+   "var9": {
+    "basis": "static-zero",
+    "code_default": 0.0,
+    "distributed_value": 0.0,
+    "source": null,
+    "type": "real32"
+   }
+  },
+  "param9": {
+   "output_basestate": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_buoyancy": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_cape": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_cin": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_coldpool": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_dbz": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_def": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_dissten": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_fallvel": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_filetype": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_format": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_interp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_kh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_km": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_lcl": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_lfc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_lwp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_nm": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pblten": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pdcomp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pi": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pipert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_prs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_prspert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_psfc": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pv": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_pwat": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_q": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_qv": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_qvbudget": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_qvpert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_radten": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_rain": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_rho": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_rhopert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sfcdiags": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sfcflx": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sfcparams": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sgs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_shs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sps": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_srs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sus": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_svs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_sws": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_th": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_thbudget": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_thpert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_tke": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_u": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_ubudget": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_uh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_uinterp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_upert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_v": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_vbudget": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_vinterp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_vort": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_vpert": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_w": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_wbudget": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_winterp": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 1,
+    "source": null,
+    "type": "integer"
+   },
+   "output_zh": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   },
+   "output_zs": {
+    "basis": "static-zero",
+    "code_default": 0,
+    "distributed_value": 0,
+    "source": null,
+    "type": "integer"
+   }
+  }
+ },
+ "required_groups": {
+  "groups": [
+   "param0",
+   "param2",
+   "param8"
+  ],
+  "source": "src/cm1.F:480,481,482",
+  "why": "cm1.F reads these groups with no end= branch, so a file without one stops CM1 before param.F runs"
+ },
+ "schema": "gm1.cm1-r21.1-namelist-defaults/v1",
+ "support_schema_sha256": "ea89820ca430ca7dfce385bfc0bc8fe10288c3ccf460f5d32a435a366c33605b"
+}

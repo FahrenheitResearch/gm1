@@ -1,0 +1,50 @@
+{
+  "artifact_execution": {
+    "debug_and_release_artifact_hashes_identical": true,
+    "release_binary": {
+      "bytes": 495616,
+      "sha256": "7e13016c891e13352777ec580d725d234a094d51e8042e4fa26153de77a08deb"
+    },
+    "restore_receipt_equal_to_write_receipt": true,
+    "verify_history_receipt_equal_to_write_receipt": true
+  },
+  "checkpoint": {
+    "arrays": 25,
+    "artifact_nbytes": 50941385,
+    "artifact_sha256": "b569a09e92116093605bf7c326aa3dfc5cfd9c71f3f2330ac00c9eaac802fe54",
+    "capability": "startup-post-getset-state-only",
+    "header_sha256": "f30772c9137451cd4518a8d6901a303d8a876abfe69ef6791b8749d90f209420",
+    "payload_nbytes": 50932572,
+    "payload_sha256": "514b25f3ed8ce6d0d768ae43cceff562c809809229c9f1bc03bc25728be6a808",
+    "schema": "gpuwm-cm1.checkpoint/startup-post-getset-v1"
+  },
+  "claim_limit": "The checkpoint is an exact first-nonrestart-post-GETSET Rust startup snapshot, not a forecast restart. The history is a model-time-zero physical-domain observation, with no forecast trajectory, NetCDF, render, CUDA, or uninterrupted/resumed identity claim.",
+  "history": {
+    "arrays": 19,
+    "artifact_nbytes": 30095599,
+    "artifact_sha256": "3e49a229bf2ef8db94d2dc3b54d62e58acbef07167bd03953e4c8824224350bf",
+    "capability": "observational-post-getset-history-only",
+    "header_sha256": "100560a023e43d2270239aa1894d22161d15d90ed23b7b9d86ad1498b1d44578",
+    "payload_nbytes": 30088652,
+    "payload_sha256": "9ffa7739e3c809a63a69b238f716f89d272a25dbd6ff50a531b777acbe049a7b",
+    "schema": "gpuwm-cm1.history/post-getset-observational-v1"
+  },
+  "negative_controls": [
+    "existing-target-no-overwrite",
+    "payload-bit-corruption",
+    "payload-bit-corruption-with-updated-array-and-payload-hashes",
+    "wrong-artifact-kind",
+    "noncanonical-header",
+    "forged-full-restart-capability"
+  ],
+  "schema": "gpuwm-cm1.startup-checkpoint-history-evidence/v1",
+  "status": "passed-bounded-rust-startup-snapshot-and-history",
+  "test_gates": {
+    "cargo_clippy_all_targets_deny_warnings": "passed",
+    "cargo_fmt_check": "passed",
+    "cargo_test": {
+      "failed": 0,
+      "passed": 29
+    }
+  }
+}

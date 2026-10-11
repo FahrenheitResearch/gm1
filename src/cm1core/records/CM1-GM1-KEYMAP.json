@@ -1,0 +1,4125 @@
+{
+  "authority_schema": "gm1.cm1-r21.1-configuration-support/v1",
+  "authority_tarball_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+  "counts": {
+    "cm1_fields_mapped": 193,
+    "cm1_fields_mapped_from_non_physical_groups": 18,
+    "cm1_fields_physical": 272,
+    "cm1_fields_total": 583,
+    "cm1_fields_unmapped": 97,
+    "gm1_keys_only": 143,
+    "gm1_keys_total": 334
+  },
+  "derived_gap_register": [
+    "axisymm",
+    "bc_temp",
+    "bcturbs",
+    "cnst_lhflx",
+    "cnst_shflx",
+    "csound",
+    "do_ib",
+    "do_lsnudge",
+    "do_lsnudge_qv",
+    "do_lsnudge_th",
+    "do_lsnudge_u",
+    "do_lsnudge_v",
+    "do_recycle_e",
+    "do_recycle_n",
+    "do_recycle_s",
+    "do_recycle_w",
+    "dx_inner",
+    "dx_outer",
+    "dy_inner",
+    "dy_outer",
+    "efall",
+    "horizturb",
+    "hurr_rad",
+    "hurr_rotate",
+    "hurr_vg",
+    "hurr_vgpl",
+    "iautoc",
+    "ib_init",
+    "idiss",
+    "iptra",
+    "isftcflx",
+    "itern",
+    "iz0tlnd",
+    "l_h",
+    "l_inf",
+    "les_subdomain_dlen",
+    "les_subdomain_shape",
+    "les_subdomain_trnslen",
+    "les_subdomain_xlen",
+    "les_subdomain_ylen",
+    "lhref1",
+    "lhref2",
+    "lsnudge_end",
+    "lsnudge_ramp_time",
+    "lsnudge_start",
+    "lsnudge_tau",
+    "nos_x_len",
+    "nos_y_len",
+    "npt",
+    "nt_c",
+    "oml_gamma",
+    "oml_hml0",
+    "outunits",
+    "pdtra",
+    "pertflx",
+    "ppnode",
+    "pr_num",
+    "procfiles",
+    "ptc_bot",
+    "ptc_top",
+    "recycle_cap_loc_m",
+    "recycle_depth_m",
+    "recycle_inj_loc_m",
+    "recycle_width_dx",
+    "rstnum",
+    "run_time",
+    "set_flx",
+    "side_cd",
+    "statfrq",
+    "tconfig",
+    "timeformat",
+    "timestats",
+    "top_cd",
+    "tot_x_len",
+    "tot_y_len",
+    "v_t",
+    "var1",
+    "var10",
+    "var11",
+    "var12",
+    "var13",
+    "var14",
+    "var15",
+    "var16",
+    "var17",
+    "var18",
+    "var19",
+    "var2",
+    "var20",
+    "var3",
+    "var4",
+    "var5",
+    "var6",
+    "var7",
+    "var8",
+    "var9",
+    "viscosity"
+  ],
+  "entries": [
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "adapt_dt",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.adaptive_timestep",
+      "note": "adaptive large step",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param15",
+      "cm1_key": "adapt_move_frq",
+      "cm1_type": "real32",
+      "gm1_key": "closures.adapt_move_frq",
+      "note": "seconds between storm-centre diagnoses (README.namelist:1796-1797); cm1.F:3679 advances adaptmovetim by exactly it and azimavg.F:4431 divides the centre departure by it.",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "advwenos",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.scalar_weno",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "advwenov",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.velocity_weno",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "alph",
+      "cm1_type": "real32",
+      "gm1_key": "dynamics.alph",
+      "note": "vertically implicit acoustic off-centering; README.namelist:756-759 default 0.60",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "alphobc",
+      "cm1_type": "real32",
+      "gm1_key": "boundaries.alphobc",
+      "note": "nudgeobc time scale (solve2.F:728 forms 1/alphobc)",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "apmasscon",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.dry_mass_correction",
+      "note": "dry-mass conservation fix",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "axisymm",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/adv.F:113; GM1 is Cartesian only",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "axisymmetric geometry; GM1 is Cartesian only",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "bbc",
+      "cm1_type": "integer",
+      "gm1_key": "closures.bbc",
+      "note": "lower boundary wind condition; boundaries.bottom is a second GM1 spelling of the same selector and must agree",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param7",
+      "cm1_key": "bc_temp",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turbtend.F:523-533 (DNS only)",
+        "read_when": [
+          {
+            "cm1setup": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "DNS temperature boundary condition; GM1 has no DNS lane in its TOML",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "bcturbs",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turbtend.F:501-579; GM1 pins bcturbs=1",
+        "gm1_runs": 1
+      },
+      "gm1_key": null,
+      "note": "turbulence lateral boundary treatment; GM1 pins CM1's default",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "betaplane",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.beta_plane",
+      "note": "beta-plane Coriolis; param.F:8945-8969 builds f2d",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cecd",
+      "cm1_type": "integer",
+      "gm1_key": "closures.cecd",
+      "note": "surface exchange-coefficient formulation",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "cm1setup",
+      "cm1_type": "integer",
+      "gm1_key": "closures.cm1setup",
+      "note": "which closure mixes the column (src/param.F:752-753); GM1 declares cm1setup and ipbl as one pair and refuses every value but 1 in the Cartesian lane, whose prognostic-TKE closure has no off switch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnst_lhflx",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "README.namelist set_flx",
+        "read_when": [
+          {
+            "set_flx": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "prescribed latent heat flux; unreachable with set_flx",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnst_shflx",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "README.namelist set_flx",
+        "read_when": [
+          {
+            "set_flx": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "prescribed sensible heat flux; unreachable with set_flx",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnst_ust",
+      "cm1_type": "real32",
+      "gm1_key": "closures.cnst_ust",
+      "note": "imposed friction velocity in m/s",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnst_znt",
+      "cm1_type": "real32",
+      "gm1_key": "closures.cnst_znt",
+      "note": "imposed roughness length in metres",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnstcd",
+      "cm1_type": "real32",
+      "gm1_key": "closures.cnstcd",
+      "note": "constant drag coefficient",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "cnstce",
+      "cm1_type": "real32",
+      "gm1_key": "closures.cnstce",
+      "note": "constant enthalpy exchange coefficient for isfcflx=1 over water with cecd=1",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "csound",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/misclibs.F:869-879",
+        "read_when": [
+          {
+            "psolver": [
+              6,
+              7
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "reference sound speed for psolver=4/5; GM1 runs psolver 2/3 only",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "cstar",
+      "cm1_type": "real32",
+      "gm1_key": "boundaries.cstar",
+      "note": "prescribed outward phase speed for irbc=1,2 (bc.F:1964; param.F:722 rewrites anything below 0.1 to 30.0)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "ctrlat",
+      "cm1_type": "real32",
+      "gm1_key": "radiation.ctrlat",
+      "note": "domain centre latitude; required as a group with radopt>=1 and refused with radopt=0, because GM1 idealized lane is otherwise location-free",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "ctrlon",
+      "cm1_type": "real32",
+      "gm1_key": "radiation.ctrlon",
+      "note": "domain centre longitude; same group rule as ctrlat",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "cuparam",
+      "cm1_type": "integer",
+      "gm1_key": "physics.cuparam",
+      "note": "cumulus parameterization; cuparam=1 is the same CCPP/MMM new Tiedtke ArWen ships as ntiedtke.cu, refused below 4000 m spacing and on an estate older than ArWen 2.7.4",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "day",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.day",
+      "note": "simulation start day; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "difforder",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.difforder",
+      "note": "artificial-diffusion order; read only when idiff>=1",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param15",
+      "cm1_key": "do_adapt_move",
+      "cm1_type": "logical",
+      "gm1_key": "closures.do_adapt_move",
+      "note": "CM1's adaptive moving domain (README.namelist:1789-1794): the storm is found from the smoothed lowest-level pressure and umove/vmove are adjusted to keep it near the domain centre. param.F:704-717 zeroes umove/vmove and raises imove when it is on, so a document that declares it declares those three together.",
+      "transform": "logical-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param20",
+      "cm1_key": "do_ib",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/cm1.F; GM1 has no immersed boundaries",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "immersed boundary method; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "do_lsnudge",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278; GM1 has no nudging key",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "large-scale nudging; large_scale_nudging.py exists but no TOML key selects it",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "do_lsnudge_qv",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "large-scale nudging component; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "do_lsnudge_th",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "large-scale nudging component; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "do_lsnudge_u",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "large-scale nudging component; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "do_lsnudge_v",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "large-scale nudging component; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "do_recycle_e",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "turbulence recycling; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "do_recycle_n",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "turbulence recycling; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "do_recycle_s",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "turbulence recycling; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "do_recycle_w",
+      "cm1_type": "logical",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "gm1_runs": false
+      },
+      "gm1_key": null,
+      "note": "turbulence recycling; eddy_recycle.F has no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "doimpl",
+      "cm1_type": "integer",
+      "gm1_key": "closures.vertical_implicit_diffusion",
+      "note": "vertically implicit diffusion",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "dtl",
+      "cm1_type": "real32",
+      "gm1_key": "run.dt_s",
+      "note": "large time step",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "dtrad",
+      "cm1_type": "real32",
+      "gm1_key": "radiation.dtrad_s",
+      "note": "radiation call interval; GM1 carries CM1 own radtim walk (src/cm1.F:3196-3199,3708-3713)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "dx",
+      "cm1_type": "real32",
+      "gm1_key": "grid.dx_m",
+      "note": "uniform x spacing; read only when stretch_x=0",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param4",
+      "cm1_key": "dx_inner",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_x",
+        "read_when": [
+          {
+            "stretch_x": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "x-stretch inner spacing; unreachable while stretch_x is refused",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param4",
+      "cm1_key": "dx_outer",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_x",
+        "read_when": [
+          {
+            "stretch_x": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "x-stretch outer spacing; unreachable while stretch_x is refused",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "dy",
+      "cm1_type": "real32",
+      "gm1_key": "grid.dy_m",
+      "note": "uniform y spacing; read only when stretch_y=0",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param5",
+      "cm1_key": "dy_inner",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_y",
+        "read_when": [
+          {
+            "stretch_y": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "y-stretch inner spacing; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param5",
+      "cm1_key": "dy_outer",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_y",
+        "read_when": [
+          {
+            "stretch_y": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "y-stretch outer spacing; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "dz",
+      "cm1_type": "real32",
+      "gm1_key": "grid.dz_m",
+      "note": "uniform z spacing; read only when stretch_z=0",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "dz_bot",
+      "cm1_type": "real32",
+      "gm1_key": "grid.dz_bot_m",
+      "note": "spacing at the stretch layer base; read by stretch_z=1",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "dz_top",
+      "cm1_type": "real32",
+      "gm1_key": "grid.dz_top_m",
+      "note": "spacing at the stretch layer top; read by stretch_z=1",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "ebc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.east",
+      "note": "east lateral boundary",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "efall",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/mp_driver.F:96,570; no Cartesian component runs getefall",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "fallout energy term; cuda_gm1_kessler_efall.py exists but no TOML key selects it",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "eqtset",
+      "cm1_type": "integer",
+      "gm1_key": "physics.equation_set",
+      "note": "mass/energy equation set",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "fcor",
+      "cm1_type": "real32",
+      "gm1_key": "dynamics.fcor_s_inv",
+      "note": "Coriolis parameter in 1/s; read only when icor=1",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "hadvordrs",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.scalar_horizontal_order",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "hadvordrv",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.velocity_horizontal_order",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "horizturb",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:1550; GM1 has no turbparam_horiz",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "separate horizontal turbulence length scale; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "hour",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.hour",
+      "note": "simulation start hour; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "hrdamp",
+      "cm1_type": "integer",
+      "gm1_key": "closures.hrdamp",
+      "note": "lateral Rayleigh damping (param.F:8687-8802); acts on w only since cm1r19.6",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param21",
+      "cm1_key": "hurr_rad",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/base.F:2845, src/solve1.F:633-646",
+        "read_when": [
+          {
+            "iwnd": [
+              8
+            ]
+          },
+          {
+            "lspgrad": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "idealized hurricane vortex; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param21",
+      "cm1_key": "hurr_rotate",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F:8971-8974",
+        "read_when": [
+          {
+            "lspgrad": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "idealized hurricane vortex; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param21",
+      "cm1_key": "hurr_vg",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/base.F:2525-2545",
+        "read_when": [
+          {
+            "iwnd": [
+              8
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "idealized hurricane vortex; GM1 has no axisymmetric/hurricane initializer",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param21",
+      "cm1_key": "hurr_vgpl",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/base.F:2844-2845",
+        "read_when": [
+          {
+            "iwnd": [
+              8
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "idealized hurricane vortex; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iautoc",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/goddard.F:578",
+        "read_when": [
+          {
+            "ptype": [
+              2,
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "autoconversion option; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param20",
+      "cm1_key": "ib_init",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "immersed boundaries",
+        "read_when": [
+          {
+            "do_ib": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "immersed boundary shape; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "ibalance",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.ibalance",
+      "note": "init3d.F:1735-1917; GM1 builds 0, 1 and 2 (the anelastic buoyancy pressure, poiss.F with singleton.F transcribed)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iconly",
+      "cm1_type": "integer",
+      "gm1_key": "run.iconly",
+      "note": "README.namelist:233-236 / cm1.F:4341-4346: build the initial condition, write it, stop",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "icor",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.coriolis",
+      "note": "Coriolis switch; solve2.F:631-720 between divx and advu",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "idiff",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.idiff",
+      "note": "explicit artificial diffusion selector; the Cartesian lane admits 0 only and names the missing difforder branch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "idiss",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:744,919; the Cartesian closure always applies dissipative heating",
+        "gm1_runs": 1
+      },
+      "gm1_key": null,
+      "note": "dissipative heating; eqtset2_surface_dissipation.py exists but no TOML key selects it",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "ihail",
+      "cm1_type": "integer",
+      "gm1_key": "physics.ihail",
+      "note": "dense-ice branch: src/param.F:3407 into Morrison, :3697-3706 into WSM6; optional in the TOML, and an undeclared value binds the component's own recorded default (CM1's shipped 1 for both schemes CM1 numbers)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iinit",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.iinit",
+      "note": "init3d.F:450-1416 3-D initialization branch; GM1 builds every arm, 0-5 and 7-13 (9, 10 and 12 as the forcings CM1 applies during the run)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "imoist",
+      "cm1_type": "integer",
+      "gm1_key": "physics.component",
+      "note": "GM1 spells moisture as the physics component: component='off' is imoist=0, any microphysics component is imoist=1",
+      "transform": "derived-component"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "imove",
+      "cm1_type": "integer",
+      "gm1_key": "closures.moving_frame",
+      "note": "translating reference frame",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "initsfc",
+      "cm1_type": "integer",
+      "gm1_key": "surface.initsfc",
+      "note": "initial surface-condition branch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iorigin",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.iorigin",
+      "note": "param.F:7212-7213: horizontal origin at the domain corner (1) or centre (2)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "ipbl",
+      "cm1_type": "integer",
+      "gm1_key": "closures.ipbl",
+      "note": "PBL scheme; ipbl=1/4/6 and the GM1 extension 11 resolve to byte-audited ArWen components and refuse at preflight naming the surface-layer carriers GM1 does not have",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param2",
+      "cm1_key": "iprcl",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.iprcl",
+      "note": "README.namelist:734-740; src/parcel.F:10",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iptra",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/solve2.F:1906-2066; GM1 carries no passive tracers",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "passive tracers; positive_definite_tracer.py exists but no TOML key selects tracers",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "irandp",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.irandp",
+      "note": "init3d.F:1446-1600; GM1 additionally requires an explicit initialization.random_seed, because CM1's generator is a property of one libgfortran build and cannot be reproduced",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "irbc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.radiative_order",
+      "note": "open lateral radiative scheme",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "irdamp",
+      "cm1_type": "integer",
+      "gm1_key": "closures.upper_damping",
+      "note": "upper Rayleigh damping",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "irst",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.irst",
+      "note": "param.F:891-903 forces iinit=0 on a restart; GM1 restarts state through its own Rust checkpoint envelope but reads the selector for that rule",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "isfcflx",
+      "cm1_type": "integer",
+      "gm1_key": "closures.isfcflx",
+      "note": "surface flux switch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "isftcflx",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:726-746",
+        "read_when": [
+          {
+            "sfcmodel": [
+              2,
+              3,
+              4,
+              6,
+              7
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "high-wind exchange-coefficient option; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "isnd",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.isnd",
+      "note": "base.F sounding branch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "itern",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/init_terrain.F:64-83",
+        "read_when": [
+          {
+            "terrain_flag": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "analytic terrain shape; GM1 terrain comes from real data only",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "iwnd",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.iwnd",
+      "note": "base.F base-state wind branch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "iz0tlnd",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:726-746",
+        "read_when": [
+          {
+            "sfcmodel": [
+              2,
+              3,
+              4,
+              6,
+              7
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "thermal roughness over land; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "kdiff2",
+      "cm1_type": "real32",
+      "gm1_key": "dynamics.kdiff2",
+      "note": "second-order artificial-diffusion coefficient; read only when idiff>=1 and difforder=2",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "kdiff6",
+      "cm1_type": "real32",
+      "gm1_key": "dynamics.kdiff6",
+      "note": "sixth-order artificial-diffusion coefficient; read only when idiff>=1 and difforder=6",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "kdiv",
+      "cm1_type": "real32",
+      "gm1_key": "dynamics.kdiv",
+      "note": "divergence-damper coefficient; psolver=2,3 only",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "l_h",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:1550, :3683-3711",
+        "read_when": [
+          {
+            "cm1setup": [
+              2,
+              4
+            ],
+            "horizturb": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "horizontal turbulence length scale; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "l_inf",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:1560, :3898-3901",
+        "read_when": [
+          {
+            "cm1setup": [
+              2,
+              4
+            ],
+            "ipbl": [
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "asymptotic turbulence length scale; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param17",
+      "cm1_key": "les_subdomain_dlen",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/init3d.F:2621-2650",
+        "read_when": [
+          {
+            "cm1setup": [
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "LES subdomain length; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param17",
+      "cm1_key": "les_subdomain_shape",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/init3d.F:2621-2650",
+        "read_when": [
+          {
+            "cm1setup": [
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "LES subdomain nesting; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param17",
+      "cm1_key": "les_subdomain_trnslen",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/init3d.F:2621-2650",
+        "read_when": [
+          {
+            "cm1setup": [
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "LES subdomain transition length; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param17",
+      "cm1_key": "les_subdomain_xlen",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/init3d.F:2621-2650",
+        "read_when": [
+          {
+            "cm1setup": [
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "LES subdomain length; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param17",
+      "cm1_key": "les_subdomain_ylen",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/init3d.F:2621-2650",
+        "read_when": [
+          {
+            "cm1setup": [
+              4
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "LES subdomain length; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "lhref1",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:1550, :3683-3711",
+        "read_when": [
+          {
+            "cm1setup": [
+              2,
+              4
+            ],
+            "horizturb": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "turbulence length-scale reference; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "lhref2",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:1550, :3683-3711",
+        "read_when": [
+          {
+            "cm1setup": [
+              2,
+              4
+            ],
+            "horizturb": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "turbulence length-scale reference; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "lsnudge_end",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "nudging window; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "lsnudge_ramp_time",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "nudging ramp; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "lsnudge_start",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "nudging window; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param19",
+      "cm1_key": "lsnudge_tau",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:278-281",
+        "read_when": [
+          {
+            "do_lsnudge": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "nudging timescale; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "lspgrad",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.lspgrad",
+      "note": "large-scale pressure gradient; 1 (solve1.F:590-612, Coriolis on the perturbation from the base state) is live in the Cartesian closure, 2/3/4 are refused by name",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "lu0",
+      "cm1_type": "integer",
+      "gm1_key": "surface.lu0",
+      "note": "LANDUSE.TBL land-use category",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "mdiff",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.mdiff",
+      "note": "Xue monotonic variant of the sixth-order diffusion; read only when idiff>=1",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "minute",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.minute",
+      "note": "simulation start minute; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "month",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.month",
+      "note": "simulation start month; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "nbc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.north",
+      "note": "north lateral boundary",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "ndcnst",
+      "cm1_type": "real32",
+      "gm1_key": "physics.ndcnst",
+      "note": "constant cloud-droplet concentration in cm-3, src/morrison.F:329; read by ptype=5 only and admitted at CM1's own 250.0, which is the value the audited ArWen kernel writes as a literal",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param4",
+      "cm1_key": "nos_x_len",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_x",
+        "read_when": [
+          {
+            "stretch_x": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "x-stretch uniform-region length; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param5",
+      "cm1_key": "nos_y_len",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_y",
+        "read_when": [
+          {
+            "stretch_y": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "y-stretch uniform-region length; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param2",
+      "cm1_key": "nparcels",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.nparcels",
+      "note": "README.namelist:734-740; src/init3d.F:355-411",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "npt",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/solve2.F:2066",
+        "read_when": [
+          {
+            "iptra": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "number of passive tracers; see iptra",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "nt_c",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F:1711, :9130 thompson_init; ArWen NT_C = 100e6 m-3",
+        "gm1_runs": 100.0,
+        "read_when": [
+          {
+            "ptype": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "constant cloud-droplet concentration for Thompson, cm-3 (README.namelist:816); no TOML key, and ArWen's classic Thompson runs 100",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "nudgeobc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.nudgeobc",
+      "note": "nudge inflow winds toward the base state (solve2.F:726-822)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param0",
+      "cm1_key": "nx",
+      "cm1_type": "integer",
+      "gm1_key": "grid.nx",
+      "note": "README.namelist:20-24",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param0",
+      "cm1_key": "ny",
+      "cm1_type": "integer",
+      "gm1_key": "grid.ny",
+      "note": "README.namelist:20-24",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param0",
+      "cm1_key": "nz",
+      "cm1_type": "integer",
+      "gm1_key": "grid.nz",
+      "note": "README.namelist:20-24",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "oceanmodel",
+      "cm1_type": "integer",
+      "gm1_key": "surface.oceanmodel",
+      "note": "ocean/water surface model; GM1 admits 1 (fixed SST) and refuses 2 by name",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "oml_gamma",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/oml.F",
+        "read_when": [
+          {
+            "oceanmodel": [
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "ocean lapse rate; unreachable with oceanmodel",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "oml_hml0",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/init_surface.F:330",
+        "read_when": [
+          {
+            "oceanmodel": [
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "ocean mixed-layer depth; unreachable with oceanmodel",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_basestate",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_basestate",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F:4430-4520, :6888, :7349",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_buoyancy",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_buoyancy",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; src/writeout.F name_output 'buoyancy'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_cape",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_cape",
+      "note": "README.namelist:1372; writeout.F:2937-2949 publishes the CAPE plane",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_cin",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_cin",
+      "note": "README.namelist:1373; writeout.F:2951-2963",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_coldpool",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_coldpool",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; src/writeout.F:772-800; src/misclibs.F calccpch",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_dbz",
+      "cm1_type": "integer",
+      "gm1_key": "physics.output_dbz",
+      "note": "README.namelist:1366-1369; GM1 spells it in [physics], beside the component whose scheme-specific formula computes it and beside dbz_level_m",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_def",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_def",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:260",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_dissten",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_dissten",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:257",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_fallvel",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_fallvel",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:258",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_filetype",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_filetype",
+      "note": "the field is a prognostic carrier every frame already holds; README.namelist:1258-1272",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_format",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_format",
+      "note": "the field is a prognostic carrier every frame already holds; README.namelist:1237-1250",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_interp",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_interp",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; README.namelist:1274-1281; src/writeout.F:10111",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_kh",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_kh",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; src/writeout.F name_output 'khh','khv'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_km",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_km",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; src/writeout.F name_output 'kmh','kmv','kmw'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_lcl",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_lcl",
+      "note": "README.namelist:1374; writeout.F:2965-2990",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_lfc",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_lfc",
+      "note": "README.namelist:1375; writeout.F:2992-3028",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_lwp",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_lwp",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'lwp','cwp'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_nm",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_nm",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:259",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_pblten",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_pblten",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:256",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param9",
+      "cm1_key": "output_pdcomp",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.output_pdcomp",
+      "note": "run/namelist.input:277; src/param.F:727-729; src/pdcomp.F:9",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_pi",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_pi",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'pi'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_pipert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_pipert",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'pipert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_prs",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_prs",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'prs'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_prspert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_prspert",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'prspert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_psfc",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_psfc",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:227",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_pv",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_pv",
+      "note": "README.namelist:1381; potential vorticity from calcvort",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_pwat",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_pwat",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'pwat'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_q",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_q",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'qc','qr','qi','qs','qg'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_qv",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_qv",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'qv'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_qvbudget",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_qvbudget",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:275",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_qvpert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_qvpert",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'qvpert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_radten",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_radten",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:261",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_rain",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_rain",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F:361-404",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_rho",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_rho",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'rho'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_rhopert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_rhopert",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'rhopert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sfcdiags",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_sfcdiags",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:226",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sfcflx",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_sfcflx",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:224",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sfcparams",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_sfcparams",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:225",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sgs",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_sgs",
+      "note": "README.namelist:1344; solve3.F max surface graupel swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_shs",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_shs",
+      "note": "README.namelist:1346; solve3.F max updraft helicity swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sps",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_sps",
+      "note": "README.namelist:1342; solve3.F min surface pressure swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_srs",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_srs",
+      "note": "README.namelist:1343; solve3.F max surface rainwater swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sus",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_sus",
+      "note": "README.namelist:1345; solve3.F max 5 km updraft swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_svs",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_svs",
+      "note": "README.namelist:1341; solve3.F max surface vertical vorticity swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_sws",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_sws",
+      "note": "README.namelist:1340; solve3.F:857-1130 run-long max surface wind swath",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_th",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_th",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'th'; src/solve1.F:893 (th = th0 + tha)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_thbudget",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_thbudget",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:274; README.namelist:1432-1443",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_thpert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_thpert",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'thpert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_tke",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_tke",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'tke'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_u",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_u",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'u'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_ubudget",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_ubudget",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:276",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_uh",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_uh",
+      "note": "README.namelist:1382; misclibs.F:1417-1532 calcuh updraft helicity",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_uinterp",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_uinterp",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'uinterp'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_upert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_upert",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'upert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_v",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_v",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'v'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_vbudget",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_vbudget",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:277",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_vinterp",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_vinterp",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'vinterp'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_vort",
+      "cm1_type": "integer",
+      "gm1_key": "diagnostics.output_vort",
+      "note": "README.namelist:1380; misclibs.F:1540-2174 calcvort",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_vpert",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_vpert",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'vpert'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_w",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_w",
+      "note": "the field is a prognostic carrier every frame already holds; src/writeout.F name_output 'w'",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_wbudget",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_wbudget",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:278",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_winterp",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_winterp",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F name_output 'winterp'; src/misclibs.F:1579-1587",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_zh",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_zh",
+      "note": "selects a field this lane computes and publishes under CM1's name; src/writeout.F:3179",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param9",
+      "cm1_key": "output_zs",
+      "cm1_type": "integer",
+      "gm1_key": "output.output_zs",
+      "note": "admitted by key; value 1 is refused with the wrong result it prevents named; run/namelist.input:228",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param0",
+      "cm1_key": "outunits",
+      "cm1_type": "integer",
+      "gm1_key": null,
+      "note": "stdout units label only; no effect on state",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "pdtra",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/solve2.F:1906,2066",
+        "read_when": [
+          {
+            "iptra": [
+              1
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "positive-definite tracer advection; see iptra",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "pertflx",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F:309",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "perturbed surface fluxes; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param0",
+      "cm1_key": "ppnode",
+      "cm1_type": "integer",
+      "gm1_key": null,
+      "note": "MPI cores-per-node; this port is single-device CUDA and has no MPI decomposition",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param7",
+      "cm1_key": "pr_num",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/cm1.F:1709-1711, src/turbtend.F:466",
+        "read_when": [
+          {
+            "cm1setup": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "DNS Prandtl number; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_b",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_b",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_dbz",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_dbz",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_kh",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_kh",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_km",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_km",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_nc",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_nc",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_prs",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_prs",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_ptra",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_ptra",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_q",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_q",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_qsat",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_qsat",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_rho",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_rho",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_sfc",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_sfc",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_t",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_t",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_th",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_th",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_tke",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_tke",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_vort",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_vort",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param13",
+      "cm1_key": "prcl_vpg",
+      "cm1_type": "integer",
+      "gm1_key": "lagrangian.prcl_vpg",
+      "note": "src/input.F:330-333 &param13; src/param.F:6257-6282 resolves it against the run's other words and src/param.F:6385-6500 builds the attribute offsets from the result",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param1",
+      "cm1_key": "prclfrq",
+      "cm1_type": "real64",
+      "gm1_key": "lagrangian.prclfrq_s",
+      "note": "README.namelist:129-133; parcel write cadence",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param0",
+      "cm1_key": "procfiles",
+      "cm1_type": "logical",
+      "gm1_key": null,
+      "note": "per-MPI-rank text files; no MPI in this port",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "psolver",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.psolver",
+      "note": "pressure solver",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param7",
+      "cm1_key": "ptc_bot",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turbtend.F:466-478",
+        "read_when": [
+          {
+            "cm1setup": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "DNS bottom potential temperature; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param7",
+      "cm1_key": "ptc_top",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/turbtend.F:466-478",
+        "read_when": [
+          {
+            "cm1setup": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "DNS top potential temperature; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "ptype",
+      "cm1_type": "integer",
+      "gm1_key": "physics.component",
+      "note": "microphysics scheme number; GM1 names the scheme: ptype=5 is morrison-mp10, 7 is wsm6-mp6, 3 is thompson-mp8 (src/param.F:2715-2730, README.namelist:458-495; cm1import.translate.PTYPE_COMPONENTS)",
+      "transform": "derived-component"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "radopt",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.radopt",
+      "note": "radiation scheme; radopt=2 resolves to ArWen legacy-RRTMG with its sha256-admitted AER tables and refuses at preflight naming the surface state GM1 does not carry; radopt=1 (NASA-Goddard) has no ArWen counterpart",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "ramp_sgs",
+      "cm1_type": "integer",
+      "gm1_key": "closures.ramp_sgs",
+      "note": "README.namelist:1081-1082; src/turb.F:240-262 ramps cme/ce1/ce2/csm in over ramp_time (cuda_cartesian_sgs_ramp); optional pair, absent is src/cm1.F:355's compiled 0",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "ramp_time",
+      "cm1_type": "real32",
+      "gm1_key": "closures.ramp_time",
+      "note": "README.namelist:1085-1086; src/param.F:750 floors it at 1e-10 s; read only when ramp_sgs=1",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "rdalpha",
+      "cm1_type": "real32",
+      "gm1_key": "closures.upper_damping_rate_s_inv",
+      "note": "upper damping inverse timescale",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "recycle_cap_loc_m",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "read_when": [
+          {
+            "do_recycle_w": [
+              true
+            ]
+          },
+          {
+            "do_recycle_s": [
+              true
+            ]
+          },
+          {
+            "do_recycle_e": [
+              true
+            ]
+          },
+          {
+            "do_recycle_n": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "recycling geometry; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "recycle_depth_m",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "read_when": [
+          {
+            "do_recycle_w": [
+              true
+            ]
+          },
+          {
+            "do_recycle_s": [
+              true
+            ]
+          },
+          {
+            "do_recycle_e": [
+              true
+            ]
+          },
+          {
+            "do_recycle_n": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "recycling geometry; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "recycle_inj_loc_m",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "read_when": [
+          {
+            "do_recycle_w": [
+              true
+            ]
+          },
+          {
+            "do_recycle_s": [
+              true
+            ]
+          },
+          {
+            "do_recycle_e": [
+              true
+            ]
+          },
+          {
+            "do_recycle_n": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "recycling geometry; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param18",
+      "cm1_key": "recycle_width_dx",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/eddy_recycle.F",
+        "read_when": [
+          {
+            "do_recycle_w": [
+              true
+            ]
+          },
+          {
+            "do_recycle_s": [
+              true
+            ]
+          },
+          {
+            "do_recycle_e": [
+              true
+            ]
+          },
+          {
+            "do_recycle_n": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "recycling geometry; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "roflux",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.roflux",
+      "note": "restrict outward mass flux at open boundaries (bc.F:2180-2391)",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "rstfrq",
+      "cm1_type": "real64",
+      "gm1_key": "run.restart_interval_s",
+      "note": "CM1 uses a negative rstfrq as the disable sentinel; GM1 carries a positive cadence and a lane that selects Rust checkpointing",
+      "transform": "abs-seconds"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param2",
+      "cm1_key": "rstnum",
+      "cm1_type": "integer",
+      "gm1_key": null,
+      "note": "restart file number; see irst",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "rterm",
+      "cm1_type": "integer",
+      "gm1_key": "closures.rterm",
+      "note": "Rotunno-Emanuel Newtonian relaxation that mimics radiation, capped at 2 K/day (src/solve1.F:1003-1054); live in the Cartesian closure",
+      "transform": "identity"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param1",
+      "cm1_key": "run_time",
+      "cm1_type": "real32",
+      "gm1_key": null,
+      "note": "wall-clock stop; a scheduler convenience, not physics",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "sbc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.south",
+      "note": "south lateral boundary",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "season",
+      "cm1_type": "integer",
+      "gm1_key": "surface.season",
+      "note": "LANDUSE.TBL season index",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "second",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.second",
+      "note": "simulation start second; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "set_flx",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/turb.F; GM1 has no prescribed-flux key",
+        "gm1_runs": 0
+      },
+      "gm1_key": null,
+      "note": "prescribed surface fluxes; prescribed_surface_flux.py exists but no TOML key selects it",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "set_ust",
+      "cm1_type": "integer",
+      "gm1_key": "closures.set_ust",
+      "note": "impose the friction velocity instead of deriving it",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "set_znt",
+      "cm1_type": "integer",
+      "gm1_key": "closures.set_znt",
+      "note": "impose the roughness length instead of deriving it",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "sfcmodel",
+      "cm1_type": "integer",
+      "gm1_key": "closures.sfcmodel",
+      "note": "surface-layer scheme",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "sgsmodel",
+      "cm1_type": "integer",
+      "gm1_key": "closures.sgs_model",
+      "note": "subgrid turbulence closure",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param20",
+      "cm1_key": "side_cd",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "immersed boundaries",
+        "read_when": [
+          {
+            "do_ib": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "immersed boundary drag; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param1",
+      "cm1_key": "statfrq",
+      "cm1_type": "real64",
+      "gm1_key": null,
+      "note": "CM1 domain-statistics cadence; GM1 has no statpack writer",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "str_bot",
+      "cm1_type": "real32",
+      "gm1_key": "grid.str_bot_m",
+      "note": "stretch layer base; read by stretch_z=1",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "str_top",
+      "cm1_type": "real32",
+      "gm1_key": "grid.str_top_m",
+      "note": "stretch layer top; read by stretch_z=1",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param4",
+      "cm1_key": "stretch_x",
+      "cm1_type": "integer",
+      "gm1_key": "grid.stretch_x",
+      "note": "GM1 admits only stretch_x=0 (false)",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param5",
+      "cm1_key": "stretch_y",
+      "cm1_type": "integer",
+      "gm1_key": "grid.stretch_y",
+      "note": "GM1 admits only stretch_y=0 (false)",
+      "transform": "int-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "stretch_z",
+      "cm1_type": "integer",
+      "gm1_key": "grid.stretch_z",
+      "note": "GM1 admits 0, 1, 3 and 4; CM1's stretch_z=2 is refused",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "t2p_avg",
+      "cm1_type": "integer",
+      "gm1_key": "closures.t2p_avg",
+      "note": "two-part sgsmodel=3/4 averaging (README.namelist:1089-1092), read only when dot2p; 1 is ported and is CM1's shipped value",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "tapfrq",
+      "cm1_type": "real64",
+      "gm1_key": "run.history_interval_s",
+      "note": "history write cadence",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "tbc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.top",
+      "note": "upper boundary",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "tconfig",
+      "cm1_type": "integer",
+      "gm1_behaviour": {
+        "anchor": "src/solve1.F:321-333; GM1 pins tconfig=1",
+        "gm1_runs": 1
+      },
+      "gm1_key": null,
+      "note": "turbulence configuration; GM1 pins CM1's default",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param0",
+      "cm1_key": "terrain_flag",
+      "cm1_type": "logical",
+      "gm1_key": "grid.terrain",
+      "note": "README.namelist:49-50",
+      "transform": "logical-to-bool"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "testcase",
+      "cm1_type": "integer",
+      "gm1_key": "initialization.testcase",
+      "note": "run/namelist.input:29; selects base.F:2467-2510's constant wind and init3d.F:1459-1620's random amplitude and depth limit",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param1",
+      "cm1_key": "timax",
+      "cm1_type": "real32",
+      "gm1_key": "run.duration_s",
+      "note": "model run length",
+      "transform": "seconds"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param0",
+      "cm1_key": "timeformat",
+      "cm1_type": "integer",
+      "gm1_key": null,
+      "note": "stdout time formatting only; no effect on state",
+      "transform": "none"
+    },
+    {
+      "affects_state": false,
+      "cm1_group": "param0",
+      "cm1_key": "timestats",
+      "cm1_type": "integer",
+      "gm1_key": null,
+      "note": "stdout timer report only; no effect on state",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "tmn0",
+      "cm1_type": "real32",
+      "gm1_key": "surface.tmn0_k",
+      "note": "initial deep-soil temperature in kelvin",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param20",
+      "cm1_key": "top_cd",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "immersed boundaries",
+        "read_when": [
+          {
+            "do_ib": [
+              true
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "immersed boundary drag; no GM1 counterpart",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param4",
+      "cm1_key": "tot_x_len",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_x",
+        "read_when": [
+          {
+            "stretch_x": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "x-stretch total length; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param5",
+      "cm1_key": "tot_y_len",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/param.F stretch_y",
+        "read_when": [
+          {
+            "stretch_y": [
+              1,
+              2
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "y-stretch total length; unreachable",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "tsk0",
+      "cm1_type": "real32",
+      "gm1_key": "surface.tsk0_k",
+      "note": "initial skin temperature in kelvin",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "umove",
+      "cm1_type": "real32",
+      "gm1_key": "closures.u_move_m_s",
+      "note": "frame translation speed, x",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "v_t",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/mp_driver.F:699-754",
+        "read_when": [
+          {
+            "ptype": [
+              6
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "prescribed terminal fall speed; no TOML key",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "vadvordrs",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.scalar_vertical_order",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "vadvordrv",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.velocity_vertical_order",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var1",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var10",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var11",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var12",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var13",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var14",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var15",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var16",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var17",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var18",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var19",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var2",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var20",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var3",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var4",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var5",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var6",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var7",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var8",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param8",
+      "cm1_key": "var9",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "read by no statement of the r21.1 source outside input.F and its echo",
+        "read_when": []
+      },
+      "gm1_key": null,
+      "note": "CM1 user-defined scratch variable read by hand-edited test cases only; no GM1 equivalent by design",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param7",
+      "cm1_key": "viscosity",
+      "cm1_type": "real32",
+      "gm1_behaviour": {
+        "anchor": "src/cm1.F:1709-1711",
+        "read_when": [
+          {
+            "cm1setup": [
+              3
+            ]
+          }
+        ]
+      },
+      "gm1_key": null,
+      "note": "DNS molecular viscosity; dns_temperature_diffusion.py exists but no TOML key selects it",
+      "transform": "none"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "vmove",
+      "cm1_type": "real32",
+      "gm1_key": "closures.v_move_m_s",
+      "note": "frame translation speed, y",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "wbc",
+      "cm1_type": "integer",
+      "gm1_key": "boundaries.west",
+      "note": "west lateral boundary",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param2",
+      "cm1_key": "weno_order",
+      "cm1_type": "integer",
+      "gm1_key": "dynamics.weno_order",
+      "note": "README.namelist",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "xhd",
+      "cm1_type": "real32",
+      "gm1_key": "closures.xhd",
+      "note": "lateral Rayleigh sponge width from each boundary (param.F:8736-8776)",
+      "transform": "metres"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param12",
+      "cm1_key": "xland0",
+      "cm1_type": "real32",
+      "gm1_key": "surface.xland0",
+      "note": "land (1.0) or water (2.0) flag",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param11",
+      "cm1_key": "year",
+      "cm1_type": "integer",
+      "gm1_key": "radiation.year",
+      "note": "simulation start year; CM1 turns the start date into the Julian day the solar declination needs",
+      "transform": "identity"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param3",
+      "cm1_key": "zd",
+      "cm1_type": "real32",
+      "gm1_key": "closures.upper_damping_depth_m",
+      "note": "CM1 zd (param.F:8655) is the HEIGHT OF THE BASE of the Rayleigh layer; GM1 upper_damping_depth_m (rust/cm1-state/src/rayleigh_profiles.rs:186-188) is its DEPTH below the model top. depth = ztop - zd, and CM1's shipped supercell deck (zd=15000 on a 20 km top) is GM1's 5000. A naive identity map puts the damper in the wrong place.",
+      "transform": "cm1-zd-to-depth"
+    },
+    {
+      "affects_state": true,
+      "cm1_group": "param6",
+      "cm1_key": "ztop",
+      "cm1_type": "real32",
+      "gm1_key": "grid.ztop_m",
+      "note": "model top; read by stretch_z=1",
+      "transform": "metres"
+    }
+  ],
+  "gm1_behaviour_unrecorded": [],
+  "gm1_only": [
+    {
+      "gm1_key": "boundaries.bottom",
+      "note": "a second GM1 spelling of CM1's bbc; config.py:1228 refuses a disagreement between the two."
+    },
+    {
+      "gm1_key": "chain.domain_id",
+      "note": "ArWen domain whose history frames are read."
+    },
+    {
+      "gm1_key": "chain.end_time",
+      "note": "last history frame the lateral boundary tendencies run to."
+    },
+    {
+      "gm1_key": "chain.history_directory",
+      "note": "directory of the saved ArWen (WRF) history frames the domain is driven from."
+    },
+    {
+      "gm1_key": "chain.map_factor_departure_limit",
+      "note": "largest map-factor departure from 1 the Cartesian domain admits."
+    },
+    {
+      "gm1_key": "chain.moisture",
+      "note": "which of the history's moist fields drive the domain: every species of GM1's scheme (all-species) or water vapour alone (vapour-only, WRF have_bcs_moist = .false.)."
+    },
+    {
+      "gm1_key": "chain.parent_i0",
+      "note": "parent-history scalar index of the domain's SW corner."
+    },
+    {
+      "gm1_key": "chain.parent_j0",
+      "note": "parent-history scalar index of the domain's SW corner."
+    },
+    {
+      "gm1_key": "chain.prepared_directory",
+      "note": "output of tools/arwen_chain_prepare.py: sounding and boundary tables."
+    },
+    {
+      "gm1_key": "chain.refinement_ratio",
+      "note": "horizontal refinement from the history grid to this domain."
+    },
+    {
+      "gm1_key": "chain.relax_zone",
+      "note": "Davies relaxation width, in domain cells (WRF relax_zone)."
+    },
+    {
+      "gm1_key": "chain.spec_zone",
+      "note": "Davies specified-boundary width, in domain cells (WRF spec_zone)."
+    },
+    {
+      "gm1_key": "chain.start_time",
+      "note": "first history frame: the initial state and first boundary time."
+    },
+    {
+      "gm1_key": "chain.terrain_relief_limit_m",
+      "note": "largest terrain relief the flat Cartesian domain admits from the history window."
+    },
+    {
+      "gm1_key": "diagnostics.adiabat",
+      "note": "getcape.F:73-77 adiabat; a source parameter in CM1."
+    },
+    {
+      "gm1_key": "diagnostics.mixed_layer_depth_m",
+      "note": "getcape.F:70 ml_depth; a source parameter in CM1."
+    },
+    {
+      "gm1_key": "diagnostics.parcel_source",
+      "note": "getcape.F:65-68 source parcel; a source parameter in CM1."
+    },
+    {
+      "gm1_key": "diagnostics.pressure_increment_pa",
+      "note": "getcape.F:60 pinc; a source parameter in CM1."
+    },
+    {
+      "gm1_key": "diagnostics.storm_motion",
+      "note": "which Bunkers mover the t=0 SRH is taken against; CM1 r21.1 computes no storm motion."
+    },
+    {
+      "gm1_key": "diagnostics.tornado_report",
+      "note": "GM1's own statement of what the run produced; CM1 r21.1 makes no tornado claim."
+    },
+    {
+      "gm1_key": "ensemble.member",
+      "note": "ensemble member index; CM1 runs one member per deck."
+    },
+    {
+      "gm1_key": "ensemble.seed",
+      "note": "seed for the reproducible irandp perturbation stream."
+    },
+    {
+      "gm1_key": "ensemble.theta_amplitude_k",
+      "note": "amplitude of the member's theta perturbation."
+    },
+    {
+      "gm1_key": "grid.levels_m",
+      "note": "explicit user level list for stretch_z=3/4; CM1 reads these from a separate file rather than the namelist."
+    },
+    {
+      "gm1_key": "initialization.alpha_uforce",
+      "note": "init3d.F:1342 alpha_uforce, the forcing's peak (m/s/s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.alpha_wnudge",
+      "note": "init3d.F:1381 alpha_wnudge, the nudging rate (1/s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.bhrad_m",
+      "note": "init3d.F:459 bhrad, the horizontal radius; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.bptpert_k",
+      "note": "init3d.F:461 bptpert, the perturbation amplitude; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.bubble_center_x_m",
+      "note": "init3d.F:456 ric, the perturbation centre in x; a source edit in CM1, configuration here."
+    },
+    {
+      "gm1_key": "initialization.bubble_center_y_m",
+      "note": "init3d.F:457 rjc, the perturbation centre in y; a source edit in CM1, configuration here."
+    },
+    {
+      "gm1_key": "initialization.bubble_first_center_y_m",
+      "note": "init3d.F:548-550 writes the three iinit=3 centres as literals 3000/33000/63000; this is the first of them, a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.bubble_spacing_y_m",
+      "note": "the y step between the iinit=3 bubbles; init3d.F:527-529 writes its three centres as literals."
+    },
+    {
+      "gm1_key": "initialization.bvrad_m",
+      "note": "init3d.F:460 bvrad, the vertical radius; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.convtime",
+      "note": "init3d.F:1315 convtime, how long the convergence is applied (s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.dmax",
+      "note": "init3d.F:1309 Dmax, the forced-convergence divergence (1/s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.half_width_m",
+      "note": "init3d.F:1356 writes the Skamarock-Klemp envelope half width as the literal 5000.0; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.hurr_rotate_deg",
+      "note": "run/namelist.input:406 hurr_rotate, which param.F:8973 turns into base.F:2545's hurr_angle."
+    },
+    {
+      "gm1_key": "initialization.hurr_vg_m_per_s",
+      "note": "run/namelist.input:403 hurr_vg, read by base.F:2534's iwnd=8 branch; CM1 spells it in param21 rather than param6."
+    },
+    {
+      "gm1_key": "initialization.imoist",
+      "note": "a second GM1 spelling of CM1's imoist, read by the initializer. physics.component carries the same selector for the runtime; config.py refuses a disagreement."
+    },
+    {
+      "gm1_key": "initialization.lamx",
+      "note": "init3d.F:1311 lamx, Loftus et al.'s lambda_x (m); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.lamy",
+      "note": "init3d.F:1312 lamy, Loftus et al.'s lambda_y (m); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.maintain_rh",
+      "note": "init3d.F:465 maintain_rh; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.nbub",
+      "note": "init3d.F:525 nbub, the number of bubbles in the iinit=3 line; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.qt_mb",
+      "note": "base.F:268 qt_mb, the moist benchmark's total water (isnd = 4, and init3d.F:625-645's iinit = 4); a source word in CM1, configuration here."
+    },
+    {
+      "gm1_key": "initialization.random_generator",
+      "note": "which stream iinit=8 and irandp draw from: \"cm1\" is CM1's own numbers (libgfortran's xoshiro256** random_number as init3d.F:427-440 seeds it, checked word for word against gfortran 15.2), \"gm1\" GM1's seeded stream. CM1 has no key: its stream is fixed."
+    },
+    {
+      "gm1_key": "initialization.random_line_amplitude_k",
+      "note": "init3d.F:1275, the iinit=8 random amplitude; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.random_seed",
+      "note": "the seed for GM1's own irandp generator (random_generator = \"gm1\"). CM1 has no equivalent key: init3d.F:427-440 seeds gfortran's generator from a fixed scramble, which random_generator = \"cm1\" reproduces."
+    },
+    {
+      "gm1_key": "initialization.t1_uforce",
+      "note": "init3d.F:1343 t1_uforce, when the forcing starts to ramp down (s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.t1_wnudge",
+      "note": "init3d.F:1384 t1_wnudge, when the nudging starts to ramp down (s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.t2_uforce",
+      "note": "init3d.F:1344 t2_uforce, when the forcing stops (s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.t2_wnudge",
+      "note": "init3d.F:1385 t2_wnudge, when the nudging stops (s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.thec_mb_k",
+      "note": "base.F:267 thec_mb, the moist benchmark's wet-equivalent potential temperature (isnd = 4); a source word in CM1, configuration here."
+    },
+    {
+      "gm1_key": "initialization.tsk0_k",
+      "note": "CM1's namelist tsk0 as base.F:1204 (isnd = 11) and :1849 (isnd = 21) read it, for a run with no [surface] table; with one, tsk0 is surface.tsk0_k."
+    },
+    {
+      "gm1_key": "initialization.wmax_wnudge",
+      "note": "init3d.F:1382 wmax_wnudge, the w the nudging pulls toward (m/s); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.xc_uforce",
+      "note": "init3d.F:1339 xc_uforce, the momentum-forcing centre in x (default the domain centre); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.xc_wnudge",
+      "note": "init3d.F:1372 xc_wnudge, the updraft-nudging centre in x (default centerx); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.xcent",
+      "note": "init3d.F:1313 xcent, the convergence centre in x (m); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.xr_uforce",
+      "note": "init3d.F:1340 xr_uforce, the forcing radius in x; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.xr_wnudge",
+      "note": "init3d.F:1373 xr_wnudge, the nudging radius in x; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.yc_wnudge",
+      "note": "init3d.F:1375 yc_wnudge, the nudging centre in y (default centery); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.ycent",
+      "note": "init3d.F:1314 ycent, the convergence centre in y (m); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.yr_wnudge",
+      "note": "init3d.F:1376 yr_wnudge, the nudging radius in y; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zc_m",
+      "note": "init3d.F:458 zc, the perturbation centre height; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zc_wnudge",
+      "note": "init3d.F:1378 zc_wnudge, the nudging centre height; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zdeep",
+      "note": "init3d.F:1310 zdeep, the depth of forced convergence (m); a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zdep_m",
+      "note": "init3d.F:494 zdep, the iinit=2 cold-pool depth; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zr_uforce",
+      "note": "init3d.F:1341 zr_uforce, the forcing depth scale; a source edit in CM1."
+    },
+    {
+      "gm1_key": "initialization.zr_wnudge",
+      "note": "init3d.F:1379 zr_wnudge, the nudging radius in z; a source edit in CM1."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_center_x_m",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_center_y_m",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_center_z_m",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_parcels",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_radius_m",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuit_spacing_z_m",
+      "note": "GM1 extension: see lagrangian.circuits."
+    },
+    {
+      "gm1_key": "lagrangian.circuits",
+      "note": "GM1 extension: CM1 r21.1 has no material-circuit or circulation diagnostic."
+    },
+    {
+      "gm1_key": "lagrangian.direction",
+      "note": "GM1 extension: backward trajectories; CM1's parcel_driver integrates forward only."
+    },
+    {
+      "gm1_key": "lagrangian.dohifrq",
+      "note": "CM1 r21.1 hard-codes dohifrq=.false. at src/cm1.F:2645 and reads it from no namelist; turning hifrq.F on there means editing and rebuilding CM1. GM1 makes it configuration, under CM1's own name."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_i0",
+      "note": "GM1 extension: hifrq.F writes the whole domain, so CM1 has no window words. A tornado occupies a few km of a domain hundreds of km across."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_i1",
+      "note": "GM1 extension: see lagrangian.hifrq_i0."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_j0",
+      "note": "GM1 extension: see lagrangian.hifrq_i0."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_j1",
+      "note": "GM1 extension: see lagrangian.hifrq_i0."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_k0",
+      "note": "GM1 extension: see lagrangian.hifrq_i0."
+    },
+    {
+      "gm1_key": "lagrangian.hifrq_k1",
+      "note": "GM1 extension: see lagrangian.hifrq_i0."
+    },
+    {
+      "gm1_key": "lagrangian.hifrqfrq_s",
+      "note": "CM1 r21.1 hard-codes hifrqfrq=3600.0 at src/cm1.F:2647 and reads it from no namelist."
+    },
+    {
+      "gm1_key": "lagrangian.nest_child",
+      "note": "GM1 extension: parcels integrated inside a live nest child (cm1core.nest_parcels). CM1 r21.1 has no nesting, so it has no word for a child seeding; the per-step arithmetic is src/parcel.F's."
+    },
+    {
+      "gm1_key": "lagrangian.nest_child_window",
+      "note": "GM1 extension: a vortex-following sub-volume of a live nest child, written every child step with the model's own advecting velocity words (cm1core.nest_child_window). CM1 r21.1 has no nesting and its own high-frequency writer src/hifrq.F:21 writes the whole domain at a fixed place, from two words src/cm1.F:2645-2647 hard-codes, so CM1 has no name for either the window or its cadence."
+    },
+    {
+      "gm1_key": "lagrangian.parcel_vorticity_budget",
+      "note": "GM1 extension: CM1's parcel.F records no vorticity budget; this samples the vorticity budget along every parcel after CM1's attributes."
+    },
+    {
+      "gm1_key": "lagrangian.seed_dx_m",
+      "note": "GM1 extension: src/init3d.F:385's hard-coded 2000.0 m."
+    },
+    {
+      "gm1_key": "lagrangian.seed_dy_m",
+      "note": "GM1 extension: src/init3d.F:386's hard-coded 2000.0 m."
+    },
+    {
+      "gm1_key": "lagrangian.seed_dz_m",
+      "note": "GM1 extension: src/init3d.F:387's hard-coded 1000.0 m."
+    },
+    {
+      "gm1_key": "lagrangian.seed_nx",
+      "note": "GM1 extension: src/init3d.F:381's hard-coded 60."
+    },
+    {
+      "gm1_key": "lagrangian.seed_ny",
+      "note": "GM1 extension: src/init3d.F:382's hard-coded 60."
+    },
+    {
+      "gm1_key": "lagrangian.seed_nz",
+      "note": "GM1 extension: src/init3d.F:380's hard-coded 10."
+    },
+    {
+      "gm1_key": "lagrangian.seed_vorticity_threshold_s_inv",
+      "note": "GM1 extension: seed only where |zeta| exceeds this, a model-time decision CM1's namelist cannot express."
+    },
+    {
+      "gm1_key": "lagrangian.seed_x0_m",
+      "note": "GM1 extension: offset of the seeding origin from minx."
+    },
+    {
+      "gm1_key": "lagrangian.seed_y0_m",
+      "note": "GM1 extension: offset of the seeding origin from miny."
+    },
+    {
+      "gm1_key": "lagrangian.seed_z0_m",
+      "note": "GM1 extension: offset of the seeding origin from zh(1)."
+    },
+    {
+      "gm1_key": "lagrangian.seeding",
+      "note": "GM1 extension: CM1 hard-codes one 60x60x10 seeding grid at src/init3d.F:381-387 with no namelist control; seeding='grid' with GM1's default parameters reproduces it exactly."
+    },
+    {
+      "gm1_key": "lagrangian.vorticity_budget",
+      "note": "GM1 extension: CM1 r21.1 computes no vorticity budget anywhere."
+    },
+    {
+      "gm1_key": "lagrangian.vorticity_budget_frq_s",
+      "note": "GM1 extension: see lagrangian.vorticity_budget."
+    },
+    {
+      "gm1_key": "lagrangian.vorticity_budget_history",
+      "note": "GM1 extension: CM1 r21.1 has no vorticity budget; this publishes calcvort of every output_*budget momentum term, and the stretching/tilting decomposition, as history carriers."
+    },
+    {
+      "gm1_key": "nest.acoustic_substeps",
+      "note": "the child's own nsound; CM1 derives one domain's."
+    },
+    {
+      "gm1_key": "nest.child_dz_bot_m",
+      "note": "child's own param6 dz_bot (stretch_z=1); the parent's top is kept."
+    },
+    {
+      "gm1_key": "nest.child_dz_top_m",
+      "note": "child's own param6 dz_top (stretch_z=1); the parent's top is kept."
+    },
+    {
+      "gm1_key": "nest.child_levels_m",
+      "note": "child's own explicit levels (stretch_z=3 or 4)."
+    },
+    {
+      "gm1_key": "nest.child_nz",
+      "note": "child's own level count when it declares its own vertical deck."
+    },
+    {
+      "gm1_key": "nest.child_str_bot_m",
+      "note": "child's own param6 str_bot (stretch_z=1)."
+    },
+    {
+      "gm1_key": "nest.child_str_top_m",
+      "note": "child's own param6 str_top (stretch_z=1)."
+    },
+    {
+      "gm1_key": "nest.child_stretch_z",
+      "note": "child's own stretch_z branch (1, 3 or 4) over the parent's model top."
+    },
+    {
+      "gm1_key": "nest.feedback",
+      "note": "one-way or two-way child-to-parent feedback."
+    },
+    {
+      "gm1_key": "nest.follow_corral_m",
+      "note": "minimum clearance kept from the parent boundary (WRF corral_dist)."
+    },
+    {
+      "gm1_key": "nest.follow_hold_limit",
+      "note": "consecutive held tracker samples before hold relocates the centre."
+    },
+    {
+      "gm1_key": "nest.follow_interval_s",
+      "note": "tracker cadence (WRF vortex_interval)."
+    },
+    {
+      "gm1_key": "nest.follow_max_speed_m_s",
+      "note": "search-window speed bound (WRF max_vortex_speed); parent cells per move are derived."
+    },
+    {
+      "gm1_key": "nest.follow_on_edge",
+      "note": "stop or hold when the surface tracker's sample is out of reach (window edge, no circulation, centroid too far) or its move enters the corral."
+    },
+    {
+      "gm1_key": "nest.follow_relocation_radius_m",
+      "note": "half-width hold's relocation searches around the kept centre."
+    },
+    {
+      "gm1_key": "nest.follow_smoothing_radius_m",
+      "note": "half-width of the surface tracker's circulation box."
+    },
+    {
+      "gm1_key": "nest.follow_storm",
+      "note": "whether the running nest moves with the tracked vortex."
+    },
+    {
+      "gm1_key": "nest.follow_tracker",
+      "note": "wrf-surface-circulation (child's surface vortex) or a CM1 pressure-centre target."
+    },
+    {
+      "gm1_key": "nest.parent_i0",
+      "note": "parent scalar index of the child's SW corner."
+    },
+    {
+      "gm1_key": "nest.parent_j0",
+      "note": "parent scalar index of the child's SW corner."
+    },
+    {
+      "gm1_key": "nest.parent_span_x",
+      "note": "whole parent cells the child covers in x."
+    },
+    {
+      "gm1_key": "nest.parent_span_y",
+      "note": "whole parent cells the child covers in y."
+    },
+    {
+      "gm1_key": "nest.refinement_ratio",
+      "note": "grid refinement ratio of the child mesh; CM1 has one domain."
+    },
+    {
+      "gm1_key": "nest.relax_zone",
+      "note": "Davies relaxation width, in child cells."
+    },
+    {
+      "gm1_key": "nest.spec_zone",
+      "note": "Davies specified-boundary width, in child cells."
+    },
+    {
+      "gm1_key": "nest.time_refinement_ratio",
+      "note": "child large-step refinement; CM1 has one clock."
+    },
+    {
+      "gm1_key": "nest.tornado_criterion",
+      "note": "fixed tornado criterion sampled on the live child every parent step; CM1 makes no tornado claim."
+    },
+    {
+      "gm1_key": "physics.component",
+      "note": "names the ArWen microphysics component behind the declared seam; CM1's ptype is an integer into its own in-tree schemes."
+    },
+    {
+      "gm1_key": "physics.dbz_level_m",
+      "note": "the single height whose reflectivity plane is published beside the column maximum; CM1 users slice the 3-D dbz field themselves, so there is no namelist word."
+    },
+    {
+      "gm1_key": "run.irst",
+      "note": "README.namelist:227 irst, spelled in GM1's [run] table because the restart pair is a run-level lifecycle choice here."
+    },
+    {
+      "gm1_key": "run.lane",
+      "note": "GM1 lane selector; separates the dry validation lane, the sealed product profiles and the configurable Cartesian runtime. CM1 has one executable and no lane concept."
+    },
+    {
+      "gm1_key": "run.restart_reset_frqtim",
+      "note": "README.namelist:1505-1510 restart_reset_frqtim, spelled in GM1's [run] table beside irst."
+    },
+    {
+      "gm1_key": "run.rstnum",
+      "note": "README.namelist:229 rstnum, spelled in GM1's [run] table beside irst."
+    },
+    {
+      "gm1_key": "runtime.acoustic_substeps",
+      "note": "CM1 derives nsound from dtl and dtsmall (misclibs.F:883-885) rather than accepting it; GM1 declares it."
+    },
+    {
+      "gm1_key": "runtime.capacity_profile",
+      "note": "device capacity profile identity; no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.memory_budget_mib",
+      "note": "device memory budget; no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.pdefq_launch",
+      "note": "which of two raw-word identical launch layouts runs CM1's pre-WSM6 positive-definite repair; a device execution parameter with no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.physics_block_nx",
+      "note": "the x extent of one WSM6 call; a device decomposition parameter with no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.physics_block_ny",
+      "note": "the y extent of one WSM6 call; a device decomposition parameter with no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.tile_nx",
+      "note": "CUDA tile shape; a device execution parameter with no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.tile_ny",
+      "note": "CUDA tile shape; a device execution parameter with no CM1 equivalent."
+    },
+    {
+      "gm1_key": "runtime.warmup_steps",
+      "note": "CUDA timing-harness warmup; no CM1 equivalent."
+    }
+  ],
+  "harness_owned_groups": [
+    "param9"
+  ],
+  "non_physical_families": [
+    {
+      "cm1_field_count": 4,
+      "cm1_group": "logging",
+      "note": "runtime logging only; no effect on state."
+    },
+    {
+      "cm1_field_count": 26,
+      "cm1_group": "nssl2mom_params",
+      "note": "NSSL two-moment microphysics tuning; ArWen ships an nssl2 kernel but no TOML key selects it."
+    },
+    {
+      "cm1_field_count": 212,
+      "cm1_group": "nssl_mp_params",
+      "note": "NSSL microphysics internals; unreachable with the above."
+    },
+    {
+      "cm1_field_count": 29,
+      "cm1_group": "param10",
+      "note": "domain-statistics selectors; GM1 has no statpack writer."
+    },
+    {
+      "cm1_field_count": 16,
+      "cm1_group": "param13",
+      "note": "parcel-attribute selectors; all sixteen are mapped individually above, because each decides whether a physical quantity is recorded along the trajectory."
+    },
+    {
+      "cm1_field_count": 2,
+      "cm1_group": "param14",
+      "note": "domain-diagnostic selectors; GM1 publishes its own diagnostics."
+    },
+    {
+      "cm1_field_count": 5,
+      "cm1_group": "param15",
+      "note": "azimuthal-average selectors; GM1 has no azimavg writer, so doazimavg, azimavgfrq and rlen are unreachable. do_adapt_move and adapt_move_frq are mapped individually above, because they move the domain; the controller is driven from the completed-step frame cadence, which is cm1.F:3642-3651's other dowriteout branch."
+    },
+    {
+      "cm1_field_count": 17,
+      "cm1_group": "param16",
+      "note": "native-restart selectors; GM1 restarts through its own Rust checkpoint envelope."
+    }
+  ],
+  "schema": "gm1.cm1-r21.1-to-gpuwm-cm1-keymap/v1"
+}

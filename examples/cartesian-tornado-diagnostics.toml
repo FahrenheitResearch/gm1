@@ -1,0 +1,140 @@
+# Every CM1 r21.1 rotation diagnostic and surface swath, switched on.
+#
+# The point of this document is that a user writes it and the run's output
+# changes end to end.  Each key is CM1's own namelist name and each one
+# selects a branch you can find in the release:
+#
+#   output_uh    src/writeout.F:724-770 -> src/misclibs.F:1417-1532 calcuh,
+#                the vertically integrated updraft helicity over 2-5 km AGL
+#                (src/misclibs.F:1441-1442), in m2/s2.  This is the standard
+#                supercell proxy; src/misclibs.F:1423 cites Kain et al. 2008,
+#                Wea. Forecasting 23, 931-952 for it, and that paper's 25 and
+#                100 m2/s2 are the values the run reports against.
+#   output_vort  src/writeout.F:4330-4400 -> src/misclibs.F:1540-2174
+#                calcvort: xvort, yvort and zvort at scalar points, in 1/s.
+#                GM1 publishes the lowest model level of zvort beside the
+#                volume, because that is where a tornado shows up.
+#   output_pv    src/writeout.F:4403-4426 -> the same routine's Ertel
+#                potential vorticity, in K m2/kg/s.
+#   output_sws   src/solve3.F:855-878    max surface wind speed
+#   output_svs   src/solve3.F:883-965    max surface vertical vorticity
+#   output_sps   src/solve3.F:968-993    min surface pressure perturbation
+#   output_srs   src/solve3.F:994-1019   max surface rainwater
+#   output_sgs   src/solve3.F:1022-1047  max surface graupel/hail
+#   output_sus   src/solve3.F:1051-1108  max w at 5 km AGL
+#   output_shs   src/solve3.F:1110-1136  max integrated updraft helicity
+#
+# The seven swaths are whole-run running extrema folded at the end of every
+# large step, exactly as src/solve3.F does, and initialized to CM1's own
+# values at src/init3d.F:181-203.  For a tornado run they are the headline
+# numbers: the swath is the damage track.
+#
+# imove is on here (closures.moving_frame), so each swath is kept twice, as
+# CM1 does at nrain=2 (src/param.F:4697-4698): once in the moving frame and
+# once anchored to the ground.  CM1 moves the ground copy with three WENO
+# stages per step (src/adv_routines.F:8884-9178 movesfc), which diffuses the
+# maximum a swath exists to report; GM1 places it instead from the
+# domainlocx/domainlocy integral it already carries (src/cm1.F:3512-3513), so
+# the peak lands on the ground cell it happened at.
+#
+# tornado_report is GM1's own and has no CM1 counterpart, because CM1 makes
+# no tornado claim.  It turns the swaths into one honest statement: peak
+# near-surface vertical vorticity, peak near-surface wind, minimum surface
+# pressure, the duration of every episode above the near-surface vortex
+# threshold, and the ground track of the maximum.  It also reports what this
+# grid can resolve, and refuses to call anything a tornado on a grid that
+# cannot hold one -- which includes this one.  At 1 km spacing the smallest
+# resolved feature is about 6 km across (Bryan, Wyngaard and Fritsch 2003,
+# Mon. Wea. Rev. 131, 2394-2416), which is a mesocyclone, not a tornado.  Run
+# the same [diagnostics] table over examples/cartesian-stretched-tornado-grade-grid.toml
+# and the verdict is allowed to say more.
+#
+# The lower boundary is semi slip here, because a free-slip bottom exerts no
+# surface stress at all (src/turb.F:4536-4545) and near-surface vorticity in
+# such a run was made without the surface drag a real tornado needs.  With
+# bbc=3 the run also takes calcvort's log-layer lowest-level horizontal
+# vorticity (src/misclibs.F:2165-2172) instead of the free-slip copy-down.
+
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.005
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 16384
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+
+[diagnostics]
+output_uh = 1
+output_vort = 1
+output_pv = 1
+output_sws = 1
+output_svs = 1
+output_sps = 1
+output_srs = 1
+output_sgs = 1
+output_sus = 1
+output_shs = 1
+tornado_report = true

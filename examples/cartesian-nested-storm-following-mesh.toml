@@ -1,0 +1,158 @@
+# A 100 m storm-following nest inside a 900 m supercell parent.
+#
+# This is the profile that makes a tornado affordable.  Thirty to a hundred
+# metres over a whole supercell domain does not fit on one GPU; a hundred
+# metres over the mesocyclone inside a nine-hundred-metre parent does, and the
+# nest follows the storm so the refined mesh stays on it.
+#
+# CM1 r21.1 HAS NO NESTING.  The release carries no ``nest`` namelist word, no
+# nesting section in README or README.namelist, no CHANGES entry and no
+# parent/child code in src; its only moving-mesh capability is the whole-domain
+# adaptive move of src/azimavg.F:4376-4528, which translates the single domain
+# rather than refining part of it.  Everything in [nest] is therefore a
+# declared extension beyond CM1, recorded as one in
+# src/cm1core/records/CM1-NEST-SEAM.md.  What is NOT an extension is every
+# number the child is admitted against: the clock below is CM1's own.
+#
+# WHY THESE NUMBERS
+#
+#   * refinement_ratio = 9 takes 900 m to 100 m.  It is odd because CM1 is an
+#     Arakawa C grid (src/cm1.F:744-777): the nine child u faces nearest a
+#     parent u face are symmetric about it only for an odd ratio, and for an
+#     even one two-way feedback would write the child's mean u at x - dx/2 into
+#     the parent's u at x for the whole run.
+#
+#   * time_refinement_ratio = 9 as well, and that is what keeps the acoustic
+#     step honest.  src/misclibs.F:867 bounds the psolver=3 small step at
+#     0.60*min(dx,dy)/360 s; refining space by nine divides that limit by nine.
+#     Refining time by nine divides the child's large step by nine too, so
+#     dbldt/dtsm is unchanged and src/misclibs.F:883-885 derives the SAME
+#     nsound for the child as for the parent.  The parent runs 0.45 s with six
+#     substeps; the child runs 0.05 s with six.  Had the child kept the
+#     parent's step it would have needed nine times the substeps and carried
+#     nine times the advective Courant number of src/misclibs.F:2714.
+#
+#   * psolver = 3 is required with a nest.  Its acoustic step is vertically
+#     implicit, so src/misclibs.F:857-868 bounds the small step by the
+#     horizontal spacings alone and refining the horizontal is exactly what
+#     shortens it.  The implicit part is one tridiagonal per column and never
+#     crosses the lateral interface: the child solves its own columns from its
+#     own relaxed state.
+#
+#   * parent_i0/parent_j0 and the spans place the child on WHOLE PARENT CELLS.
+#     That is the conservation requirement: the child's outermost u and v
+#     columns then coincide with parent u and v columns, so the normal mass
+#     flux specified at the child's boundary is the parent's own face value,
+#     copied.  Whatever mass left the covered region through that parent face
+#     is exactly what enters the child.
+#
+#   * spec_zone = 1 and relax_zone = 4 are the Davies (1976, 1983) zone.  The
+#     outer row's tendency is the parent's outright; the next four are relaxed
+#     toward it on a linear ramp with a second-order diffusion term.  A
+#     specified boundary is perfectly reflecting -- the storm's own gravity
+#     waves and the psolver=3 acoustic modes do come back off it -- and the
+#     relaxation zone damps rather than removes that.  The mitigation that
+#     works is the geometry: 27 km of nest around a mesocyclone leaves a
+#     reflected wave a long way to travel.
+#
+#   * feedback = 1 is two-way.  The child's interior block means replace the
+#     parent's covered cells; its own relaxation rows are not fed back, because
+#     those rows already carry the parent's values and feeding them back would
+#     relax the parent toward itself through the child.
+#
+#   * follow_storm tracks CM1's own centre: src/azimavg.F:4071-4107 runs 100
+#     passes of the 9-point 0.11111111 smoother over the lowest level of pp3d,
+#     in CM1's own summation order, and src/azimavg.F:4159-4163 reports the
+#     result as a grid FACE.  The nest re-centres on that face every 270 s --
+#     CM1's own adapt_move_frq cadence, src/azimavg.F:4421-4435 -- by whole
+#     parent cells, because a fractional shift would take the child's outer
+#     faces off the parent's.
+#
+# The parent's own translating frame is still on: base.F:2661-2674's umove/vmove
+# carries the whole domain with the storm and cm1.F:3512-3513 integrates where
+# the ground is.  The nest follows what motion the frame does not remove.
+[run]
+lane = "cartesian"
+duration_s = 5400.0
+dt_s = 0.45
+history_interval_s = 45.0
+restart_interval_s = 5400.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 900.0
+dy_m = 900.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[nest]
+refinement_ratio = 9
+time_refinement_ratio = 9
+parent_i0 = 45
+parent_j0 = 45
+parent_span_x = 30
+parent_span_y = 30
+spec_zone = 1
+relax_zone = 4
+feedback = 1
+acoustic_substeps = 6
+follow_storm = true
+follow_interval_s = 270.0
+follow_max_speed_m_s = 13.5
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+# Double-moment Morrison (CM1 ptype=5), not single-moment WSM6: a single-
+# moment scheme fixes the rain intercept, so evaporation in the downdraft
+# over-cools the cold pool, and cold-pool strength controls whether a
+# low-level mesocyclone becomes a tornado. Double-moment microphysics is the
+# tornado-research standard. GPU run of this lane on Morrison: pending.
+component = "morrison-mp10"
+equation_set = 2

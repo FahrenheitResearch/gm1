@@ -1,0 +1,1286 @@
+{
+ "aliases": {
+  "advweno": {
+   "class": "physics",
+   "kind": "value-mapped",
+   "last_release": "r16",
+   "note": "scalar WENO; became advwenos in CM1 r17, which added advwenov for velocities (off before r17)",
+   "old_group": "param2",
+   "r21_targets": [
+    "param2.advwenos",
+    "param2.advwenov"
+   ],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 135,
+     "line_sha256": "c3c226188932f27fbd8e94d7c77219aa75c492a482c65aaf34861a1057a830db",
+     "release": "r16",
+     "says": "documents advweno: whether the scalars other than pressure use the WENO scheme"
+    },
+    {
+     "file": "CHANGES",
+     "line": 26,
+     "line_sha256": "e5e2528d1b5b28dbb1c729b484b374a2fc2f3a54003a1a7551179f49ff9d5d86",
+     "release": "r17",
+     "says": "adds WENO advection for the velocities, under the new setting advwenov"
+    },
+    {
+     "file": "README.namelist",
+     "line": 150,
+     "line_sha256": "b5eb66aff6cdee37805c89646f1775a95c9575266c727b5e22714a2bef6653f0",
+     "release": "r17",
+     "says": "notes that the WENO option is now set separately for scalars and velocities"
+    }
+   ],
+   "values": {
+    "0": {
+     "advwenos": 0,
+     "advwenov": 0
+    },
+    "1": {
+     "advwenos": 1,
+     "advwenov": 0
+    },
+    "2": {
+     "advwenos": 2,
+     "advwenov": 0
+    }
+   }
+  },
+  "bc_wind": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r16",
+   "note": "replaced by bbc and tbc in CM1 r17; set bbc and tbc",
+   "old_group": "param7",
+   "r21_targets": [],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 11,
+     "line_sha256": "46748defc430d934014435f176d03e24c6b7c117f575f9e9f48f2bac275dc89b",
+     "release": "r17",
+     "says": "lists bc_wind and idrag among the settings removed in this release"
+    }
+   ],
+   "successor": [
+    "bbc",
+    "tbc"
+   ]
+  },
+  "bcturbu": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r16",
+   "note": "replaced by bbc and tbc in CM1 r17; set bbc and tbc",
+   "old_group": "param2",
+   "r21_targets": [],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 10,
+     "line_sha256": "1e3a378b326b5a9ecbfb1d713e0e88c16b8475f2afceac9589586bd2e68d210f",
+     "release": "r17",
+     "says": "removes bcturbu, with bc_wind and idrag, in favour of bbc and tbc"
+    }
+   ],
+   "successor": [
+    "bbc",
+    "tbc"
+   ]
+  },
+  "charging_border": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r20.3",
+   "note": "NSSL electrification internal of CM1 r20; read only with ptype 26-28",
+   "old_group": "nssl_mp_params",
+   "r21_targets": [],
+   "releases": [
+    "r20.3"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 136,
+     "release": "r21.1",
+     "text": "Updated the NSSL microphysics code"
+    }
+   ]
+  },
+  "ddr": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "radial spacing of CM1 r19's azimuthal-average grid; not a namelist key since r20",
+   "old_group": "param15",
+   "r21_targets": [],
+   "releases": [
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1670,
+     "release": "r19.10",
+     "text": "ddr  -  Radial grid spacing"
+    }
+   ]
+  },
+  "denscale": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r20.3",
+   "note": "NSSL density-scaling internal of CM1 r20; read only with ptype 26-28",
+   "old_group": "nssl_mp_params",
+   "r21_targets": [],
+   "releases": [
+    "r20.3"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 136,
+     "release": "r21.1",
+     "text": "Updated the NSSL microphysics code"
+    }
+   ]
+  },
+  "dns": {
+   "class": "physics",
+   "kind": "value-mapped",
+   "last_release": "r18",
+   "note": "direct numerical simulation became cm1setup = 3 in CM1 r19",
+   "old_group": "param2",
+   "r21_targets": [
+    "param2.cm1setup"
+   ],
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 60,
+     "release": "r19.10",
+     "text": "3 = direct numerical simulation (DNS)"
+    },
+    {
+     "file": "README.namelist",
+     "line": 227,
+     "line_sha256": "31717d789e45f90b45d859124e7a139097d5576acc65082d63d1287668b70098",
+     "release": "r18",
+     "says": "documents dns: running the model in direct numerical simulation mode"
+    }
+   ],
+   "values": {
+    "0": {},
+    "1": {
+     "cm1setup": 3
+    }
+   }
+  },
+  "doturbdiag": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "CM1 r19's in-run turbulence diagnostics; not declared since r20",
+   "old_group": "param14",
+   "r21_targets": [],
+   "releases": [
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1627,
+     "release": "r19.10",
+     "text": "doturbdiag - Calculate and write"
+    }
+   ]
+  },
+  "hadvorder": {
+   "class": "physics",
+   "kind": "renamed",
+   "last_release": "r16",
+   "note": "split into hadvordrs (scalars) and hadvordrv (velocities) in CM1 r17; both take the old value",
+   "old_group": "param2",
+   "r21": {
+    "group": "param2",
+    "keys": [
+     "hadvordrs",
+     "hadvordrv"
+    ]
+   },
+   "r21_targets": [
+    "param2.hadvordrs",
+    "param2.hadvordrv"
+   ],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 31,
+     "line_sha256": "a274d18b0d9c168694fd65e408dcee99276d241803dc8e6907b4f7d2c1f54299",
+     "release": "r17",
+     "says": "names the four advection-order settings hadvordrs, vadvordrs, hadvordrv and vadvordrv"
+    },
+    {
+     "file": "README.namelist",
+     "line": 126,
+     "line_sha256": "b5eb66aff6cdee37805c89646f1775a95c9575266c727b5e22714a2bef6653f0",
+     "release": "r17",
+     "says": "notes that the advection order is now set separately for scalars and velocities"
+    }
+   ]
+  },
+  "idrag": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r16",
+   "note": "surface drag became bbc = 3 in CM1 r17; set bbc",
+   "old_group": "param12",
+   "r21_targets": [],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 11,
+     "line_sha256": "46748defc430d934014435f176d03e24c6b7c117f575f9e9f48f2bac275dc89b",
+     "release": "r17",
+     "says": "lists bc_wind and idrag among the settings removed in this release"
+    }
+   ],
+   "successor": [
+    "bbc"
+   ]
+  },
+  "ipbl": {
+   "class": "physics",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "moved from param12 to param2 in CM1 r19 (1 = YSU in both)",
+   "old_group": "param12",
+   "r21": {
+    "group": "param2",
+    "key": "ipbl"
+   },
+   "r21_targets": [
+    "param2.ipbl"
+   ],
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 655,
+     "line_sha256": "3925687c21d1b81aca2c46e56185eccd9c98d23c4e6f087adc178c6986d39e8d",
+     "release": "r18",
+     "says": "documents ipbl: whether to use the YSU boundary-layer scheme"
+    },
+    {
+     "file": "README.namelist",
+     "line": 314,
+     "release": "r21.1",
+     "text": "1 = Yonsei University (YSU) PBL parameterization"
+    }
+   ]
+  },
+  "iturb": {
+   "class": "physics",
+   "kind": "value-mapped",
+   "last_release": "r18",
+   "note": "replaced by cm1setup and sgsmodel in CM1 r19",
+   "old_group": "param2",
+   "r21_targets": [
+    "param2.cm1setup",
+    "param2.sgsmodel"
+   ],
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 47,
+     "release": "r19.10",
+     "text": "Added a new variable to the CM1 namelist called \"cm1setup\""
+    },
+    {
+     "file": "README.namelist",
+     "line": 338,
+     "release": "r21.1",
+     "text": "(previously, this was iturb=1)"
+    },
+    {
+     "file": "README.namelist",
+     "line": 341,
+     "release": "r21.1",
+     "text": "(previously, this was iturb=2)"
+    },
+    {
+     "file": "README.namelist",
+     "line": 371,
+     "release": "r21.1",
+     "text": "(note:  previously, this was part of iturb=3)"
+    }
+   ],
+   "unmapped_values": {
+    "0": "no documented single equivalent: cm1setup 0 (no turbulence) or 2 (PBL scheme) depends on ipbl; set cm1setup",
+    "3": "only partly documented (horizturb was part of iturb=3); set cm1setup, ipbl and horizturb"
+   },
+   "values": {
+    "1": {
+     "cm1setup": 1,
+     "sgsmodel": 1
+    },
+    "2": {
+     "cm1setup": 1,
+     "sgsmodel": 2
+    }
+   }
+  },
+  "neweqts": {
+   "class": "physics",
+   "kind": "value-mapped",
+   "last_release": "r16",
+   "note": "replaced by eqtset in CM1 r17 (1 traditional, 2 Bryan-Fritsch)",
+   "old_group": "param2",
+   "r21_targets": [
+    "param2.eqtset"
+   ],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 218,
+     "line_sha256": "e44b118ffbb2a50b2f5952ec0845c1ff831dab40c00eedfe6c64b7dd32a7f30b",
+     "release": "r17",
+     "says": "replaces neweqts with eqtset"
+    },
+    {
+     "file": "README.namelist",
+     "line": 282,
+     "line_sha256": "f6bcb445b2ec70e8ff3f5659b722dfa796e9858b42aa969f51d9e93045dfa932",
+     "release": "r16",
+     "says": "documents neweqts = 0: the traditional, approximate equation set"
+    },
+    {
+     "file": "README.namelist",
+     "line": 283,
+     "line_sha256": "744547e5a1fb5da329a7ccef5bd0c11dba5641a501f986b2bea8501789dfadc6",
+     "release": "r16",
+     "says": "documents neweqts = 1: the original formulation of the newer equation set"
+    }
+   ],
+   "unmapped_values": {
+    "2": "condensation on every Runge-Kutta step has no r21.1 setting"
+   },
+   "values": {
+    "0": {
+     "eqtset": 1
+    },
+    "1": {
+     "eqtset": 2
+    }
+   }
+  },
+  "nodex": {
+   "class": "not-needed",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "MPI decomposition; CM1 r20 and later decompose automatically, and one GPU needs none",
+   "old_group": "param0",
+   "r21_targets": [],
+   "releases": [
+    "r16",
+    "r17",
+    "r18",
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 16,
+     "release": "r20.3",
+     "text": "user no longer specifies nodex,nodey"
+    }
+   ]
+  },
+  "nodey": {
+   "class": "not-needed",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "MPI decomposition; CM1 r20 and later decompose automatically, and one GPU needs none",
+   "old_group": "param0",
+   "r21_targets": [],
+   "releases": [
+    "r16",
+    "r17",
+    "r18",
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 16,
+     "release": "r20.3",
+     "text": "user no longer specifies nodex,nodey"
+    }
+   ]
+  },
+  "nsound": {
+   "class": "physics",
+   "kind": "derived",
+   "last_release": "r18",
+   "note": "CM1 r19 and later derive the number of acoustic steps from dt; the value is not read",
+   "old_group": "param2",
+   "r21_targets": [],
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 430,
+     "release": "r19.10",
+     "text": "\"nsound\" has been removed from the namelist"
+    }
+   ]
+  },
+  "output_basename": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "removed in CM1 r20.1; output files are named cm1out_*",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r16",
+    "r17",
+    "r18",
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 112,
+     "release": "r20.3",
+     "text": "Removed output_path, output_basename options"
+    }
+   ]
+  },
+  "output_dissheat": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r18",
+   "note": "replaced by the budget output of CM1 r19 (output_thbudget)",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 78,
+     "line_sha256": "730da78c6b78cdb4e90072b2a39163046865bb7ce67a834cb495771f905152b4",
+     "release": "r18",
+     "says": "points to output_dissheat in namelist.input"
+    },
+    {
+     "file": "CHANGES",
+     "line": 241,
+     "release": "r19.10",
+     "text": "have now been restored as part of the \"budget\" output variables"
+    }
+   ]
+  },
+  "output_impdiften": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r18",
+   "note": "replaced by the budget output of CM1 r19 (output_ubudget and the others)",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 240,
+     "release": "r19.10",
+     "text": "were previously written when output_impdiften=1"
+    }
+   ]
+  },
+  "output_mptend": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r18",
+   "note": "replaced by the budget output of CM1 r19 (output_thbudget)",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 81,
+     "line_sha256": "e94904d6f9d07eeb47eddfae67201bdd4371d061d7771d30d09bc772daaa2cc4",
+     "release": "r18",
+     "says": "points to output_mptend in namelist.input"
+    },
+    {
+     "file": "CHANGES",
+     "line": 241,
+     "release": "r19.10",
+     "text": "have now been restored as part of the \"budget\" output variables"
+    }
+   ]
+  },
+  "output_path": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "removed in CM1 r20.1; output goes to the run directory",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r16",
+    "r17",
+    "r18",
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 112,
+     "release": "r20.3",
+     "text": "Removed output_path, output_basename options"
+    }
+   ]
+  },
+  "output_turbten": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r18",
+   "note": "replaced by the budget output of CM1 r19 (output_ubudget and the others)",
+   "old_group": "param9",
+   "r21_targets": [],
+   "releases": [
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 241,
+     "release": "r19.10",
+     "text": "have now been restored as part of the \"budget\" output variables"
+    }
+   ]
+  },
+  "pdscheme": {
+   "class": "physics",
+   "kind": "hard-wired",
+   "last_release": "r18",
+   "note": "r19 and later always use the nearly mass-conserving scheme (pdscheme = 1)",
+   "old_group": "param2",
+   "r21_targets": [],
+   "r21_value": 1,
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "src/param.F",
+     "line": 732,
+     "release": "r21.1",
+     "text": "pdscheme = 1"
+    },
+    {
+     "file": "README.namelist",
+     "line": 148,
+     "line_sha256": "917c5a0d5ba30e5eecf2b8978eb40b7ce392ef08787e9210f9df2a9c77486c6c",
+     "release": "r18",
+     "says": "documents pdscheme: the scheme that keeps fields positive definite"
+    }
+   ]
+  },
+  "pertcor": {
+   "class": "physics",
+   "kind": "renamed",
+   "last_release": "r18",
+   "note": "renamed in CM1 r19",
+   "old_group": "param2",
+   "r21": {
+    "group": "param2",
+    "key": "lspgrad"
+   },
+   "r21_targets": [
+    "param2.lspgrad"
+   ],
+   "releases": [
+    "r16",
+    "r17",
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 120,
+     "release": "r19.10",
+     "text": "from \"pertcor\" to \"lspgrad\""
+    },
+    {
+     "file": "README.namelist",
+     "line": 535,
+     "release": "r21.1",
+     "text": "lspgrad = 1 was called \"pertcor\""
+    }
+   ],
+   "values": {
+    "0": {
+     "lspgrad": 0
+    },
+    "1": {
+     "lspgrad": 1
+    }
+   }
+  },
+  "restart_file_dbz": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_dbz"
+   },
+   "r21_targets": [
+    "param16.restart_file_dbz"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_diags": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_diags"
+   },
+   "r21_targets": [
+    "param16.restart_file_diags"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_pi0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_pi0"
+   },
+   "r21_targets": [
+    "param16.restart_file_pi0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_prs0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_prs0"
+   },
+   "r21_targets": [
+    "param16.restart_file_prs0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_qv0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_qv0"
+   },
+   "r21_targets": [
+    "param16.restart_file_qv0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_rho0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_rho0"
+   },
+   "r21_targets": [
+    "param16.restart_file_rho0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_th0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_th0"
+   },
+   "r21_targets": [
+    "param16.restart_file_th0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_theta": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_theta"
+   },
+   "r21_targets": [
+    "param16.restart_file_theta"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_u0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_u0"
+   },
+   "r21_targets": [
+    "param16.restart_file_u0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_v0": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_v0"
+   },
+   "r21_targets": [
+    "param16.restart_file_v0"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_zf": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_zf"
+   },
+   "r21_targets": [
+    "param16.restart_file_zf"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_zh": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_zh"
+   },
+   "r21_targets": [
+    "param16.restart_file_zh"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_file_zs": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_file_zs"
+   },
+   "r21_targets": [
+    "param16.restart_file_zs"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_filetype": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_filetype"
+   },
+   "r21_targets": [
+    "param16.restart_filetype"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_format": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_format"
+   },
+   "r21_targets": [
+    "param16.restart_format"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_reset_frqtim": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_reset_frqtim"
+   },
+   "r21_targets": [
+    "param16.restart_reset_frqtim"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "restart_use_theta": {
+   "class": "not-needed",
+   "kind": "moved",
+   "last_release": "r18",
+   "note": "native-restart selector; moved from param9 to param16 in CM1 r19",
+   "old_group": "param9",
+   "r21": {
+    "group": "param16",
+    "key": "restart_use_theta"
+   },
+   "r21_targets": [
+    "param16.restart_use_theta"
+   ],
+   "releases": [
+    "r18"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1072,
+     "line_sha256": "4be6e1b854314b33123a2bb817e5e533aa89ed5800d747d853db7317cf3042d5",
+     "release": "r18",
+     "says": "documents restart_format: the format of the restart files"
+    }
+   ]
+  },
+  "turbfrq": {
+   "class": "output",
+   "kind": "removed",
+   "last_release": "r19.10",
+   "note": "cadence of CM1 r19's in-run turbulence diagnostics; not declared since r20",
+   "old_group": "param14",
+   "r21_targets": [],
+   "releases": [
+    "r19.10"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1633,
+     "release": "r19.10",
+     "text": "turbfrq - Frequency (seconds)"
+    }
+   ]
+  },
+  "vadvorder": {
+   "class": "physics",
+   "kind": "renamed",
+   "last_release": "r16",
+   "note": "split into vadvordrs (scalars) and vadvordrv (velocities) in CM1 r17; both take the old value",
+   "old_group": "param2",
+   "r21": {
+    "group": "param2",
+    "keys": [
+     "vadvordrs",
+     "vadvordrv"
+    ]
+   },
+   "r21_targets": [
+    "param2.vadvordrs",
+    "param2.vadvordrv"
+   ],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 31,
+     "line_sha256": "a274d18b0d9c168694fd65e408dcee99276d241803dc8e6907b4f7d2c1f54299",
+     "release": "r17",
+     "says": "names the four advection-order settings hadvordrs, vadvordrs, hadvordrv and vadvordrv"
+    },
+    {
+     "file": "README.namelist",
+     "line": 126,
+     "line_sha256": "b5eb66aff6cdee37805c89646f1775a95c9575266c727b5e22714a2bef6653f0",
+     "release": "r17",
+     "says": "notes that the advection order is now set separately for scalars and velocities"
+    }
+   ]
+  },
+  "vdiff": {
+   "class": "physics",
+   "kind": "removed",
+   "last_release": "r16",
+   "note": "vertical artificial diffusion was removed in CM1 r17",
+   "old_group": "param2",
+   "r21_targets": [],
+   "releases": [
+    "r16"
+   ],
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 215,
+     "line_sha256": "2fe518332f4f2dab7536e3a872967da8d785ddf72b487f18efd3d178a23dbcba",
+     "release": "r17",
+     "says": "removes the vdiff (vertical diffusion) option"
+    }
+   ]
+  }
+ },
+ "counts": {
+  "derived": 1,
+  "hard-wired": 1,
+  "keys": 44,
+  "moved": 18,
+  "removed": 17,
+  "renamed": 3,
+  "value-mapped": 4
+ },
+ "kinds": {
+  "derived": "r21.1 computes the setting itself and reads no key",
+  "hard-wired": "r21.1 always runs r21_value; any other value has no r21.1 setting",
+  "moved": "the same key in another namelist group",
+  "removed": "no r21.1 setting; 'successor' names what replaced it, if anything",
+  "renamed": "the same setting under a new name; the value carries over (to every key listed)",
+  "value-mapped": "values map to r21.1 settings through 'values', from a CM1 document; other values are 'unmapped_values'"
+ },
+ "releases": {
+  "r16": {
+   "files": {
+    "CHANGES": "899c83d43913423e69b1dc3a04029ea61319d4e385abc64c3e22d42aa281ef5f",
+    "README.namelist": "6458c890a9dfb8bc4ff4db366f58de3c07d7ebce769bb31c640372a19b2fd9f8",
+    "src/cm1.F": "b387939b38a6df3ba6f26f33135da88d36c5865ee9b52df8e2f4dcbfc6960471",
+    "src/param.F": "f2f27fc2d381300ecee856a9a70ff6ab9e71e92caf37fce57a9d56049c04d528"
+   },
+   "tarball_bytes": 481606,
+   "tarball_sha256": "c56a473156aa2258527b8df5a9c02aa97cea1abb269d163c94518225d45a7e81",
+   "terms": "Release 16 (6 February 2012): use permitted provided CM1 is not redistributed beyond the user's immediate working group without permission; not quoted here",
+   "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r16.tar.gz"
+  },
+  "r17": {
+   "files": {
+    "CHANGES": "d58360e781564bdabb4fe9200531b52ec35dadf0110d0e1bdca1974322a0f615",
+    "README.namelist": "91bb77ba414fefadd72a25a3a34ce3182da94d12917be6e304223fa6271b7210",
+    "src/cm1.F": "eca9c16dbf72c54b605f9dfa52d06a7957a86209088aea96cd80fc54e2796f9f",
+    "src/param.F": "11ce9b6165924e975ae9c8f2373647a927168a9cf42ee5cd51e3d4ae996beefe"
+   },
+   "tarball_bytes": 638242,
+   "tarball_sha256": "3a01dc7ea6dfb1c6df7934bdde1ad13a8fa5cbee8725e28c01f39c492f8da60d",
+   "terms": "Release 17 (26 September 2013): the same terms as release 16; not quoted here",
+   "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r17.tar.gz"
+  },
+  "r18": {
+   "files": {
+    "CHANGES": "c88706024eba4d68ef21eb1ff0ef19f4b54d539260722662f9139e5bbe227b48",
+    "README.namelist": "cd12401348331f9db8d7719616b15d02f12f1b9af8872a687ef6a328318ff1f1",
+    "src/cm1.F": "dd208890b5279ef83a703bc3256948a7b91409a105f2a5235cadcb9251e3563d",
+    "src/param.F": "862415c7e330445e2a052c7cceff880d23553ba25bd07cb6c0a104a13becef3e"
+   },
+   "tarball_bytes": 686899,
+   "tarball_sha256": "3484aaed21627193422364aead80156326a744eb4a06912a7da3e660378c21ad",
+   "terms": "Release 18.3 (7 October 2015, the tarball cm1r18): the same terms as release 16; not quoted here",
+   "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r18.tar.gz"
+  },
+  "r19.10": {
+   "files": {
+    "CHANGES": "6240f812b4878722ae0dedd12b1f5d1371577c3e44db53bc3c504d77d326c588",
+    "README.namelist": "4567435c5bdb3ff4c13c9901bbf2982278529b2578f0aa81c2999d0a3812f075",
+    "src/input.F": "ebb24a57547ed9ac7cd1e44e7b3b9eff0bb74e918f5158494295fc86b58574bf",
+    "src/module_ra_etc.F": "a0e8a06a0700e44cb6e2eabf1ceb5e407f61d9ddb459306b978fcc50088ac22b",
+    "src/param.F": "70dcd4d7aea1c063064c28a440e53eb76d3df07ac27df1c6ac49754d36d21705"
+   },
+   "tarball_bytes": 5304509,
+   "tarball_sha256": "a6597d44bd291364eff281583dae8771b94885f93053dd46e8c9f2cc65a17b3f",
+   "terms": "Release 19.10 (4 March 2020): UCAR's permissive grant, copyright 2020 University Corporation for Atmospheric Research (the terms CM1 r21.1 carries); short lines quoted under it",
+   "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r19.10.tar.gz"
+  },
+  "r20.3": {
+   "files": {
+    "CHANGES": "90756b390596cd03851fcf2981ae888a4e81b9a88fd6b0606458dbf29f485c9b",
+    "README.namelist": "3f1c8d1610fb2f11fc007b6be9967c2380d96a36273d864858a01b74ff31f923",
+    "src/input.F": "74b9d1befcb74831c84ef65ba17a3458f9b30f41578aa9de87e67338ab328631",
+    "src/module_mp_nssl_2mom.F": "1bb990e887cf252f8ec08bfa86504e58b2f7fabf68a4844127c5e23dc7b50ea6",
+    "src/module_ra_etc.F": "943a7e285182f29aa4e885416b07dadd2180faec64b7c469f77367fab2e4e33d",
+    "src/param.F": "701643d98befccd9ae022339c8b9b6a7d81cf41af08d0a5f845d9d57681a5c15"
+   },
+   "tarball_bytes": 103848443,
+   "tarball_sha256": "ea981de71a7acd9d1f3ebb7c943065e75ece47ad74565d9e8849d8de5e5d838c",
+   "terms": "Release 20.3 (25 June 2021): UCAR's permissive grant, copyright 2021 University Corporation for Atmospheric Research (the terms CM1 r21.1 carries); short lines quoted under it",
+   "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r20.3.tar.gz"
+  }
+ },
+ "schema": "gm1.cm1-namelist-key-aliases/v1",
+ "sources": "each source names a release's file and line; 'text' quotes the line's words where the release is under UCAR's permissive grant (r19.10 and later, r21.1 included), and 'says' and 'line_sha256' describe and pin it where the release's own terms do not permit redistribution (r16, r17, r18)",
+ "target_release": "r21.1"
+}

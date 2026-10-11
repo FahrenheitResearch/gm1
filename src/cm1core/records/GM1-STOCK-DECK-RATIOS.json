@@ -1,0 +1,403 @@
+{
+ "schema": "gm1.stock-deck-ratios/v1",
+ "deck": "CM1 r21.1 run/config_files/supercell/namelist.input (120 x 120 x 40, 1 km, 2 h)",
+ "window": "mature-phase means over 3600-7200 s (5 frames)",
+ "measured": "2026-09-23: GM1 on an RTX 3080; CM1 r21.1 built unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU; each CM1 twin adds 1e-4 K to th0 at the lowest level",
+ "evidence": "the supercell-fidelity comparison of the development repository (not distributed); the rows here are its numbers",
+ "target": "within 5 % on every statistic (about 3 x CM1's twin spread): printed, not a gate",
+ "families": {
+  "updraft": "updraft family",
+  "downdraft": "downdraft, cold-pool and precipitation family"
+ },
+ "schemes": {
+  "morrison-mp10": {
+   "ptype": 5,
+   "reference": "CM1 r21.1 ptype = 5 (morrison.F), eqtset = 2",
+   "gates_release": true,
+   "rows": [
+    {
+     "key": "wmax",
+     "label": "max w",
+     "unit": "m/s",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 57.670428,
+     "gm1": 57.93818,
+     "ratio": 1.004643,
+     "twin": 1.003204,
+     "ramp0": 1.003513,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "uh_max",
+     "label": "max 2-5 km updraft helicity",
+     "unit": "m2/s2",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 675.279199,
+     "gm1": 680.01344,
+     "ratio": 1.007011,
+     "twin": 0.993476,
+     "ramp0": 1.048282,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "updraft_area_w_gt_10_at_k10_km2",
+     "label": "updraft area, w > 10 m/s at 5 km",
+     "unit": "km2",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 151.8,
+     "gm1": 155.4,
+     "ratio": 1.023715,
+     "twin": 1.001318,
+     "ramp0": 0.969697,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "zvort_max",
+     "label": "max vertical vorticity",
+     "unit": "1/s",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 0.027879,
+     "gm1": 0.029159,
+     "ratio": 1.045923,
+     "twin": 0.984124,
+     "ramp0": 1.054874,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "wmin",
+     "label": "min w",
+     "unit": "m/s",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": -33.298403,
+     "gm1": -33.201034,
+     "ratio": 0.997076,
+     "twin": 1.001116,
+     "ramp0": 1.031607,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "thpert_sfc_min",
+     "label": "lowest-level theta' min",
+     "unit": "K",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": -6.691174,
+     "gm1": -6.608569,
+     "ratio": 0.987655,
+     "twin": 1.001525,
+     "ramp0": 1.023333,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "coldpool_area_km2_lt_minus1K",
+     "label": "cold-pool area, theta' < -1 K",
+     "unit": "km2",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 1860.6,
+     "gm1": 1834.2,
+     "ratio": 0.985811,
+     "twin": 0.997958,
+     "ramp0": 0.965602,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "rain_area_gt_1mm_km2",
+     "label": "rain area > 1 mm",
+     "unit": "km2",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 1263.2,
+     "gm1": 1275.2,
+     "ratio": 1.0095,
+     "twin": 1.0,
+     "ramp0": 0.965643,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "rain_max_cm",
+     "label": "max rain",
+     "unit": "cm",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 6.781575,
+     "gm1": 6.850197,
+     "ratio": 1.010119,
+     "twin": 0.998907,
+     "ramp0": 0.889972,
+     "inside_band": true,
+     "inside_target": true
+    },
+    {
+     "key": "qg_max_gkg",
+     "label": "max graupel/hail mixing ratio",
+     "unit": "g/kg",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 13.347839,
+     "gm1": 13.438733,
+     "ratio": 1.00681,
+     "twin": 0.997781,
+     "ramp0": 1.002307,
+     "inside_band": true,
+     "inside_target": true
+    }
+   ],
+   "ratio_range": [
+    0.985811,
+    1.045923
+   ],
+   "twin_range": [
+    0.984124,
+    1.003204
+   ],
+   "all_inside_band": true,
+   "all_inside_target": true,
+   "location": {
+    "rule": "max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s",
+    "frames": [
+     {
+      "t_s": 1800.0,
+      "cells": 0.0
+     },
+     {
+      "t_s": 2700.0,
+      "cells": 0.0
+     },
+     {
+      "t_s": 3600.0,
+      "cells": 0.0
+     },
+     {
+      "t_s": 4500.0,
+      "cells": 0.0
+     },
+     {
+      "t_s": 5400.0,
+      "cells": 0.0
+     },
+     {
+      "t_s": 6300.0,
+      "cells": 1.0
+     },
+     {
+      "t_s": 7200.0,
+      "cells": 0.0
+     }
+    ],
+    "worst_cells": 1.0,
+    "inside": true
+   },
+   "onset": {
+    "rule": "max w at 1800 s within 15 % of CM1's",
+    "cm1": 29.348,
+    "gm1": 29.273,
+    "ratio": 0.997452,
+    "inside": true
+   },
+   "ramp0_note": "ramp0: CM1 itself run with ramp_sgs = 0, over CM1 with ramp_sgs = 1"
+  },
+  "wsm6-mp6": {
+   "ptype": 7,
+   "reference": "CM1 r21.1 ptype = 7, which CM1 runs at eqtset = 1 (param.F:936-948); GM1 runs eqtset = 2 with WSM6's heating converted to constant volume",
+   "gates_release": false,
+   "rows": [
+    {
+     "key": "wmax",
+     "label": "max w",
+     "unit": "m/s",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 51.343514,
+     "gm1": 56.151651,
+     "ratio": 1.093646,
+     "twin": 1.002891,
+     "inside_band": true,
+     "inside_target": false
+    },
+    {
+     "key": "uh_max",
+     "label": "max 2-5 km updraft helicity",
+     "unit": "m2/s2",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 636.889368,
+     "gm1": 755.179333,
+     "ratio": 1.185731,
+     "twin": 1.000152,
+     "inside_band": false,
+     "inside_target": false
+    },
+    {
+     "key": "updraft_area_w_gt_10_at_k10_km2",
+     "label": "updraft area, w > 10 m/s at 5 km",
+     "unit": "km2",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 131.6,
+     "gm1": 158.8,
+     "ratio": 1.206687,
+     "twin": 1.013678,
+     "inside_band": false,
+     "inside_target": false
+    },
+    {
+     "key": "zvort_max",
+     "label": "max vertical vorticity",
+     "unit": "1/s",
+     "family": "updraft",
+     "band": 0.1,
+     "cm1": 0.026126,
+     "gm1": 0.027733,
+     "ratio": 1.061497,
+     "twin": 1.000302,
+     "inside_band": true,
+     "inside_target": false
+    },
+    {
+     "key": "wmin",
+     "label": "min w",
+     "unit": "m/s",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": -28.854404,
+     "gm1": -33.790058,
+     "ratio": 1.171054,
+     "twin": 0.99033,
+     "inside_band": false,
+     "inside_target": false
+    },
+    {
+     "key": "thpert_sfc_min",
+     "label": "lowest-level theta' min",
+     "unit": "K",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": -7.442676,
+     "gm1": -8.351526,
+     "ratio": 1.122113,
+     "twin": 1.002599,
+     "inside_band": true,
+     "inside_target": false
+    },
+    {
+     "key": "coldpool_area_km2_lt_minus1K",
+     "label": "cold-pool area, theta' < -1 K",
+     "unit": "km2",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 1969.0,
+     "gm1": 2206.2,
+     "ratio": 1.120467,
+     "twin": 1.000406,
+     "inside_band": true,
+     "inside_target": false
+    },
+    {
+     "key": "rain_area_gt_1mm_km2",
+     "label": "rain area > 1 mm",
+     "unit": "km2",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 918.8,
+     "gm1": 1090.2,
+     "ratio": 1.186548,
+     "twin": 1.000435,
+     "inside_band": false,
+     "inside_target": false
+    },
+    {
+     "key": "rain_max_cm",
+     "label": "max rain",
+     "unit": "cm",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 9.599189,
+     "gm1": 8.765876,
+     "ratio": 0.913189,
+     "twin": 1.000946,
+     "inside_band": true,
+     "inside_target": false
+    },
+    {
+     "key": "qg_max_gkg",
+     "label": "max graupel/hail mixing ratio",
+     "unit": "g/kg",
+     "family": "downdraft",
+     "band": 0.15,
+     "cm1": 14.033865,
+     "gm1": 14.491766,
+     "ratio": 1.032628,
+     "twin": 0.970728,
+     "inside_band": true,
+     "inside_target": true
+    }
+   ],
+   "ratio_range": [
+    0.913189,
+    1.206687
+   ],
+   "twin_range": [
+    0.970728,
+    1.013678
+   ],
+   "all_inside_band": false,
+   "all_inside_target": false,
+   "location": {
+    "rule": "max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s",
+    "frames": [
+     {
+      "t_s": 1800.0,
+      "cells": 1.0
+     },
+     {
+      "t_s": 2700.0,
+      "cells": 1.0
+     },
+     {
+      "t_s": 3600.0,
+      "cells": 1.0
+     },
+     {
+      "t_s": 4500.0,
+      "cells": 1.0
+     },
+     {
+      "t_s": 5400.0,
+      "cells": 2.0
+     },
+     {
+      "t_s": 6300.0,
+      "cells": 2.236
+     },
+     {
+      "t_s": 7200.0,
+      "cells": 3.162
+     }
+    ],
+    "worst_cells": 3.162,
+    "inside": false
+   },
+   "onset": {
+    "rule": "max w at 1800 s within 15 % of CM1's",
+    "cm1": 23.091,
+    "gm1": 25.149,
+    "ratio": 1.089102,
+    "inside": true
+   }
+  }
+ }
+}

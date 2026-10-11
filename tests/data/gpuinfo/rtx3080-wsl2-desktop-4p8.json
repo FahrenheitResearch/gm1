@@ -1,0 +1,18 @@
+{
+ "_about": "The same card with 4.8 GB in use (the fit table's fixture)",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-77777777-8888-9999-aaaa-bbbbbbbbbbbb",
+   "name": "NVIDIA GeForce RTX 3080",
+   "memory.total": 10240,
+   "memory.used": 4578,
+   "memory.free": 5475,
+   "memory.reserved": 187,
+   "compute_cap": "8.6",
+   "driver_version": "610.74",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions (Mac, AMD, laptops, disk, privacy, where are my storms)
+    url: https://github.com/FahrenheitResearch/gm1#common-questions
+    about: The common questions about GM1, each answered in a line, before you write.
+  - name: Read this first - TROUBLESHOOTING
+    url: https://github.com/FahrenheitResearch/gm1/blob/main/docs/TROUBLESHOOTING.md
+    about: The common problems (driver, WSL2, install, port in use, greyed storms, blank pictures), each with its exact fix.

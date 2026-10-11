@@ -1,0 +1,115 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "iln-2012-06-29",
+  "order": 16,
+  "group": "famous",
+  "name": "Wilmington, Ohio, 29 June 2012 (afternoon balloon)",
+  "line": "Extremely unstable, very moist air (CAPE about 6300 J/kg) with moderate wind shear (19 m/s over 6 km).",
+  "budget": "10m",
+  "note": "The balloon launched at 1800 UTC (2 pm local time). A 200 x 120 km area for 3 hours; the ends of the line feel the open sides. The storm is started by a gentle push of rising air, as CM1's updraft nudging does. In a 1 km run the push starts one storm, not a line, and it has rained itself out within about 45 minutes (measured). This day's sounding in an idealized storm, not a reconstruction of that day's storms. The area is not made smaller than 120 km, because CM1's parcel grid covers 120 km; the fit makes the grid coarser or the storm shorter instead.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/squall_line/namelist.input",
+    "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 300,
+        "to": 200,
+        "why": "a 200 km long area, so the line has room to move east"
+      },
+      {
+        "key": "ny",
+        "from": 60,
+        "to": 120,
+        "why": "a 120 km wide area with open sides"
+      },
+      {
+        "key": "sbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides, which GM1 runs as CM1 does (repeating sides are not yet checked)"
+      },
+      {
+        "key": "nbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides"
+      },
+      {
+        "key": "iinit",
+        "from": 8,
+        "to": 12,
+        "why": "CM1's updraft nudging starts the storms: a gentle push of rising air for the first 20 minutes (Naylor and Gilmore 2012), with CM1's own strength, size and timing"
+      },
+      {
+        "key": "isnd",
+        "from": 5,
+        "to": 7,
+        "why": "the sounding is the file input_sounding beside this namelist"
+      },
+      {
+        "key": "iwnd",
+        "from": 1,
+        "to": 0,
+        "why": "the wind comes from the sounding file (CM1 sets iwnd = 0 with isnd = 7)"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 8.5,
+        "why": "the moving frame follows this sounding's storm motion (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 0.0,
+        "to": -7.125,
+        "why": "the moving frame follows this sounding's storm motion"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "iprcl",
+        "from": 0,
+        "to": 1,
+        "why": "follow air parcels, so Results can show air rising into the storm"
+      },
+      {
+        "key": "nparcels",
+        "from": 1,
+        "to": 36000,
+        "why": "CM1's own parcel grid: 60 x 60 across, every 2 km, and 10 levels, every 1 km"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 120
+  },
+  "min_duration_s": 5400,
+  "shrink": "both",
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "08b7bc5abd1d404707cd95a1ca14c8001f3b928b6a4d2b11e57c223775333dde",
+    "shipped_as": "data/soundings/kiln-2012-06-29-1800z.input_sounding",
+    "observation": "NWS rawinsonde, Wilmington, Ohio (ILN, WMO 72426), 1800 UTC 29 June 2012",
+    "source": "https://weather.uwyo.edu/wsgi/sounding?datetime=2012-06-29%2018:00:00&id=72426&src=UNKNOWN&type=TEXT:LIST",
+    "retrieved_utc": "2026-09-24T09:00:14Z",
+    "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive"
+  }
+}

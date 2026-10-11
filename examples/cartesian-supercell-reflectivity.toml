@@ -1,0 +1,107 @@
+# CM1's own supercell deck, with simulated radar reflectivity turned on.
+#
+# This is cartesian-supercell-translating-frame.toml -- the same sounding,
+# shear, grid, clock and translating frame -- plus the two [physics] words
+# that make every published frame carry what a meteorologist looks at:
+# output_dbz, which is CM1's own namelist name for "reflectivity (dBZ)?"
+# (README.namelist:1366-1369), and dbz_level_m, the single plan-view level.
+#
+# What that adds to the run, stated rather than left to be counted.  A frame
+# of this lane carries twelve carriers and about sixteen float32 words per
+# gridpoint.  output_dbz adds a thirteenth carrier, dbz, at exactly one more
+# word per gridpoint, and a fourteenth, cref, at one word per column;
+# dbz_level_m adds a fifteenth, also one word per column.  On this 60x60x40
+# grid that is 1.05 more words per gridpoint out of 16.16, or 6.5% of a
+# frame, and it is per-run: the deck beside this one publishes exactly the
+# frame it always did, byte for byte.
+#
+# It costs no forecast time on the steps that publish nothing.  CM1 raises
+# getdbz only on the steps whose completed state is about to be written
+# (cm1.F:3214-3237) and so does this port: nothing in the forecast reads
+# reflectivity, so it is computed at the history cadence and nowhere else.
+#
+# Render it with cm1-render --product reflectivity (the composite, CM1's own
+# calccref column maximum) or --product reflectivity-level --level K, both on
+# the standard NWS dBZ colour scale, and in gm1-view with
+# --science-layer reflectivity_dbz.
+
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+# CM1 README.namelist:1366-1369.  output_dbz writes the simulated 10 cm
+# reflectivity field and the composite -- column-maximum -- reflectivity CM1
+# calls cref (writeout.F:1081-1091 from misclibs.F:2259-2292).  It is the
+# field a meteorologist actually looks at: the hook, the forward-flank core
+# and the bounded weak echo region are all read off it.  The formula belongs
+# to the microphysics scheme, and this deck's scheme is WSM6, so the field is
+# WRF's own refl10cm_wsm6 (mp_wsm6.F90:2275-2444) through the declared ArWen
+# seam.  CM1 param.F:1583-1603 refuses output_dbz under a scheme that has no
+# reflectivity routine, and so does this port.
+output_dbz = true
+# CM1 writes the whole three-dimensional field and leaves a user to slice it.
+# This port also publishes one plan-view level, named in metres and resolved
+# through CM1's own descending level scan (misclibs.F:2454-2466).  1000 m is
+# the level a low-level radar scan of a supercell is read at.
+dbz_level_m = 1000.0

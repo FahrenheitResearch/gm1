@@ -1,0 +1,84 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "supercell-100m",
+  "order": 3,
+  "group": "start",
+  "name": "Supercell, 100 m, overnight",
+  "line": "The lowest kilometre of the storm in fine detail. An overnight run on a 16 GB card.",
+  "budget": "overnight",
+  "note": "The grid is fine enough to show the gust front and the spin near the ground in detail.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 120,
+        "to": 600,
+        "why": "a 60 km area at 100 m"
+      },
+      {
+        "key": "ny",
+        "from": 120,
+        "to": 600,
+        "why": "a 60 km area at 100 m"
+      },
+      {
+        "key": "nz",
+        "from": 40,
+        "to": 80,
+        "why": "80 levels of 250 m"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 100.0,
+        "why": "100 m grid spacing"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 100.0,
+        "why": "100 m grid spacing"
+      },
+      {
+        "key": "dz",
+        "from": 500.0,
+        "to": 250.0,
+        "why": "250 m levels, uniform as in CM1's file (stretched levels are not yet checked against CM1 in a storm)"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 0.6,
+        "why": "the time step scaled with the grid spacing"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 40
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "offered": false,
+  "not_offered_reason": "Not offered in 0.1.0: this preset stops early on a domain-position check; being fixed.",
+  "picture_from": "supercell-250m",
+  "gm1_settings": {
+    "initialization.bubble_center_x_m": 11000.0,
+    "initialization.bubble_center_y_m": 0.0
+  },
+  "gm1_settings_why": "The warm bubble that starts the storm sits 11 km east of the centre, so the storm stays inside this smaller area. CM1 keeps the bubble in its code, not the namelist, so this is a GM1 setting."
+}

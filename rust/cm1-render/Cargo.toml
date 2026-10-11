@@ -1,0 +1,27 @@
+[package]
+name = "cm1-render"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+publish = false
+description = "Rust-native renderer for GM1 history products"
+
+[dependencies]
+cm1-state = { path = "../cm1-state" }
+
+[[bin]]
+name = "cm1-render"
+path = "src/main.rs"
+
+[[bin]]
+name = "cm1-f64-window"
+path = "src/bin/f64_window.rs"
+
+[[bin]]
+name = "checkpoint-wind-grads"
+path = "src/bin/checkpoint_wind_grads.rs"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true

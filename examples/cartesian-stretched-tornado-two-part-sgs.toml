@@ -1,0 +1,109 @@
+# The stretched tornado-grade grid beside this file, integrated with CM1 r21.1's
+# Bryan (2020) two-part near-wall subgrid model instead of the plain Deardorff
+# closure.
+#
+# Why: a Deardorff TKE closure with a semi-slip lower boundary under-resolves
+# the wall layer.  Within the lowest few grid levels the resolved eddies are
+# smaller than the grid can carry, the TKE mixing length is capped by the
+# spacing, and the near-surface wind profile comes out too sheared -- the
+# "log-layer mismatch" of LES over rough surfaces.  CM1's two-part models
+# (README.namelist:334-352) keep the TKE closure and add a mean-shear eddy
+# viscosity that only acts where gamwall = 1-0.5*(1+tanh((z-150 m)/25 m)) is
+# nonzero (src/param.F:8869-8888): below roughly 250 m.
+#
+# sgs_model = 4 is the Bryan (2020) model (src/turb.F:6078-6267, t2pcode).  At
+# every w level of that wall layer it sets the eddy viscosity whose flux
+# divergence balances the domain-mean momentum tendency of everything else, and
+# divides by the log-law shear of the domain-mean friction velocity and
+# roughness length.  turbuz/turbvz then add that flux's divergence to the
+# vertical stress tendency (src/turbtend.F:1767-1802, :2424-2459).  It needs
+# CM1's semi-slip surface layer -- the domain-mean ust and znt come from it --
+# so bbc = 3 and sfcmodel = 1 are required, and sfcmodel=1's sfcdiags imposes a
+# neutral surface layer (src/sfcphys.F:529-535), which is the branch t2pcode
+# takes.
+#
+# Nothing two-part acts before 30 minutes: src/turb.F:264-270 ramps the model in
+# linearly from 1800 s to 3600 s.  Averages are over this whole domain
+# (t2p_avg = 1); CM1's per-column time average (t2p_avg = 2) is not ported.
+# A live nest child inherits this selection and averages over its own window.
+#
+# sgs_model = 3 (Sullivan et al. 1994) is also admitted.  In r21.1 its only live
+# effect is the isotropy factor gamk that scales kmh/kmv (src/turb.F:1612-1628);
+# its mean-shear flux is never copied into the array turbuz reads.  Its restart
+# writing is refused, because this lane's restart carries no gamk profile.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 1200
+ny = 1200
+nz = 75
+dx_m = 50.0
+dy_m = 50.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 15000.0
+str_bot_m = 200.0
+str_top_m = 7000.0
+dz_bot_m = 20.0
+dz_top_m = 320.0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 4
+t2p_avg = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 65536
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

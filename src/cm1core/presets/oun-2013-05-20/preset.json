@@ -1,0 +1,129 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "oun-2013-05-20",
+  "order": 10,
+  "group": "famous",
+  "name": "Norman, Oklahoma, 20 May 2013 (midday balloon)",
+  "line": "Very moist, very unstable air (CAPE about 4900 J/kg) with strong wind shear (26 m/s over 6 km).",
+  "budget": "10m",
+  "note": "The balloon launched at 1800 UTC (1 pm local time). The storm is started by a gentle push of rising air, as CM1's updraft nudging does. In a 1 km run the storm grows for about 15 minutes and has rained itself out within about an hour; CM1 r21.1 makes the same storm from this air, with the same life (both measured). At 250 m, on the full 120 km area, a 2-hour run of this card also made a storm, strongest in its first half hour. This day's sounding in an idealized storm, not a reconstruction of that day's storms.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 120,
+        "to": 480,
+        "why": "the same 120 km area at 250 m"
+      },
+      {
+        "key": "ny",
+        "from": 120,
+        "to": 480,
+        "why": "the same 120 km area at 250 m"
+      },
+      {
+        "key": "nz",
+        "from": 40,
+        "to": 80,
+        "why": "80 levels of 250 m: the same 20 km depth at twice the vertical detail (CM1's file has 40 of 500 m)"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dz",
+        "from": 500.0,
+        "to": 250.0,
+        "why": "250 m levels"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 1.5,
+        "why": "the time step scaled with the grid spacing, as CM1 advises (6 s at 1 km)"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "isnd",
+        "from": 5,
+        "to": 7,
+        "why": "the sounding is the file input_sounding beside this namelist"
+      },
+      {
+        "key": "iwnd",
+        "from": 2,
+        "to": 0,
+        "why": "the wind comes from the sounding file (CM1 sets iwnd = 0 with isnd = 7)"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 15.375,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 3.0,
+        "to": 8.0,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "iinit",
+        "from": 1,
+        "to": 12,
+        "why": "CM1's updraft nudging starts the storm: a gentle push of rising air for its first 20 minutes (Naylor and Gilmore 2012), with CM1's own strength, size and timing"
+      }
+    ]
+  },
+  "ladder_m": [
+    500,
+    1000
+  ],
+  "min_width_km": {
+    "default": 64
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "gm1_settings": {
+    "initialization.xc_wnudge": 4800.0,
+    "initialization.yc_wnudge": -6000.0
+  },
+  "gm1_settings_why": "The push of rising air that starts the storm is centred 4.8 km east and 6 km south of the centre, the storm-track check's recommended place for this sounding, so the storm keeps the most room to every side. CM1 keeps the nudging's centre in its code (xc_wnudge, yc_wnudge), not the namelist, so this is a GM1 setting.",
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "aa7d5afa3701ebf14f46221e532c144b01a94c4bc36baad0275db0c3da79e83d",
+    "shipped_as": "data/soundings/koun-2013-05-20-1800z.input_sounding",
+    "observation": "NWS rawinsonde, Norman, Oklahoma (OUN, WMO 72357), 1800 UTC 20 May 2013",
+    "source": "https://weather.uwyo.edu/wsgi/sounding?datetime=2013-05-20%2018:00:00&id=72357&src=UNKNOWN&type=TEXT:LIST",
+    "retrieved_utc": "2026-09-14",
+    "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive"
+  }
+}

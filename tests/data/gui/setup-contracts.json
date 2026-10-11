@@ -1,0 +1,756 @@
+{
+ "GET /api/examples": {
+  "examples": [
+   [
+    "cells",
+    "commands",
+    "duration_s",
+    "error",
+    "estimate",
+    "exit",
+    "grid",
+    "guided",
+    "id",
+    "kind",
+    "line",
+    "microphysics",
+    "name",
+    "not_offered",
+    "path",
+    "picture",
+    "picture_caption",
+    "plain_name",
+    "price",
+    "sounding",
+    "source",
+    "suggested_name",
+    "verdict",
+    "verdict_text"
+   ]
+  ],
+  "gpu": {
+   "driver_version": "str",
+   "free_bytes": "int",
+   "in_use_bytes": "int",
+   "index": "int",
+   "name": "str",
+   "sm": "str",
+   "total_bytes": "int",
+   "uuid": "str",
+   "wsl2": "bool"
+  },
+  "note": "str",
+  "pricing": "bool",
+  "root": "str"
+ },
+ "GET /api/runs/RUN/measure": [
+  "id",
+  "state"
+ ],
+ "GET /api/runs/RUN/namelist": [
+  "diff",
+  "editable",
+  "edited",
+  "id",
+  "original",
+  "sha256",
+  "text"
+ ],
+ "GET /api/runs/RUN/report: sections[]": [
+  "count",
+  "id",
+  "label",
+  "rows"
+ ],
+ "GET /api/runs/RUN/setup": {
+  "commands": {
+   "check": "str",
+   "estimate": "str",
+   "jobscript": "str",
+   "measure": "str",
+   "report_text": "str",
+   "start": "str"
+  },
+  "commands_log": "str",
+  "diff": "null",
+  "editable": "bool",
+  "estimate": {
+   "assumptions": "list",
+   "checks": [
+    [
+     "id",
+     "level",
+     "text"
+    ]
+   ],
+   "command": "str",
+   "fake_runner": "bool",
+   "fits": "bool",
+   "fits_rule": "str",
+   "gpu": [
+    "driver_version",
+    "free_bytes",
+    "in_use_bytes",
+    "index",
+    "name",
+    "sm",
+    "total_bytes",
+    "uuid",
+    "wsl2"
+   ],
+   "gpu_query": [
+    "elapsed_s",
+    "message",
+    "nvidia_smi",
+    "schema",
+    "status",
+    "wsl2"
+   ],
+   "recommendation": [
+    "memory_budget_mib"
+   ],
+   "rows": [
+    [
+     "basis",
+     "basis_label",
+     "fits",
+     "have_bytes",
+     "have_text",
+     "high_bytes",
+     "id",
+     "label",
+     "low_bytes",
+     "need_bytes",
+     "note",
+     "other_bytes",
+     "total_bytes",
+     "what"
+    ]
+   ],
+   "run": [
+    "acoustic_substeps",
+    "cells",
+    "closure_tile",
+    "dt_s",
+    "duration_s",
+    "frames",
+    "grid",
+    "history_interval_s",
+    "microphysics",
+    "restarts",
+    "steps"
+   ],
+   "step": [
+    "basis",
+    "label",
+    "measured_here",
+    "seconds"
+   ],
+   "wall": [
+    "basis",
+    "basis_label",
+    "high_s",
+    "label",
+    "low_s",
+    "value_s",
+    "words"
+   ]
+  },
+  "estimate_stale": "bool",
+  "files": {
+   "diff": "null",
+   "report_json": "str",
+   "report_text": "str"
+  },
+  "fit": "null",
+  "geometry": {
+   "admission_clearance_km": "float",
+   "bubble_km": "list",
+   "clearance_at_end_km": "float",
+   "coordinates": "str",
+   "deck_file_sha256": "str",
+   "domain_km": "list",
+   "door": "str",
+   "duration_s": "float",
+   "exit_time_s": "null",
+   "fit_edge_rule_km": "float",
+   "frame_m_s": "list",
+   "hodograph_frame": "str",
+   "hodograph_m_s": "list",
+   "iinit": "int",
+   "isnd": "int",
+   "iwnd": "int",
+   "left_mover_leaves_at_s": "float",
+   "meets_edge_rule": "bool",
+   "minimum_edge_clearance_km": "float",
+   "model": "str",
+   "open_sides": [
+    "east",
+    "north",
+    "south",
+    "west"
+   ],
+   "origin_km": "list",
+   "recommended_bubble_km": "list",
+   "recommended_frame_exact_m_s": "list",
+   "recommended_frame_m_s": "list",
+   "recommended_pair": [
+    "bubble_km",
+    "frame_m_s",
+    "minimum_edge_clearance_km",
+    "stays_inside",
+    "uses_it",
+    "why"
+   ],
+   "required_domain_km": "list",
+   "schema": "str",
+   "status": "str",
+   "stays_inside": "bool",
+   "steering_m_s": "list",
+   "storm_motion": [
+    "deviation_m_s",
+    "left_mover_m_s",
+    "mean_wind_m_s",
+    "method",
+    "right_mover_m_s"
+   ],
+   "track_km": [
+    "left",
+    "mean",
+    "right"
+   ],
+   "wind_source": "str"
+  },
+  "geometry_stale": "bool",
+  "has_run": "bool",
+  "id": "str",
+  "mode": "str",
+  "path": "str",
+  "plain": {
+   "sentences": "list",
+   "text": "str"
+  },
+  "report": {
+   "acknowledgments": [
+    "given",
+    "missing",
+    "needed"
+   ],
+   "aliases": "list",
+   "command": "str",
+   "component": [
+    "component",
+    "imoist",
+    "ptype",
+    "reason",
+    "scheme",
+    "status"
+   ],
+   "counts": [
+    "differs",
+    "not_checked",
+    "not_needed",
+    "not_read",
+    "refused",
+    "same"
+   ],
+   "error": "null",
+   "exit": "int",
+   "fake_runner": "bool",
+   "first_refused": "null",
+   "guided": [
+    "offered",
+    "reasons",
+    "why_not"
+   ],
+   "namelist": [
+    "edited",
+    "groups",
+    "name",
+    "original_sha256",
+    "path",
+    "settings_defaulted",
+    "settings_stated",
+    "sha256"
+   ],
+   "not_r21": "str",
+   "notes": "list",
+   "output": [
+    "also_netcdf",
+    "format",
+    "output_filetype",
+    "output_format",
+    "text",
+    "writer"
+   ],
+   "present": "bool",
+   "schema": "str",
+   "verdict": "str",
+   "verdict_text": "str"
+  },
+  "run": [
+   "acknowledgments",
+   "cm1",
+   "created_utc",
+   "deck",
+   "gm1",
+   "gpu",
+   "host",
+   "import",
+   "imported_utc",
+   "name",
+   "namelist",
+   "scheduler",
+   "schema",
+   "segments",
+   "sounding"
+  ],
+  "settings_toml": {
+   "output": [
+    "also_netcdf",
+    "filetype",
+    "format"
+   ],
+   "schema": "str"
+  },
+  "setup": {
+   "deck_initialization": [
+    "ibalance",
+    "iinit",
+    "iorigin",
+    "irandp",
+    "irst",
+    "isnd",
+    "iwnd",
+    "testcase"
+   ],
+   "fortran": [
+    [
+     "active",
+     "fields",
+     "id",
+     "plain",
+     "selector",
+     "source",
+     "title"
+    ]
+   ],
+   "gpu": [
+    "chosen",
+    "memory_budget_mib",
+    "note"
+   ],
+   "note": "str",
+   "output_words": [
+    [
+     "editable",
+     "fields",
+     "label",
+     "state",
+     "unvalidated",
+     "value",
+     "why",
+     "word"
+    ]
+   ],
+   "random_generator": "str",
+   "random_seed": "null",
+   "schema": "str",
+   "user_settings": [],
+   "values": [
+    "adapt_dt",
+    "bbc",
+    "dtl",
+    "dx",
+    "dy",
+    "dz",
+    "dz_bot",
+    "dz_top",
+    "ebc",
+    "fcor",
+    "icor",
+    "ihail",
+    "iinit",
+    "imoist",
+    "imove",
+    "iorigin",
+    "iprcl",
+    "irandp",
+    "irbc",
+    "isfcflx",
+    "isnd",
+    "iwnd",
+    "lspgrad",
+    "nbc",
+    "nx",
+    "ny",
+    "nz",
+    "output_filetype",
+    "output_format",
+    "prclfrq",
+    "ptype",
+    "rstfrq",
+    "sbc",
+    "sfcmodel",
+    "sgsmodel",
+    "statfrq",
+    "str_bot",
+    "str_top",
+    "stretch_x",
+    "stretch_y",
+    "stretch_z",
+    "tapfrq",
+    "tbc",
+    "tconfig",
+    "timax",
+    "umove",
+    "vmove",
+    "wbc",
+    "ztop"
+   ]
+  },
+  "sounding": {
+   "authority": "null",
+   "card": "null",
+   "checks": [
+    [
+     "state",
+     "text"
+    ]
+   ],
+   "claim_limit": "null",
+   "environment_status": "str",
+   "file": "null",
+   "hodograph": "list",
+   "hodograph_frame": "str",
+   "isnd": "int",
+   "iwnd": "int",
+   "motion_authority": "null",
+   "parcels": "list",
+   "reads_file": "bool",
+   "source": "str",
+   "storm_motion": [
+    "deviation_m_s",
+    "left_mover_m_s",
+    "mean_wind_m_s",
+    "method",
+    "right_mover_m_s"
+   ],
+   "surface": "null",
+   "wind": [
+    [
+     "label",
+     "u",
+     "unit",
+     "v"
+    ]
+   ],
+   "winds": "str"
+  },
+  "status": {
+   "actions": "list",
+   "duration_s": "null",
+   "end": "null",
+   "eta_s": "null",
+   "frames": "int",
+   "grid": "null",
+   "has_estimate": "bool",
+   "host": "null",
+   "import_exit_code": "int",
+   "label": "str",
+   "last_frame": "null",
+   "last_record_age_s": "null",
+   "last_restart": "null",
+   "local": "bool",
+   "microphysics": "null",
+   "model_s_per_wall_s": "null",
+   "model_time_s": "null",
+   "percent": "null",
+   "phase": "null",
+   "pid": "null",
+   "s_per_step_mean": "null",
+   "scheduler": "null",
+   "segment": "null",
+   "segments": "int",
+   "state": "str",
+   "view_only": "bool"
+  },
+  "steps": [
+   [
+    "id",
+    "label",
+    "number",
+    "state"
+   ]
+  ],
+  "url": "str",
+  "values": {
+   "adapt_dt": "int",
+   "bbc": "int",
+   "dtl": "float",
+   "dx": "float",
+   "dy": "float",
+   "dz": "float",
+   "dz_bot": "float",
+   "dz_top": "float",
+   "ebc": "int",
+   "fcor": "float",
+   "icor": "int",
+   "ihail": "int",
+   "iinit": "int",
+   "imoist": "int",
+   "imove": "int",
+   "iorigin": "int",
+   "iprcl": "int",
+   "irandp": "int",
+   "irbc": "int",
+   "isfcflx": "int",
+   "isnd": "int",
+   "iwnd": "int",
+   "lspgrad": "int",
+   "nbc": "int",
+   "nx": "int",
+   "ny": "int",
+   "nz": "int",
+   "output_filetype": "int",
+   "output_format": "int",
+   "prclfrq": "float",
+   "ptype": "int",
+   "rstfrq": "float",
+   "sbc": "int",
+   "sfcmodel": "int",
+   "sgsmodel": "int",
+   "statfrq": "float",
+   "str_bot": "float",
+   "str_top": "float",
+   "stretch_x": "int",
+   "stretch_y": "int",
+   "stretch_z": "int",
+   "tapfrq": "float",
+   "tbc": "int",
+   "tconfig": "int",
+   "timax": "float",
+   "umove": "float",
+   "vmove": "float",
+   "wbc": "int",
+   "ztop": "float"
+  }
+ },
+ "POST acknowledge": [
+  "action",
+  "command",
+  "diff",
+  "exit",
+  "first_refused",
+  "fix",
+  "message",
+  "ok",
+  "output",
+  "rc",
+  "report",
+  "run",
+  "settings_changed",
+  "stored_diff",
+  "verdict",
+  "verdict_text"
+ ],
+ "POST edit": [
+  "action",
+  "command",
+  "diff",
+  "exit",
+  "first_refused",
+  "fix",
+  "message",
+  "ok",
+  "output",
+  "rc",
+  "report",
+  "run",
+  "settings_changed",
+  "stored_diff",
+  "verdict",
+  "verdict_text"
+ ],
+ "POST jobscript": [
+  "action",
+  "command",
+  "file",
+  "fix",
+  "message",
+  "ok",
+  "output",
+  "rc",
+  "run",
+  "scheduler",
+  "script",
+  "submit"
+ ],
+ "setup.estimate": {
+  "assumptions": "list",
+  "checks": [
+   [
+    "id",
+    "level",
+    "text"
+   ]
+  ],
+  "command": "str",
+  "fake_runner": "bool",
+  "fits": "bool",
+  "fits_rule": "str",
+  "gpu": {
+   "driver_version": "str",
+   "free_bytes": "int",
+   "in_use_bytes": "int",
+   "index": "int",
+   "name": "str",
+   "sm": "str",
+   "total_bytes": "int",
+   "uuid": "str",
+   "wsl2": "bool"
+  },
+  "gpu_query": {
+   "elapsed_s": "float",
+   "message": "str",
+   "nvidia_smi": "str",
+   "schema": "str",
+   "status": "str",
+   "wsl2": "bool"
+  },
+  "recommendation": {
+   "memory_budget_mib": "int"
+  },
+  "rows": [
+   [
+    "basis",
+    "basis_label",
+    "fits",
+    "have_bytes",
+    "have_text",
+    "high_bytes",
+    "id",
+    "label",
+    "low_bytes",
+    "need_bytes",
+    "note",
+    "other_bytes",
+    "total_bytes",
+    "what"
+   ]
+  ],
+  "run": {
+   "acoustic_substeps": "int",
+   "cells": "int",
+   "closure_tile": "str",
+   "dt_s": "float",
+   "duration_s": "float",
+   "frames": "int",
+   "grid": [
+    "domain_km",
+    "dx_m",
+    "dy_m",
+    "dz_m",
+    "nx",
+    "ny",
+    "nz",
+    "stretch_z"
+   ],
+   "history_interval_s": "float",
+   "microphysics": "str",
+   "restarts": "int",
+   "steps": "int"
+  },
+  "step": {
+   "basis": "str",
+   "label": "str",
+   "measured_here": "bool",
+   "seconds": "float"
+  },
+  "wall": {
+   "basis": "str",
+   "basis_label": "str",
+   "high_s": "float",
+   "label": "str",
+   "low_s": "float",
+   "value_s": "float",
+   "words": "str"
+  }
+ },
+ "setup.geometry.recommended_pair": [
+  "bubble_km",
+  "frame_m_s",
+  "minimum_edge_clearance_km",
+  "stays_inside",
+  "uses_it",
+  "why"
+ ],
+ "setup.setup.fortran[]": [
+  "active",
+  "fields",
+  "id",
+  "plain",
+  "selector",
+  "source",
+  "title"
+ ],
+ "setup.setup.fortran[].fields[]": [
+  "changed",
+  "cm1",
+  "cm1_value",
+  "factor",
+  "key",
+  "kind",
+  "label",
+  "unit",
+  "value"
+ ],
+ "setup.setup.output_words[]": [
+  "editable",
+  "fields",
+  "label",
+  "state",
+  "unvalidated",
+  "value",
+  "why",
+  "word"
+ ],
+ "setup.sounding": {
+  "authority": "null",
+  "card": "null",
+  "checks": [
+   [
+    "state",
+    "text"
+   ]
+  ],
+  "claim_limit": "null",
+  "environment_status": "str",
+  "file": "null",
+  "hodograph": "list",
+  "hodograph_frame": "str",
+  "isnd": "int",
+  "iwnd": "int",
+  "motion_authority": "null",
+  "parcels": "list",
+  "reads_file": "bool",
+  "source": "str",
+  "storm_motion": {
+   "deviation_m_s": "list",
+   "left_mover_m_s": "list",
+   "mean_wind_m_s": "list",
+   "method": "str",
+   "right_mover_m_s": "list"
+  },
+  "surface": "null",
+  "wind": [
+   [
+    "label",
+    "u",
+    "unit",
+    "v"
+   ]
+  ],
+  "winds": "str"
+ }
+}

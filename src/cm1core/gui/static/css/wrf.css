@@ -1,0 +1,57 @@
+/* The column route: guided mode's WRF/ArWen card and its in-place panel, and advanced mode's New run panel.
+   Only the base's --gm1-* tokens (re-pointed by the Recast skin) and .is-new; nothing here changes a picture. */
+
+.wrf-card .wrf-pic { display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; }
+.wrf-panel { grid-column: 1 / -1; margin: 0; }
+.wrf-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 8px; }
+.wrf-panel-head .cap { margin: 0; }
+
+.wrf-flow { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wrf-flow .wrf-file { margin-bottom: 0; }
+.wrf-pathrow { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+.wrf-pathrow .action { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.wrf-found { margin: 4px 0 0; }
+.wrf-facts { margin: 0; color: var(--gm1-text); }
+.wrf-facts:empty, .wrf-say:empty, .wrf-chosen:empty { display: none; }
+.wrf-where { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wrf-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.wrf-row > label { color: var(--gm1-muted); }
+.wrf-row select.input { min-width: 14em; max-width: 100%; }
+.wrf-fields { display: flex; gap: 6px; }
+.wrf-fields .btn[aria-pressed="true"] { border-color: var(--gm1-text); color: var(--gm1-title); background: var(--gm1-hover); }
+.wrf-latlon .input.num { width: 8em; }
+
+.wrf-mapwrap { max-width: 960px; }
+.wrf-map { margin: 0; }
+.wrf-map img { width: 100%; aspect-ratio: 16 / 9; border: 1px solid var(--gm1-rule); background: var(--gm1-void);
+  cursor: crosshair; }
+.wrf-map figcaption { margin-top: 4px; }
+.wrf-map-empty { aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--gm1-rule); background: var(--gm1-void); color: var(--gm1-dim); font-size: var(--fs-small); }
+
+.wrf-preview { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.wrf-preview:empty { display: none; }
+.wrf-h { margin: 6px 0 0; font-size: 15px; color: var(--gm1-title); }
+.wrf-skewt { margin: 0; max-width: 1280px; }
+.wrf-skewt img { width: 100%; border: 1px solid var(--gm1-rule); background: var(--gm1-void); }
+.wrf-expect { margin: 0; color: var(--gm1-text); }
+.wrf-expect .sub { display: block; margin-top: 2px; font-size: var(--fs-small); color: var(--gm1-muted); }
+.wrf-about { border-left: 2px solid var(--gm1-muted); padding: 6px 12px; background: var(--gm1-ground); }
+.wrf-about h3 { margin: 0 0 4px; font-size: var(--fs-small); color: var(--gm1-muted); font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; }
+.wrf-about p { margin: 0; color: var(--gm1-text); }
+.wrf-next { margin-top: 12px; }
+
+.wrf-tab { margin-top: 16px; }
+.wrf-import { margin-top: 12px; border-top: 1px solid var(--gm1-rule); padding-top: 12px; }
+.wrf-import .input.mono { margin-top: 6px; width: 100%; }
+
+@media (max-width: 760px) {
+  .wrf-pathrow { grid-template-columns: minmax(0, 1fr); }
+  .wrf-row select.input { min-width: 0; width: 100%; }
+  .wrf-latlon .input.num { width: 7em; }
+}
+
+.wrf-check { display: block; margin: 4px 0 10px; color: var(--gm1-text); }
+.wrf-check input { margin-right: 6px; vertical-align: middle; }
+.wrf-check .sub { display: block; margin-top: 3px; font-size: var(--fs-small); color: var(--gm1-muted); }

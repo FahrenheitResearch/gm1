@@ -1,0 +1,558 @@
+{
+  "schema": "gpuwm-cm1.gpu-rates/v1",
+  "title": "Measured GM1 step rates, device memory and start-up, for gpuwm-cm1 estimate",
+  "labels": {
+    "measured": "a receipt of a run, cited by id and sha256",
+    "documented": "a repository document states it; the receipt is not in the repository",
+    "estimated": "arithmetic on measured or documented rows, stated",
+    "rough": "an unmeasured card, scaled from the RTX 3080's measured rate by vendor memory bandwidth"
+  },
+  "trees": {
+    "post-closure-fix": "the release lineage after the latent-heating closure fix",
+    "pre-closure-fix": "before the fix; the fix adds about 6 % to the stock deck's step (0.0719 s against 0.0675 s)"
+  },
+  "receipts": {
+    "rtx3080-120x120x40-morrison": {
+      "what": "the stock 1 km supercell (120 x 120 x 40) with Morrison, 1200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "c7dedb3dcdbebe0154f01005f2802d4c6228dc9d4db5bb11cf5c56299db4f8ba"
+    },
+    "rtx3080-120x120x40-wsm6": {
+      "what": "the stock 1 km supercell (120 x 120 x 40) with WSM6, 1200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "e58b15f0dc926b21418f473070db424273185938837b8a3c371a34e55487a559"
+    },
+    "rtx3080-256x256x80-morrison-tile128": {
+      "what": "the 250 m supercell (256 x 256 x 80) with Morrison, tile 128",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "27a632eba72e1f8c2ed86bbb38023cef6a0007c3a4998d70de7a0ce4d6287d37"
+    },
+    "rtx3080-256x256x80-wsm6-tile128": {
+      "what": "the 250 m supercell (256 x 256 x 80) with WSM6, tile 128",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "7839e5263823fb69182da303b1d419712986e1fea152668575c990cbb3353b1f"
+    },
+    "rtx3080-256x256x80-morrison-whole-tile": {
+      "what": "the 250 m supercell (256 x 256 x 80) with Morrison, one whole-domain tile",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "b0fd7fb415ab03d905cd339e08256211972a36752dcd67fbe641680148904b5d"
+    },
+    "rtx3080-120x120x40-morrison-second": {
+      "what": "a second run of the imported stock deck; its receipt was not kept, its event log was",
+      "tree": "post-closure-fix",
+      "receipt": "not kept"
+    },
+    "rtx3080-120x120x40-wsm6-second": {
+      "what": "a second run of the stock deck with WSM6; event log only",
+      "tree": "post-closure-fix, with runtime events",
+      "receipt": "not kept"
+    },
+    "rtx3080-256x256x80-morrison-earlier": {
+      "what": "0.2283 s/step over 1200 steps at 256x256x80; the receipt was not kept (documented)",
+      "tree": "pre-closure-fix",
+      "receipt": "not kept"
+    },
+    "rtx5090-640x768x80-morrison-tile128": {
+      "what": "640 x 768 x 80 (39.3 M cells) with Morrison, tile 128, on an RTX 5090",
+      "tree": "pre-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "9e7a8260aebe0ea5d29ea30664072d9e8aa8cab3f2c6a67665dc37a3a6a07db2"
+    },
+    "rtx5090-640x640x80-wsm6-whole-tile": {
+      "what": "640 x 640 x 80 (32.8 M cells) with WSM6, one whole-domain tile, on an RTX 5090",
+      "tree": "pre-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "48704af31c18d4db0ba731f434c7c1ae23061ab59f4fa8c23ea94763693c19ec"
+    },
+    "rtx4090-512x512x75": {
+      "what": "RTX 4090, 512 x 512 x 75, 0.315 s/step; documented, the receipt was not kept",
+      "tree": "pre-closure-fix",
+      "receipt": "not kept"
+    },
+    "rtx3080-120x120x40-morrison-check": {
+      "what": "the stock 1 km deck, 1200 steps, estimator verification (launch to exit 64.1 s)",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "bafb0bee8dc85bd987ca5aee3b38160737018ccbc86fa88d948b07d2d6d61739"
+    },
+    "rtx3080-128x128x80-morrison": {
+      "what": "the 250 m supercell's physics at 128 x 128 x 80 (1.31 M cells, one 128 x 128 tile), 200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "8f7d0bec6c6203613ee7eb33b7df0ef83519c373074fc91f429c8daff7500e0f"
+    },
+    "rtx3080-128x128x40-morrison": {
+      "what": "the 250 m supercell's physics at 128 x 128 x 40, dz 500 m (0.66 M cells), 200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "e7d379df05fb64600c0d02d949975115ddcffb50668111ffde789c4356c465ee"
+    },
+    "rtx3080-192x192x80-morrison-tile128": {
+      "what": "the 250 m supercell's physics at 192 x 192 x 80 (2.95 M cells), tile 128 (4 tiles, two of them 64 cells wide), 200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "0f57bf7ff8d2f953b552ecc393296383dd4de058833f2a6c06a4ea238d83d1ee"
+    },
+    "rtx3080-128x128x80-morrison-unused": {
+      "what": "an earlier 128 x 128 x 80 run, superseded by rtx3080-128x128x80-morrison; not used",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "46354e073bcbc2944586518175bc865963e37357cb378e2f5e1ab62aa4d057e4"
+    },
+    "rtx3080-160x160x80-morrison-tile128": {
+      "what": "the 250 m supercell's physics at 160 x 160 x 80 (2.05 M cells), tile 128 (4 tiles, two of them 32 cells wide), 200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "0f42821f29c72b67f76965ff46be71a999062917113ebfd1c6ef2e7591c76b2e"
+    },
+    "rtx3080-192x192x80-morrison-whole-tile": {
+      "what": "the 250 m supercell's physics at 192 x 192 x 80, one whole-domain tile, 200 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "f0c82b1be1fa63f4d9103c7a67fe0a22c8d236f432cd059db0a4a7c60d134d6a"
+    },
+    "rtx3080-264x264x80-morrison-tile128": {
+      "what": "the 250 m supercell's physics at 264 x 264 x 80 (5.58 M cells), tile 128 (9 tiles, five of them 8 cells wide), 100 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "9c52d0ddcdea5733be1d6c09135738ce23719199fdbd1db6512b4db492e92da5"
+    },
+    "rtx3080-240x240x80-morrison-tile128": {
+      "what": "the guided fit for a 10 GB RTX 3080 (240 x 240 x 80 at 500 m, dt 3 s), tile 128 (4 tiles), 100 steps",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "cff2b98ebcfa671926dbc78f59faaaf757bee523f7192b466bc37178e08dc48b"
+    }
+  },
+  "step_model": {
+    "formula": "seconds per large step = max(floor_s + (tiles - 1) x tile_s, cells x ns_per_cell_step x 1e-9), tiles = the closure tiles a step launches (1 for the whole domain)",
+    "why": "a GM1 step is host-launch-bound on small grids (a flat floor of 1300-1400 launches per step) and scales with cells once the device work exceeds it; the per-cell cost stays flat as the storm grows",
+    "acoustic_substeps": "not scaled: the 39.3 M-cell deck's body at 6 substeps ran 40.8-45.9 ns per cell-step on the RTX 3080 against 41.8 at 4, inside the band",
+    "band_measured": 0.25,
+    "band_documented": 0.35,
+    "band_estimated": 0.5,
+    "band_rough": 0.5,
+    "tiles": "every closure tile launches the closure's operations again, so a tiled grid whose tiles hold little device work is launch-bound: on the RTX 3080 160 x 160 x 80 at tile 128 ran 1.8 x its whole-domain speed (estimator verification)"
+  },
+  "cards": {
+    "rtx 3080": {
+      "sm": "sm_86",
+      "memory_bandwidth_gb_s": 760,
+      "rates": {
+        "morrison-mp10": {
+          "ns_per_cell_step": 41.8,
+          "label": "measured",
+          "basis": "measured on an RTX 3080 10 GB reference card: 0.2190 s per step, the mean over 200 steps at 256 x 256 x 80 (5.24 M cells), closure tile 128, 4 sound-wave steps per step; the whole-domain tile ran 0.2186 s",
+          "receipts": [
+            "rtx3080-256x256x80-morrison-tile128",
+            "rtx3080-256x256x80-morrison-whole-tile",
+            "rtx3080-256x256x80-morrison-earlier"
+          ],
+          "floor_s": 0.0476,
+          "floor_label": "measured",
+          "floor_basis": "measured on an RTX 3080 10 GB reference card: the stock 1 km supercell's mean step time over 1200 steps, averaged over two runs (0.0429 and 0.0523 s)",
+          "floor_receipts": [
+            "rtx3080-120x120x40-morrison",
+            "rtx3080-120x120x40-morrison-second"
+          ],
+          "tile_s": 0.038,
+          "tile_label": "measured",
+          "tile_basis": "the host seconds each closure tile after the first adds, measured on an RTX 3080 10 GB reference card: 0.036, 0.045 and 0.034 s at 160 x 160, 192 x 192 and 264 x 264 x 80 with tile 128, which ran 0.155, 0.184 and 0.321 s per step against 0.086, 0.123 and 0.233 s for their cells alone; 256 x 256 (4 full tiles) and 240 x 240 at 500 m stay device-bound",
+          "tile_receipts": [
+            "rtx3080-160x160x80-morrison-tile128",
+            "rtx3080-192x192x80-morrison-tile128",
+            "rtx3080-264x264x80-morrison-tile128"
+          ]
+        },
+        "wsm6-mp6": {
+          "ns_per_cell_step": 37.2,
+          "label": "measured",
+          "basis": "measured on an RTX 3080 10 GB reference card: 0.1952 s per step, the mean over 200 steps at 256 x 256 x 80, closure tile 128",
+          "receipts": [
+            "rtx3080-256x256x80-wsm6-tile128"
+          ],
+          "floor_s": 0.038,
+          "floor_label": "measured",
+          "floor_basis": "measured on an RTX 3080 10 GB reference card: the stock 1 km supercell's mean WSM6 step time over 1200 steps, averaged over two runs (0.0433 and 0.0326 s)",
+          "floor_receipts": [
+            "rtx3080-120x120x40-wsm6",
+            "rtx3080-120x120x40-wsm6-second"
+          ],
+          "tile_s": 0.038,
+          "tile_label": "estimated",
+          "tile_basis": "the Morrison runs' per-tile host cost: the closure tile launches the same operations under either scheme",
+          "tile_receipts": [
+            "rtx3080-160x160x80-morrison-tile128",
+            "rtx3080-192x192x80-morrison-tile128",
+            "rtx3080-264x264x80-morrison-tile128"
+          ]
+        }
+      }
+    },
+    "rtx 5090": {
+      "sm": "sm_120",
+      "memory_bandwidth_gb_s": 1792,
+      "rates": {
+        "morrison-mp10": {
+          "ns_per_cell_step": 13.5,
+          "label": "measured",
+          "basis": "measured on an RTX 5090 with an earlier build: 0.5302 s per step, the mean over 17,600 steps at 640 x 768 x 80 (39.3 M cells), closure tile 128, 6 sound-wave steps per step",
+          "receipts": [
+            "rtx5090-640x768x80-morrison-tile128"
+          ],
+          "floor_s": 0.0476,
+          "floor_label": "rough",
+          "floor_basis": "no small-grid run on this card; the floor is set by the host, and is taken from the RTX 3080 reference card",
+          "tile_s": 0.0166,
+          "tile_label": "estimated",
+          "tile_basis": "an upper bound on an RTX 5090 Linux system: a 640 x 768 x 80 run of 30 tiles of 128 ran 0.530 s per step device-bound, so each tile after the first cost at most (0.530 - 0.0476) / 29 s",
+          "tile_receipts": [
+            "rtx5090-640x768x80-morrison-tile128"
+          ]
+        },
+        "wsm6-mp6": {
+          "ns_per_cell_step": 9.2,
+          "label": "measured",
+          "basis": "measured on an RTX 5090 with an earlier build: 0.3011 s per step, the mean over 11,200 steps at 640 x 640 x 80 (32.8 M cells), whole-domain tile",
+          "receipts": [
+            "rtx5090-640x640x80-wsm6-whole-tile"
+          ],
+          "floor_s": 0.038,
+          "floor_label": "rough",
+          "floor_basis": "no small-grid run on this card; the RTX 3080 reference card's WSM6 floor",
+          "tile_s": 0.0166,
+          "tile_label": "estimated",
+          "tile_basis": "an upper bound on an RTX 5090 Linux system: a 640 x 768 x 80 run of 30 tiles of 128 ran 0.530 s per step device-bound, so each tile after the first cost at most (0.530 - 0.0476) / 29 s",
+          "tile_receipts": [
+            "rtx5090-640x768x80-morrison-tile128"
+          ]
+        }
+      }
+    },
+    "rtx 4090": {
+      "sm": "sm_89",
+      "memory_bandwidth_gb_s": 1008,
+      "rates": {
+        "wsm6-mp6": {
+          "ns_per_cell_step": 16.0,
+          "label": "documented",
+          "basis": "recorded on an RTX 4090 with an earlier build: 0.315 s per step at 512 x 512 x 75 (19.7 M cells), WSM6",
+          "receipts": [
+            "rtx4090-512x512x75"
+          ],
+          "floor_s": 0.038,
+          "floor_label": "rough",
+          "floor_basis": "the RTX 3080 reference card's WSM6 floor"
+        },
+        "morrison-mp10": {
+          "ns_per_cell_step": 23.5,
+          "label": "estimated",
+          "basis": "the documented WSM6 rate times the RTX 5090's measured Morrison/WSM6 ratio, 13.5/9.2",
+          "receipts": [
+            "rtx4090-512x512x75",
+            "rtx5090-640x768x80-morrison-tile128",
+            "rtx5090-640x640x80-wsm6-whole-tile"
+          ],
+          "floor_s": 0.0476,
+          "floor_label": "rough",
+          "floor_basis": "the RTX 3080 reference card's Morrison floor"
+        }
+      }
+    }
+  },
+  "component_fallback": {
+    "thompson-mp8": {
+      "use": "morrison-mp10",
+      "label": "rough",
+      "why": "Thompson has run only a 120-s column; no whole-model rate exists"
+    },
+    "native-cm1-ptype5": {
+      "use": "morrison-mp10",
+      "label": "rough",
+      "why": "no whole-model rate recorded"
+    },
+    "off": {
+      "use": "wsm6-mp6",
+      "label": "rough",
+      "why": "a dry run is cheaper than any moist one; WSM6's rate bounds it from above"
+    }
+  },
+  "reference_card": "rtx 3080",
+  "memory_bandwidth_gb_s": {
+    "_label": "rough: vendor memory bandwidth, GB/s, used only to scale the RTX 3080's measured rate to a card GM1 has no rate for",
+    "t4": 320,
+    "rtx 2060": 336,
+    "rtx 2060 super": 448,
+    "rtx 2070": 448,
+    "rtx 2070 super": 448,
+    "rtx 2080": 448,
+    "rtx 2080 super": 496,
+    "rtx 2080 ti": 616,
+    "titan rtx": 672,
+    "quadro rtx 4000": 416,
+    "quadro rtx 5000": 448,
+    "quadro rtx 6000": 672,
+    "quadro rtx 8000": 672,
+    "rtx 3050": 224,
+    "rtx 3060": 360,
+    "rtx 3060 ti": 448,
+    "rtx 3070": 448,
+    "rtx 3070 ti": 608,
+    "rtx 3080": 760,
+    "rtx 3080 ti": 912,
+    "rtx 3090": 936,
+    "rtx 3090 ti": 1008,
+    "rtx a2000": 288,
+    "rtx a4000": 448,
+    "rtx a4500": 640,
+    "rtx a5000": 768,
+    "rtx a5500": 768,
+    "rtx a6000": 768,
+    "a10": 600,
+    "a16": 200,
+    "a30": 933,
+    "a40": 696,
+    "a100 pcie 40gb": 1555,
+    "a100 sxm4 40gb": 1555,
+    "a100 pcie 80gb": 1935,
+    "a100 80gb pcie": 1935,
+    "a100 sxm4 80gb": 2039,
+    "rtx 4060": 272,
+    "rtx 4060 ti": 288,
+    "rtx 4070": 504,
+    "rtx 4070 super": 504,
+    "rtx 4070 ti": 504,
+    "rtx 4070 ti super": 672,
+    "rtx 4080": 717,
+    "rtx 4080 super": 736,
+    "rtx 4090": 1008,
+    "rtx 2000 ada": 224,
+    "rtx 4000 ada": 360,
+    "rtx 4500 ada": 432,
+    "rtx 5000 ada": 576,
+    "rtx 6000 ada": 960,
+    "l4": 300,
+    "l40": 864,
+    "l40s": 864,
+    "h100 pcie": 2000,
+    "h100 80gb hbm3": 3350,
+    "h100 nvl": 3900,
+    "h200": 4800,
+    "rtx 5060": 448,
+    "rtx 5060 ti": 448,
+    "rtx 5070": 672,
+    "rtx 5070 ti": 896,
+    "rtx 5080": 960,
+    "rtx 5090": 1792,
+    "rtx pro 6000 blackwell": 1792
+  },
+  "architectures_run": {
+    "sm_86": "RTX 3080 (this record's post-closure-fix receipts)",
+    "sm_89": "RTX 4090 (documented; the receipt was not kept)",
+    "sm_120": "RTX 5090 (receipts above)"
+  },
+  "largest_domain_cells": {
+    "value": 39321600,
+    "basis": "640 x 768 x 80 on an RTX 5090, the largest single domain GM1 has run"
+  },
+  "memory_model": {
+    "formula": "device bytes = priced_peak + fixed_bytes + per_cell_bytes x cells + component_extra_bytes",
+    "priced_peak": "cartesian_door.closure_decomposition_peak_bytes at the run's own closure tile: the dynamics phase peak, the persistent closure and reflectivity residents, and the largest of the held, TKE and physics-block workspaces (host-side, CUDA-cold)",
+    "fixed_bytes": 550000000,
+    "per_cell_bytes": 80,
+    "component_extra_bytes": {
+      "wsm6-mp6": 560000000
+    },
+    "fits": "device bytes <= 0.95 x nvidia-smi memory.free",
+    "fits_fraction_of_free": 0.95,
+    "band": 0.1,
+    "fit_method": "chosen over the seven Morrison runs then in hand (the four build runs and three estimator verification runs, 128 x 128 x 40, 128 x 128 x 80 and 192 x 192 x 80 on the RTX 3080): 0.55 GB + 80 B per cell puts every one within 7.7 % (the strict minimax, 0.53 GB + 99 B, gives 7.0 % but is 4.6 % high at 39.3 M cells); the WSM6 extra is the mean of the two RTX 3080 WSM6 rows' remainders, 0.56 GB. Four later verification runs (160 x 160, 192 x 192 whole-domain, 264 x 264 and 240 x 240 at 500 m) check it out of sample. The build fit (0.48 GB + 78 B) was 11 % low at 128 x 128 x 80, the direction that says fits and then runs out of memory",
+    "rows": [
+      {
+        "run": "rtx3080-120x120x40-morrison",
+        "cells": 576000,
+        "tile": "whole (120x120)",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 500706140,
+        "process_peak_bytes": 1024458752,
+        "method": "nvidia-smi 1 Hz: peak 2724 MiB minus 1747 MiB in use before launch"
+      },
+      {
+        "run": "rtx3080-256x256x80-morrison-tile128",
+        "cells": 5242880,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 2694175324,
+        "process_peak_bytes": 3705667584,
+        "method": "nvidia-smi 1 Hz: 5227 minus 1693 MiB"
+      },
+      {
+        "run": "rtx3080-256x256x80-morrison-whole-tile",
+        "cells": 5242880,
+        "tile": "whole (256x256)",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 4491129916,
+        "process_peak_bytes": 5234491392,
+        "method": "nvidia-smi 1 Hz: 6840 minus 1848 MiB"
+      },
+      {
+        "run": "rtx5090-640x768x80-morrison-tile128",
+        "cells": 39321600,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 15850275488,
+        "process_peak_bytes": 19378995200,
+        "method": "receipt sampled_peak_device_used_bytes on a card that held 2 MiB before (native Linux)"
+      },
+      {
+        "run": "rtx3080-128x128x40-morrison",
+        "cells": 655360,
+        "tile": "whole (128x128)",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 569210236,
+        "process_peak_bytes": 1087373312,
+        "method": "nvidia-smi 5 Hz: peak 3293 MiB minus 2256 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-128x128x80-morrison",
+        "cells": 1310720,
+        "tile": "whole (128x128)",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 1129796156,
+        "process_peak_bytes": 1924136960,
+        "method": "nvidia-smi 5 Hz: peak 4067 MiB minus 2232 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-192x192x80-morrison-tile128",
+        "cells": 2949120,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 1817234268,
+        "process_peak_bytes": 2621440000,
+        "method": "nvidia-smi 5 Hz: peak 4980 MiB minus 2480 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-160x160x80-morrison-tile128",
+        "cells": 2048000,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 1472103388,
+        "process_peak_bytes": 2368733184,
+        "method": "nvidia-smi 5 Hz: peak 4810 MiB minus 2551 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-192x192x80-morrison-whole-tile",
+        "cells": 2949120,
+        "tile": "whole (192x192)",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 2531492668,
+        "process_peak_bytes": 3280994304,
+        "method": "nvidia-smi 5 Hz: peak 5664 MiB minus 2535 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-264x264x80-morrison-tile128",
+        "cells": 5575680,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 2821294140,
+        "process_peak_bytes": 3904897024,
+        "method": "nvidia-smi 5 Hz: peak 6159 MiB minus 2435 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-240x240x80-morrison-tile128",
+        "cells": 4608000,
+        "tile": "128",
+        "component": "morrison-mp10",
+        "priced_peak_bytes": 2451605148,
+        "process_peak_bytes": 3451912192,
+        "method": "nvidia-smi 5 Hz: peak 5687 MiB minus 2395 MiB, the memory in use outside the run sampled before and after it",
+        "fit": "verification (out of sample)"
+      },
+      {
+        "run": "rtx3080-120x120x40-wsm6",
+        "cells": 576000,
+        "tile": "whole (120x120)",
+        "component": "wsm6-mp6",
+        "priced_peak_bytes": 456987740,
+        "process_peak_bytes": 1659895808,
+        "method": "nvidia-smi 1 Hz: 3436 minus 1853 MiB"
+      },
+      {
+        "run": "rtx3080-256x256x80-wsm6-tile128",
+        "cells": 5242880,
+        "tile": "128",
+        "component": "wsm6-mp6",
+        "priced_peak_bytes": 2417783388,
+        "process_peak_bytes": 3909091328,
+        "method": "nvidia-smi 1 Hz: 5435 minus 1707 MiB"
+      },
+      {
+        "run": "rtx5090-640x640x80-wsm6-whole-tile",
+        "cells": 32768000,
+        "tile": "whole (640x640)",
+        "component": "wsm6-mp6",
+        "priced_peak_bytes": 25613858908,
+        "process_peak_bytes": 27358658560,
+        "method": "receipt sampled_peak_device_used_bytes; this row checks the model and does not fit it"
+      }
+    ],
+    "replaces": "an earlier fit, 1.2 GB + 461 B/cell, which is within 5 % at 1.3-39 M cells at tile 128 but 72 % high at the stock deck's 0.58 M cells (1.47 GB against 0.86 GB measured then)",
+    "replaced": "0.48 GB + 78 B per cell + 0.65 GB for WSM6 (the build fit over four Morrison rows)"
+  },
+  "tile_rule": {
+    "rule": "a document that declares no closure tile runs one whole-domain tile (cartesian_door.resolve_closure_tiles); the estimator prices that, and recommends tile 128 when the whole domain does not fit the GPU's free memory, or when tile 128 needs less memory at no more than 3 % more estimated step time",
+    "why": "on the RTX 3080 at 256 x 256 x 80 the two ran at the same speed (0.2190 against 0.2186 s/step) and tile 128 needed 1.5 GB less (3534 against 4992 MiB); the whole-domain tile's held workspace grows as 470 B/cell. Tile 128 is not free on grids that are not multiples of it: at 192 x 192 x 80 it ran 0.184 s/step against 0.116 for the whole domain (estimator verification)",
+    "receipts": [
+      "rtx3080-256x256x80-morrison-tile128",
+      "rtx3080-256x256x80-morrison-whole-tile",
+      "rtx3080-192x192x80-morrison-tile128",
+      "rtx3080-192x192x80-morrison-whole-tile"
+    ],
+    "exception": "CM1's cecd=2/3 water-roughness iteration is the one path whose tiled words differ from untiled (docs/GM1-CARTESIAN-RUNTIME.md); with a surface layer over water the recommendation says so"
+  },
+  "startup": {
+    "formula": "seconds from launch to the first large step = fixed_s + per_cell_s x cells",
+    "fixed_s": 10.1,
+    "per_cell_s": 5.9e-07,
+    "band": 0.3,
+    "label": "measured",
+    "basis": "least squares over eight runs from 0.58 M to 39.3 M cells (8.4 to 36.1 s); NVRTC compiles 60-80 programs in 6-8 s every run"
+  },
+  "io": {
+    "snapshot_gb_s": 1.5,
+    "final_write_gb_s": 0.35,
+    "field_scan_s": 0.03,
+    "label": "measured",
+    "basis": "measured: a frame's blocking snapshot runs at 1.1-1.9 GB/s and a restart in mid-run at 0.7 GB/s; the last frame and restart are waited for, 0.26-0.39 GB/s measured",
+    "receipts": [
+      "rtx3080-120x120x40-morrison",
+      "rtx3080-256x256x80-morrison-tile128",
+      "rtx3080-256x256x80-wsm6-tile128",
+      "rtx3080-256x256x80-morrison-whole-tile"
+    ]
+  },
+  "disk": {
+    "frame": "cartesian_door.cartesian_history_plan payload_bytes (twice with --history-envelope on)",
+    "restart": "cartesian_restart.cartesian_restart_profile payload_nbytes",
+    "netcdf_over_raw": 1.3,
+    "netcdf_label": "estimated",
+    "netcdf_basis": "an earlier conversion of 5.24 M-cell frames: 0.44 GB raw against 0.57 GB of cm1out netCDF; the cm1out writer replaces this ratio with its own count",
+    "quicklook_bytes_per_frame": 3100000,
+    "quicklook_label": "measured: six 1920 x 1080 PNGs and their 480 x 270 thumbnails, 2.68-3.05 MB per frame on CM1's stock 1 km run, the 250 m run and a 100 m frame (the quick-look measurement record)"
+  },
+  "host_locked": {
+    "formula": "history payload + restart payload (the two page-locked publication arenas)",
+    "basis": "every measured run's locked host buffers equal the plan's two payloads (572,271,168 + 1,469,366,832 bytes at 256 x 256 x 80)"
+  }
+}

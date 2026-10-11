@@ -1,0 +1,116 @@
+# A fifty-metre Cartesian grid with fifty metres of near-ground vertical
+# spacing, run at a large step small enough for it.
+#
+# This profile exists because the large step is no longer welded anywhere.
+# CM1 r21.1 carries dt as a default-REAL variable (src/solve2.F:145) and
+# multiplies the four held diabatic rates by it in the final RK stage
+# (src/solve2.F:1569-1576); every GM1 stage, that kernel included, now takes
+# the step as an argument.
+#
+# The two bounds that remain are CM1's own, and both are checked before a
+# word of device memory is priced:
+#
+#   * src/misclibs.F:867, the psolver=3 three-dimensional branch of dtsmall:
+#     the acoustic small step dt/nsound may not exceed 0.60*min(dx,dy)/360,
+#     which is 0.60*50/360 = 0.0833 s here.  0.05/4 = 0.0125 s is well inside
+#     it, and src/misclibs.F:883-885 would itself derive nsound=4 for this
+#     pair.  The half second this port used to pin sits exactly on that limit
+#     at 50 m: 0.5/6 = 0.0833 s is admitted with no margin at all, and four
+#     substeps are refused outright.
+#   * src/misclibs.F:2726-2814 and src/misclibs.F:2584-2718 with the stop at
+#     src/misclibs.F:2714: the advective Courant number of the live wind
+#     field.  In a serial adapt_dt=0 build -- which is what this port runs --
+#     CM1 reaches that stop through src/statpack.F:469 at statistics cadence
+#     with stat_cfl=1 (its own shipped default, run/namelist.input:320), then
+#     writes the tripping state's output at src/cm1.F:3517-3520 and abandons
+#     the run at src/cm1.F:4385-4392.  GM1 measures it before the first large
+#     step and again at every history frame, which is earlier and no less
+#     often than CM1; that cadence is GM1's own choice, while the norm and the
+#     1.50 are CM1's.  (src/cm1.F:3020-3023 is not the authority for any of
+#     this: it is adapt_dt=1-only, #ifdef MPI-only, and its stopit is cleared
+#     at src/cm1.F:3035 before the first reader at src/cm1.F:3517.)
+#
+#     This is the bound that actually decides the step here.  At dt=0.5 s and
+#     50 m cells a 100 m/s wind is already at the Courant number
+#     src/misclibs.F:617 steers an adaptive run toward, and 150 m/s is CM1's
+#     stop; a tornado's vertical velocity through fifty-metre near-ground
+#     layers reaches that range, so the half second leaves no headroom to
+#     resolve the vortex it is meant to capture.  At dt=0.05 s the same grid
+#     carries 1000 m/s at that target and 1500 m/s before CM1 would abandon
+#     the run.
+#
+# 0.05 s is not exactly representable in binary32 or binary64, so the device
+# advances by float32(0.05) while the model clock accumulates the float64
+# value.  That is CM1's own arrangement, not a defect of this profile: cm1.F:62
+# declares dbldt double precision, cm1.F:1254 sets dbldt=dble(dt) from the
+# default-REAL dt the kernels use, and cm1.F:3510 advances mtime by dbldt.
+#
+# 3.2 km square at 50 m is deliberately small: this is a step-cadence and
+# admission profile, not a storm domain.  run.duration_s and
+# run.history_interval_s are whole numbers of large steps, which the fixed
+# clock requires and which a finer step makes easier, not harder.
+[run]
+lane = "cartesian"
+duration_s = 600.0
+dt_s = 0.05
+history_interval_s = 10.0
+restart_interval_s = 600.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 64
+ny = 64
+nz = 64
+dx_m = 50.0
+dy_m = 50.0
+dz_m = 50.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 800.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[runtime]
+acoustic_substeps = 4
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 1
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

@@ -1,0 +1,5917 @@
+{
+  "admission_states": {
+    "admitted": "Complete selected family exists behind an exact gate.",
+    "identity": "The value disables a family and requires no operator.",
+    "operator-only": "An independently validated operator exists but no arbitrary coupled trajectory is admitted.",
+    "partial": "Some selected-path implementation exists, but this value is not generically selectable.",
+    "unported": "No admitted implementation; the owning gate must refuse by selector and value."
+  },
+  "admitted_profiles": {
+    "dns-temperature-diffusion-all-bounded-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 DNS potential-temperature kappa/boundary preparation and the complete bc_temp=1/2 x doimpl=0/1 vertical diffusion slice with native O0/O2/repeat and CPU raw-word equality. No water-vapor saturation boundary, other scalar, horizontal turbulence, coupled turbulence dispatch, production trajectory, or forecast.",
+      "evidence": "evidence/oracles/dns-temperature-diffusion-source-exact-v1/receipt.json",
+      "gate": "cm1core.dns_temperature_diffusion.cpu_dns_temperature_diffusion_inplace",
+      "selectors": {
+        "bc_temp": [
+          1,
+          2
+        ],
+        "cm1setup": [
+          3
+        ],
+        "doimpl": [
+          0,
+          1
+        ],
+        "ivar": [
+          1
+        ]
+      }
+    },
+    "existing-psolver3-selected-paths": {
+      "admission": "partial",
+      "claim_limit": "Preserved selected operators; only the flat-periodic family below has a source-pinned stock pressure-profile gate and independent horizontally varying native primitive oracle. This matrix does not broaden the open/terrain claims.",
+      "gates": [
+        "cm1core.cuda_psolver3_periodic.require_psolver3_periodic_selection",
+        "cm1core.cuda_sound3_open_boundary",
+        "cm1core.cuda_psolver3_terrain_open"
+      ]
+    },
+    "idealized-radiation-all-bounded-branches-cpu-operator": {
+      "admission": "admitted",
+      "claim_limit": "Exact CM1 r21.1 default-constant cvm preparation, absent/present liquid and ice sums, Cartesian/axisymmetric inner budget weight, all three capped rterm=1 regions, optional dedicated diagnostic, pressure tendency, and serial binary64 energy budget with native O0/O2/repeat and CPU raw-word equality. A live device kernel now adds the capped theta tendency at the same boundary in the production Cartesian closure, selectable as closures.rterm; the earlier narrower typed binding fixed the Cartesian six-category post-idiss/pre-SGS theta-tendency boundary while preserving the rterm=0 receipt shape; pressure/budget side effects remain uncoupled and there is no active CUDA raw-bit or coupled-trajectory oracle. No simultaneous radopt/lspgrad/Coriolis, MPI reduction, complete axisymmetric coordinate system, production configuration, or forecast.",
+      "evidence": "evidence/oracles/idealized-radiation-source-exact-v1/receipt.json",
+      "gate": "cm1core.idealized_radiation.cpu_idealized_radiation_inplace",
+      "selectors": {
+        "axisymmetric_inner_budget_weight": [
+          0,
+          1
+        ],
+        "diagnostic": [
+          false,
+          true
+        ],
+        "eqtset": [
+          1,
+          2
+        ],
+        "iice": [
+          0,
+          1
+        ],
+        "imoist": [
+          0,
+          1
+        ],
+        "mpi": [
+          false
+        ],
+        "radopt": [
+          0
+        ],
+        "rterm": [
+          1
+        ]
+      },
+      "typed_solve1_binding": {
+        "active_coupled_trajectory_admitted": false,
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "consumer": "cm1core.cuda_gm1_tilestream_solve1_full_held.launch_cuda_gm1_tiled_solve1_full_held",
+        "energy_budget_coupled": false,
+        "evidence": "evidence/validation/cm1-idealized-radiation-solve1-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_solve1_idealized_radiation.prepare_cuda_gm1_solve1_idealized_radiation",
+        "pressure_tendency_coupled": false,
+        "requirements": {
+          "adaptive_dt": false,
+          "axisymmetric": 0,
+          "completed_nrk": 0,
+          "diagnostic": false,
+          "domain": [
+            75,
+            300,
+            300
+          ],
+          "dx_dy_dz_m": [
+            50.0,
+            50.0,
+            200.0
+          ],
+          "eqtset": 2,
+          "icor": 0,
+          "iice": 1,
+          "imoist": 1,
+          "lspgrad": 0,
+          "moisture_categories": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "mpi": false
+        },
+        "rterm_0_default_receipt_shape_unchanged": true,
+        "source_order": [
+          "eqtset=2 idiss",
+          "active rterm=1 idealized-radiation theta tendency",
+          "stretched SGS stress then scalar turbulence"
+        ]
+      }
+    },
+    "large-scale-nudging-all-components-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 solve1 schedule/ramp and u/v/theta/qv tendency blocks plus solve3 u/v base-profile update on supplied already-interpolated target profiles. Ten native profiles cover disabled/strict-boundary/ramped/full/instantaneous timing, one target rollover, each component, dry qv preservation, and all components with O0/O2/repeat and CPU raw-word equality. A typed CPU-tested binding fixes the late-solve1 held and solve3 post-held-recapture/pre-current-to-A boundaries with exact stream/full-held/RK3 lineage while the omitted branch preserves the default receipt shape. No external target-profile reader/interpolator, CUDA raw-bit oracle, terrain, MPI, diagnostics, checkpoint persistence of u/v base profiles, complete coupled trajectory, production configuration, or forecast.",
+      "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+      "excluded_source_blocks": [
+        "lsnudge_XXXX.dat reading/interpolation",
+        "terrain and MPI",
+        "diagnostics",
+        "complete solve1/solve3 coupling"
+      ],
+      "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+      "selectors": {
+        "do_lsnudge": [
+          false,
+          true
+        ],
+        "do_lsnudge_qv": [
+          false,
+          true
+        ],
+        "do_lsnudge_th": [
+          false,
+          true
+        ],
+        "do_lsnudge_u": [
+          false,
+          true
+        ],
+        "do_lsnudge_v": [
+          false,
+          true
+        ],
+        "imoist": [
+          0,
+          1
+        ],
+        "profile_rollover": [
+          false,
+          true
+        ],
+        "time_region": [
+          "start-boundary",
+          "ramp",
+          "full",
+          "end-boundary"
+        ]
+      },
+      "typed_solve1_solve3_binding": {
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "base_profiles_in_checkpoint_37": false,
+        "consumers": [
+          "cm1core.cuda_gm1_tilestream_solve1_full_held.launch_cuda_gm1_tiled_solve1_full_held",
+          "tools.run_live_gm1_tilestream_post_rk3_final_step.execute_live_post_rk3_final_step"
+        ],
+        "coupled_trajectory_admitted": false,
+        "disabled_default_receipt_shape_unchanged": true,
+        "evidence": "evidence/validation/cm1-large-scale-nudging-live-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_tilestream_large_scale_nudging.prepare_cuda_gm1_large_scale_nudging",
+        "requirements": {
+          "adaptive_dt": false,
+          "adaptive_move": false,
+          "budget_diagnostics": false,
+          "domain": [
+            75,
+            300,
+            300
+          ],
+          "external_target_profile_reader_or_interpolator": false,
+          "external_target_profiles_authenticated": true,
+          "icor": 0,
+          "idealized_radiation": false,
+          "lspgrad": 0,
+          "mpi_average": false,
+          "ramp_sgs": 0,
+          "rayleigh_variant": false,
+          "supplied_averages_authenticated": true,
+          "supplied_base_state_authenticated": true
+        },
+        "source_order": [
+          "solve1 final held composition",
+          "active supplied-profile u/v/theta/qv nudging",
+          "RK1/RK2/RK3 consume the exact full-held lineage",
+          "solve3 held-rate recapture",
+          "active u/v base-profile update",
+          "solve3 momentum current-to-A"
+        ]
+      }
+    },
+    "lspgrad-active-source-order-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "All four active CM1 r21.1 solve1.F:536-681 branches on an exact compact staggered tendency window, with native O0/O2/repeat and CPU raw-word equality. A bounded typed binding now fixes the post-Rayleigh/pre-idiss tile enqueue boundary and preserves the lspgrad=0 receipt shape, but has no active CUDA raw-bit oracle or coupled trajectory. No adaptive lspgrad, Coriolis combination, axisymmetric combination, complete solve1, or production configuration.",
+      "evidence": "evidence/oracles/lspgrad-source-exact-v1/receipt.json",
+      "gate": "cm1core.large_scale_pressure_gradient.cpu_large_scale_pressure_gradient_inplace",
+      "selectors": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "typed_solve1_binding": {
+        "active_coupled_trajectory_admitted": false,
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "consumer": "cm1core.cuda_gm1_tilestream_solve1_full_held.launch_cuda_gm1_tiled_solve1_full_held",
+        "evidence": "evidence/validation/cm1-lspgrad-solve1-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_solve1_lspgrad.prepare_cuda_gm1_solve1_lspgrad",
+        "lspgrad_0_default_receipt_shape_unchanged": true,
+        "requirements": {
+          "adaptive_lspgrad": false,
+          "axisymmetric": 0,
+          "completed_nrk": 0,
+          "domain": [
+            75,
+            300,
+            300
+          ],
+          "dx_dy_m": [
+            50.0,
+            50.0
+          ],
+          "icor": 0
+        },
+        "source_order": [
+          "terrain Rayleigh",
+          "active lspgrad=1..4",
+          "eqtset=2 idiss"
+        ]
+      }
+    },
+    "positive-definite-tracer-flat-periodic-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 flat Cartesian serial-periodic final-RK pdefx1/x2, pdefy1/y2, pdefz, scalar tendency/update, and final pdefq(0) on supplied directional advection, mass-flux, density, divergence, and metric carriers. Three native profiles cover pdtra=0 identity, pdtra=1 nonfinal identity, and active final-RK X/Y/Z donor repair plus column redistribution with O0/O2/repeat and CPU raw-word equality. No advection reconstruction, terrain, axisymmetry, open boundary, MPI exchange, diagnostics, coupled trajectory, production configuration, or forecast.",
+      "evidence": "evidence/oracles/positive-definite-tracer-source-exact-v1/receipt.json",
+      "excluded_source_blocks": [
+        "centered and WENO advection reconstruction",
+        "terrain and axisymmetric donor repair",
+        "lateral-open and MPI candidate exchange",
+        "diagnostics and complete solve2/RK coupling"
+      ],
+      "gate": "cm1core.positive_definite_tracer.cpu_positive_definite_tracer_update_inplace",
+      "selectors": {
+        "axisymmetric": [
+          false
+        ],
+        "lateral_boundary": [
+          "periodic"
+        ],
+        "mpi": [
+          false
+        ],
+        "nrk_relation": [
+          "nrk<nrkmax",
+          "nrk=nrkmax"
+        ],
+        "pdscheme": [
+          1
+        ],
+        "pdtra": [
+          0,
+          1
+        ],
+        "terrain_flag": [
+          false
+        ]
+      },
+      "stock_case_usage": {
+        "pdtra=0": 0,
+        "pdtra=1": 24
+      }
+    },
+    "prescribed-surface-flux-all-bounded-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 prescribed sensible/latent surface-flux fields, testcase 2/6 post-3000-second shutdown, testcase 11 early/middle/late forcing, dry/moist dispositions, and serial binary64 moisture-budget accumulation on supplied compact carriers with native O0/O2/repeat and CPU raw-word equality. No testcase 7 saturation replacement, set_flx=0 diagnosed flux, surface-model coupling, production trajectory, or forecast.",
+      "evidence": "evidence/oracles/prescribed-surface-flux-source-exact-v1/receipt.json",
+      "excluded_testcase": {
+        "7": "requires rslf saturation replacement"
+      },
+      "gate": "cm1core.prescribed_surface_flux.cpu_prescribed_surface_flux_inplace",
+      "selectors": {
+        "imoist": [
+          0,
+          1
+        ],
+        "isfcflx": [
+          1
+        ],
+        "set_flx": [
+          1
+        ],
+        "testcase": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10,
+          11,
+          12,
+          14,
+          15
+        ]
+      }
+    },
+    "psolver1-flat-serial-periodic-fixed-dt-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Three source-cadenced soundns.F RK stages with supplied live post-advs sten, held momentum/thermodynamic inputs, flat divergence/pressure update, velocity boundaries every stage, and pp3d boundaries only for nrk<3. No pressure-tendency advs, complete solve2/solve3, stock case, coupled trajectory, or forecast.",
+      "gate": "cm1core.cuda_psolver1_periodic.require_psolver1_periodic_selection",
+      "requirements": {
+        "adapt_dt": 0,
+        "apmasscon": 0,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 2,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "psolver": 1,
+        "roflux": 0,
+        "sbc": 1,
+        "stretch_x": 0,
+        "stretch_y": 0,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "stock_case_pressure_profile_matches": []
+    },
+    "psolver2-flat-serial-periodic-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Supplied-nsound explicit-compressible sounde acoustic/RK operator with held thv, piadv, ppterm, ppten, and momentum tendencies; not open-boundary les_HurrCoast, complete solve2/solve3, or forecast.",
+      "gate": "cm1core.cuda_psolver2_periodic.require_psolver2_periodic_selection",
+      "requirements": {
+        "apmasscon": 1,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 1,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "psolver": 2,
+        "roflux": 0,
+        "sbc": 1,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "stock_case_covered": "les_StableBoundLayer"
+    },
+    "psolver3-flat-serial-periodic-eqtset2-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Supplied-nsound sound.F acoustic/RK operator with held thv, piadv, ppterm, ppten, and momentum tendencies plus a proven horizontally homogeneous base profile. Matching 13 stock pressure/grid selector profiles does not admit their surrounding physics, complete solve2/solve3, coupled trajectories, or forecasts.",
+      "gate": "cm1core.cuda_psolver3_periodic.require_psolver3_periodic_selection",
+      "requirements": {
+        "apmasscon": 1,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 2,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "psolver": 3,
+        "roflux": 0,
+        "sbc": 1,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "stock_case_pressure_profile_matches": [
+        "cpm_RadConvEquil",
+        "dns_RayleighBenard",
+        "hurricane_3d_cpm",
+        "les_ConvBoundLayer",
+        "les_HurrBoundLayer",
+        "les_ShallowCu",
+        "les_ShallowCuPrecip",
+        "les_ShearBoundLayer",
+        "les_StratoCuDrizzle",
+        "les_StratoCuNoPrecip",
+        "scm_HurrBoundLayer",
+        "scm_HurrBoundLayer_tqnudge",
+        "sea_breeze"
+      ]
+    },
+    "psolver4-5-flat-serial-periodic-frame": {
+      "admission": "operator-only",
+      "claim_limit": "Complete selected periodic elliptic operator from live RHS through global phi2 and post-solve velocity projection/periodic-rigid closure. Compact supplied spectral modes are CPU/CUDA raw-bit exact; arbitrary-size Singleton/cuFFT identity is residual-bounded. No stock case, complete solve2, coupled trajectory, or forecast.",
+      "gate": "cm1core.cuda_anelp_periodic.require_anelp_periodic_selection",
+      "global_solve": "CM1 Singleton-normalized periodic FFT, source-built psolver>3 coefficients, vertical spectral Thomas solve, singular zero-mode gauge/reconstruction, inverse transform/d2 storage, and live projection",
+      "operator": "cm1core.cuda_anelp_poisson_periodic.launch_cuda_anelp_periodic_global_frame",
+      "requirements": {
+        "apmasscon": 0,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 1,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "roflux": 1,
+        "sbc": 1,
+        "stretch_x": 0,
+        "stretch_y": 0,
+        "stretch_z": 0,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "selectors": [
+        4,
+        5
+      ],
+      "stock_case_pressure_profile_matches": []
+    },
+    "psolver4-5-flat-serial-periodic-stretch-z1-50m-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 Wilhelmson-Chen grid words and mh/mf proof, CPU/CUDA raw-bit grid identity, and complete selected periodic psolver=4/5 operator on 300x300x75 live carriers for a 15 km square 50 m grid. Analytic operator validation only; no moving domain, nesting, complete solve2, trajectory, or forecast.",
+      "evidence": "evidence/validation/stretch-z1-anelp-50m-v1/validation-receipt.json",
+      "gate": "cm1core.cuda_anelp_periodic.require_anelp_periodic_selection plus proof-bound cm1core.cuda_stretch_z1.build_stretch_z1_metric_proof",
+      "grid_operator": "cm1core.cuda_stretch_z1.launch_cuda_stretch_z1",
+      "pressure_operator": "cm1core.cuda_anelp_poisson_periodic.launch_cuda_anelp_periodic_global_frame",
+      "requirements": {
+        "apmasscon": 0,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 1,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "roflux": 1,
+        "sbc": 1,
+        "stretch_x": 0,
+        "stretch_y": 0,
+        "stretch_z": 1,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "sealed_grid_parameters": {
+        "dx_m": 50.0,
+        "dz": 100.0,
+        "dz_bot": 20.0,
+        "dz_top": 400.0,
+        "nk": 75,
+        "str_bot": 200.0,
+        "str_top": 9650.0,
+        "ztop": 17650.0
+      },
+      "selectors": [
+        4,
+        5
+      ],
+      "stock_case_pressure_profile_matches": []
+    },
+    "psolver6-flat-serial-periodic-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Supplied-nsound/csound soundcb.F acoustic/RK operator with held momentum tendencies, acoustic velocity averages, periodic/rigid boundary cadence, final-stage filter/phi commit, and explicit solve3.F ppx=phi1+filter completion. No complete solve2/solve3, stock case, coupled trajectory, or forecast.",
+      "gate": "cm1core.cuda_psolver6_periodic.require_psolver6_periodic_selection",
+      "requirements": {
+        "apmasscon": 0,
+        "axisymm": 0,
+        "convinit": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 1,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "psolver": 6,
+        "roflux": 0,
+        "sbc": 1,
+        "terrain_flag": false,
+        "wbc": 1,
+        "wnudge": 0
+      },
+      "stock_case_pressure_profile_matches": [],
+      "stock_case_remaining": "les_ib_windtunnel selects wbc=2, ebc=2, irbc=2, and do_ib=true; mixed open/radiative and immersed-boundary coupling remain refused."
+    },
+    "psolver7-flat-serial-periodic-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Supplied-nsound sounde acoustic/RK operator with held inputs; not complete solve2/solve3 or forecast.",
+      "gate": "cm1core.cuda_psolver7_periodic.require_psolver7_periodic_selection",
+      "requirements": {
+        "apmasscon": 0,
+        "axisymm": 0,
+        "do_ib": false,
+        "ebc": 1,
+        "eqtset": 1,
+        "irbc": 4,
+        "mpi": false,
+        "nbc": 1,
+        "nudgeobc": 0,
+        "psolver": 7,
+        "roflux": 0,
+        "sbc": 1,
+        "terrain_flag": false,
+        "wbc": 1
+      }
+    },
+    "rayleigh-damping-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact coefficient initialization, vertical irdamp=1/2, all-four-side hrdamp=1 with max composition, serial binary64 area-weighted averages, selector normalization, and base/average tendencies with native O0/O2/repeat and CPU raw-word equality. The hrdamp-only r19.6 branch modifies w only. A narrower typed live binding fixes all five flat active pairs at the Rayleigh-held boundary while preserving the default child receipt shape; it has no active CUDA raw-bit or coupled-trajectory oracle. No terrain average damping, MPI reduction, axisymmetric lateral coefficient, diagnostics, simultaneous lspgrad/rterm, production trajectory, or forecast.",
+      "evidence": "evidence/oracles/rayleigh-damping-source-exact-v1/receipt.json",
+      "gate": "cm1core.rayleigh_damping.cpu_rayleigh_damping_inplace",
+      "selectors": {
+        "axisymm": [
+          0
+        ],
+        "hrdamp": [
+          0,
+          1
+        ],
+        "irdamp": [
+          1,
+          2
+        ],
+        "mpi": [
+          false
+        ],
+        "terrain_flag": [
+          false
+        ]
+      },
+      "typed_solve1_binding": {
+        "active_coupled_trajectory_admitted": false,
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "consumer": "cm1core.cuda_gm1_tilestream_solve1_full_held.launch_cuda_gm1_tiled_solve1_full_held",
+        "default_rayleigh_receipt_shape_unchanged": true,
+        "evidence": "evidence/validation/cm1-rayleigh-solve1-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_solve1_rayleigh_variants.prepare_cuda_gm1_solve1_rayleigh_variant",
+        "requirements": {
+          "active_irdamp_hrdamp_pairs": [
+            [
+              1,
+              0
+            ],
+            [
+              2,
+              0
+            ],
+            [
+              0,
+              1
+            ],
+            [
+              1,
+              1
+            ],
+            [
+              2,
+              1
+            ]
+          ],
+          "adaptive_dt": false,
+          "axisymmetric": 0,
+          "completed_nrk": 0,
+          "diagnostics": false,
+          "domain": [
+            75,
+            300,
+            300
+          ],
+          "dx_dy_m": [
+            50.0,
+            50.0
+          ],
+          "lspgrad": 0,
+          "mpi": false,
+          "rterm": 0,
+          "terrain_flag": false
+        },
+        "source_order": [
+          "replace the default terrain-Rayleigh held assignment on identical arrays",
+          "active flat irdamp/hrdamp exact held values",
+          "optional large-scale forcing then eqtset=2 idiss"
+        ]
+      }
+    },
+    "rotation-forcing-all-inner-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact f2d construction and all three icor=1 inner tendency branches with native O0/O2/repeat and CPU raw-word equality. A typed live binding fixes the solve2 post-divx/pre-momentum-advection stream boundary for RK1/RK2/RK3 while preserving the omitted icor=0 receipt shape, but has no active CUDA raw-bit or coupled-trajectory oracle. Axisymmetric=1 proves only the bounded source Coriolis u inner term and does not admit the axisymmetric coordinate system; adaptive combinations, simultaneous lspgrad, diagnostics, and production configuration remain refused.",
+      "evidence": "evidence/oracles/rotation-forcing-source-exact-v1/receipt.json",
+      "gate": "cm1core.rotation_forcing.cpu_rotation_forcing_inplace",
+      "selectors": {
+        "axisymmetric_inner_term": [
+          0,
+          1
+        ],
+        "betaplane": [
+          0,
+          1
+        ],
+        "icor": [
+          1
+        ]
+      },
+      "typed_solve2_binding": {
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "consumer": "cm1core.cuda_gm1_child_stretched_momentum.launch_cuda_gm1_child_stretched_momentum5",
+        "coupled_trajectory_admitted": false,
+        "evidence": "evidence/validation/cm1-rotation-solve2-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_solve2_rotation.prepare_cuda_gm1_solve2_rotation",
+        "icor0_receipt_shape_unchanged": true,
+        "requirements": {
+          "adaptive_dt": false,
+          "adaptive_move": false,
+          "axisymmetric_outer_coordinate": false,
+          "axisymmetric_u_inner_term_requires_explicit_bounded_opt_in": true,
+          "betaplane": [
+            0,
+            1
+          ],
+          "budget_diagnostics": false,
+          "domain": [
+            300,
+            300,
+            75
+          ],
+          "icor": 1,
+          "nrk": [
+            1,
+            2,
+            3
+          ],
+          "simultaneous_lspgrad": false,
+          "spacing_m": [
+            50.0,
+            50.0
+          ]
+        },
+        "rk_consumers": [
+          "cm1core.cuda_gm1_tilestream_pre_acoustic_momentum_rk.launch_cuda_gm1_tilestream_pre_acoustic_momentum_rk",
+          "cm1core.cuda_gm1_tilestream_rk23_pre_acoustic_momentum.launch_cuda_gm1_tilestream_rk23_pre_acoustic_momentum"
+        ],
+        "source_order": [
+          "terrain mass flux and bcw(rrw,0)",
+          "divx",
+          "active icor=1 rotation",
+          "advu then advv then advw"
+        ]
+      }
+    },
+    "scalar-artificial-diffusion-all-orders-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 flat Cartesian scalar difforder=2 horizontal/vertical diffusion and difforder=6 ordinary/monotonic horizontal diffusion on supplied halo, density, and metric carriers. Seven native profiles cover scalar idiff=0/1/2, mdiff=0/1, both orders, and cm1setup>=1 second-order normalization with O0/O2/repeat and CPU raw-word equality. No velocity diffusion, terrain, axisymmetry, boundary exchange, diagnostics, complete advection/turbulence dispatch, coupled trajectory, production configuration, or forecast.",
+      "evidence": "evidence/oracles/scalar-artificial-diffusion-source-exact-v1/receipt.json",
+      "excluded_source_blocks": [
+        "u/v/w velocity diffusion",
+        "terrain and axisymmetric diffusion",
+        "boundary exchange and diagnostics",
+        "complete solve1/solve2 advection and turbulence cadence"
+      ],
+      "gate": "cm1core.scalar_artificial_diffusion.cpu_scalar_artificial_diffusion_inplace",
+      "selectors": {
+        "axisymmetric": [
+          false
+        ],
+        "cm1setup": [
+          0,
+          1
+        ],
+        "difforder": [
+          2,
+          6
+        ],
+        "idiff": [
+          0,
+          1,
+          2
+        ],
+        "mdiff": [
+          0,
+          1
+        ],
+        "terrain_flag": [
+          false
+        ]
+      },
+      "stock_case_usage": {
+        "difforder=2": 0,
+        "difforder=6": 24
+      }
+    },
+    "sgs-startup-ramp-all-bounded-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 ramp_time normalization, pre/in/post ramp clamps, cm0 threshold preservation, cme floor, and source-ordered cme/ce1/ce2/csm updates with native O0/O2/repeat and CPU raw-word equality. A narrower typed live binding fixes the selected fresh cm1setup=1/sgsmodel=1 closure boundary on one exact stream while preserving the omitted ramp_sgs=0 receipt shape; active CUDA raw-bit and coupled-trajectory oracles remain absent. No retained TKE, simultaneous optional solve forcing, other SGS-model live dispatch, production configuration, forecast, storm, or tornado claim.",
+      "evidence": "evidence/oracles/sgs-startup-ramp-source-exact-v1/receipt.json",
+      "gate": "cm1core.sgs_startup_ramp.cpu_sgs_startup_ramp_inplace",
+      "selectors": {
+        "cm0_region": [
+          "cm0<=cmemin",
+          "cm0>cmemin"
+        ],
+        "idoles": [
+          true
+        ],
+        "ramp_sgs": [
+          1
+        ],
+        "sgsmodel": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "time_region": [
+          "pre-ramp",
+          "in-ramp",
+          "post-ramp"
+        ]
+      },
+      "typed_fresh_closure_binding": {
+        "active_cuda_raw_bit_oracle": false,
+        "admission": "cpu-tested-source-order-binding-only",
+        "consumer": "cm1core.cuda_gm1_tilestream_stretched_closure.launch_cuda_gm1_tiled_stretched_closure",
+        "coupled_trajectory_admitted": false,
+        "evidence": "evidence/validation/cm1-sgs-startup-ramp-live-source-order-binding-v1/validation-receipt.json",
+        "gate": "cm1core.cuda_gm1_tilestream_sgs_startup_ramp.prepare_cuda_gm1_tilestream_sgs_startup_ramp",
+        "ramp_sgs0_receipt_shape_unchanged": true,
+        "requirements": {
+          "adaptive_dt": false,
+          "cm0": "uniform-c_m-0.10",
+          "cm1setup": 1,
+          "completed_nrk": 0,
+          "domain": [
+            75,
+            300,
+            300
+          ],
+          "dx_dy_m": [
+            50.0,
+            50.0
+          ],
+          "mpi": false,
+          "ramp_sgs": 1,
+          "retained_tke": false,
+          "sgsmodel": 1,
+          "simultaneous_lspgrad": false,
+          "simultaneous_rayleigh_variant": false,
+          "simultaneous_rterm": false,
+          "tconfig": 1
+        },
+        "retained_tke_admitted": false,
+        "source_order": [
+          "source-normalized rtime/ramp_time and cm1setup=1 cm0=c_m selection",
+          "ramp_sgs=1 updates cme then ce1/ce2/csm before turbulence dispatch",
+          "fresh closure km/kh/dissten/tkea refresh on the exact source stream",
+          "rigid faces and tke3d/tketen copy after the refresh"
+        ]
+      }
+    },
+    "stretch-z1-fixed-terrain-four-open-50m-15km-static-metrics": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 fixed-terrain plus Wilhelmson-Chen stretch_z=1 static metric composition for the selected serial four-open 300x300x75, 50 m, 15 km-top shape. Native/CPU/CUDA compact raw-bit proof and a full-size analytic hardware gate only; no real child terrain, remap, hydrostatic/base-state repair, pressure integration, coupled trajectory, forecast, storm, or tornado claim.",
+      "evidence": "evidence/validation/stretch-z1-terrain-v1/validation-receipt.json",
+      "gate": "cm1core.cuda_stretch_z1_terrain.require_stretch_z1_terrain_selection",
+      "operator": "cm1core.cuda_stretch_z1_terrain.launch_cuda_stretch_z1_terrain",
+      "real_child_product_gate": "BLOCKED_PENDING_SOURCE_COORDINATE_TERRAIN_PRODUCER",
+      "record": "src/cm1core/records/CM1-STRETCH-Z1-TERRAIN.json",
+      "requirements": {
+        "axisymm": 0,
+        "do_ib": false,
+        "ebc": 2,
+        "hadvordrs": 5,
+        "hadvordrv": 5,
+        "imove": 0,
+        "mpi": false,
+        "nbc": 2,
+        "sbc": 2,
+        "stretch_x": 0,
+        "stretch_y": 0,
+        "stretch_z": 1,
+        "terrain_flag": true,
+        "wbc": 2
+      },
+      "sealed_grid_parameters": {
+        "dx_m": 50.0,
+        "dy_m": 50.0,
+        "dz": 100.0,
+        "dz_bot": 20.0,
+        "dz_top": 320.0,
+        "nk": 75,
+        "nx": 300,
+        "ny": 300,
+        "str_bot": 200.0,
+        "str_top": 7000.0,
+        "ztop": 15000.0
+      }
+    },
+    "surface-exchange-coefficients-all-bounded-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 neutral getcecd prescribed-roughness and prescribed-friction-velocity precedence, cecd=1/2/3, land/iterative-water, enthalpy disabled/enabled, and averaged-surface broadcast/restore branches on supplied compact carriers with native O0/O2/repeat and CPU raw-word equality. No turbulence tendencies, surface-flux application, external surface model, MPI, coupled trajectory, production configuration, or forecast.",
+      "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+      "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+      "selectors": {
+        "cecd": [
+          1,
+          2,
+          3
+        ],
+        "isfcflx": [
+          0,
+          1
+        ],
+        "land_water": [
+          "xland<=1.5",
+          "xland>1.5"
+        ],
+        "set_ust": [
+          0,
+          1
+        ],
+        "set_znt": [
+          0,
+          1
+        ],
+        "use_avg_sfc": [
+          false,
+          true
+        ]
+      }
+    },
+    "surface-initialization-all-bounded-branches-cpu-operator": {
+      "admission": "operator-only",
+      "claim_limit": "Exact CM1 r21.1 pre-landuse init_surface.F:40-227 default fields, initsfc=1/2/3/4, multi/single-layer soil disposition, all three dsxy branches, inactive preservation, PBL suppression, and the final cm1setup=4 compatibility override on supplied compact carriers with native O0/O2/repeat and CPU raw-word equality. No LANDUSE.TBL/getlanduse, post-landuse roughness, ocean model, surface-flux tendency, coupled trajectory, production configuration, or forecast.",
+      "evidence": "evidence/oracles/surface-initialization-source-exact-v1/receipt.json",
+      "excluded_source_blocks": [
+        "LANDUSE.TBL/getlanduse",
+        "post-landuse roughness",
+        "ocean-model initialization"
+      ],
+      "gate": "cm1core.surface_initialization.cpu_surface_initialization_inplace",
+      "selectors": {
+        "axisymm": [
+          0,
+          1
+        ],
+        "bbc": [
+          1,
+          2,
+          3
+        ],
+        "cm1setup": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "initsfc": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "ipbl": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "isfcflx": [
+          0,
+          1
+        ],
+        "sfcmodel": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ]
+      }
+    }
+  },
+  "default_policy": {
+    "null_or_missing_is_pass": false,
+    "operator-only": "require exact owning gate",
+    "partial": "require exact owning gate",
+    "unknown_selector": "refuse",
+    "unknown_value": "refuse",
+    "unported": "refuse"
+  },
+  "exhaustiveness_seal": {
+    "combined_selector_count": 82,
+    "forcing_projection_count": 38,
+    "forcing_projection_selectors": [
+      "bc_temp",
+      "bcturbs",
+      "cecd",
+      "cm1setup",
+      "cuparam",
+      "do_lsnudge",
+      "do_lsnudge_qv",
+      "do_lsnudge_th",
+      "do_lsnudge_u",
+      "do_lsnudge_v",
+      "doimpl",
+      "efall",
+      "eqtset",
+      "horizturb",
+      "iautoc",
+      "idiss",
+      "ihail",
+      "imoist",
+      "initsfc",
+      "ipbl",
+      "isfcflx",
+      "isftcflx",
+      "iz0tlnd",
+      "oceanmodel",
+      "pertflx",
+      "ptype",
+      "radopt",
+      "ramp_sgs",
+      "rterm",
+      "season",
+      "set_flx",
+      "set_ust",
+      "set_znt",
+      "sfcmodel",
+      "sgsmodel",
+      "t2p_avg",
+      "tconfig",
+      "testcase"
+    ],
+    "local_selector_count": 44,
+    "local_selectors": [
+      "adapt_dt",
+      "advwenos",
+      "advwenov",
+      "apmasscon",
+      "axisymm",
+      "bbc",
+      "betaplane",
+      "difforder",
+      "do_adapt_move",
+      "do_ib",
+      "do_recycle_e",
+      "do_recycle_n",
+      "do_recycle_s",
+      "do_recycle_w",
+      "ebc",
+      "hadvordrs",
+      "hadvordrv",
+      "hrdamp",
+      "ib_init",
+      "icor",
+      "idiff",
+      "imove",
+      "iorigin",
+      "iptra",
+      "irbc",
+      "irdamp",
+      "les_subdomain_shape",
+      "lspgrad",
+      "mdiff",
+      "nbc",
+      "nudgeobc",
+      "pdtra",
+      "psolver",
+      "roflux",
+      "sbc",
+      "stretch_x",
+      "stretch_y",
+      "stretch_z",
+      "tbc",
+      "terrain_flag",
+      "vadvordrs",
+      "vadvordrv",
+      "wbc",
+      "weno_order"
+    ],
+    "physics_matrix": {
+      "path": "src/cm1core/records/GM1-PHYSICS-SUPPORT.json",
+      "schema": "gm1.physics-support/v1",
+      "sha256": "36437535a9e0a0f83dc9c8a501840dfd2eeacb1fc3943f58d02b5c2ed8fb7dcf"
+    },
+    "source_namelist_declarations": "src/input.F:261-351"
+  },
+  "generated_at": "2026-08-29",
+  "math_authority": {
+    "release": "CM1 r21.1",
+    "release_tarball_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "source_files": {
+      "README.namelist": {
+        "bytes": 82596,
+        "sha256": "7b95be56db51f5c9396c59dca252cf96b918a312cc70107451f91149a34ab3b5"
+      },
+      "src/adv.F": {
+        "bytes": 120515,
+        "sha256": "e9985af10bdde4bfd83d34c43b641af9d073c948c472d9d5ea51ccb5f0a7a66f"
+      },
+      "src/anelp.F": {
+        "bytes": 9545,
+        "sha256": "a81a3382a0463d7a04611326b16431008c78903e1f1f6ef7f390838b66be1d2c"
+      },
+      "src/bc.F": {
+        "bytes": 64802,
+        "sha256": "5b7353a08b13eb9f69e4b89e250aec0e7918df3c93bd48c8539ab850787716e3"
+      },
+      "src/cm1.F": {
+        "bytes": 172367,
+        "sha256": "7650be7688b45288997b4a869f5c996869aa22eae0c3c1cffa04c372e7deedb4"
+      },
+      "src/constants.F": {
+        "bytes": 5569,
+        "sha256": "71cb7f92163a247c6f76df9d9d563f9fe4e1470123d0480a8c16762c2e0c8f94"
+      },
+      "src/diff2.F": {
+        "bytes": 34982,
+        "sha256": "00ebe1dc8fc3060758e99eb80f8167108fc81e5bd534781ddcfff0a1c46c1696"
+      },
+      "src/ib_module.F": {
+        "bytes": 60025,
+        "sha256": "b4776955435dd6fdd36969871daf589291f743622f49ce20fa779fb78a890080"
+      },
+      "src/init3d.F": {
+        "bytes": 90547,
+        "sha256": "9c45c0982ba194ea6ea74afd6a2516445cdd011fc90902091d089f4cb92dfd28"
+      },
+      "src/input.F": {
+        "bytes": 24941,
+        "sha256": "e8b3bb25e0b624d79da7d361a2027431b55f98434abfe19b4385d7c7e1692663"
+      },
+      "src/misclibs.F": {
+        "bytes": 108091,
+        "sha256": "2f8181c6de3a519fb55423911c292c56c2fb4ae0a75feeff7c0b27a73b82e7e1"
+      },
+      "src/param.F": {
+        "bytes": 326358,
+        "sha256": "cac64a6cb4363c6b88367b5cb9391f1bcf2130c63ffedef6e5973c03b190c349"
+      },
+      "src/pdef.F": {
+        "bytes": 17322,
+        "sha256": "815cb7729c441b07c8d171596543b15ec630ab0c87eda5ab59a95d4eab2ae670"
+      },
+      "src/poiss.F": {
+        "bytes": 5803,
+        "sha256": "279af0396d24b231e34862e014929d6212e63469ad165262adef289779a92b2f"
+      },
+      "src/singleton.F": {
+        "bytes": 38630,
+        "sha256": "af86ee66f26accde170ca6537668f9959f9d668425ee2da9c539c664dbd107bd"
+      },
+      "src/solve1.F": {
+        "bytes": 61895,
+        "sha256": "515346f18268aea39e7a919536ee6187386e5db6d184e6e4c597509c701e2076"
+      },
+      "src/solve2.F": {
+        "bytes": 71898,
+        "sha256": "a853067a5d3a943aed099dd85a8335fae9c16035a4fe18bed41ae9b05eecf734"
+      },
+      "src/solve3.F": {
+        "bytes": 41773,
+        "sha256": "686f89fa8c58fbf19d8fa2f5954e930eb2ec869ce60586fd763416f69c6a3393"
+      },
+      "src/sound.F": {
+        "bytes": 27741,
+        "sha256": "5fe055e22d106e91b5bdbe35ad7c72b2bbbcfb5b01733126703fdc7a5977da54"
+      },
+      "src/soundcb.F": {
+        "bytes": 17245,
+        "sha256": "f1f855744be92f22f24bed15e403b146815be5286a62e2c60fd2cd85a9bd9275"
+      },
+      "src/sounde.F": {
+        "bytes": 32653,
+        "sha256": "9eb759000607f9bfd02adc17b2ae16a67a1ad2ff66ff3a25a3f9dba0420fac67"
+      },
+      "src/soundns.F": {
+        "bytes": 10545,
+        "sha256": "725d773d9dad79b1926fd7f51a83362f1c04c3200d731528a388234d7aa0e51b"
+      },
+      "src/testcase_simple_phys.F": {
+        "bytes": 14831,
+        "sha256": "ce0a74ba558634cf712669aae3cbee2eafeb4e23a116e0fe3d819886938ffc72"
+      }
+    },
+    "source_root": "upstream/cm1-21.1/pristine"
+  },
+  "product_name": "GM1",
+  "schema": "gpuwm-cm1.dynamics-branch-matrix/v1",
+  "scope": {
+    "claim_limit": "Exhaustive inventory does not imply implementation. Only exact separately gated profiles/operators are callable; partial/operator-only/unported values cannot be promoted by this record.",
+    "excluded": {
+      "continuous_dimensions_and_tunables": "Inventoried as companion_fields or in the companion records; they are not finite branch enumerations.",
+      "hardwired_not_namelist": {
+        "pdscheme": "src/param.F:731-732 hard-wires pdscheme=1; it is not in a namelist."
+      },
+      "initialization_only": [
+        "isnd",
+        "iwnd",
+        "itern",
+        "iinit",
+        "irandp",
+        "ibalance"
+      ],
+      "restart_execution_io_diagnostics": [
+        "irst",
+        "rstnum",
+        "iconly",
+        "iprcl",
+        "nparcels",
+        "output_*",
+        "restart_*",
+        "stat_*"
+      ]
+    },
+    "included": [
+      "Every discrete param0/2/4/5/6/15/17/18/20 selector that chooses dynamics, grid topology, pressure, boundary, advection, diffusion, damping, rotation, moving-domain, tracer, or immersed-boundary branches.",
+      "Every param2/7/11/12/19 physics or large-scale-forcing selector, projected with all values from the separately exhaustive GM1 physics matrix.",
+      "Every branch value documented by README.namelist plus ib_init values dispatched in ib_module.F.",
+      "Explicit stock-case usage counts for all 24 official CM1 r21.1 config-file namelists."
+    ]
+  },
+  "selectors": {
+    "adapt_dt": {
+      "companion_fields": [
+        "dtl",
+        "cflmax"
+      ],
+      "constraints": [],
+      "family": "time-integration",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:222-225"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "fixed large timestep"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "adaptive large timestep"
+        }
+      }
+    },
+    "advwenos": {
+      "companion_fields": [
+        "weno_order"
+      ],
+      "constraints": [],
+      "family": "scalar-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:251-258"
+      ],
+      "values": {
+        "0": {
+          "admission": "operator-only",
+          "label": "centered scalar advection"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "WENO every RK stage"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Available only in separately ratified fifth-order scalar/TKE operators.",
+          "label": "WENO final RK stage"
+        }
+      }
+    },
+    "advwenov": {
+      "companion_fields": [
+        "weno_order"
+      ],
+      "constraints": [],
+      "family": "velocity-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:251-258"
+      ],
+      "values": {
+        "0": {
+          "admission": "operator-only",
+          "label": "centered velocity advection"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "WENO every RK stage"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Available only in separately ratified fifth-order velocity operators.",
+          "label": "WENO final RK stage"
+        }
+      }
+    },
+    "apmasscon": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "pressure-mass",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:271-279"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no pressure mass correction"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "domain-average pressure mass correction"
+        }
+      }
+    },
+    "axisymm": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "coordinate-system",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:716-720"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "Cartesian"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "axisymmetric"
+        }
+      }
+    },
+    "bbc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "vertical-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:574-580",
+        "src/param.F:1518-1532",
+        "src/turb.F:4515-4702",
+        "src/turb.F:3244-3306",
+        "src/turbtend.F:1454",
+        "src/turbtend.F:2224",
+        "src/solve1.F:917-988"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "label": "free slip"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "sfcstress bbc=2 lower face on the ground-relative wind, with the tkebc lower face CM1 leaves at zero when no surface layer fills znt/ust; gate cm1core.cuda_surface_drag.",
+          "label": "no slip"
+        },
+        "3": {
+          "admission": "operator-only",
+          "claim_limit": "sfcstress bbc=3 lower face from CM1's sfcmodel=1 surface layer in all four getcecd branches (set_znt=1, set_ust=1, cecd=1, cecd=2/3 over water), its tkebc lower face, its surface dissipative heating and, with isfcflx=1, the turb.F:292 surface pressure, the sfcflux computed branch and the turbtend.F:595 scalar lower flux; gate cm1core.cuda_surface_drag with cm1core.eqtset2_surface_dissipation and cm1core.surface_fields. Terrain, set_flx=1, oceanmodel=2 and the external surface layers remain refused by name.",
+          "label": "semi slip"
+        }
+      }
+    },
+    "bc_temp": {
+      "constraints": [
+        "The operator-only slice is limited to cm1setup=3 and ivar=1 potential temperature.",
+        "Water-vapor ivar=2 saturation boundaries and other scalar dispatch remain unported."
+      ],
+      "family": "dns-diffusion",
+      "namelist": "param7",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1177-1197",
+        "src/param.F:1550-1565",
+        "src/turbtend.F:466-690"
+      ],
+      "values": {
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact DNS potential-temperature boundary plus explicit/implicit vertical diffusion on supplied compact carriers; no coupled turbulence trajectory.",
+          "implemented_slice": {
+            "doimpl": [
+              0,
+              1
+            ],
+            "evidence": "evidence/oracles/dns-temperature-diffusion-source-exact-v1/receipt.json",
+            "gate": "cm1core.dns_temperature_diffusion.cpu_dns_temperature_diffusion_inplace",
+            "module": "src/cm1core/dns_temperature_diffusion.py",
+            "module_sha256": "908d2513e808a999d47eb0f399669bb52ede441f5f9fd75ec4a9cfa2b300011e",
+            "outer_selection": {
+              "cm1setup": 3,
+              "ivar": 1
+            },
+            "schema": "gpuwm-cm1.dns-temperature-diffusion/v1",
+            "status": "ADMITTED_CM1_R21_1_DNS_TEMPERATURE_DIFFUSION_OPERATOR_ONLY"
+          },
+          "label": "fixed-temperature boundary"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Exact DNS potential-temperature boundary plus explicit/implicit vertical diffusion on supplied compact carriers; no coupled turbulence trajectory.",
+          "implemented_slice": {
+            "doimpl": [
+              0,
+              1
+            ],
+            "evidence": "evidence/oracles/dns-temperature-diffusion-source-exact-v1/receipt.json",
+            "gate": "cm1core.dns_temperature_diffusion.cpu_dns_temperature_diffusion_inplace",
+            "module": "src/cm1core/dns_temperature_diffusion.py",
+            "module_sha256": "908d2513e808a999d47eb0f399669bb52ede441f5f9fd75ec4a9cfa2b300011e",
+            "outer_selection": {
+              "cm1setup": 3,
+              "ivar": 1
+            },
+            "schema": "gpuwm-cm1.dns-temperature-diffusion/v1",
+            "status": "ADMITTED_CM1_R21_1_DNS_TEMPERATURE_DIFFUSION_OPERATOR_ONLY"
+          },
+          "label": "specified-flux boundary"
+        }
+      }
+    },
+    "bcturbs": {
+      "family": "sgs",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:363-366",
+        "src/param.F:1480-1495"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "label": "zero scalar SGS flux at boundaries"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "zero scalar gradient at boundaries"
+        }
+      }
+    },
+    "betaplane": {
+      "companion_fields": [
+        "fcor",
+        "yh",
+        "centery"
+      ],
+      "constraints": [
+        "The bounded beta-plane operator is Cartesian; the separately inventoried axisymmetric coordinate system remains unported."
+      ],
+      "family": "rotation-forcing",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:526-529",
+        "src/constants.F:14-25,87",
+        "src/param.F:8945-8969",
+        "src/solve2.F:655-673"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "constant Coriolis"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL f2d construction and Cartesian beta-plane tendency-window operator; lateral-boundary compatibility and coupled solve2 remain unadmitted.",
+          "label": "beta-plane Coriolis"
+        }
+      }
+    },
+    "cecd": {
+      "constraints": [
+        "getcecd runs only for sfcmodel=1, which CM1 couples to bbc=3.",
+        "set_znt=1 and set_ust=1 take precedence over cecd entirely (src/sfcphys.F:81-118)."
+      ],
+      "family": "surface-option",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1019-1031",
+        "src/param.F:1345-1360",
+        "src/sfcphys.F:18-267"
+      ],
+      "values": {
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection": {
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "use_avg_sfc": [
+                false,
+                true
+              ]
+            },
+            "module": "src/cm1core/surface_exchange_coefficients.py",
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1",
+            "status": "ADMITTED_CM1_R21_1_SURFACE_EXCHANGE_COEFFICIENT_OPERATOR_ONLY"
+          },
+          "label": "constant exchange coefficients"
+        },
+        "2": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection": {
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "use_avg_sfc": [
+                false,
+                true
+              ]
+            },
+            "module": "src/cm1core/surface_exchange_coefficients.py",
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1",
+            "status": "ADMITTED_CM1_R21_1_SURFACE_EXCHANGE_COEFFICIENT_OPERATOR_ONLY"
+          },
+          "label": "Deacon wind-dependent coefficients"
+        },
+        "3": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection": {
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "use_avg_sfc": [
+                false,
+                true
+              ]
+            },
+            "module": "src/cm1core/surface_exchange_coefficients.py",
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1",
+            "status": "ADMITTED_CM1_R21_1_SURFACE_EXCHANGE_COEFFICIENT_OPERATOR_ONLY"
+          },
+          "label": "Fairall/Donelan/Drennan coefficients"
+        }
+      }
+    },
+    "cm1setup": {
+      "family": "closure-mode",
+      "gm1_note": "cm1setup is selectable as closures.cm1setup and defaults to 1. Values other than 1 refuse in the Cartesian lane with CM1-CFG-CLOSURE-HAS-NO-OFF-SWITCH: cuda_cartesian_closure integrates the prognostic-TKE closure every large step and reads no sgsmodel selector.",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:122-147",
+        "src/param.F:1172-1187"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "Euler equations; no SGS/PBL"
+        },
+        "1": {
+          "admission": "partial",
+          "label": "LES"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "mesoscale/PBL"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "DNS"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "nested LES inside mesoscale/PBL"
+        }
+      }
+    },
+    "cuparam": {
+      "family": "convection",
+      "gm1_note": "CM1 src/cu_ntiedtke.F and ArWen kernels/ntiedtke.cu are the same CCPP/MMM scheme with identical scale-dependency factors, but the kernel first appears in ArWen 2.7.4, and GM1's audited component surface for it is not coupled to any Cartesian stage.",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:514-517",
+        "src/init_physics.F:141-157",
+        "src/solve1.F:1510-1531",
+        "src/param.F:2208-2223"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no convection parameterization"
+        },
+        "1": {
+          "admission": "partial",
+          "label": "Tiedtke convection parameterization"
+        }
+      }
+    },
+    "difforder": {
+      "companion_fields": [
+        "idiff",
+        "mdiff",
+        "kdiff2",
+        "kdiff6"
+      ],
+      "constraints": [
+        "The operator-only slice is scalar and flat Cartesian; velocity diffusion, terrain, axisymmetry, boundary exchange, and diagnostics remain unported.",
+        "Complete solve1/solve2 advection and turbulence cadence remains unported.",
+        "For difforder=2, cm1setup>=1 follows native param.F normalization to effective idiff=0."
+      ],
+      "family": "artificial-diffusion",
+      "namelist": "param2",
+      "source": [
+        "README.namelist:278-306,743-747",
+        "src/input.F:266-277",
+        "src/solve1.F:686-728",
+        "src/diff2.F:540-735",
+        "src/adv.F:342-403",
+        "src/param.F:1087-1102"
+      ],
+      "values": {
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Exact flat Cartesian scalar second-order horizontal/vertical diffusion on supplied halo and metric carriers; no velocity diffusion or coupled dispatch.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/scalar-artificial-diffusion-source-exact-v1/receipt.json",
+            "gate": "cm1core.scalar_artificial_diffusion.cpu_scalar_artificial_diffusion_inplace",
+            "joint_selection": {
+              "axisymmetric": [
+                false
+              ],
+              "cm1setup": [
+                0,
+                1
+              ],
+              "idiff": [
+                0,
+                1,
+                2
+              ],
+              "mdiff": [
+                0,
+                1
+              ],
+              "terrain_flag": [
+                false
+              ]
+            },
+            "module": "src/cm1core/scalar_artificial_diffusion.py",
+            "module_sha256": "9da42bb02f9fbab53ac8b3505364f4a4ba1d59baaebf517a3ab29d5469eccf15",
+            "schema": "gpuwm-cm1.scalar-artificial-diffusion/v1",
+            "status": "ADMITTED_CM1_R21_1_SCALAR_ARTIFICIAL_DIFFUSION_OPERATOR_ONLY"
+          },
+          "label": "second-order"
+        },
+        "6": {
+          "admission": "operator-only",
+          "claim_limit": "Exact flat Cartesian scalar ordinary/monotonic sixth-order horizontal diffusion on supplied halo and density carriers; no velocity diffusion or coupled RK dispatch.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/scalar-artificial-diffusion-source-exact-v1/receipt.json",
+            "gate": "cm1core.scalar_artificial_diffusion.cpu_scalar_artificial_diffusion_inplace",
+            "joint_selection": {
+              "axisymmetric": [
+                false
+              ],
+              "cm1setup": [
+                0,
+                1
+              ],
+              "idiff": [
+                0,
+                1,
+                2
+              ],
+              "mdiff": [
+                0,
+                1
+              ],
+              "terrain_flag": [
+                false
+              ]
+            },
+            "module": "src/cm1core/scalar_artificial_diffusion.py",
+            "module_sha256": "9da42bb02f9fbab53ac8b3505364f4a4ba1d59baaebf517a3ab29d5469eccf15",
+            "schema": "gpuwm-cm1.scalar-artificial-diffusion/v1",
+            "status": "ADMITTED_CM1_R21_1_SCALAR_ARTIFICIAL_DIFFUSION_OPERATOR_ONLY"
+          },
+          "label": "sixth-order"
+        }
+      }
+    },
+    "do_adapt_move": {
+      "companion_fields": [
+        "adapt_move_frq"
+      ],
+      "constraints": [],
+      "family": "moving-domain",
+      "namelist": "param15",
+      "source": [
+        "src/input.F:336-337",
+        "README.namelist:1789-1797"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "storm-following adaptive motion"
+        }
+      }
+    },
+    "do_ib": {
+      "companion_fields": [
+        "ib_init",
+        "top_cd",
+        "side_cd"
+      ],
+      "constraints": [],
+      "family": "immersed-boundary",
+      "namelist": "param20",
+      "source": [
+        "src/input.F:348-349",
+        "README.namelist:1910-1920",
+        "src/ib_module.F:75-177"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "immersed boundary"
+        }
+      }
+    },
+    "do_lsnudge": {
+      "constraints": [
+        "The operator requires authenticated, already-interpolated target profiles; lsnudge_XXXX.dat reading/interpolation is excluded.",
+        "Terrain, MPI, diagnostics, complete solve1/solve3 execution, and coupled trajectories remain unported."
+      ],
+      "family": "large-scale-forcing",
+      "namelist": "param19",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1863-1904",
+        "src/input.F:345-347",
+        "src/solve1.F:252-288,1608-1693",
+        "src/solve3.F:357-408"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "no large-scale nudging"
+        },
+        "true": {
+          "admission": "operator-only",
+          "claim_limit": "Exact schedule/ramp, selected u/v/theta/qv tendencies, and u/v base-profile update on supplied already-interpolated targets; no external profile reader or coupled solve1/solve3 trajectory.",
+          "implemented_slice": {
+            "component_selectors": [
+              "do_lsnudge_u",
+              "do_lsnudge_v",
+              "do_lsnudge_th",
+              "do_lsnudge_qv"
+            ],
+            "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+            "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+            "imoist": [
+              0,
+              1
+            ],
+            "module": "src/cm1core/large_scale_nudging.py",
+            "module_sha256": "f3f3642c830a2fb0fd6115727684a8d6b9917b32563f8bc5d258d93b5ed01e5c",
+            "schema": "gpuwm-cm1.large-scale-nudging/v1",
+            "status": "ADMITTED_CM1_R21_1_LARGE_SCALE_NUDGING_OPERATOR_ONLY"
+          },
+          "label": "large-scale nudging enabled"
+        }
+      }
+    },
+    "do_lsnudge_qv": {
+      "constraints": [
+        "The operator requires authenticated, already-interpolated target profiles; lsnudge_XXXX.dat reading/interpolation is excluded.",
+        "qv application requires imoist=1; imoist=0 is exact identity.",
+        "Complete solve1 coupling remains unported."
+      ],
+      "family": "large-scale-forcing",
+      "namelist": "param19",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1863-1904",
+        "src/solve1.F:1674-1693"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "do not nudge vapor"
+        },
+        "true": {
+          "admission": "operator-only",
+          "claim_limit": "Exact supplied-profile qv tendency with native imoist=0 preservation/imoist=1 application only; no coupled trajectory.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+            "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+            "imoist": [
+              0,
+              1
+            ],
+            "module": "src/cm1core/large_scale_nudging.py",
+            "module_sha256": "f3f3642c830a2fb0fd6115727684a8d6b9917b32563f8bc5d258d93b5ed01e5c",
+            "outer_selection": {
+              "do_lsnudge": true
+            },
+            "schema": "gpuwm-cm1.large-scale-nudging/v1",
+            "status": "ADMITTED_CM1_R21_1_LARGE_SCALE_NUDGING_OPERATOR_ONLY"
+          },
+          "label": "nudge vapor"
+        }
+      }
+    },
+    "do_lsnudge_th": {
+      "constraints": [
+        "The operator requires authenticated, already-interpolated target profiles; lsnudge_XXXX.dat reading/interpolation is excluded.",
+        "Complete solve1 coupling remains unported."
+      ],
+      "family": "large-scale-forcing",
+      "namelist": "param19",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1863-1904",
+        "src/solve1.F:1654-1673"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "do not nudge theta"
+        },
+        "true": {
+          "admission": "operator-only",
+          "claim_limit": "Exact supplied-profile theta tendency only; no coupled trajectory.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+            "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+            "module": "src/cm1core/large_scale_nudging.py",
+            "module_sha256": "f3f3642c830a2fb0fd6115727684a8d6b9917b32563f8bc5d258d93b5ed01e5c",
+            "outer_selection": {
+              "do_lsnudge": true
+            },
+            "schema": "gpuwm-cm1.large-scale-nudging/v1",
+            "status": "ADMITTED_CM1_R21_1_LARGE_SCALE_NUDGING_OPERATOR_ONLY"
+          },
+          "label": "nudge theta"
+        }
+      }
+    },
+    "do_lsnudge_u": {
+      "constraints": [
+        "The operator requires authenticated, already-interpolated target profiles; lsnudge_XXXX.dat reading/interpolation is excluded.",
+        "Complete solve1/solve3 coupling remains unported."
+      ],
+      "family": "large-scale-forcing",
+      "namelist": "param19",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1863-1904",
+        "src/solve1.F:1614-1633",
+        "src/solve3.F:357-382"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "do not nudge u"
+        },
+        "true": {
+          "admission": "operator-only",
+          "claim_limit": "Exact supplied-profile u tendency and base-profile update only; no coupled trajectory.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+            "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+            "module": "src/cm1core/large_scale_nudging.py",
+            "module_sha256": "f3f3642c830a2fb0fd6115727684a8d6b9917b32563f8bc5d258d93b5ed01e5c",
+            "outer_selection": {
+              "do_lsnudge": true
+            },
+            "schema": "gpuwm-cm1.large-scale-nudging/v1",
+            "status": "ADMITTED_CM1_R21_1_LARGE_SCALE_NUDGING_OPERATOR_ONLY"
+          },
+          "label": "nudge u"
+        }
+      }
+    },
+    "do_lsnudge_v": {
+      "constraints": [
+        "The operator requires authenticated, already-interpolated target profiles; lsnudge_XXXX.dat reading/interpolation is excluded.",
+        "Complete solve1/solve3 coupling remains unported."
+      ],
+      "family": "large-scale-forcing",
+      "namelist": "param19",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1863-1904",
+        "src/solve1.F:1634-1653",
+        "src/solve3.F:384-408"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "do not nudge v"
+        },
+        "true": {
+          "admission": "operator-only",
+          "claim_limit": "Exact supplied-profile v tendency and base-profile update only; no coupled trajectory.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/large-scale-nudging-source-exact-v1/receipt.json",
+            "gate": "cm1core.large_scale_nudging.cpu_large_scale_nudging_inplace",
+            "module": "src/cm1core/large_scale_nudging.py",
+            "module_sha256": "f3f3642c830a2fb0fd6115727684a8d6b9917b32563f8bc5d258d93b5ed01e5c",
+            "outer_selection": {
+              "do_lsnudge": true
+            },
+            "schema": "gpuwm-cm1.large-scale-nudging/v1",
+            "status": "ADMITTED_CM1_R21_1_LARGE_SCALE_NUDGING_OPERATOR_ONLY"
+          },
+          "label": "nudge v"
+        }
+      }
+    },
+    "do_recycle_e": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "boundary-eddy-recycling",
+      "namelist": "param18",
+      "source": [
+        "src/input.F:341-344",
+        "README.namelist:1831-1857"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "eastern recycling"
+        }
+      }
+    },
+    "do_recycle_n": {
+      "companion_fields": [
+        "recycle_width_dx",
+        "recycle_depth_m",
+        "recycle_cap_loc_m",
+        "recycle_inj_loc_m"
+      ],
+      "constraints": [],
+      "family": "boundary-eddy-recycling",
+      "namelist": "param18",
+      "source": [
+        "src/input.F:341-344",
+        "README.namelist:1831-1857"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "northern recycling"
+        }
+      }
+    },
+    "do_recycle_s": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "boundary-eddy-recycling",
+      "namelist": "param18",
+      "source": [
+        "src/input.F:341-344",
+        "README.namelist:1831-1857"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "southern recycling"
+        }
+      }
+    },
+    "do_recycle_w": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "boundary-eddy-recycling",
+      "namelist": "param18",
+      "source": [
+        "src/input.F:341-344",
+        "README.namelist:1831-1857"
+      ],
+      "values": {
+        "false": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "true": {
+          "admission": "unported",
+          "label": "western recycling"
+        }
+      }
+    },
+    "doimpl": {
+      "family": "closure-solver",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:378-389",
+        "src/solve1.F:1169-1187"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "explicit vertical turbulence"
+        },
+        "1": {
+          "admission": "operator-only",
+          "label": "implicit vertical turbulence"
+        }
+      }
+    },
+    "ebc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "lateral-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:561-572",
+        "src/bc.F"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated flat periodic operators.",
+          "label": "periodic"
+        },
+        "2": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated psolver=3 open operators.",
+          "label": "open-radiative"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "rigid free-slip"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "rigid no-slip"
+        }
+      }
+    },
+    "efall": {
+      "family": "precipitation-energy",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:555-557",
+        "src/mp_driver.F:190-1516"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no dissipative heating from hydrometeor fallout"
+        },
+        "1": {
+          "admission": "operator-only",
+          "label": "fallout dissipative heating"
+        }
+      }
+    },
+    "eqtset": {
+      "family": "thermodynamics",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:540-549",
+        "src/param.F:936-949"
+      ],
+      "values": {
+        "1": {
+          "admission": "admitted",
+          "label": "traditional potential-temperature equation"
+        },
+        "2": {
+          "admission": "operator-only",
+          "label": "energy-conserving equation set"
+        }
+      }
+    },
+    "hadvordrs": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "scalar-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:237-249"
+      ],
+      "values": {
+        "10": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "10th-order"
+        },
+        "2": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "2nd-order"
+        },
+        "3": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "3rd-order"
+        },
+        "4": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "4th-order"
+        },
+        "5": {
+          "admission": "operator-only",
+          "label": "5th-order"
+        },
+        "6": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "6th-order"
+        },
+        "7": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "7th-order"
+        },
+        "8": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "8th-order"
+        },
+        "9": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "9th-order"
+        }
+      }
+    },
+    "hadvordrv": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "velocity-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:237-249"
+      ],
+      "values": {
+        "10": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "10th-order"
+        },
+        "2": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "2nd-order"
+        },
+        "3": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "3rd-order"
+        },
+        "4": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "4th-order"
+        },
+        "5": {
+          "admission": "operator-only",
+          "label": "5th-order"
+        },
+        "6": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "6th-order"
+        },
+        "7": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "7th-order"
+        },
+        "8": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "8th-order"
+        },
+        "9": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "9th-order"
+        }
+      }
+    },
+    "horizturb": {
+      "family": "pbl",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:368-376",
+        "src/param.F:1414-1431"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no PBL horizontal turbulence"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "PBL horizontal turbulence"
+        }
+      }
+    },
+    "hrdamp": {
+      "companion_fields": [
+        "rdalpha",
+        "xhd",
+        "xh",
+        "yh",
+        "tauf"
+      ],
+      "constraints": [
+        "When irdamp and hrdamp are both active, param.F rewrites hrdamp=irdamp before tendency dispatch.",
+        "The bounded all-four-side operator is Cartesian and serial; arbitrary axisymmetric/MPI coupling remains refused."
+      ],
+      "family": "rayleigh-damping",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:400-402",
+        "src/param.F:724-725,8684-8778",
+        "src/solve1.F:390-454"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact Cartesian coefficient/max-composition and r19.6 w-only lateral tendency operator; no coupled solve1 trajectory.",
+          "label": "all-four-side lateral damping"
+        }
+      }
+    },
+    "iautoc": {
+      "family": "microphysics-option",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:510-512"
+      ],
+      "values": {
+        "0": {
+          "admission": "unported",
+          "label": "disable ptype=2 autoconversion"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "enable ptype=2 autoconversion"
+        }
+      }
+    },
+    "ib_init": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "immersed-boundary",
+      "namelist": "param20",
+      "source": [
+        "src/input.F:348-349",
+        "src/ib_module.F:75-177"
+      ],
+      "values": {
+        "1": {
+          "admission": "unported",
+          "label": "nonhydrostatic mountain"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "2-D advection block"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "multiple cubes"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "Martinuzzi-Tropea cube/channel"
+        },
+        "5": {
+          "admission": "unported",
+          "label": "centered cube"
+        }
+      }
+    },
+    "icor": {
+      "companion_fields": [
+        "fcor",
+        "umove",
+        "vmove",
+        "axisymm",
+        "betaplane"
+      ],
+      "constraints": [],
+      "family": "rotation-forcing",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:518-523",
+        "src/solve2.F:631-720"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no Coriolis"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL CPU tendency-window operator for Cartesian f-plane, Cartesian beta-plane, and the axisymmetric u term; no coupled solve2 trajectory.",
+          "label": "Coriolis acceleration"
+        }
+      }
+    },
+    "idiff": {
+      "companion_fields": [
+        "difforder",
+        "kdiff2",
+        "kdiff6"
+      ],
+      "constraints": [],
+      "family": "artificial-diffusion",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:281-287"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "all prognostic variables"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "winds only"
+        }
+      }
+    },
+    "idiss": {
+      "family": "dissipative-heating",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:551-553",
+        "src/solve1.F:1533-1562"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no dissipative heating"
+        },
+        "1": {
+          "admission": "operator-only",
+          "label": "dissipative heating"
+        }
+      }
+    },
+    "ihail": {
+      "family": "microphysics-option",
+      "implemented_slice": {
+        "arwen_run_config_option": {
+          "morrison-mp10": "morr_rimed_ice",
+          "wdm6-mp16": "wdm6_hail_opt",
+          "wsm6-mp6": "wsm6_hail_opt"
+        },
+        "configuration_key": "physics.ihail",
+        "default_authority": "CM1 supplies no compiled default (src/param.F:1567-1580) but ships ihail=1 in run/namelist.input:56 and run/config_files/supercell/namelist.input:55.  GM1 bound 0 for wsm6-mp6 until 2026-09; the default moved to CM1's answer and every WSM6 run's words moved with it.  Neither Thompson has a dense-ice branch at all and a declared value there is refused. wdm6-mp16 would bind WRF's own hail_opt default of 0, but the component is not selectable.",
+        "default_when_undeclared": {
+          "morrison-mp10": 1,
+          "thompson-aerosol-mp28": null,
+          "thompson-mp8": null,
+          "wsm6-mp6": 1
+        },
+        "measured": {
+          "oracle": "CM1 r21.1 compiled mp_wsm6.mp_wsm6_run, one seeded near-saturated column, 120 s",
+          "receipt": "evidence/micro/wsm6-dense-ice-ihail/ihail-differential.json",
+          "result": "hail moves the dense-ice centroid 1.845x further than graupel in CM1 and 2.045x in GM1"
+        },
+        "module": "cm1core.dense_ice",
+        "refusal": "GM1-DENSE-ICE-IHAIL",
+        "schema": "gm1.dense-ice-selection/v1",
+        "selector_absent": {
+          "thompson-aerosol-mp28": "mp_physics=28 shares mp_physics=8's ice treatment and its absent hail_opt",
+          "thompson-mp8": "no hail_opt exists for mp_physics=8 in WRF or in ArWen"
+        }
+      },
+      "namelist": "param2",
+      "note": "README.namelist:505-508 names only ptype 2/5; the r21.1 source also passes ihail into WSM6 as hail_opt at src/param.F:3697-3706, and GM1 follows the source. CM1 supplies no default and stops outside 0..1.",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:505-508",
+        "src/input.F:95,272",
+        "src/param.F:1567-1580",
+        "src/param.F:3407",
+        "src/param.F:3697-3706",
+        "src/mp_wsm6.F:86-100",
+        "src/morrison.F:397-412,441-476"
+      ],
+      "values": {
+        "0": {
+          "admission": "admitted",
+          "constants": {
+            "morrison-mp10": {
+              "ag": 19.3,
+              "bg": 0.37,
+              "rhog": 400.0
+            },
+            "wsm6-mp6": {
+              "avtg": 330.0,
+              "bvtg": 0.8,
+              "deng": 500.0,
+              "lamdagmax": 60000.0,
+              "n0g": 4000000.0
+            }
+          },
+          "label": "graupel for ptype 5/7 (ptype 2 unported)"
+        },
+        "1": {
+          "admission": "admitted",
+          "constants": {
+            "morrison-mp10": {
+              "ag": 114.5,
+              "bg": 0.5,
+              "rhog": 900.0
+            },
+            "wsm6-mp6": {
+              "avtg": 285.0,
+              "bvtg": 0.8,
+              "deng": 700.0,
+              "lamdagmax": 20000.0,
+              "n0g": 40000.0
+            }
+          },
+          "label": "hail for ptype 5/7 (ptype 2 unported)"
+        }
+      }
+    },
+    "imoist": {
+      "family": "moisture-master",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:450-456",
+        "src/param.F:3137-4532"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "dry"
+        },
+        "1": {
+          "admission": "admitted",
+          "label": "moist"
+        }
+      }
+    },
+    "imove": {
+      "companion_fields": [
+        "umove",
+        "vmove"
+      ],
+      "constraints": [],
+      "family": "moving-domain",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:722-724"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "stationary domain"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "constant translating domain"
+        }
+      }
+    },
+    "initsfc": {
+      "constraints": [
+        "src/init_surface.F:441-466 getlanduse reads LANDUSE.TBL after the initsfc branches and overwrites znt, mavail, emiss, thc, albedo and xland from lu_index, so initsfc=3's rough-west/smooth-east roughness does not survive into a run unless set_znt=1 re-imposes one (src/init_surface.F:246-254).",
+        "The LANDUSE.TBL bytes are packaged as records/CM1-LANDUSE-TBL.json and pinned to CM1 r21.1's own run/LANDUSE.TBL.",
+        "The horizontal coordinate is CM1's iorigin=2, the domain-centred origin every shipped r21.1 deck uses."
+      ],
+      "family": "surface-initialization",
+      "namelist": "param12",
+      "open_domain": "Native source permits user-defined values outside 1-4; GM1 refuses them because their semantics are not source-defined.",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:916-989",
+        "src/init_surface.F:40-227"
+      ],
+      "values": {
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-initialization-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_initialization.cpu_surface_initialization_inplace",
+            "joint_selection": {
+              "axisymm": [
+                0,
+                1
+              ],
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "cm1setup": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "ipbl": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            "module": "src/cm1core/surface_initialization.py",
+            "module_sha256": "d54bac78c3ecb47e52d5cdf8411d13ff6039dd242d685048d40e412c573065a9",
+            "schema": "gpuwm-cm1.surface-initialization/v1",
+            "status": "ADMITTED_CM1_R21_1_PRE_LANDUSE_SURFACE_INITIALIZATION_OPERATOR_ONLY"
+          },
+          "label": "constant surface properties"
+        },
+        "2": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-initialization-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_initialization.cpu_surface_initialization_inplace",
+            "joint_selection": {
+              "axisymm": [
+                0,
+                1
+              ],
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "cm1setup": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "ipbl": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            "module": "src/cm1core/surface_initialization.py",
+            "module_sha256": "d54bac78c3ecb47e52d5cdf8411d13ff6039dd242d685048d40e412c573065a9",
+            "schema": "gpuwm-cm1.surface-initialization/v1",
+            "status": "ADMITTED_CM1_R21_1_PRE_LANDUSE_SURFACE_INITIALIZATION_OPERATOR_ONLY"
+          },
+          "label": "idealized sea breeze"
+        },
+        "3": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-initialization-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_initialization.cpu_surface_initialization_inplace",
+            "joint_selection": {
+              "axisymm": [
+                0,
+                1
+              ],
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "cm1setup": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "ipbl": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            "module": "src/cm1core/surface_initialization.py",
+            "module_sha256": "d54bac78c3ecb47e52d5cdf8411d13ff6039dd242d685048d40e412c573065a9",
+            "schema": "gpuwm-cm1.surface-initialization/v1",
+            "status": "ADMITTED_CM1_R21_1_PRE_LANDUSE_SURFACE_INITIALIZATION_OPERATOR_ONLY"
+          },
+          "label": "rough west and smooth east"
+        },
+        "4": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-initialization-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_initialization.cpu_surface_initialization_inplace",
+            "joint_selection": {
+              "axisymm": [
+                0,
+                1
+              ],
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "cm1setup": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "ipbl": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7
+              ]
+            },
+            "module": "src/cm1core/surface_initialization.py",
+            "module_sha256": "d54bac78c3ecb47e52d5cdf8411d13ff6039dd242d685048d40e412c573065a9",
+            "schema": "gpuwm-cm1.surface-initialization/v1",
+            "status": "ADMITTED_CM1_R21_1_PRE_LANDUSE_SURFACE_INITIALIZATION_OPERATOR_ONLY"
+          },
+          "label": "coastline setup"
+        }
+      }
+    },
+    "iorigin": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "horizontal-grid-origin",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:707-714"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "label": "bottom-left origin"
+        },
+        "2": {
+          "admission": "partial",
+          "label": "centered origin"
+        }
+      }
+    },
+    "ipbl": {
+      "family": "pbl",
+      "gm1_extension_note": "GM1 additionally admits closures.ipbl = 11, which is not a CM1 r21.1 value: it is WRF bl_pbl_physics=11, the scale-aware Shin-Hong scheme ArWen ships and CM1 does not. It is outside CM1 0..6 so it can never be read as one of CM1 own, and a run that selects it is recorded as not expressible as a CM1 namelist.",
+      "gm1_extension_values": [
+        11
+      ],
+      "gm1_note": "ipbl=1, 4, 6 and the GM1 extension 11 resolve to byte-audited ArWen components (cm1core.arwen_physics_component); every one of them is uncoupled because GM1 carries none of hfx, qfx, psim, psih, br, wspd, u10, v10, xland or psfc on the device. ipbl=2 is CM1 own inline scheme and ipbl=3 and 5 have no ArWen counterpart.",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:310-332",
+        "src/param.F:2742-2749,4978-5054"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no PBL parameterization"
+        },
+        "1": {
+          "admission": "partial",
+          "label": "YSU"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "CM1 simple Louis/Bryan-Rotunno"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "GFS EDMF"
+        },
+        "4": {
+          "admission": "partial",
+          "label": "MYNN level 2.5"
+        },
+        "5": {
+          "admission": "unported",
+          "label": "MYNN level 3"
+        },
+        "6": {
+          "admission": "partial",
+          "label": "MYJ"
+        }
+      }
+    },
+    "iptra": {
+      "companion_fields": [
+        "npt",
+        "pdtra"
+      ],
+      "constraints": [],
+      "family": "passive-tracer-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:726-732"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no passive tracers"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "integrate passive tracers"
+        }
+      }
+    },
+    "irbc": {
+      "companion_fields": [
+        "cstar"
+      ],
+      "constraints": [],
+      "family": "radiative-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:590-593"
+      ],
+      "values": {
+        "1": {
+          "admission": "unported",
+          "label": "Klemp-Wilhelmson large-step"
+        },
+        "2": {
+          "admission": "partial",
+          "label": "Klemp-Wilhelmson small-step"
+        },
+        "4": {
+          "admission": "partial",
+          "claim_limit": "Selected open psolver=3 closure only.",
+          "label": "Durran-Klemp"
+        }
+      }
+    },
+    "irdamp": {
+      "companion_fields": [
+        "rdalpha",
+        "zd",
+        "tauh",
+        "taus",
+        "tauf"
+      ],
+      "constraints": [
+        "CM1 refuses irdamp=2 with terrain (src/param.F:1730-1737).",
+        "The admitted average operator is serial; no MPI_ALLREDUCE path is claimed."
+      ],
+      "family": "rayleigh-damping",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:391-398",
+        "src/cm1.F:850-864",
+        "src/param.F:724-725,8631-8673",
+        "src/solve1.F:390-454",
+        "src/testcase_simple_phys.F:245-299"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact serial Cartesian flat-domain coefficient/tendency operator; no coupled solve1 trajectory.",
+          "label": "damp toward base state"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Exact serial area-weighted-average and tendency operator; terrain and MPI reduction remain refused.",
+          "label": "damp toward horizontal average"
+        }
+      }
+    },
+    "isfcflx": {
+      "family": "surface-master",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:908-914",
+        "src/sfcphys.F:1-1132"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no surface momentum/heat/moisture flux"
+        },
+        "1": {
+          "admission": "admitted",
+          "implemented_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "label": "surface fluxes enabled"
+        }
+      }
+    },
+    "isftcflx": {
+      "family": "surface-option",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1044-1050"
+      ],
+      "values": {
+        "0": {
+          "admission": "unported",
+          "label": "standard thermal exchange"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "thermal exchange correction option 1"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "thermal exchange correction option 2"
+        }
+      }
+    },
+    "iz0tlnd": {
+      "family": "surface-option",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1052-1055"
+      ],
+      "values": {
+        "0": {
+          "admission": "unported",
+          "label": "legacy land thermal roughness"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "revised land thermal roughness"
+        }
+      }
+    },
+    "les_subdomain_shape": {
+      "companion_fields": [
+        "les_subdomain_xlen",
+        "les_subdomain_ylen",
+        "les_subdomain_dlen",
+        "les_subdomain_trnslen"
+      ],
+      "constraints": [],
+      "family": "nested-grid-closure",
+      "namelist": "param17",
+      "source": [
+        "src/input.F:338-340",
+        "README.namelist:1804-1825"
+      ],
+      "values": {
+        "1": {
+          "admission": "unported",
+          "label": "square LES subdomain"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "circular LES subdomain; native documentation says not implemented"
+        }
+      }
+    },
+    "lspgrad": {
+      "companion_fields": [
+        "fcor",
+        "umove",
+        "vmove",
+        "ug",
+        "vg",
+        "hurr_rad",
+        "hurr_rotate",
+        "ulspg",
+        "vlspg"
+      ],
+      "constraints": [
+        "The solve1.F adaptive lspgrad=4 block is hard-disabled by do_adapt_lspg=.false.; this operator preserves that disposition."
+      ],
+      "family": "large-scale-pressure-forcing",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:531-538",
+        "src/solve1.F:536-681",
+        "src/param.F:8971-8974"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL source-order CPU tendency-window operator; no coupled solve1 trajectory.",
+          "label": "geostrophic base-wind balance"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL source-order CPU tendency-window operator; no coupled solve1 trajectory.",
+          "label": "ug/vg-array geostrophic balance"
+        },
+        "3": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL/double-angle source-order CPU tendency-window operator; no coupled solve1 trajectory.",
+          "label": "gradient-wind balance"
+        },
+        "4": {
+          "admission": "operator-only",
+          "claim_limit": "Exact default-REAL source-order CPU tendency-window operator; adaptive pressure-gradient modification remains hard-disabled as in CM1 r21.1.",
+          "label": "user-specified acceleration"
+        }
+      }
+    },
+    "mdiff": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "artificial-diffusion",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:289-294"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "ordinary sixth-order diffusion"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "monotonic sixth-order diffusion"
+        }
+      }
+    },
+    "nbc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "lateral-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:561-572",
+        "src/bc.F"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated flat periodic operators.",
+          "label": "periodic"
+        },
+        "2": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated psolver=3 open operators.",
+          "label": "open-radiative"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "rigid free-slip"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "rigid no-slip"
+        }
+      }
+    },
+    "nudgeobc": {
+      "companion_fields": [
+        "alphobc"
+      ],
+      "constraints": [],
+      "family": "open-boundary-nudging",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:603-610"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "nudge inflow wind"
+        }
+      }
+    },
+    "oceanmodel": {
+      "family": "ocean-surface",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:971-977",
+        "src/init_surface.F:329-343"
+      ],
+      "values": {
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "label": "fixed SST"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "ocean mixed layer"
+        }
+      }
+    },
+    "pdtra": {
+      "companion_fields": [
+        "iptra",
+        "npt"
+      ],
+      "constraints": [
+        "CM1 hard-wires pdscheme=1 in src/param.F:731-732.",
+        "The active operator requires supplied directional advection and mass-flux carriers; WENO/centered reconstruction and outer RK dispatch remain unported.",
+        "Terrain, axisymmetry, lateral-open boundaries, MPI candidate exchange, diagnostics, and coupled trajectories remain unported."
+      ],
+      "family": "passive-tracer-advection",
+      "namelist": "param2",
+      "source": [
+        "README.namelist:726-732",
+        "src/input.F:266-277",
+        "src/param.F:731-732",
+        "src/solve2.F:1906-1946,2061-2071",
+        "src/adv.F:428-445,616-653",
+        "src/pdef.F:15-486",
+        "src/misclibs.F:1037-1117"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "ordinary tracer update"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact flat Cartesian serial-periodic final-RK donor repair, tracer update, and pdefq(0) on supplied directional advection/mass-flux carriers; no reconstruction or coupled trajectory.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/positive-definite-tracer-source-exact-v1/receipt.json",
+            "gate": "cm1core.positive_definite_tracer.cpu_positive_definite_tracer_update_inplace",
+            "joint_selection": {
+              "axisymmetric": [
+                false
+              ],
+              "lateral_boundary": [
+                "periodic"
+              ],
+              "mpi": [
+                false
+              ],
+              "nrk_relation": [
+                "nrk<nrkmax",
+                "nrk=nrkmax"
+              ],
+              "pdscheme": [
+                1
+              ],
+              "terrain_flag": [
+                false
+              ]
+            },
+            "module": "src/cm1core/positive_definite_tracer.py",
+            "module_sha256": "eacca40d61844685e5fa8e459d6331d5df8b076d2c527d5f6c17f084e2c5061f",
+            "schema": "gpuwm-cm1.positive-definite-tracer/v1",
+            "status": "ADMITTED_CM1_R21_1_POSITIVE_DEFINITE_TRACER_OPERATOR_ONLY"
+          },
+          "label": "positive-definite tracer update"
+        }
+      }
+    },
+    "pertflx": {
+      "family": "surface-option",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1033-1042",
+        "src/param.F:2139-2173"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no random surface heat-flux perturbations"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "random surface heat-flux perturbations"
+        }
+      }
+    },
+    "psolver": {
+      "companion_fields": [
+        "nsound",
+        "csound",
+        "kdiv",
+        "alph"
+      ],
+      "constraints": [
+        "psolver=4,5,6,7 require eqtset=1 and apmasscon=0 (src/param.F)."
+      ],
+      "family": "pressure-equation",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:404-455",
+        "src/solve2.F:1085-1173"
+      ],
+      "values": {
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Flat Cartesian serial-four-periodic fixed-dt soundns RK operator only; supplied live post-advs sten and held momentum/thermodynamic inputs.",
+          "label": "explicit compressible"
+        },
+        "2": {
+          "admission": "operator-only",
+          "claim_limit": "Flat Cartesian serial-periodic sounde family only; supplied nsound and held live thv/piadv/tendency inputs.",
+          "label": "explicit split compressible"
+        },
+        "3": {
+          "admission": "partial",
+          "claim_limit": "An exact flat-periodic eqtset=2 operator plus selected flat-open and terrain-open operators exist behind fail-closed gates; arbitrary psolver=3 configurations remain unported.",
+          "label": "vertically implicit split compressible"
+        },
+        "4": {
+          "admission": "operator-only",
+          "claim_limit": "Flat serial unstretched square-spacing four-periodic RHS, global Singleton/cuFFT spectral vertical solve, zero-mode reconstruction, and momentum projection operator.",
+          "label": "anelastic"
+        },
+        "5": {
+          "admission": "operator-only",
+          "claim_limit": "Flat serial unstretched square-spacing four-periodic RHS, global Singleton/cuFFT spectral vertical solve, zero-mode reconstruction, and momentum projection operator.",
+          "label": "incompressible"
+        },
+        "6": {
+          "admission": "operator-only",
+          "claim_limit": "Flat Cartesian serial-four-periodic soundcb acoustic/RK operator plus explicit solve3 pressure completion only; supplied nsound/csound and held tendencies. The stock mixed-open immersed-boundary case remains unported.",
+          "label": "compressible Boussinesq"
+        },
+        "7": {
+          "admission": "operator-only",
+          "claim_limit": "Flat Cartesian serial-periodic acoustic family only; supplied nsound and held inputs.",
+          "label": "modified compressible"
+        }
+      }
+    },
+    "ptype": {
+      "arwen_only_schemes": {
+        "note": "ArWen also ports two microphysics schemes CM1 r21.1 has no ptype for. They are not ptype values and are selected by physics.component alone.",
+        "thompson-aerosol-mp28": {
+          "admission": "admitted",
+          "arwen_mp_physics": 28,
+          "numq": 11,
+          "validation": "unvalidatable against CM1: no CM1 scheme exists at this identity; the aerosol initial state is ArWen's own fallback"
+        },
+        "wdm6-mp16": {
+          "admission": "partial",
+          "arwen_mp_physics": 16,
+          "gm1_blocker": "ArWen's WDM6 refuses without WRF's XLAND land/sea mask (gpuwm/core/wdm6.py:156), measured by dispatching the column",
+          "numq": 9
+        }
+      },
+      "family": "microphysics",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:458-495",
+        "src/mp_driver.F:190-1516",
+        "src/param.F:2714-2731,3141-4532"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "water vapor only; no microphysics"
+        },
+        "1": {
+          "admission": "operator-only",
+          "admission_note": "Both efall branches and the source-ordered large-step/restart lifecycle are independently gated and semantically dispatched. The only admitted real product is WSM6-initialized, and CM1 r21.1 defines no frozen-species-to-Kessler conversion, so ptype=1 remains operator-only and real selection fails closed rather than relabeling atmospheric state.",
+          "gm1_blocker": "six-mass-species post-physics",
+          "gm1_blocker_record": "cm1core.column_component_blockers",
+          "implemented_slice": {
+            "admitted_native_branch": {
+              "axisymmetric": 0,
+              "efall": [
+                0,
+                1
+              ],
+              "moving_domain": 0,
+              "nrk": 4,
+              "pdscheme": 1,
+              "rain_bins": 1
+            },
+            "authority": "src/mp_driver.F:190-232; src/misclibs.F:1037-1117; src/kessler.F:8-138,146-477,530-562",
+            "complete_operator_family_for_admitted_branch": true,
+            "equation_sets": [
+              1,
+              2
+            ],
+            "evidence": {
+              "native_operator": "evidence/oracles/gm1-kessler-driver-v2/receipt.json",
+              "real_carrier_large_step_restart": "evidence/validation/real-gm1-kessler-large-step-v1/full-domain-sm86.json",
+              "real_carrier_operator": "evidence/validation/real-gm1-kessler-driver-v2/full-domain-sm86.json"
+            },
+            "large_step_composition": {
+              "already_native_ptype1_state_coupled": true,
+              "coordinator_dispatch": "cm1core.cuda_gm1_forecast.apply_cuda_gm1_microphysics_transition",
+              "module": "cm1core.cuda_gm1_kessler_large_step",
+              "module_sha256": "78743d8d4aa98e1141b2dc9645ff23e6fd9996fd74c497d8348a8f5f1adb033a",
+              "persistent_restart": [
+                "qpten",
+                "qtten",
+                "qvten",
+                "qcten",
+                "rain",
+                "prate",
+                "asq",
+                "qbudget"
+              ],
+              "restart_schema": "gm1.kessler-large-step-restart/v1",
+              "schema": "gm1.cuda-kessler-large-step/v1",
+              "semantic_id": "kessler-ptype1",
+              "source_order": [
+                "equation-set-2 held remove/snapshot",
+                "pre-physics EOS",
+                "dry-mass correction hook",
+                "mp_driver ptype=1",
+                "equation-set-2 held recapture"
+              ]
+            },
+            "module": "cm1core.cuda_gm1_kessler_driver",
+            "module_sha256": "88af5ab68b9c97aeb78a5abcc285bca8df05b8fb9aeb4145271afac027111e10",
+            "nested_efall_module_sha256": "a5c611ccd6a09d338c74bed5de66f8361625172cdc88300e0022a07d75520f82",
+            "nested_efall_source_sha256": "2b2281a1ee0c96975623608fbe478fa5ea963053c71d364ad555ec73442d9c6e",
+            "nested_local_module_sha256": "295f25e0ab0b72c7cd99fbe50bdb84de16311e4ee4b26d13e0f3bf2096af8ac4",
+            "nested_local_source_sha256": "320eeb15809a66fc446770081d61b404e9ebade0bf86695392cc6407ca427278",
+            "schema": "gm1.cuda-kessler-driver/v1",
+            "source_sha256": "f880dc2ddffd9625bd5c75aad91d9249ba1011f73c1bb250d3d2a0c8d08d43f4"
+          },
+          "label": "Kessler warm rain",
+          "native_driver_order": [
+            "pdefq(qv)",
+            "pdefq(qc)",
+            "pdefq(qr)",
+            "k_fallout",
+            "geterain",
+            "optional efall",
+            "fallout",
+            "kessler local conversion",
+            "satadj"
+          ],
+          "unimplemented_seams": [
+            "source-attested native ptype=1 real initialization",
+            "ptype=1 reflectivity consumer",
+            "real Kessler forecast validation"
+          ]
+        },
+        "2": {
+          "admission": "unported",
+          "label": "NASA-Goddard LFO"
+        },
+        "26": {
+          "admission": "unported",
+          "gm1_blocker": "the public ArWen seam needs a PhysicsDriver and a production binding",
+          "gm1_blocker_record": "cm1core.column_component_blockers",
+          "label": "NSSL two moment, graupel only"
+        },
+        "27": {
+          "admission": "unported",
+          "gm1_blocker": "the public ArWen seam needs a PhysicsDriver and a production binding",
+          "gm1_blocker_record": "cm1core.column_component_blockers",
+          "label": "NSSL two moment, graupel and hail"
+        },
+        "28": {
+          "admission": "unported",
+          "label": "NSSL single moment, graupel only"
+        },
+        "3": {
+          "admission": "admitted",
+          "implemented_slice": {
+            "arwen_mp_physics": 8,
+            "axis_authority": "src/param.F:3322-3398",
+            "component_id": "thompson-mp8",
+            "configuration_key": "physics.component",
+            "module": "cm1core.arwen_scheme_components",
+            "numq": 8,
+            "validation": "unvalidated -- exposed, dispatched once on a seeded column, never compared; see cm1core.component_validation"
+          },
+          "label": "Thompson"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "Gilmore/Straka/Rasmussen LFO"
+        },
+        "5": {
+          "admission": "admitted",
+          "implemented_slice": {
+            "arwen_mp_physics": 10,
+            "axis_authority": "src/param.F:3414-3473",
+            "component_id": "morrison-mp10",
+            "configuration_key": "physics.component",
+            "module": "cm1core.arwen_morrison_component",
+            "numq": 10,
+            "validation": "unvalidated -- exposed, dispatched once on a seeded column, never compared; see cm1core.component_validation"
+          },
+          "label": "Morrison double moment"
+        },
+        "50": {
+          "admission": "unported",
+          "gm1_blocker": "six-mass-species post-physics",
+          "gm1_blocker_record": "cm1core.column_component_blockers",
+          "label": "P3 one ice category, one-moment cloud water"
+        },
+        "51": {
+          "admission": "unported",
+          "label": "P3 one ice category, two-moment cloud water"
+        },
+        "52": {
+          "admission": "unported",
+          "label": "P3 two ice categories, two-moment cloud water"
+        },
+        "53": {
+          "admission": "unported",
+          "label": "P3 one ice category with third ice moment, two-moment cloud water"
+        },
+        "55": {
+          "admission": "unported",
+          "label": "Jensen ISHMAEL"
+        },
+        "6": {
+          "admission": "unported",
+          "label": "Rotunno-Emanuel simple water"
+        },
+        "7": {
+          "admission": "admitted",
+          "label": "WSM6"
+        }
+      }
+    },
+    "radopt": {
+      "family": "radiation",
+      "gm1_note": "radopt=2 resolves to ArWen legacy-RRTMG (ra_lw_physics=ra_sw_physics=4), whose AER lookup tables are sha256-admitted in cm1core.arwen_physics_component.RRTMG_LOOKUP_TABLES; it is uncoupled because GM1 carries no tsk, albd, emiss, xland, glw or gsw. radopt=1 has no ArWen counterpart at all.",
+      "namelist": "param11",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:835-869",
+        "src/radiation_driver.F:119-314",
+        "src/param.F:2229-2338"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no radiation"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "NASA-Goddard radiation"
+        },
+        "2": {
+          "admission": "partial",
+          "label": "RRTMG radiation"
+        }
+      }
+    },
+    "ramp_sgs": {
+      "family": "sgs-surface-coupling",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1081-1087",
+        "src/constants.F:14,22,49-52",
+        "src/param.F:750",
+        "src/turb.F:233-262"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no SGS surface-flux ramp"
+        },
+        "1": {
+          "admission": "operator-only",
+          "implemented_slice": {
+            "bounded_branches": {
+              "cm0_region": [
+                "cm0<=cmemin",
+                "cm0>cmemin"
+              ],
+              "idoles": [
+                true
+              ],
+              "ramp_sgs": [
+                1
+              ],
+              "ramp_time_normalization": true,
+              "sgsmodel": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "time_region": [
+                "pre-ramp",
+                "in-ramp",
+                "post-ramp"
+              ]
+            },
+            "claim_limit": "Localized coefficient startup ramp on supplied compact LES carriers only. No SGS dispatch, turbulence tendencies, surface-flux coupling, coupled large step, production selection, or forecast.",
+            "complete_operator_family_for_bounded_branch": true,
+            "evidence": "evidence/oracles/sgs-startup-ramp-source-exact-v1/receipt.json",
+            "gate": "cm1core.sgs_startup_ramp.cpu_sgs_startup_ramp_inplace",
+            "module": "cm1core.sgs_startup_ramp",
+            "module_sha256": "0a4ad122def32b6cef427d5c3455a6deecca42d5e4d17e420d70fbe8eb1b9f72",
+            "schema": "gpuwm-cm1.sgs-startup-ramp/v1"
+          },
+          "label": "ramp SGS coefficients during startup"
+        }
+      }
+    },
+    "roflux": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "open-boundary-flux",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:595-601"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "disabled"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "restrict outward mass flux"
+        }
+      }
+    },
+    "rterm": {
+      "family": "idealized-radiation",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:555-562",
+        "src/constants.F:86-152",
+        "src/solve1.F:744-874,1003-1053",
+        "src/param.F:2279-2289"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no simple radiative tendency"
+        },
+        "1": {
+          "admission": "admitted",
+          "implemented_slice": {
+            "bounded_branches": {
+              "diagnostic": [
+                false,
+                true
+              ],
+              "eqtset": [
+                1,
+                2
+              ],
+              "ice_category_sum": [
+                "absent",
+                "present"
+              ],
+              "iice": [
+                0,
+                1
+              ],
+              "imoist": [
+                0,
+                1
+              ],
+              "inner_budget_geometry": [
+                "Cartesian",
+                "axisymmetric"
+              ],
+              "liquid_category_sum": [
+                "absent",
+                "present"
+              ],
+              "mpi": [
+                false
+              ],
+              "radopt": [
+                0
+              ],
+              "theta_cap_regions": [
+                "tha<-1",
+                "-1<=tha<=1",
+                "tha>1"
+              ]
+            },
+            "claim_limit": "Default-constant localized rterm=1 source block only. No simultaneous radopt, MPI reduction, complete axisymmetric coordinate system, coupled solve1 trajectory, production selection, or forecast.",
+            "complete_operator_family_for_bounded_branch": true,
+            "coupled_operator": {
+              "call_site": "cm1core.cuda_cartesian_closure.CartesianClosure._held_tile, after the eqtset=2 idiss block and before the SGS stress divergence, which is where src/solve1.F:1003-1054 sits",
+              "claim_limit": "the capped theta tendency of src/solve1.F:1026-1032 only. src/solve1.F:1033-1040 forms prad and the qbudget(10) accumulation from the same thrad; neither is a prognostic, so neither is in the live kernel and no budget is claimed.",
+              "kernel": "gm1_solve1_rterm_theta_tendency",
+              "module": "cm1core.cuda_gm1_solve1_idealized_radiation",
+              "selector": "closures.rterm"
+            },
+            "evidence": "evidence/oracles/idealized-radiation-source-exact-v1/receipt.json",
+            "gate": "cm1core.idealized_radiation.cpu_idealized_radiation_inplace",
+            "module": "cm1core.idealized_radiation",
+            "module_sha256": "1b1deb3b29f9d679310d90ee1f5a1580d15bb26f7ded998b240925e6528c7134",
+            "schema": "gpuwm-cm1.idealized-radiation/v1"
+          },
+          "label": "Rotunno-Emanuel Newtonian relaxation, capped at 2 K/day; live in the Cartesian closure as closures.rterm"
+        }
+      }
+    },
+    "sbc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "lateral-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:561-572",
+        "src/bc.F"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated flat periodic operators.",
+          "label": "periodic"
+        },
+        "2": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated psolver=3 open operators.",
+          "label": "open-radiative"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "rigid free-slip"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "rigid no-slip"
+        }
+      }
+    },
+    "season": {
+      "family": "surface-option",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1007-1015",
+        "src/param.F:2119-2137"
+      ],
+      "values": {
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "label": "summer"
+        },
+        "2": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "init_surface.F:40-322 in CM1's own order on a uniform iorigin=2 Cartesian grid, with the packaged run/LANDUSE.TBL record; oceanmodel=2 omlinit, testcase=13, stretched horizontal grids, terrain and MPI subdomains are excluded",
+            "gate": "cm1core.surface_fields.build_surface_fields",
+            "joint_selection": {
+              "bbc": [
+                1,
+                2,
+                3
+              ],
+              "initsfc": [
+                1,
+                2,
+                3,
+                4
+              ],
+              "oceanmodel": [
+                1
+              ],
+              "season": [
+                1,
+                2
+              ],
+              "sfcmodel": [
+                0,
+                1
+              ]
+            },
+            "landuse_authority_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+            "landuse_module": "src/cm1core/surface_landuse.py",
+            "landuse_module_sha256": "aa97db775cbc12cdfe8e98c23ef271898d8beb1b66c9938ff40707f5f88e40aa",
+            "module": "src/cm1core/surface_fields.py",
+            "module_sha256": "f3799640a21631d55a80360f1a644bfe2b313a2576dcc70347493322bf444d9d",
+            "schema": "gm1.surface-fields/v1",
+            "source": [
+              "src/init_surface.F:40-145",
+              "src/init_surface.F:152-203",
+              "src/init_surface.F:207-227",
+              "src/init_surface.F:239-243",
+              "src/init_surface.F:246-254",
+              "src/init_surface.F:270-322",
+              "src/init_surface.F:441-466"
+            ],
+            "status": "ADMITTED_CM1_R21_1_INIT_SURFACE_IN_SOURCE_ORDER"
+          },
+          "label": "winter"
+        }
+      }
+    },
+    "set_flx": {
+      "constraints": [
+        "The operator-only slice requires isfcflx=1 and set_flx=1.",
+        "Testcase 7 saturation replacement and set_flx=0 computed fluxes remain unported."
+      ],
+      "family": "surface-prescription",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1064-1070",
+        "src/sfcphys.F:312-447"
+      ],
+      "values": {
+        "0": {
+          "admission": "unported",
+          "label": "diagnose surface heat fluxes"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact prescribed dry/moist fields, testcase 2/6 and 11 post-overrides, and serial moisture-budget accumulation on supplied compact carriers; no testcase 7 saturation, normal flux calculation, or coupled surface model.",
+          "implemented_slice": {
+            "evidence": "evidence/oracles/prescribed-surface-flux-source-exact-v1/receipt.json",
+            "excluded_testcase": 7,
+            "gate": "cm1core.prescribed_surface_flux.cpu_prescribed_surface_flux_inplace",
+            "imoist": [
+              0,
+              1
+            ],
+            "module": "src/cm1core/prescribed_surface_flux.py",
+            "module_sha256": "8caeb66632189cf054711b229d1207a41623cbca1ac2fcf80228696fa29892a1",
+            "outer_selection": {
+              "isfcflx": 1
+            },
+            "schema": "gpuwm-cm1.prescribed-surface-flux/v1",
+            "status": "ADMITTED_CM1_R21_1_PRESCRIBED_SURFACE_FLUX_OPERATOR_ONLY",
+            "testcase": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6,
+              8,
+              9,
+              10,
+              11,
+              12,
+              14,
+              15
+            ]
+          },
+          "label": "prescribe surface heat fluxes"
+        }
+      }
+    },
+    "set_ust": {
+      "family": "surface-prescription",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1077-1080",
+        "src/param.F:1324-1341",
+        "src/sfcphys.F:18-267"
+      ],
+      "values": {
+        "0": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection_required": true,
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1"
+          },
+          "label": "diagnose friction velocity"
+        },
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection_required": true,
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1"
+          },
+          "label": "prescribe friction velocity"
+        }
+      }
+    },
+    "set_znt": {
+      "family": "surface-prescription",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1072-1075",
+        "src/param.F:1324-1341",
+        "src/sfcphys.F:18-267"
+      ],
+      "values": {
+        "0": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection_required": true,
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1"
+          },
+          "label": "do not prescribe roughness"
+        },
+        "1": {
+          "admission": "admitted",
+          "coupled_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "implemented_slice": {
+            "evidence": "evidence/oracles/surface-exchange-coefficients-source-exact-v1/receipt.json",
+            "gate": "cm1core.surface_exchange_coefficients.cpu_surface_exchange_coefficients_inplace",
+            "joint_selection_required": true,
+            "module_sha256": "d62636b4c7cbb7e7a9140caa9490a726142160f6420811f127b2340aad98dae1",
+            "schema": "gpuwm-cm1.surface-exchange-coefficients/v1"
+          },
+          "label": "prescribe roughness"
+        }
+      }
+    },
+    "sfcmodel": {
+      "family": "surface-layer",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:916-968",
+        "src/init_physics.F:113-138",
+        "src/init_surface.F:152-346",
+        "src/param.F:2751-2759"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no surface model"
+        },
+        "1": {
+          "admission": "admitted",
+          "implemented_slice": {
+            "claim_limit": "all four getcecd branches, the isfcflx=1 enthalpy exchange coefficients, turb.F:292 psfc, the sfcflux computed branch and the turbtend.F:595 scalar lower flux, each raw-word identical to CM1's own statements compiled by gfortran; set_flx=1, the sfcflux testcase overrides, the qbudget(8) moisture accumulator, sfcdiags, use_avg_sfc, pertflx, oceanmodel=2, sfcmodel=2..7, every PBL scheme and terrain are excluded and refused by name",
+            "gate": "cm1core.cuda_surface_drag.validate_surface_drag_selection",
+            "joint_selection": {
+              "axisymm": [
+                0
+              ],
+              "bbc": [
+                3
+              ],
+              "cecd": [
+                1,
+                2,
+                3
+              ],
+              "isfcflx": [
+                0,
+                1
+              ],
+              "set_ust": [
+                0,
+                1
+              ],
+              "set_znt": [
+                0,
+                1
+              ],
+              "sfcmodel": [
+                1
+              ],
+              "terrain_flag": [
+                0
+              ]
+            },
+            "module": "src/cm1core/cuda_surface_drag.py",
+            "module_sha256": "d867b255837c05ed3fa4f47c13a0e20019013baab72e9ce7336b6b2b133f9a17",
+            "schema": "gm1.cuda-surface-drag/v1",
+            "source": [
+              "src/turb.F:292",
+              "src/turb.F:296-307",
+              "src/turb.F:532-555",
+              "src/turb.F:614-616",
+              "src/turb.F:645-649",
+              "src/sfcphys.F:83-99",
+              "src/sfcphys.F:102-118",
+              "src/sfcphys.F:120-136",
+              "src/sfcphys.F:138-194",
+              "src/sfcphys.F:197-236",
+              "src/sfcphys.F:341-361",
+              "src/cm1libs.F:37-41",
+              "src/turb.F:3244-3306",
+              "src/turb.F:4515-4702",
+              "src/turbtend.F:588-596",
+              "src/turbtend.F:625-690",
+              "src/solve1.F:917-988",
+              "src/solve1.F:1177-1178"
+            ],
+            "status": "ADMITTED_CM1_R21_1_SFCMODEL1_SURFACE_LAYER_AND_LOWER_BOUNDARY",
+            "unvalidated": [
+              "device transcendental last-place agreement (no GPU run in the pass that exposed these selectors)",
+              "an integrated cm1.exe-versus-GM1 storm differential with a surface layer on"
+            ]
+          },
+          "label": "original CM1 neutral surface exchange"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "WRF/MM5 similarity surface layer"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "revised WRF surface layer"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "GFDL surface layer"
+        },
+        "5": {
+          "admission": "unported",
+          "label": "MOST surface layer for LES"
+        },
+        "6": {
+          "admission": "unported",
+          "label": "MYNN surface layer"
+        },
+        "7": {
+          "admission": "unported",
+          "label": "MYJ surface layer"
+        }
+      }
+    },
+    "sgsmodel": {
+      "family": "sgs",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:334-354",
+        "src/solve1.F:296-368,1121-1169",
+        "src/param.F:2733-2740"
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no SGS model"
+        },
+        "1": {
+          "admission": "operator-only",
+          "label": "Deardorff TKE"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "Smagorinsky"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "Deardorff TKE plus Sullivan two-part"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "Deardorff TKE plus Bryan two-part"
+        },
+        "5": {
+          "admission": "unported",
+          "label": "NBA TKE"
+        },
+        "6": {
+          "admission": "unported",
+          "label": "NBA Smagorinsky"
+        }
+      }
+    },
+    "stretch_x": {
+      "companion_fields": [
+        "dx_inner",
+        "dx_outer",
+        "nos_x_len",
+        "tot_x_len"
+      ],
+      "constraints": [],
+      "family": "grid-spacing",
+      "namelist": "param4",
+      "source": [
+        "src/input.F:281",
+        "README.namelist:1099-1112"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "uniform"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "two-sided generated stretch"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "west-side generated stretch"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "user file"
+        }
+      }
+    },
+    "stretch_y": {
+      "companion_fields": [
+        "dy_inner",
+        "dy_outer",
+        "nos_y_len",
+        "tot_y_len"
+      ],
+      "constraints": [],
+      "family": "grid-spacing",
+      "namelist": "param5",
+      "source": [
+        "src/input.F:282",
+        "README.namelist:1119-1132"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "uniform"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "two-sided generated stretch"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "south-side generated stretch"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "user file"
+        }
+      }
+    },
+    "stretch_z": {
+      "companion_fields": [
+        "ztop",
+        "str_bot",
+        "str_top",
+        "dz_bot",
+        "dz_top"
+      ],
+      "constraints": [],
+      "family": "grid-spacing",
+      "namelist": "param6",
+      "source": [
+        "src/input.F:283",
+        "README.namelist:1139-1174"
+      ],
+      "values": {
+        "0": {
+          "admission": "partial",
+          "label": "uniform"
+        },
+        "1": {
+          "admission": "operator-only",
+          "claim_limit": "Exact flat Cartesian grid/metric construction, proof-bound periodic psolver=4/5 composition, and one selected fixed-terrain four-open static-metric family exist; arbitrary coupled dynamics remain unported.",
+          "label": "Wilhelmson-Chen"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "smooth geometric"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "user scalar levels"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "user w levels"
+        }
+      }
+    },
+    "t2p_avg": {
+      "family": "sgs-two-part",
+      "namelist": "param12",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:1089-1091"
+      ],
+      "values": {
+        "1": {
+          "admission": "unported",
+          "label": "spatial average"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "time average"
+        }
+      }
+    },
+    "tbc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "vertical-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:583-588"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "label": "free slip"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "no slip"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "semi slip"
+        }
+      }
+    },
+    "tconfig": {
+      "family": "sgs",
+      "namelist": "param2",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:356-361"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "label": "same horizontal and vertical coefficients"
+        },
+        "2": {
+          "admission": "partial",
+          "label": "separate horizontal and vertical coefficients"
+        }
+      }
+    },
+    "terrain_flag": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "grid-topology",
+      "namelist": "param0",
+      "source": [
+        "src/input.F:261-263",
+        "README.namelist:49-50"
+      ],
+      "values": {
+        "false": {
+          "admission": "partial",
+          "label": "flat lower boundary"
+        },
+        "true": {
+          "admission": "partial",
+          "claim_limit": "Selected psolver=3 terrain/open operators and an exact fixed-domain stretch_z=1 static-metric family exist; arbitrary coupled terrain configurations do not.",
+          "label": "terrain-following grid"
+        }
+      }
+    },
+    "testcase": {
+      "family": "prescribed-physics",
+      "namelist": "param2",
+      "native_gap": "README.namelist does not define testcase=13 even though init_surface.F:256 contains a testcase=13 grid adjustment. It is inventoried as an undocumented source branch and is not selectable.",
+      "record_owner": "GM1-PHYSICS-SUPPORT.json",
+      "source": [
+        "README.namelist:151-231",
+        "src/solve1.F:1495-1507",
+        "src/sfcphys.F:371-416,814-847,950-1027"
+      ],
+      "undocumented_source_values": [
+        13
+      ],
+      "values": {
+        "0": {
+          "admission": "identity",
+          "label": "no special prescribed physics"
+        },
+        "1": {
+          "admission": "unported",
+          "label": "convective boundary layer LES"
+        },
+        "10": {
+          "admission": "unported",
+          "label": "hurricane boundary layer with thermodynamic nudging"
+        },
+        "11": {
+          "admission": "unported",
+          "label": "moist convective boundary layer"
+        },
+        "12": {
+          "admission": "unported",
+          "label": "immersed-cube wind tunnel LES"
+        },
+        "14": {
+          "admission": "unported",
+          "label": "diurnal shallow cumulus over land"
+        },
+        "15": {
+          "admission": "unported",
+          "label": "hurricane winds at a coast"
+        },
+        "2": {
+          "admission": "unported",
+          "label": "sheared boundary layer LES"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "shallow cumulus LES"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "nonprecipitating stratocumulus LES"
+        },
+        "5": {
+          "admission": "unported",
+          "label": "drizzling stratocumulus LES"
+        },
+        "6": {
+          "admission": "unported",
+          "label": "hurricane boundary layer LES/SCM"
+        },
+        "7": {
+          "admission": "unported",
+          "label": "RICO precipitating shallow cumulus LES"
+        },
+        "8": {
+          "admission": "unported",
+          "label": "radiative-convective equilibrium CPM"
+        },
+        "9": {
+          "admission": "unported",
+          "label": "stable boundary layer LES"
+        }
+      }
+    },
+    "vadvordrs": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "scalar-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:237-249"
+      ],
+      "values": {
+        "10": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "10th-order"
+        },
+        "2": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "2nd-order"
+        },
+        "3": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "3rd-order"
+        },
+        "4": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "4th-order"
+        },
+        "5": {
+          "admission": "operator-only",
+          "label": "5th-order"
+        },
+        "6": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "6th-order"
+        },
+        "7": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "7th-order"
+        },
+        "8": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "8th-order"
+        },
+        "9": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "9th-order"
+        }
+      }
+    },
+    "vadvordrv": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "velocity-advection",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:237-249"
+      ],
+      "values": {
+        "10": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "10th-order"
+        },
+        "2": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "2nd-order"
+        },
+        "3": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "3rd-order"
+        },
+        "4": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "4th-order"
+        },
+        "5": {
+          "admission": "operator-only",
+          "label": "5th-order"
+        },
+        "6": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "6th-order"
+        },
+        "7": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "7th-order"
+        },
+        "8": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "8th-order"
+        },
+        "9": {
+          "admission": "unported",
+          "claim_limit": "Only the independently ratified fifth-order family is present.",
+          "label": "9th-order"
+        }
+      }
+    },
+    "wbc": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "lateral-boundary",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:561-572",
+        "src/bc.F"
+      ],
+      "values": {
+        "1": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated flat periodic operators.",
+          "label": "periodic"
+        },
+        "2": {
+          "admission": "partial",
+          "claim_limit": "Implemented only inside separately gated psolver=3 open operators.",
+          "label": "open-radiative"
+        },
+        "3": {
+          "admission": "unported",
+          "label": "rigid free-slip"
+        },
+        "4": {
+          "admission": "unported",
+          "label": "rigid no-slip"
+        }
+      }
+    },
+    "weno_order": {
+      "companion_fields": [],
+      "constraints": [],
+      "family": "advection-reconstruction",
+      "namelist": "param2",
+      "source": [
+        "src/input.F:266-277",
+        "README.namelist:257-269"
+      ],
+      "values": {
+        "3": {
+          "admission": "unported",
+          "label": "WENO3"
+        },
+        "5": {
+          "admission": "operator-only",
+          "label": "WENO5"
+        },
+        "7": {
+          "admission": "unported",
+          "label": "WENO7"
+        },
+        "9": {
+          "admission": "unported",
+          "label": "WENO9"
+        }
+      }
+    }
+  },
+  "stock_cases": {
+    "count": 24,
+    "explicit_selector_usage": {
+      "adapt_dt": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 9,
+          "1": 15
+        }
+      },
+      "advwenos": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 1,
+          "2": 23
+        }
+      },
+      "advwenov": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 19,
+          "2": 5
+        }
+      },
+      "apmasscon": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 2,
+          "1": 22
+        }
+      },
+      "axisymm": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 23,
+          "1": 1
+        }
+      },
+      "bbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 4,
+          "2": 1,
+          "3": 19
+        }
+      },
+      "bc_temp": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 23,
+          "2": 1
+        }
+      },
+      "bcturbs": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 23,
+          "2": 1
+        }
+      },
+      "betaplane": {
+        "explicit_case_count": 7,
+        "missing_uses_native_default": 17,
+        "value_counts": {
+          "0": 7
+        }
+      },
+      "cecd": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 1,
+          "3": 23
+        }
+      },
+      "cm1setup": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 1,
+          "1": 15,
+          "2": 6,
+          "3": 1,
+          "4": 1
+        }
+      },
+      "cuparam": {
+        "explicit_case_count": 11,
+        "missing_uses_native_default": 13,
+        "value_counts": {
+          "0": 11
+        }
+      },
+      "difforder": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "6": 24
+        }
+      },
+      "do_adapt_move": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_ib": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 23,
+          "true": 1
+        }
+      },
+      "do_lsnudge": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_lsnudge_qv": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_lsnudge_th": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_lsnudge_u": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_lsnudge_v": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 24
+        }
+      },
+      "do_recycle_e": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 22,
+          "true": 2
+        }
+      },
+      "do_recycle_n": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 23,
+          "true": 1
+        }
+      },
+      "do_recycle_s": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 23,
+          "true": 1
+        }
+      },
+      "do_recycle_w": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 22,
+          "true": 2
+        }
+      },
+      "doimpl": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 5,
+          "1": 19
+        }
+      },
+      "ebc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 17,
+          "2": 6,
+          "3": 1
+        }
+      },
+      "efall": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "eqtset": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 6,
+          "2": 18
+        }
+      },
+      "hadvordrs": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "5": 24
+        }
+      },
+      "hadvordrv": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "5": 24
+        }
+      },
+      "horizturb": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "hrdamp": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "iautoc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 13,
+          "1": 11
+        }
+      },
+      "ib_init": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "4": 24
+        }
+      },
+      "icor": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 7,
+          "1": 17
+        }
+      },
+      "idiff": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "idiss": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 16,
+          "1": 8
+        }
+      },
+      "ihail": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 17,
+          "1": 7
+        }
+      },
+      "imoist": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 8,
+          "1": 16
+        }
+      },
+      "imove": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "initsfc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 22,
+          "2": 1,
+          "4": 1
+        }
+      },
+      "iorigin": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 17,
+          "2": 7
+        }
+      },
+      "ipbl": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 17,
+          "1": 1,
+          "2": 6
+        }
+      },
+      "iptra": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "irbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "2": 2,
+          "4": 22
+        }
+      },
+      "irdamp": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 3,
+          "1": 19,
+          "2": 2
+        }
+      },
+      "isfcflx": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 7,
+          "1": 17
+        }
+      },
+      "isftcflx": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "iz0tlnd": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "les_subdomain_shape": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 24
+        }
+      },
+      "lspgrad": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 7,
+          "1": 9,
+          "2": 3,
+          "3": 4,
+          "4": 1
+        }
+      },
+      "mdiff": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "nbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 22,
+          "2": 2
+        }
+      },
+      "nudgeobc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "oceanmodel": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 5,
+          "1": 19
+        }
+      },
+      "pdtra": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 24
+        }
+      },
+      "pertflx": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "psolver": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "2": 2,
+          "3": 20,
+          "6": 1,
+          "7": 1
+        }
+      },
+      "ptype": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 2,
+          "5": 19,
+          "6": 3
+        }
+      },
+      "radopt": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 22,
+          "2": 2
+        }
+      },
+      "ramp_sgs": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 24
+        }
+      },
+      "roflux": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 24
+        }
+      },
+      "rterm": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "sbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 22,
+          "2": 2
+        }
+      },
+      "season": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 24
+        }
+      },
+      "set_flx": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 16,
+          "1": 8
+        }
+      },
+      "set_ust": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 3
+        }
+      },
+      "set_znt": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 18,
+          "1": 6
+        }
+      },
+      "sfcmodel": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 5,
+          "1": 13,
+          "3": 1,
+          "5": 5
+        }
+      },
+      "sgsmodel": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 4,
+          "1": 18,
+          "4": 2
+        }
+      },
+      "stretch_x": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 21,
+          "1": 2,
+          "2": 1
+        }
+      },
+      "stretch_y": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 22,
+          "1": 2
+        }
+      },
+      "stretch_z": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 12,
+          "1": 11,
+          "3": 1
+        }
+      },
+      "t2p_avg": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 23,
+          "2": 1
+        }
+      },
+      "tbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 22,
+          "2": 1,
+          "3": 1
+        }
+      },
+      "tconfig": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 20,
+          "2": 4
+        }
+      },
+      "terrain_flag": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "false": 23,
+          "true": 1
+        }
+      },
+      "testcase": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "0": 9,
+          "1": 1,
+          "10": 1,
+          "11": 1,
+          "12": 1,
+          "14": 1,
+          "15": 1,
+          "2": 1,
+          "3": 1,
+          "4": 1,
+          "5": 1,
+          "6": 2,
+          "7": 1,
+          "8": 1,
+          "9": 1
+        }
+      },
+      "vadvordrs": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "5": 24
+        }
+      },
+      "vadvordrv": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "5": 24
+        }
+      },
+      "wbc": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "1": 17,
+          "2": 6,
+          "3": 1
+        }
+      },
+      "weno_order": {
+        "explicit_case_count": 24,
+        "missing_uses_native_default": 0,
+        "value_counts": {
+          "5": 24
+        }
+      }
+    },
+    "names": [
+      "cpm_RadConvEquil",
+      "dns_RayleighBenard",
+      "hurricane_3d_cpm",
+      "hurricane_axisymmetric",
+      "hurricane_les_within_mm",
+      "les_ConvBoundLayer",
+      "les_ConvPBL_moisture",
+      "les_HurrBoundLayer",
+      "les_HurrCoast",
+      "les_ShallowCu",
+      "les_ShallowCuLand",
+      "les_ShallowCuPrecip",
+      "les_ShearBoundLayer",
+      "les_StableBoundLayer",
+      "les_StratoCuDrizzle",
+      "les_StratoCuNoPrecip",
+      "les_ib_windtunnel",
+      "config_files",
+      "nh_mountain_waves",
+      "scm_HurrBoundLayer",
+      "scm_HurrBoundLayer_tqnudge",
+      "sea_breeze",
+      "squall_line",
+      "supercell"
+    ]
+  }
+}

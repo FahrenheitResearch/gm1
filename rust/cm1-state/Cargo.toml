@@ -1,0 +1,105 @@
+[package]
+name = "cm1-state"
+version = "0.1.0"
+edition = "2021"
+license = "Apache-2.0"
+description = "Dependency-free structural-state verifier and source-anchored CM1 scientific initializer"
+publish = false
+
+[lib]
+name = "cm1_state"
+path = "src/lib.rs"
+crate-type = ["rlib", "cdylib"]
+
+[[bin]]
+name = "cm1-state"
+path = "src/main.rs"
+
+[[bin]]
+name = "gm1-history-grads-export"
+path = "src/bin/gm1_history_grads_export.rs"
+
+[[bin]]
+name = "cm1-initialized-product-restart"
+path = "src/bin/initialized_product_restart.rs"
+
+[[bin]]
+name = "cm1-wsm6-geopotential"
+path = "src/bin/wsm6_geopotential.rs"
+
+[[bin]]
+name = "cm1-wsm6-transition-checkpoint"
+path = "src/bin/wsm6_transition_checkpoint.rs"
+
+[[bin]]
+name = "cm1-terrain-open-restart"
+path = "src/bin/terrain_open_restart.rs"
+
+[[bin]]
+name = "cm1-live-full-state"
+path = "src/bin/live_full_state.rs"
+
+[[bin]]
+name = "gm1-forecast-checkpoint"
+path = "src/bin/gm1_forecast_checkpoint.rs"
+
+[[bin]]
+name = "cm1-r21-namelist"
+path = "src/bin/cm1_r21_namelist.rs"
+
+[[bin]]
+name = "gm1-arwen-history-extract"
+path = "src/bin/gm1_arwen_history_extract.rs"
+
+[[bin]]
+name = "gm1-forcing-history-export"
+path = "src/bin/gm1_forcing_history_export.rs"
+
+[[bin]]
+name = "gm1-hrrr-future-boundaries"
+path = "src/bin/gm1_hrrr_future_boundaries.rs"
+
+[[bin]]
+name = "gm1-hrrr-remap-audit"
+path = "src/bin/gm1_hrrr_remap_audit.rs"
+
+[[bin]]
+name = "gm1-domain-grid-checkpoint"
+path = "src/bin/gm1_domain_grid_checkpoint.rs"
+
+[[bin]]
+name = "gm1-t300-child-remap"
+path = "src/bin/gm1_t300_child_remap.rs"
+
+[[bin]]
+name = "gm1-child-terrain"
+path = "src/bin/gm1_child_terrain.rs"
+
+[[bin]]
+name = "gm1-child-atmosphere"
+path = "src/bin/gm1_child_atmosphere.rs"
+
+[[bin]]
+name = "gm1-child-static-heights"
+path = "src/bin/gm1_child_static_heights.rs"
+
+[[bin]]
+name = "gm1-child-auxiliary"
+path = "src/bin/gm1_child_auxiliary.rs"
+
+[[bin]]
+name = "gm1-child-full-state"
+path = "src/bin/gm1_child_full_state.rs"
+
+[[bin]]
+name = "gm1-child-post-step"
+path = "src/bin/gm1_child_post_step.rs"
+
+[[bin]]
+name = "gm1-child-view-pack"
+path = "src/bin/gm1_child_view_pack.rs"
+
+[profile.release]
+codegen-units = 1
+lto = true
+strip = true

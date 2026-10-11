@@ -1,0 +1,181 @@
+{
+  "arwen_read_only_comparison": {
+    "comparison_boundary": "The reference maps to a WRF Lambert C grid and uses overlapping parabolic interpolation for continuous fields, while this CM1 target is a local Cartesian grid and uses bounded bilinear interpolation. Full-field bit identity is therefore not claimed.",
+    "cone_absolute_difference": 1.1102230246251565e-16,
+    "earth_wind_rotation_identity": "Rust u_e=cos(theta)*u_g+sin(theta)*v_g and v_n=-sin(theta)*u_g+cos(theta)*v_g equals the reference alpha=-theta convention exactly at the probed point.",
+    "reference_cone": 0.6225146366376196,
+    "reference_cosalpha": 0.9994552608741223,
+    "reference_sinalpha": -0.03300275005268652,
+    "reference_zero_based_i": 983.8547006169603,
+    "reference_zero_based_j": 634.5238881040486,
+    "rust_cone": 0.6225146366376195,
+    "rust_zero_based_i": 983.8547006169604,
+    "rust_zero_based_j": 634.5238881040498,
+    "source": "read-only gpuwm.ingest.hrrr.hrrr_source_grid coordinate and rotation oracle",
+    "zero_based_i_absolute_difference": 1.1368683772161603e-13,
+    "zero_based_j_absolute_difference": 1.2505552149377763e-12
+  },
+  "claim": "Rust-native strict decoded-window ingestion, real two-lead HRRR-to-CM1 regrid/scientific conversion, staggered carrier construction, and deterministic CM1FCP1/CM1FHS1 publication",
+  "determinism": {
+    "boundary_repeat_sha256_equal": true,
+    "initial_repeat_sha256_equal": true,
+    "receipt_repeat_sha256_equal": true,
+    "runs": 2
+  },
+  "input": {
+    "boundary_source_fingerprint_sha256": "409d293d95b7fdc607e20308fac57505d052e53cfe49ee51b5be1b0fab034b5c",
+    "decoded_window_schema": "gpuwm-cm1.hrrr-decoded-f32-window/v1",
+    "initial_source_fingerprint_sha256": "d32625d9b79aed2cde5a3a830121778c062f231440a78c9345c3c6b59166a955",
+    "inventory_per_lead": {
+      "direct_refc_fields": 1,
+      "direct_refd_fields": 2,
+      "hybrid_levels": 50,
+      "named_files": 75,
+      "vvel_hybrid_fields": 50,
+      "window_nx": 26,
+      "window_ny": 26
+    },
+    "ownership_boundary": "Upstream Rust GRIB2 decode/crop emits exact little-endian float32 windows; cm1-state validates and owns every scientific transform after that boundary.",
+    "required_no_fallback": [
+      "VVEL levels 1..50",
+      "REFC entire-atmosphere diagnostic",
+      "REFD at 1000 m AGL",
+      "REFD at 4000 m AGL"
+    ]
+  },
+  "negative_controls": [
+    "missing any VVEL level refuses with no-fallback inventory mismatch",
+    "missing REFC refuses with no-fallback inventory mismatch",
+    "missing either REFD level refuses with no-fallback inventory mismatch",
+    "extra carrier refuses",
+    "non-finite float32 refuses",
+    "non-increasing HGT or non-decreasing PRES refuses",
+    "target outside decoded Lambert window refuses",
+    "all-zero mapped w refuses",
+    "horizontally uniform theta perturbation refuses",
+    "nonintegral forcing-offset/model-dt step refuses",
+    "existing outputs refuse"
+  ],
+  "outputs": {
+    "boundary": {
+      "artifact_nbytes": 298990390,
+      "artifact_sha256": "fb1e1171df099e33564d943617a8b652c4e541bded8ec61d07bdeac400fcf4fb",
+      "kind": "CM1FHS1 forecast history boundary-ready frame",
+      "payload_nbytes": 298982100,
+      "payload_sha256": "ff21fadcac81f625244fdb68ba138d3f2b5222a4a25bd8531934236f2ca0837f",
+      "step_at_dt_0_5_s": 7200
+    },
+    "contract_sha256": "47bcbb3e283bea84058d86e486e144afc82f8860b1a5887d9a7ee56987f07b71",
+    "initial": {
+      "artifact_nbytes": 298990408,
+      "artifact_sha256": "e6907a2a508473a8e23aef898720519c7e3aa5ece33d614e0eaf54c5554a1549",
+      "kind": "CM1FCP1 forecast checkpoint initialization frame",
+      "payload_nbytes": 298982100,
+      "payload_sha256": "2a907390b3bd7a9b837108999deb7c7183e5b8c493f56a74c9ac688e1311c4b4",
+      "step": 0
+    },
+    "initialization_receipt_nbytes": 3586,
+    "initialization_receipt_sha256": "083f7a4879558109438f8e71bf152113097ae45be1e999e69461a95e5cd35b0b",
+    "rust_direct_render_previews": {
+      "boundary_refc": {
+        "field": "refc_dbz",
+        "finite_max_dbz": 19.284364700317383,
+        "finite_min_dbz": -10.0,
+        "png_nbytes": 3367895,
+        "png_sha256": "f28a7bb7a5fe7de01f018cf198a6f265a6601fafb74701aaacacc25c5e9a450a",
+        "product": "reflectivity"
+      },
+      "boundary_w_2km_agl": {
+        "field": "w3d",
+        "finite_max_m_s-1": 0.45108717679977417,
+        "finite_min_m_s-1": -0.13773195445537567,
+        "level_index": 10,
+        "png_nbytes": 3367901,
+        "png_sha256": "526d7a0fe13988b189b498d528b37a2425b56fb144da63a9cd04c89cf22d7864",
+        "product": "scalar"
+      },
+      "reader_contract": "cm1-render independently verifies the caller-supplied ForecastContract SHA-256 before decoding CM1FHS1; PNG metadata embeds the source field, grid, finite range, renderer ABI, and contract hash"
+    }
+  },
+  "performance_release": {
+    "first_run": {
+      "load_seconds": 0.036553,
+      "map_two_leads_seconds": 2.590819,
+      "total_seconds": 14.714500,
+      "write_and_restore_seconds": 12.086408
+    },
+    "repeat_run": {
+      "load_seconds": 0.038605,
+      "map_two_leads_seconds": 2.570628,
+      "total_seconds": 14.637989,
+      "write_and_restore_seconds": 12.027806
+    },
+    "validated_current_source_run": {
+      "load_seconds": 0.035637,
+      "map_two_leads_seconds": 2.531592,
+      "total_seconds": 14.325609,
+      "write_and_restore_seconds": 11.757857
+    }
+  },
+  "remaining_gaps": [
+    "live CUDA carrier copy and forecast-driver injection",
+    "terrain-following metric and contravariant-velocity construction",
+    "CM1 halo and open-boundary-zone population",
+    "dynamical pressure rebalance before first tendency",
+    "forcing interpolation between the initial and one-hour boundary frames",
+    "uninterrupted forecast trajectory evidence",
+    "the upstream GRIB2 decoder remains a separate Rust artifact rather than code inside cm1-state"
+  ],
+  "schema": "gpuwm-cm1.hrrr-cm1-real-init-evidence/v1",
+  "scientific_ranges": {
+    "boundary": {
+      "exner_perturbation_max": 0.0012509822845458984,
+      "exner_perturbation_min": -0.0014171600341796875,
+      "nonzero_w_cells": 6840000,
+      "pressure_max_pa": 94493.65625,
+      "pressure_min_pa": 12090.44921875,
+      "refc_max_dbz": 19.284364700317383,
+      "refc_min_dbz": -10.0,
+      "theta_perturbation_max_k": 3.648345947265625,
+      "theta_perturbation_min_k": -2.67926025390625,
+      "total_theta_max_k": 401.8915100097656,
+      "total_theta_min_k": 302.5744934082031,
+      "w_max_mps": 1.40907621383667,
+      "w_min_mps": -1.4151967763900757
+    },
+    "initial": {
+      "exner_perturbation_max": 0.0012279748916625977,
+      "exner_perturbation_min": -0.0012454986572265625,
+      "nonzero_w_cells": 6840000,
+      "pressure_max_pa": 94554.5390625,
+      "pressure_min_pa": 12059.712890625,
+      "refc_max_dbz": 12.519632339477539,
+      "refc_min_dbz": -10.0,
+      "theta_perturbation_max_k": 2.95574951171875,
+      "theta_perturbation_min_k": -2.415069580078125,
+      "total_theta_max_k": 400.3328857421875,
+      "total_theta_min_k": 300.84027099609375,
+      "w_max_mps": 0.03170182555913925,
+      "w_min_mps": -0.031922291964292526
+    }
+  },
+  "status": "PASS",
+  "target": {
+    "center_latitude_degrees": 41.3053,
+    "center_longitude_degrees": -94.4619,
+    "dx_m": 100.0,
+    "dy_m": 100.0,
+    "dz_m": 200.0,
+    "nx": 300,
+    "ny": 300,
+    "nz": 75
+  },
+  "validation": {
+    "cargo_clippy_all_targets_deny_warnings": "PASS",
+    "cargo_fmt_check": "PASS",
+    "cargo_test": "PASS 42/42",
+    "cm1fhs_direct_refc_and_w_png_render": "PASS",
+    "optimized_real_run_and_post_write_restore": "PASS",
+    "repeat_byte_identity": "PASS"
+  }
+}

@@ -1,0 +1,33 @@
+/* More looks and films: the More looks row under the four favourites' tabs, and the film row under
+   the picture. Only --gm1-* variables and the .is-new marker (the skin styles the marker; the fallback below keeps it
+   readable before that merge). Pictures are never filtered, clipped or re-coloured here. */
+
+.more-looks { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; margin: -4px 0 12px; }
+.more-looks-cap { margin: 0; white-space: nowrap; }
+.more-looks-list { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.more-look { background: none; border: 1px solid var(--gm1-rule); border-radius: 3px; color: var(--gm1-muted);
+  font: inherit; font-size: var(--fs-small); padding: 3px 9px; cursor: pointer; max-width: 100%; text-align: left;
+  overflow-wrap: anywhere; }
+.more-look:hover { border-color: var(--gm1-data); color: var(--gm1-title); }
+.more-look.on { border-color: var(--gm1-text); color: var(--gm1-title); }
+.more-look.off { color: var(--gm1-dim); }
+.more-look:focus-visible { outline: 2px solid var(--gm1-accent, var(--gm1-cold)); outline-offset: 1px; }
+.more-looks .is-new { margin-left: 6px; font-size: var(--fs-micro); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--gm1-new, var(--gm1-cold)); }
+
+.film-slot { margin-top: 10px; }
+.film-bar:empty { display: none; }
+.film-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 6px; }
+.film-row .showcmd { flex-basis: 100%; }
+.film-row .note { margin: 0; }
+.film-progress { color: var(--gm1-data); font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
+.film-meter { display: inline-block; width: 160px; max-width: 40vw; height: 4px; background: var(--gm1-rule);
+  border-radius: 2px; overflow: hidden; }
+.film-meter span { display: block; height: 100%; background: var(--gm1-cold); }
+.film-files a { margin: 0 2px; }
+.note.warn { color: var(--gm1-warn); }
+
+@media (max-width: 720px) {
+  .more-looks { gap: 6px; }
+  .film-meter { width: 100px; }
+}

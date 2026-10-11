@@ -1,0 +1,2250 @@
+{
+ "applies_when": "the key is read only when this condition on the file's settings holds (null: always); where it is not read, any value is the same as r21.1",
+ "changed_meaning": {
+  "irandp": {
+   "group": "param2",
+   "r21_meaning": "1 adds random potential-temperature perturbations; there is no 2",
+   "r21_values": [
+    0,
+    1
+   ],
+   "r22_meaning": "1 adds random potential-temperature perturbations; 2 (new) adds random water-vapour perturbations",
+   "sources": [
+    {
+     "file": "CHANGES",
+     "line": 40,
+     "release": "r22.0",
+     "text": "irandp=2 adds random relative humidity"
+    },
+    {
+     "file": "src/init3d.F",
+     "line": 1446,
+     "release": "r21.1",
+     "text": "IF( irandp.eq.1 )THEN"
+    }
+   ]
+  },
+  "output_vort": {
+   "group": "param9",
+   "r21_meaning": "vorticity interpolated to scalar points, in the _s file",
+   "r22_key_for_r21_meaning": "output_vortinterp",
+   "r22_meaning": "vorticity at native (staggered) grid points, in the _xv, _yv and _zv files",
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1486,
+     "release": "r22.0",
+     "text": "output_vort     - vorticity"
+    },
+    {
+     "file": "README.namelist",
+     "line": 1487,
+     "release": "r22.0",
+     "text": "at native grid points"
+    },
+    {
+     "file": "README.namelist",
+     "line": 1391,
+     "release": "r21.1",
+     "text": "output_vort     - vorticity?  (all three components, interpolated"
+    }
+   ]
+  }
+ },
+ "classes": {
+  "cosmetic": "changes only messages or logging",
+  "output": "changes only what r22.0 writes",
+  "physics": "changes what r22.0 computes; any value other than the r21.1 equivalent, where r22.0 reads the key, has no r21.1 counterpart"
+ },
+ "counts": {
+  "keys": 64,
+  "output": 8,
+  "physics": 56
+ },
+ "equivalent_kinds": {
+  "any-of": "any of the listed options",
+  "at-most": "less than or equal to value",
+  "below": "strictly less than value",
+  "r21-key": "r21.1 has this setting under r21_key; with requires_equal, only when those keys agree",
+  "unread": "no r21.1 counterpart; the same as r21.1 only where r22.0 does not read the key",
+  "value": "equal to value (binary32 for real keys)",
+  "value-when": "the value of the first case whose condition holds, otherwise 'otherwise'"
+ },
+ "keys": {
+  "nssl2mom_params": {
+   "nssl_3moment": {
+    "applies_when": {
+     "in": [
+      26,
+      27
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl2mom_params",
+    "note": "NSSL three-moment option; r21.1 declares it .false. and cannot read it",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": false
+    },
+    "r22_default": {
+     "source": "src/cm1.F:448",
+     "value": false
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1824,
+      "release": "r22.0",
+      "text": "nssl_3moment - logical"
+     },
+     {
+      "file": "src/input.F",
+      "line": 234,
+      "release": "r21.1",
+      "text": "logical :: nssl_3moment = .false."
+     }
+    ],
+    "type": "logical"
+   },
+   "nssl_density_on": {
+    "applies_when": {
+     "in": [
+      26,
+      27
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl2mom_params",
+    "note": "NSSL graupel/hail density prediction; r21.1 declares it .true. and cannot read it",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": true
+    },
+    "r22_default": {
+     "source": "src/cm1.F:449",
+     "value": true
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1829,
+      "release": "r22.0",
+      "text": "nssl_density_on  - logical"
+     },
+     {
+      "file": "src/input.F",
+      "line": 235,
+      "release": "r21.1",
+      "text": "logical :: nssl_density_on = .true."
+     }
+    ],
+    "type": "logical"
+   }
+  },
+  "nssl_mp_params": {
+   "ac_kappa": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1077",
+     "value": 0.61
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "ac_opt": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1058",
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "ac_pgw": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1076",
+     "value": 0.69
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "ac_pmr": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "arg_para": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1071",
+     "value": true
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "logical"
+   },
+   "ccn": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:253",
+     "value": 600000000.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "ccn_co": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:254",
+     "value": 50000000.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "ccn_nu": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:255",
+     "value": 1600000000.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "co_kappa": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1080",
+     "value": 0.61
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "co_pgw": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1079",
+     "value": 0.77
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "co_pmr": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "cxmincorr": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:234",
+     "value": 0.001
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "dhlmx": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:953",
+     "value": -1.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "eiw0": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:429",
+     "value": 0.5
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "esw0": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:430",
+     "value": 0.5
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "hailcnvtoffset": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:591",
+     "value": -2.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "icondlimit": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:362",
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "icorrectfddbz": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:232",
+     "value": -1
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "icorrecthaildbz": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:231",
+     "value": -1
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "iifall": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:287",
+     "value": 2
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "inactopt": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:389",
+     "value": 2
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "incwet": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:582",
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "irainbreak": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:610",
+     "value": -1
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "integer"
+   },
+   "naerdust": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:391",
+     "value": 1000000.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "nu_kappa": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1074",
+     "value": 0.07
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "nu_pgw": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:1073",
+     "value": 0.53
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "nu_pmr": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "rainbreakfac": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:617",
+     "value": 2500000.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "takshedsize1": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:663",
+     "value": 0.15
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "takshedsize2": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:664",
+     "value": 0.3
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "takshedsize3": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:665",
+     "value": 0.45
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "wetgrthtoffset": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:590",
+     "value": -1.0
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   },
+   "zxmincorr": {
+    "applies_when": {
+     "in": [
+      26,
+      27,
+      28
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "nssl_mp_params",
+    "note": "NSSL microphysics internal added in r22.0; read only with ptype 26-28",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/module_mp_nssl_2mom.F:233",
+     "value": 1e-15
+    },
+    "sources": [
+     {
+      "file": "src/module_mp_nssl_2mom.F",
+      "line": 1090,
+      "release": "r22.0",
+      "text": "NAMELIST /nssl_mp_params/"
+     }
+    ],
+    "type": "real32"
+   }
+  },
+  "param1": {
+   "cfl_limit": {
+    "applies_when": {
+     "in": [
+      1
+     ],
+     "key": "adapt_dt"
+    },
+    "class": "physics",
+    "group": "param1",
+    "note": "target Courant number for adapt_dt; r21.1 fixes it at 1.0",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 1.0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:419",
+     "value": 1.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 91,
+      "release": "r22.0",
+      "text": "cfl_limit - When using adaptive time steps"
+     },
+     {
+      "file": "src/misclibs.F",
+      "line": 617,
+      "release": "r21.1",
+      "text": "cfl_limit   =  1.00"
+     }
+    ],
+    "type": "real32"
+   }
+  },
+  "param12": {
+   "cnstch": {
+    "applies_when": {
+     "all": [
+      {
+       "in": [
+        1
+       ],
+       "key": "isfcflx"
+      },
+      {
+       "in": [
+        1
+       ],
+       "key": "cecd"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param12",
+    "note": "constant Ch; r22.0 split r21.1's cnstce (one Ce for heat and moisture) into cnstch and cnstcq",
+    "r21_equivalent": {
+     "kind": "r21-key",
+     "r21_key": "cnstce",
+     "requires_equal": [
+      "cnstch",
+      "cnstcq"
+     ]
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1077,
+      "release": "r22.0",
+      "text": "cnstch - Constant value of Ch"
+     },
+     {
+      "file": "CHANGES",
+      "line": 95,
+      "release": "r22.0",
+      "text": "(previously used Ce)"
+     },
+     {
+      "file": "README.namelist",
+      "line": 1037,
+      "release": "r21.1",
+      "text": "cnstce - Constant value of Ce"
+     }
+    ],
+    "type": "real32"
+   },
+   "cnstcq": {
+    "applies_when": {
+     "all": [
+      {
+       "in": [
+        1
+       ],
+       "key": "isfcflx"
+      },
+      {
+       "in": [
+        1
+       ],
+       "key": "cecd"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param12",
+    "note": "constant Cq; r22.0 split r21.1's cnstce (one Ce for heat and moisture) into cnstch and cnstcq",
+    "r21_equivalent": {
+     "kind": "r21-key",
+     "r21_key": "cnstce",
+     "requires_equal": [
+      "cnstch",
+      "cnstcq"
+     ]
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1081,
+      "release": "r22.0",
+      "text": "cnstcq - Constant value of Cq"
+     },
+     {
+      "file": "CHANGES",
+      "line": 98,
+      "release": "r22.0",
+      "text": "(previously used Ce)"
+     }
+    ],
+    "type": "real32"
+   },
+   "use_avg_sfc": {
+    "applies_when": {
+     "in": [
+      1,
+      5
+     ],
+     "key": "sfcmodel"
+    },
+    "class": "physics",
+    "group": "param12",
+    "note": "surface-layer scalars from domain-average conditions (Moeng 1984); r21.1 uses local conditions",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": false
+    },
+    "r22_default": {
+     "source": "src/cm1.F:481",
+     "value": false
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1131,
+      "release": "r22.0",
+      "text": "use_avg_sfc - use average"
+     }
+    ],
+    "type": "logical"
+   }
+  },
+  "param2": {
+   "irandprst": {
+    "applies_when": {
+     "in": [
+      1
+     ],
+     "key": "irst"
+    },
+    "class": "physics",
+    "group": "param2",
+    "note": "random water-vapour perturbations added on a restart; r21.1 adds none",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:451",
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 719,
+      "release": "r22.0",
+      "text": "irandprst - Include random"
+     },
+     {
+      "file": "src/init3d.F",
+      "line": 3099,
+      "release": "r22.0",
+      "text": "restarted .and. irandprst.eq.1"
+     }
+    ],
+    "type": "integer"
+   },
+   "numrand": {
+    "applies_when": {
+     "in": [
+      1
+     ],
+     "key": "irandp"
+    },
+    "class": "physics",
+    "group": "param2",
+    "note": "draws numrand extra random fields before the perturbation, for ensemble members; 0 or less draws none, as r21.1",
+    "r21_equivalent": {
+     "kind": "at-most",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 727,
+      "release": "r22.0",
+      "text": "numrand - For"
+     },
+     {
+      "file": "src/init3d.F",
+      "line": 1596,
+      "release": "r22.0",
+      "text": "do n=1,max(0,numrand)"
+     }
+    ],
+    "type": "integer"
+   },
+   "ramp_down": {
+    "applies_when": {
+     "in": [
+      1
+     ],
+     "key": "adapt_dt"
+    },
+    "class": "physics",
+    "group": "param2",
+    "note": "with adapt_dt, shorten the step to land on output times; the only behaviour before r22.0",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 1
+    },
+    "r22_default": {
+     "source": "src/cm1.F:422",
+     "value": 1
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 250,
+      "release": "r22.0",
+      "text": "ramp_down - When adapt_dt=1"
+     },
+     {
+      "file": "README.namelist",
+      "line": 254,
+      "release": "r22.0",
+      "text": "This was only option in CM1 before cm1r22.0"
+     }
+    ],
+    "type": "integer"
+   }
+  },
+  "param22": {
+   "trn_lr": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:409",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_lz": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:410",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_swirl": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:407",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_wfrc": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:408",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_xc": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:411",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_yc": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:412",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   },
+   "trn_zc": {
+    "applies_when": {
+     "in": [
+      17
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param22",
+    "note": "r22.0's idealized tornado case (testcase=17), which r21.1 does not have; unread otherwise",
+    "r21_equivalent": {
+     "kind": "unread"
+    },
+    "r22_default": {
+     "source": "src/cm1.F:413",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2095,
+      "release": "r22.0",
+      "text": "param22 section:  options related to testcase=17"
+     }
+    ],
+    "type": "real32"
+   }
+  },
+  "param23": {
+   "gamma_cp": {
+    "applies_when": {
+     "all": [
+      {
+       "in": [
+        1,
+        4
+       ],
+       "key": "cm1setup"
+      },
+      {
+       "in": [
+        3,
+        4
+       ],
+       "key": "sgsmodel"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param23",
+    "note": "two-part SGS transition-zone centre (m); r21.1 fixes it at 150 m (75 m for testcase=11)",
+    "r21_equivalent": {
+     "cases": [
+      {
+       "value": 75.0,
+       "when": {
+        "in": [
+         11
+        ],
+        "key": "testcase"
+       }
+      }
+     ],
+     "kind": "value-when",
+     "otherwise": 150.0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:417",
+     "value": 100.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2147,
+      "release": "r22.0",
+      "text": "gamma_cp   -  centerpoint"
+     },
+     {
+      "file": "src/param.F",
+      "line": 8869,
+      "release": "r21.1",
+      "text": "gam_cp     =    150.0"
+     },
+     {
+      "file": "src/param.F",
+      "line": 8875,
+      "release": "r21.1",
+      "text": "gam_cp = 75.0"
+     },
+     {
+      "file": "src/param.F",
+      "line": 8865,
+      "release": "r21.1",
+      "text": "( sgsmodel.eq.3 .or. sgsmodel.eq.4 ) ) dot2p = .true."
+     }
+    ],
+    "type": "real32"
+   },
+   "gamma_dr": {
+    "applies_when": {
+     "all": [
+      {
+       "in": [
+        1,
+        4
+       ],
+       "key": "cm1setup"
+      },
+      {
+       "in": [
+        3,
+        4
+       ],
+       "key": "sgsmodel"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param23",
+    "note": "two-part SGS transition-zone decay rate (m); r21.1 fixes it at 25 m (12.5 m for testcase=11)",
+    "r21_equivalent": {
+     "cases": [
+      {
+       "value": 12.5,
+       "when": {
+        "in": [
+         11
+        ],
+        "key": "testcase"
+       }
+      }
+     ],
+     "kind": "value-when",
+     "otherwise": 25.0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:418",
+     "value": 18.0
+    },
+    "sources": [
+     {
+      "file": "src/param.F",
+      "line": 8871,
+      "release": "r21.1",
+      "text": "gam_dr     =     25.0"
+     },
+     {
+      "file": "src/param.F",
+      "line": 8876,
+      "release": "r21.1",
+      "text": "gam_dr = 12.5"
+     },
+     {
+      "file": "src/param.F",
+      "line": 9642,
+      "release": "r22.0",
+      "text": "(zf(1,1,k)-gamma_cp)/gamma_dr"
+     }
+    ],
+    "type": "real32"
+   },
+   "timeavg_len": {
+    "applies_when": {
+     "any": [
+      {
+       "all": [
+        {
+         "in": [
+          1,
+          4
+         ],
+         "key": "cm1setup"
+        },
+        {
+         "in": [
+          3,
+          4
+         ],
+         "key": "sgsmodel"
+        },
+        {
+         "in": [
+          2
+         ],
+         "key": "t2p_avg"
+        }
+       ]
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_w"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_e"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_s"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_n"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param23",
+    "note": "length (s) of each time-averaging level; r21.1 fixes 60 s",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 60.0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:416",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "src/param.F",
+      "line": 10018,
+      "release": "r21.1",
+      "text": "rtim  =  60.0"
+     },
+     {
+      "file": "src/param.F",
+      "line": 9270,
+      "release": "r21.1",
+      "text": "if( do_recycle_w ) do_recycle = .true."
+     }
+    ],
+    "type": "real32"
+   },
+   "timeavg_num": {
+    "applies_when": {
+     "any": [
+      {
+       "all": [
+        {
+         "in": [
+          1,
+          4
+         ],
+         "key": "cm1setup"
+        },
+        {
+         "in": [
+          3,
+          4
+         ],
+         "key": "sgsmodel"
+        },
+        {
+         "in": [
+          2
+         ],
+         "key": "t2p_avg"
+        }
+       ]
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_w"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_e"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_s"
+      },
+      {
+       "in": [
+        true
+       ],
+       "key": "do_recycle_n"
+      }
+     ]
+    },
+    "class": "physics",
+    "group": "param23",
+    "note": "number of time-averaging levels for the two-part SGS model and eddy recycling; r21.1 fixes 5",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 5
+    },
+    "r22_default": {
+     "source": "src/cm1.F:415",
+     "value": 1
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 2139,
+      "release": "r22.0",
+      "text": "timeavg_num   -  number"
+     },
+     {
+      "file": "src/param.F",
+      "line": 10015,
+      "release": "r21.1",
+      "text": "ntim  =   5"
+     }
+    ],
+    "type": "integer"
+   }
+  },
+  "param3": {
+   "brkup_db": {
+    "applies_when": {
+     "in": [
+      5
+     ],
+     "key": "ptype"
+    },
+    "class": "physics",
+    "group": "param3",
+    "note": "Morrison raindrop-breakup cutoff diameter (m); r21.1 fixes it at 300e-6 m, and r22.0 reads a value below 1e-20 as 300e-6 m",
+    "r21_equivalent": {
+     "kind": "any-of",
+     "options": [
+      {
+       "kind": "value",
+       "value": 0.0003
+      },
+      {
+       "kind": "below",
+       "value": 1e-20
+      }
+     ]
+    },
+    "r22_default": {
+     "source": "src/cm1.F:404",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 844,
+      "release": "r22.0",
+      "text": "brkup_db - Mean cutoff diameter"
+     },
+     {
+      "file": "src/morrison.F",
+      "line": 493,
+      "release": "r21.1",
+      "text": "D_b = 300.e-6"
+     },
+     {
+      "file": "src/morrison.F",
+      "line": 494,
+      "release": "r22.0",
+      "text": "if( cm1db.lt.1.0e-20 )then"
+     },
+     {
+      "file": "src/morrison.F",
+      "line": 495,
+      "release": "r22.0",
+      "text": "cm1db = 300.e-6"
+     }
+    ],
+    "type": "real32"
+   },
+   "solconrce": {
+    "applies_when": {
+     "in": [
+      8
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param3",
+    "note": "solar constant (W/m2) of the testcase=8 RCE case; r21.1 fixes it at 650.83",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 650.83
+    },
+    "r22_default": {
+     "source": "src/cm1.F:405",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 866,
+      "release": "r22.0",
+      "text": "solconrce - solar constant"
+     },
+     {
+      "file": "src/radiation_driver.F",
+      "line": 551,
+      "release": "r21.1",
+      "text": "solcon = 650.83"
+     }
+    ],
+    "type": "real32"
+   },
+   "zenanglrce": {
+    "applies_when": {
+     "in": [
+      8
+     ],
+     "key": "testcase"
+    },
+    "class": "physics",
+    "group": "param3",
+    "note": "solar zenith angle (degrees) of the testcase=8 RCE case; r21.1 fixes it at 50.5",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 50.5
+    },
+    "r22_default": {
+     "source": "src/cm1.F:406",
+     "value": 0.0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 868,
+      "release": "r22.0",
+      "text": "zenanglrce - solar zenith angle"
+     },
+     {
+      "file": "src/radiation_driver.F",
+      "line": 552,
+      "release": "r21.1",
+      "text": "coszen = cos(50.5*pi/180.0)"
+     }
+    ],
+    "type": "real32"
+   }
+  },
+  "param9": {
+   "output_hail": {
+    "applies_when": {
+     "in": [
+      26,
+      27
+     ],
+     "key": "ptype"
+    },
+    "class": "output",
+    "group": "param9",
+    "note": "surface hail accumulation, NSSL microphysics only",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1376,
+      "release": "r22.0",
+      "text": "output_hail     - surface hail"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_qdiags": {
+    "applies_when": {
+     "in": [
+      5
+     ],
+     "key": "ptype"
+    },
+    "class": "output",
+    "group": "param9",
+    "note": "Morrison condensation, evaporation, deposition and sublimation rates",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1511,
+      "release": "r22.0",
+      "text": "output_qdiags   - some"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_rh": {
+    "applies_when": null,
+    "class": "output",
+    "group": "param9",
+    "note": "relative humidity in the output files",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1455,
+      "release": "r22.0",
+      "text": "output_rh       - relative"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_sedtend": {
+    "applies_when": {
+     "in": [
+      3,
+      5
+     ],
+     "key": "ptype"
+    },
+    "class": "output",
+    "group": "param9",
+    "note": "sedimentation tendencies (Thompson and Morrison)",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1516,
+      "release": "r22.0",
+      "text": "output_sedtend  - sedimentation"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_tau": {
+    "applies_when": null,
+    "class": "output",
+    "group": "param9",
+    "note": "subgrid/viscous stress terms",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1524,
+      "release": "r22.0",
+      "text": "output_tau      - subgrid"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_temperature": {
+    "applies_when": null,
+    "class": "output",
+    "group": "param9",
+    "note": "air temperature in the output files",
+    "r21_equivalent": {
+     "kind": "value",
+     "value": 0
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1443,
+      "release": "r22.0",
+      "text": "output_temperature - air"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_vortinterp": {
+    "applies_when": null,
+    "class": "output",
+    "group": "param9",
+    "note": "vorticity interpolated to scalar points, which is what r21.1's output_vort writes",
+    "r21_equivalent": {
+     "kind": "r21-key",
+     "r21_key": "output_vort"
+    },
+    "r22_default": {
+     "source": null,
+     "value": 0
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1491,
+      "release": "r22.0",
+      "text": "output_vortinterp - vorticity"
+     },
+     {
+      "file": "CHANGES",
+      "line": 142,
+      "release": "r22.0",
+      "text": "(this is what output_vort did in previous"
+     }
+    ],
+    "type": "integer"
+   },
+   "output_z_max": {
+    "applies_when": null,
+    "class": "output",
+    "group": "param9",
+    "note": "write output only up to this height; a negative value writes the whole column, as r21.1 does",
+    "r21_equivalent": {
+     "kind": "below",
+     "value": 0.0
+    },
+    "r22_default": {
+     "source": "src/cm1.F:439",
+     "value": -999.9
+    },
+    "sources": [
+     {
+      "file": "README.namelist",
+      "line": 1355,
+      "release": "r22.0",
+      "text": "output_z_max - Maximum height"
+     },
+     {
+      "file": "README.namelist",
+      "line": 1358,
+      "release": "r22.0",
+      "text": "A negative value (default)"
+     }
+    ],
+    "type": "real32"
+   }
+  }
+ },
+ "release": {
+  "files": {
+   "CHANGES": "6c2a97a96497fe0b45c4f6543283f328d18c088ac2c152389e05e5c865a030d7",
+   "README.namelist": "3b5b7526f214e66137066f04737eac09e8c8e8806cfa1892dcc96f9227385009",
+   "run/config_files/supercell/namelist.input": "d8e64ca3de41ed855c7fc486e1a87adb1bda4d15ea260bd2705e631f735011bb",
+   "src/cm1.F": "2e822409abaa08058acb4b0585f06cb27ca405786d60e83094c11379c77f406a",
+   "src/init3d.F": "d4a21b1886ae7aa18be6657a5bc25dd46116e2573385cc2eecf6e3af7bac3fcf",
+   "src/input.F": "9e56927bbe263e0cf7ab3b80b35fc3cc92cd1174ecd5ffdd838fdafdef350c00",
+   "src/misclibs.F": "9fee9077e506d8269abebde7552743561d5ca47dc367fc8346ff7dc1c2279c97",
+   "src/module_mp_nssl_2mom.F": "4a880c53b64e7b6b87a9fd7063e5c8176407ad9b53f31e6f7a3749b85d5ba8d0",
+   "src/module_ra_etc.F": "9b3d51a1945b3ce73628fc5c922e5f2f294d37e5335f1b549cb7fde57cb02e90",
+   "src/morrison.F": "2e199a4f2cb66f0590b455fe54b762c5ca4bfdfcd49bd7aa5317b757655034f7",
+   "src/param.F": "5d696c648613d3e6b810be5a5d07687f80fd4299c46d1f6e525964b65c827722",
+   "src/radiation_driver.F": "528bdfdd37e5649d305737fd83e73cc94833b9c44340ac9907c7383d7e5eff67"
+  },
+  "name": "r22.0",
+  "tarball_bytes": 345966115,
+  "tarball_sha256": "05f990bb79055873c49499c92d0ff447524a2795016a474447a7e87dd5a86226",
+  "terms": "Release 22.0 (21 September 2026): UCAR's permissive grant, copyright 2026 University Corporation for Atmospheric Research (the terms CM1 r21.1 carries); short lines quoted under it",
+  "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r22.0.tar.gz"
+ },
+ "removed_r21_keys": {
+  "cnstce": {
+   "group": "param12",
+   "note": "r22.0 has no cnstce; an r22.0 file gives r21.1's cnstce as cnstch when cnstch equals cnstcq",
+   "r22_keys": [
+    "cnstch",
+    "cnstcq"
+   ],
+   "sources": [
+    {
+     "file": "README.namelist",
+     "line": 1037,
+     "release": "r21.1",
+     "text": "cnstce - Constant value of Ce"
+    },
+    {
+     "file": "CHANGES",
+     "line": 95,
+     "release": "r22.0",
+     "text": "(previously used Ce)"
+    }
+   ]
+  }
+ },
+ "schema": "gm1.cm1-r22.0-new-namelist-keys/v1"
+}

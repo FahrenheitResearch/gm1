@@ -1,0 +1,147 @@
+# param.F:8072-8132's explicit w-level branch, on a column CM1 also builds
+# analytically -- which is the point.
+#
+# stretch_z=4 does not generate anything: param.F:8083 opens a file called
+# input_grid_z and param.F:8086 reads nk+1 w levels out of it, then
+# param.F:8103 takes the model top from the last one.  The level list below is
+# exactly the column examples/oracle/stretched-column-32.differential.toml
+# generates from param.F:7819-7953, so the two cases describe one coordinate
+# reached two different ways, and anything this case finds is the reading of
+# the list rather than the shape of the column.
+#
+# CM1 has no namelist word for the list; gpuwm-cm1 carries it inside the sealed
+# document as grid.levels_m, which is why the key map holds it as GM1-only and
+# why cm1_run writes input_grid_z from it.  One declaration, two sides.
+#
+# ztop, str_bot, str_top, dz_bot and dz_top are declared as 0: param.F:8103
+# overwrites ztop from the generated top and this branch reads none of the
+# other four, so a nonzero value would travel in the run receipt describing a
+# coordinate the run does not have -- which is what gpuwm-cm1's
+# CM1-CFG-STRETCH-CONTROL-UNUSED refuses.
+#
+# Horizon: one advective cell crossing, exactly as the analytic case.
+
+[case]
+name = "explicit-w-levels-32"
+term = "metric"
+notes = """CM1 r21.1 stretch_z=4 explicit w levels read from input_grid_z,
+listing the same 100 m to 300 m column under an 8 km top that the analytic
+stretch_z=1 case generates. One advective cell crossing."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 200.0
+dtl = 1.0
+timax = 100.0
+tapfrq = 20.0
+rstfrq = 100.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 6000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 4
+ztop = 0.0
+str_bot = 0.0
+str_top = 0.0
+dz_bot = 0.0
+dz_top = 0.0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+# param.F:8086 reads nz+1 = 41 w levels, in metres above ground.
+"grid.levels_m" = [
+  0.0,
+  100.0,
+  200.0,
+  300.0,
+  400.0,
+  500.0,
+  600.0,
+  700.0,
+  800.0,
+  900.0,
+  1000.0,
+  1100.0,
+  1210.526367,
+  1331.578979,
+  1463.157959,
+  1605.263184,
+  1757.894775,
+  1921.052734,
+  2094.736816,
+  2278.947266,
+  2473.684082,
+  2678.94751,
+  2894.736816,
+  3121.05249,
+  3357.894775,
+  3605.263184,
+  3863.157959,
+  4131.579102,
+  4410.526367,
+  4700.0,
+  5000.0,
+  5300.0,
+  5600.0,
+  5900.0,
+  6200.0,
+  6500.0,
+  6800.0,
+  7100.0,
+  7400.0,
+  7700.0,
+  8000.0,
+]
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 2048
+"runtime.capacity_profile" = "default"

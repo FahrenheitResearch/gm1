@@ -1,0 +1,36 @@
+{
+  "inputs": [
+    {
+      "bytes": 869,
+      "filename": "cm1r21.1-cpm_RadConvEquil-input_sounding",
+      "name": "cm1r21.1-cpm-radconvequil-sounding",
+      "notice_section": "CM1 attribution",
+      "sha256": "295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5",
+      "shipped": false,
+      "source_path": "run/config_files/cpm_RadConvEquil/input_sounding",
+      "source_release": "cm1r21.1"
+    },
+    {
+      "bytes": 8173,
+      "filename": "cm1r21.1-supercell-namelist.input",
+      "name": "cm1r21.1-supercell-namelist",
+      "notice_section": "CM1 attribution",
+      "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+      "shipped": true,
+      "source_path": "run/config_files/supercell/namelist.input",
+      "source_release": "cm1r21.1"
+    },
+    {
+      "bytes": 8173,
+      "filename": "cm1r21.1-squall_line-namelist.input",
+      "name": "cm1r21.1-squall-line-namelist",
+      "notice_section": "CM1 attribution",
+      "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+      "shipped": true,
+      "source_path": "run/config_files/squall_line/namelist.input",
+      "source_release": "cm1r21.1"
+    }
+  ],
+  "redistribution": "Rows with shipped false are identities, recorded and not shipped: CM1-AUTHORITY.json's redistribution record names 'fourteen tar-only runtime assets have no standalone license sidecar' as a blocker, and its package policy is to ship identities and maps rather than CM1 runtime assets; the caller supplies such a file from their own r21.1 extraction and the package verifies it against the sha256 recorded here. Rows with shipped true are CM1's own supercell and squall_line namelists, shipped byte for byte as the GUI's examples under the CM1 r21.1 release grant quoted in NOTICE; they are text configuration files, not among the recorded blockers, and their digests are the ones tools/authority/cm1r21.1-content-sha256.tsv (in the source distribution) records for the pinned tarball.",
+  "schema": "gpuwm-cm1.required-inputs/v1"
+}

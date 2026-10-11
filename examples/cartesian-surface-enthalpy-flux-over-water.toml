@@ -1,0 +1,125 @@
+# A water surface that exchanges heat and moisture with the air above it.
+#
+# Momentum drag alone makes a storm's inflow slower near the ground.  It does
+# not feed the storm.  isfcflx=1 turns on CM1's surface enthalpy flux
+# (src/sfcphys.F:341-361), which is the term that lets a warm sea surface
+# keep a convective system supplied:
+#
+#     thflux = Ch * s10 * ( tsk/pi_sfc - th0 - tha )
+#     qvflux = Cq * s10 * ( rslf(psfc,tsk) - qv ) * mavail
+#
+# and src/turbtend.F:595 puts them in as the lower boundary of the implicit
+# vertical scalar diffusion, for theta and qv only (src/solve1.F:1208,1217;
+# every other scalar keeps the zero at src/solve1.F:1222,1233).
+#
+# The three things it needs, which an idealized lane has no initializer for
+# until [surface] exists, are all here:
+#
+#   * tsk0_k, the skin temperature.  302.15 K is a 29 C sea surface.
+#   * xland0 = 2.0 with lu0 = 16, LANDUSE.TBL's water category.  getcecd
+#     branches on xland > 1.5 (src/sfcphys.F:141), and init_surface.F:277
+#     forces the moisture availability to 1 over water, so the sea is
+#     saturated at its own temperature and the latent heat flux is the full
+#     saturation deficit.
+#   * oceanmodel = 1, the fixed sea-surface temperature CM1 requires with
+#     sfcmodel=1 (README.namelist:946).  oceanmodel=2's prognostic mixed
+#     layer, which would cool the sea under the storm, is refused by name.
+#
+# cecd = 3 is the Fairall (2003) / Donelan (2004) drag line
+# (src/sfcphys.F:161-165): Cd rises from 1.0e-3 at 5 m/s to 2.4e-3 at 25 m/s
+# and saturates there, iterated against the 10 m wind it predicts.  That
+# saturation is the whole point at hurricane wind speeds -- a constant Cd
+# either under-drags the outer circulation or over-drags the eyewall -- and
+# it is why this deck does not simply declare cnstcd.  Over water with
+# cecd=3 the enthalpy coefficient is Drennan's constant 1.20e-3
+# (src/sfcphys.F:216-218), so cnstce is inert here and is declared only
+# because a half-declared surface is refused.
+#
+# The roughness length still has to start somewhere: src/sfcphys.F:155 uses
+# the previous step's value as the iteration's first guess, and before the
+# first step that is LANDUSE.TBL's water roughness of 1e-4 m.
+
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 1
+cecd = 3
+cnstcd = 0.001
+cnstce = 0.001
+set_znt = 0
+cnst_znt = 0.16
+set_ust = 0
+cnst_ust = 0.25
+
+[surface]
+initsfc = 1
+tsk0_k = 302.15
+tmn0_k = 302.15
+xland0 = 2.0
+lu0 = 16
+season = 1
+oceanmodel = 1
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

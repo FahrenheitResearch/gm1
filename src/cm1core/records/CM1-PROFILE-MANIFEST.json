@@ -1,0 +1,390 @@
+{
+  "cartesian_runtime": {
+    "admitted_envelope": {
+      "acoustic_substeps": [
+        4,
+        6,
+        8,
+        10,
+        12
+      ],
+      "boundaries": {
+        "lateral": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "radiative_order": 4,
+        "vertical": [
+          1,
+          1
+        ]
+      },
+      "capacity_profile": "gm1.arwen-wsm6-column-capacity-256/v1",
+      "closures": {
+        "sgs_model": 1,
+        "upper_damping": 1,
+        "vertical_implicit_diffusion": true
+      },
+      "dry_mass_correction": true,
+      "dt_s": 0.5,
+      "equation_set": 2,
+      "horizontal_minimum": 7,
+      "levels": [
+        8,
+        80
+      ],
+      "levels_with_capacity_profile": [
+        8,
+        256
+      ],
+      "physics_component": "wsm6-mp6",
+      "psolver": 3,
+      "scalar_weno": 2,
+      "tile_widths": [
+        16,
+        32,
+        64,
+        128
+      ]
+    },
+    "authority_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "derivation": "configurable uniform Cartesian grid executed by the device-resident GM1 runtime; an admitted envelope of grids, not one sealed native profile",
+    "initialization_contract": {
+      "fallback_policy": "refuse a profile that does not cover the model column; the source profile is never extrapolated",
+      "required_inputs": [
+        "idealized initializer library",
+        "input_sounding"
+      ],
+      "sounding_extent_rule": "the profile must bracket every mass level: its first height below grid.dz_m/2 and its top at or above grid.nz*grid.dz_m - grid.dz_m/2",
+      "source": "the Rust CM1 r21.1 isnd=7 single-sounding initializer with the official iinit=1 warm bubble"
+    },
+    "lane_name": "cartesian",
+    "product_differences": {
+      "native_ptype_5": "substituted by ArWen semantic component wsm6-mp6",
+      "output_format_1": "substituted by one JSON execution receipt; GM1 history/checkpoint writing remains a separate gate",
+      "rstfrq": "no native restart cadence is honoured; this lane writes exactly one end-of-run receipt"
+    },
+    "profile": "gm1-cartesian-configurable-grid/v1",
+    "semantic_config_fixture": {
+      "bytes": 962,
+      "semantic_key_count": 48,
+      "sha256": "629a8975315ceaeb2f46c87e0f22b02e86d3b16805dba3d6784cb96e73d14a5d",
+      "source_distribution_path": "examples/cartesian-uniform-grid.toml"
+    },
+    "source_anchors": {
+      "acoustic_substep_count": "src/misclibs.F:834-889",
+      "large_step_order": "src/solve1.F;src/solve2.F;src/mp_driver.F;src/solve3.F",
+      "sounding_interpolation": "src/base.F:675-755",
+      "uniform_grid_top": "src/param.F:2608-2609"
+    },
+    "status": "executable-under-qualification: executed steps and measured resource use, not native-CM1 trajectory identity or forecast skill"
+  },
+  "cartesian_runtime_admission": {
+    "column_components": {
+      "default": "wsm6-mp6",
+      "morrison-mp10": {
+        "arwen_mp_physics": 10,
+        "capacity_profile": null,
+        "cm1_ptype": 5,
+        "levels": [
+          2,
+          256
+        ],
+        "levels_with_capacity_profile": null,
+        "numq": 10
+      },
+      "thompson-aerosol-mp28": {
+        "arwen_mp_physics": 28,
+        "capacity_profile": null,
+        "cm1_ptype": null,
+        "levels": [
+          2,
+          256
+        ],
+        "levels_with_capacity_profile": null,
+        "numq": 11
+      },
+      "thompson-mp8": {
+        "arwen_mp_physics": 8,
+        "capacity_profile": null,
+        "cm1_ptype": 3,
+        "levels": [
+          2,
+          256
+        ],
+        "levels_with_capacity_profile": null,
+        "numq": 8
+      },
+      "wsm6-mp6": {
+        "arwen_mp_physics": 6,
+        "capacity_profile": "gm1.arwen-wsm6-column-capacity-256/v1",
+        "cm1_ptype": 7,
+        "levels": [
+          2,
+          80
+        ],
+        "levels_with_capacity_profile": [
+          2,
+          256
+        ],
+        "numq": 6
+      }
+    },
+    "ihail": {
+      "admitted_values": [
+        0,
+        1
+      ],
+      "authority": "src/param.F:1567-1580 admits 0 or 1 and supplies no default; src/param.F:3407 passes it to Morrison and src/param.F:3697-3706 passes it to WSM6",
+      "default_by_component": {
+        "morrison-mp10": 1,
+        "wdm6-mp16": 0,
+        "wsm6-mp6": 1
+      },
+      "undeclared_binds": "the selected component's own recorded value: wsm6-mp6 binds 0, the branch this port has executed since it first bound WSM6, and morrison-mp10 binds 1, which is what CM1 ships ptype=5 with in run/namelist.input:55-56 and run/config_files/supercell/namelist.input:54-55",
+      "values": [
+        0,
+        1
+      ]
+    },
+    "ndcnst": {
+      "authority": "src/morrison.F:314-329; the admitted ArWen kernel writes the conversion as the literal 250.0e6f at gpuwm/core/kernels/morrison.cu:124 and :1310",
+      "scope": "morrison-mp10",
+      "unit": "cm-3",
+      "values": [
+        250.0
+      ]
+    },
+    "product_differences": {
+      "native_ptype_3": "ptype = 3 runs ArWen thompson-mp8 (WRF mp_physics = 8), not CM1's thompson.F; it has run only a 120-s column, so the namelist importer asks for an acknowledgment",
+      "native_ptype_5": "ptype = 5 runs ArWen morrison-mp10 (WRF mp_physics = 10, with CM1's ihail and ndcnst), not CM1's morrison.F",
+      "native_ptype_7": "ptype = 7 runs ArWen wsm6-mp6 (WRF mp_physics = 6), not CM1's mp_wsm6.F",
+      "other_ptypes": "no other CM1 r21.1 microphysics scheme runs; the namelist importer refuses it by scheme name",
+      "sealed_identity_text": "cartesian_runtime.product_differences.native_ptype_5 reads 'substituted by ArWen semantic component wsm6-mp6'. That described the envelope sealed when wsm6-mp6 was the lane's only component. It stays in the sealed identity so every recorded plan_sha256 keeps naming its run; this block is the lane's live statement, and gpuwm-cm1 check prints it."
+    },
+    "record": "gm1.cartesian-live-admission/v1",
+    "why_this_is_not_inside_cartesian_runtime": "cartesian_runtime.admitted_envelope is a SEALED IDENTITY, not a live description. profiles.profile_identity deep-copies it into every canonical document, and CM1Config.sha256 is the digest of that document; recorded GPU-run receipts carry the digest as plan_sha256 (state.py:345). Widening the lane therefore may not touch it, which is why it still reads dt_s = 0.5 and a five-value acoustic_substeps list long after the large step became free and the substep range became 4..192. The lane's live admission lives here, is regenerated from the code that enforces it, and is held to that code by tests/test_cartesian_live_admission.py."
+  },
+  "dry_bootstrap": {
+    "authority_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "derivation": "separately labeled internal operator bootstrap; not a shipped forecast capability or native supercell profile",
+    "fixed_identity": {
+      "boundaries": {
+        "irbc_inert_value": 1,
+        "lateral": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "vertical": [
+          1,
+          1
+        ]
+      },
+      "closures": {
+        "moving_frame": false,
+        "sgs_model": 0,
+        "upper_damping": 0,
+        "vertical_implicit_diffusion": false
+      },
+      "dry_mass_correction": true,
+      "dt_s": 1.0,
+      "duration_s": 60.0,
+      "equation_set": 1,
+      "grid": [
+        16,
+        16,
+        16
+      ],
+      "moisture": "off",
+      "psolver": 2,
+      "scalar_weno": 0,
+      "spacing_m": [
+        1000.0,
+        1000.0,
+        1000.0
+      ]
+    },
+    "profile": "cm1-21.1-derived-dry-psolver2-bootstrap/v1",
+    "required_next_evidence": [
+      "complete derived native namelist patch and hash",
+      "classification of every unprojected native input",
+      "two-build instrumented psolver=2 operator deck with negative controls"
+    ],
+    "semantic_config_fixture": {
+      "bytes": 820,
+      "semantic_key_count": 42,
+      "sha256": "cf52ef48e2c65ed8a7cb4a7d4db085cfb9ae41b5594342f053dc979ccb5eadee",
+      "source_distribution_path": "examples/dry-psolver2-bootstrap.toml"
+    },
+    "source_anchors": {
+      "periodic_lateral_boundary": "README.namelist:561-570",
+      "psolver_2_dispatch": "src/solve2.F:1080-1173",
+      "sgs_disabled_semantics": "README.namelist:124-132; package value 0 is a semantic off sentinel, not a claimed native sgsmodel assignment; native disablement requires the future complete cm1setup=0 derivation"
+    },
+    "status": "configuration-contract-only-runtime-refused",
+    "unprojected_native_option_status": "not yet classified or bound; no native or CUDA execution is admitted"
+  },
+  "official_supercell": {
+    "authority_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "fixed_scientific_options_not_projected_as_user_keys": {
+      "boundary_companions": {
+        "alphobc": 60.0,
+        "nudgeobc": 0,
+        "roflux": 0
+      },
+      "closures": {
+        "bcturbs": 1,
+        "horizturb": 0,
+        "hrdamp": 0,
+        "ipbl": 0,
+        "ramp_sgs": 1,
+        "ramp_time": 1800.0,
+        "tconfig": 1
+      },
+      "dynamics": {
+        "alph": 0.6,
+        "csound": 300.0,
+        "difforder": 6,
+        "fcor": 5e-05,
+        "idiff": 0,
+        "kdiff2": 75.0,
+        "kdiff6": 0.04,
+        "kdiv": 0.1,
+        "mdiff": 0
+      },
+      "energy": {
+        "efall": 0,
+        "idiss": 1,
+        "imoist": 1,
+        "rterm": 0
+      },
+      "initialization": {
+        "axisymm": 0,
+        "cm1setup": 1,
+        "ibalance": 0,
+        "iinit": 1,
+        "iorigin": 2,
+        "irandp": 0,
+        "isnd": 5,
+        "iwnd": 2,
+        "testcase": 0
+      },
+      "native_physics_context": {
+        "cuparam": 0,
+        "iautoc": 1,
+        "ihail": 1,
+        "isfcflx": 0,
+        "oceanmodel": 0,
+        "ptype": 5,
+        "radopt": 0,
+        "sfcmodel": 0
+      }
+    },
+    "native_namelist": {
+      "bytes": 8173,
+      "option_count": 344,
+      "override_policy": "no native namelist is accepted by the package; all 344 source values are bound by this byte identity",
+      "path_in_authority": "run/config_files/supercell/namelist.input",
+      "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4"
+    },
+    "product_differences": {
+      "equation_set_2": "retained but runtime-red until O-EQTSET2-ENERGY passes",
+      "native_microphysics_controls": "context-only and not forwarded as ArWen selectors",
+      "native_ptype_5": "substituted by ArWen semantic component wsm6-mp6",
+      "output_format_1": "substituted by gpuwm-cm1.history/v1 through a not-yet-implemented Rust path",
+      "rstfrq_-3600": "substituted by positive 3600 s semantic CM1 Rust checkpoint cadence"
+    },
+    "profile": "cm1-21.1-official-supercell/v1",
+    "source_derived_behavior": {
+      "damping_start_m": 15000.0,
+      "effective_uniform_grid_top_m": 20000.0,
+      "input_ztop_m": 18000.0,
+      "source_anchor": "src/param.F:2608"
+    }
+  },
+  "policy": "gpuwm-cm1 does not parse a native CM1 namelist. The official supercell identity binds all 344 upstream values by exact fixture bytes. Every derived profile is separately identified and runtime-refused until its own initialization, unprojected-option classification, operators and executable evidence pass.",
+  "real_atmosphere_100m": {
+    "authority_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "derivation": "GPU-first real-data product standard; idealized profiles remain validation fixtures only",
+    "fixed_identity": {
+      "boundaries": {
+        "lateral": [
+          2,
+          2,
+          2,
+          2
+        ],
+        "radiative_order": 4,
+        "vertical": [
+          1,
+          1
+        ]
+      },
+      "closures": {
+        "moving_frame": false,
+        "sgs_model": 1,
+        "upper_damping": 1,
+        "vertical_implicit_diffusion": true
+      },
+      "dry_mass_correction": true,
+      "dt_s": 0.5,
+      "duration_s": 3600.0,
+      "equation_set": 2,
+      "grid": [
+        300,
+        300,
+        75
+      ],
+      "history_interval_s": 300.0,
+      "physics_component": "wsm6-mp6",
+      "psolver": 3,
+      "restart_interval_s": 900.0,
+      "scalar_weno": 2,
+      "spacing_m": [
+        100.0,
+        100.0,
+        200.0
+      ],
+      "terrain": true
+    },
+    "initialization_contract": {
+      "fallback_policy": "refuse missing fields; no analytic bubble, zero-w replacement, random perturbation or proxy reflectivity",
+      "required_2d": [
+        "PSFC",
+        "SOILHGT",
+        "SKINTEMP",
+        "REFC",
+        "REFD_1000M",
+        "REFD_4000M"
+      ],
+      "required_3d": [
+        "HGT",
+        "PRES",
+        "TT",
+        "SPFH",
+        "U_MASS",
+        "V_MASS",
+        "VVEL",
+        "QC",
+        "QI",
+        "QR",
+        "QS",
+        "QG"
+      ],
+      "source": "real Rust-decoded atmospheric analyses and forecasts"
+    },
+    "profile": "cm1-21.1-real-atmosphere-100m/v1",
+    "semantic_config_fixture": {
+      "bytes": 843,
+      "semantic_key_count": 42,
+      "sha256": "0c0fa22e7061c3c9ecddbcb4863e80294cea85bd327df5bb32b9b416f713d854",
+      "source_distribution_path": "examples/real-atmosphere-100m-product.toml"
+    },
+    "status": "configuration-and-real-transport-contract; runtime-refused pending Rust mapping and coupled forecast"
+  },
+  "schema": "gpuwm-cm1.profile-manifest/v1"
+}

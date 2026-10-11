@@ -1,0 +1,125 @@
+# CM1's semi-slip lower boundary on the translating-frame supercell deck.
+#
+# Every other key here is the deck beside this one, unchanged.  The
+# difference is the five lines in [closures] that name CM1's lower boundary
+# -- bbc, sfcmodel, isfcflx, cecd and cnstcd, which are declared together or
+# not at all -- plus boundaries.bottom, which is the same bbc selector under
+# this port's earlier spelling and must agree with it.
+#
+# bbc = 3 is CM1's semi-slip bottom (README.namelist:574-580).  Instead of
+# copying t13/t23 from k=2 -- the free-slip branch at turb.F:4536-4545, which
+# makes the surface stress identically zero -- turb.F:4596-4605 sets
+#
+#   t13(i,j,1) = 0.25*( ust**2 * u1/max(s1,0.01) + ... ) * ( rf + rf )
+#
+# at k=1, and turbtend.F:1454 feeds that straight into the lowest row of the
+# implicit vertical momentum solve.  That is a retarding force on the lowest
+# model level, and the horizontal vorticity it generates is the vorticity a
+# near-ground vortex tilts and stretches.  With bbc=1 there is none, which is
+# why a free-slip run can build a mesocyclone aloft and nothing at the ground.
+#
+# sfcmodel = 1 is CM1's own simple neutral surface layer, and it is required:
+# param.F:2073-2088 stops CM1 when bbc=3 has no surface model, because ust
+# comes from the surface layer and without it the stress above is exactly
+# zero.  cecd = 1 selects the constant drag coefficient branch of
+# sfcphys.F:120-136, which is what idealized surface-drag studies use:
+#
+#   cd  = max(1e-10, cnstcd)
+#   znt = 10/(exp(karman/sqrt(cd)) - 1)
+#   ust = max( s1*karman/log((za+znt)/znt), 1e-6 )
+#
+# so the declared coefficient fixes the roughness length and the friction
+# velocity follows the lowest model level wind.  cnstcd = 0.001 is CM1's own
+# namelist value (run/namelist.input:140); it is the one number to raise for
+# a rougher surface.  CM1 puts no upper bound on it and neither does this
+# port: what is refused is only the range where the roughness length above
+# stops existing in binary32.
+#
+# With bbc=3 the lowest model level also changes how it is heated.
+# solve1.F:932-935 moves the interior dissipative-heating loop's first index
+# to k=2, and solve1.F:950-988 heats k=1 with the surface-layer rate
+#
+#   epsd = ust**3 * log((dz1+znt)/znt) / (karman*dz1)
+#
+# instead, so the kinetic energy the surface stress removes returns as heat
+# at the level that lost it.
+#
+# isfcflx = 0 keeps surface fluxes of heat and moisture off, exactly as CM1's
+# supercell deck does (run/namelist.input:128).  Momentum drag needs none.
+#
+# The frame matters here.  turb.F:296-307 forms the ground-relative wind
+# ua+umove, va+vmove before any surface quantity is computed, and turb.F:539
+# builds the lowest-level wind from that.  The ground does not travel with
+# the storm, so the drag acts on the ground-relative wind, not the carried
+# frame-relative one.  This deck runs in the translating frame, so that
+# distinction is live, not hypothetical.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

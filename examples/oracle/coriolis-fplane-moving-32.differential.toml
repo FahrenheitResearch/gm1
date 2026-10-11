@@ -1,0 +1,126 @@
+# icor=1 in a translating frame -- the one combination that has to be got
+# right for GM1's storm-following domain to mean anything.
+#
+# base.F:2667 subtracts umove/vmove from every base-state wind once, so
+# every wind the run carries is frame-relative.  With icor=0 that is an
+# exact change of variable and nothing else is needed.  With icor=1 it is
+# not: the Coriolis acceleration is a function of the ground-relative
+# wind, and solve2.F:645,647 add the frame velocity back inside the term
+# for exactly that reason.  solve2.F:667-672, the beta-plane branch, does
+# not -- which is why dynamics.beta_plane = 1 is refused with a nonzero
+# frame.
+#
+# Control: coriolis-fplane-moving-32-icor0.differential.toml.
+# Evidence: the CM1 word record coriolis-fplane-moving-32 (development repository)
+
+# The cheapest decisive differential this port can run.
+#
+# gpuwm-cm1's only configurable lane is "cartesian", and config.py:1666-1679
+# binds it to physics.component = "wsm6-mp6" and equation_set = 2.  There is
+# therefore no dry configurable lane: the shortest honest comparison is a
+# moist one, kept short enough that the dycore -- not the microphysics --
+# is what the divergence curve is measuring.
+#
+# Term: acoustic.  A sound wave crosses one 1000 m cell in 1000/360 = 2.78 s,
+# so the decisive horizon is
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+#   PYTHONPATH=src python3 $HARNESS/differential.py horizon --term acoustic \
+#       --nx 32 --ny 32 --nz 40 --dx 1000 --dy 1000 --dz 500 --dt 1.0
+#
+#   timescale 2.778 s, horizon 278 s = 278 large steps = 1668 acoustic substeps.
+#
+# Rounded up to 280 s so the 20 s history cadence divides the duration exactly,
+# which gpuwm-cm1's config.py:1874-1895 requires.  14 frames, 32x32x40 cells:
+# seconds of CM1 wall time and a small GPU run.
+#
+# The base state is base.F's Weisman-Klemp analytic sounding (isnd=5) with its
+# analytic shear profile (iwnd=2).
+#
+# iwnd=0 would be the cleaner acoustic test -- no mean wind, so nothing is
+# advected and the only signal is the bubble's acoustic and buoyant
+# adjustment -- and config.py:816-826 admits the (isnd=5, iwnd=0) pair.  The
+# runtime does not: gm1_idealized_residency.py refuses it with "the analytic
+# Weisman-Klemp sounding lane admits iwnd=2 only".  The door and the
+# initializer disagree, so the pair is configurable and unrunnable.  Until
+# that is fixed this case carries the shear, and the advective timescale
+# (dx/U = 1000/20 = 50 s) sits inside the acoustic horizon rather than
+# outside it.
+
+[case]
+name = "coriolis-fplane-moving-32"
+term = "acoustic"
+notes = """psolver=3 split-explicit acoustics with the vertically implicit step, on a
+32x32x40 1 km / 500 m grid, with the Weisman-Klemp sounding and its
+quarter-circle shear (isnd=5, iwnd=2), Coriolis on an f plane (icor=1,
+fcor=0.0001), a frame moving at (12.5, 3) m/s (imove=1) and a fixed 1 s time
+step."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 280.0
+tapfrq = 20.0
+rstfrq = 280.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 1
+fcor = 1.0e-4
+imove = 1
+umove = 12.5
+vmove = 3.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid (4 here), and the translator does the same so both
+# codes take the same number of acoustic small steps per large step.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

@@ -1,0 +1,8 @@
+{
+ "ram_total_bytes": 64000000000,
+ "ram_available_bytes": 60000000000,
+ "disk_total_bytes": 2000000000000,
+ "disk_free_bytes": 1000000000000,
+ "cpu_count": 16,
+ "wsl2": false
+}

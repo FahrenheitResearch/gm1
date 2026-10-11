@@ -1,0 +1,189 @@
+gpuwm-cm1 (GM1)
+Copyright 2026 GM1 contributors
+
+This product is licensed under the Apache License, Version 2.0. It runs its
+column physics through ArWen, the separately distributed Apache-2.0 engine
+published on PyPI as the package gpuwm; ArWen is a dependency and is not
+bundled in this distribution.
+
+gpuwm-cm1 is an independent port. It is not affiliated with or endorsed by the
+University Corporation for Atmospheric Research (UCAR) or the NSF National
+Center for Atmospheric Research (NCAR).
+
+CM1 attribution
+---------------
+
+Scientific portions of this work are derived from the CM1 Numerical Model,
+Release 21.1, distributed by the University Corporation for Atmospheric
+Research. CM1 itself is made available under the following terms:
+
+CM1 Numerical Model, Release 21.1 (cm1r21.1)
+24 March 2024
+
+Copyright 2024 - University Corporation for Atmospheric Research
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+Under the terms above, this distribution carries these files and data derived
+from the CM1 r21.1 release. Paths are inside the installed package (cm1core/);
+the source distribution and the public source snapshot hold the same files
+under src/cm1core/.
+
+  * run/config_files/supercell/namelist.input and
+    run/config_files/squall_line/namelist.input, unchanged, as examples
+    (cm1core/data/);
+  * 21 modified copies of those two namelists, the presets' namelists
+    (cm1core/presets/*/namelist.input). Each preset's preset.json names the
+    file it was made from, that file's sha256 and every setting changed;
+  * the values of run/LANDUSE.TBL (the 33 land-use categories in two seasons
+    that CM1's getlanduse reads), transcribed to JSON as
+    cm1core/records/CM1-LANDUSE-TBL.json, which records the sha256 of the
+    file it was read from;
+  * the namelist-defaults table cm1core/records/CM1-R21-NAMELIST-DEFAULTS.json:
+    the default value of every r21.1 namelist setting and the file and line of
+    run/namelist.input, src/cm1.F, src/input.F, src/module_mp_nssl_2mom.F or
+    src/module_ra_etc.F that sets it, with each file's sha256;
+  * output of CM1 r21.1 itself on its supercell namelist, reduced to numbers:
+    the domain extremes at each output time that the quick-look series draws
+    beside a run (cm1core/records/CM1-STOCK-SUPERCELL-SERIES.json) and the
+    mature-phase means GM1 is compared against
+    (cm1core/records/GM1-STOCK-DECK-RATIOS.json);
+  * in the source distribution and the public source snapshot only (not in
+    the wheel): CM1 r21.1's base-state columns at model time zero (th0, qv0,
+    qc0 and qi0 for each analytic sounding, as binary32 words) written by
+    CM1 r21.1 itself (rust/cm1-state/evidence/cm1-base-columns.txt), which a
+    test of the Rust crate compares its initial states against;
+  * in the public source snapshot only (tests/ is not in the sdist or the
+    wheel): run/namelist.input, unchanged, and second copies of the supercell
+    and squall_line namelists, as the namelist importer's test fixtures
+    (tests/data/cm1import/); the importer's translation of the supercell
+    namelist (tests/data/decks/stock-imported.gpuwm-cm1.toml); and output
+    written by CM1 r21.1 itself on that namelist at 24 x 24 x 40 (one history
+    file, file layouts, GrADS descriptors and records, statistics), with the
+    namelists that made it (tests/data/cm1-ref-24x24/).
+
+These are text files, values and output of the CM1 r21.1 release under its
+root grant above; none is a file whose own notice carries other terms. No file
+of any other CM1 release is distributed. No CM1 source file, binary physics or
+radiation table, or executable is distributed.
+
+Other CM1 releases
+------------------
+
+The namelist importer also reads namelists written for other CM1 releases. Its
+two records of their keys cite the releases' README.namelist, CHANGES and
+source files by file and line, as the redistribution inventory lists:
+
+  * cm1core/records/CM1-R22-NEW-KEYS.json quotes short lines of CM1 Release
+    22.0 (cm1r22.0, 21 September 2026), Copyright 2026 - University
+    Corporation for Atmospheric Research;
+  * cm1core/records/CM1-KEY-ALIASES.json quotes short lines of CM1 Release
+    19.10 (cm1r19.10, 4 March 2020), Copyright 2020 - University Corporation
+    for Atmospheric Research, and of CM1 Release 20.3 (cm1r20.3, 25 June
+    2021), Copyright 2021 - University Corporation for Atmospheric Research.
+
+Each of these releases is made available under the same permission notice as
+CM1 r21.1 above (the permission and no-warranty text quoted in the CM1
+attribution section, each with its own copyright line), and the quoted lines
+are used under it. CM1 Releases 16, 17 and 18.3 were distributed under
+earlier terms that do not permit redistribution beyond the user's working
+group: CM1-KEY-ALIASES.json quotes nothing of them. It names the settings
+those releases declared (as a namelist written for them uses them), says in
+its own words what each cited line says, and pins the line by its SHA-256.
+
+The port's comments, docstrings, records and documents cite CM1 r21.1 source
+files and lines and describe what they compute. Some quote short excerpts of
+CM1 r21.1 source (a statement, an expression or a variable's name) to show
+what a GM1 operator ports; these excerpts are used under the grant above.
+The tests that check the citations against a CM1 tree the user supplies name
+each CM1 statement by a digest. Where the port computes the same equation as
+CM1, it is written as this package's own code. The CM1 output field names and
+units, namelist settings and messages the package reproduces so that its
+output and refusals match CM1's are interface text. Each distributed file or
+table is listed in the redistribution inventory in
+cm1core/records/CM1-AUTHORITY.json, and any further one must be listed there
+first, with any notice it requires.
+
+GM1 View (public source snapshot only)
+--------------------------------------
+
+The public source snapshot also holds GM1 View (rust/gm1-view/), the desktop
+viewer for GM1's forecast artifacts. It is not in the wheel or the source
+distribution. It is part of this product and under its licence, and it
+carries the following:
+
+  * SimSat: GM1 View's sky lighting (the positive log-SH3 sky irradiance and
+    its data row, assets/t300-sky-radiance-log-sh3.f32le) and its SimSat top
+    view, infrared and water-vapour layers are adapted from the SimSat
+    project, the work of the same project as GM1, and are distributed here
+    under GM1's Apache License, Version 2.0
+    (rust/gm1-view/third_party/SimSat-PROVENANCE.md).
+  * ArWen: src/arwen_wrfout.rs adapts the classic-netCDF header decoder of the
+    ArWen volumetric viewer source, Copyright FahrenheitResearch, licensed
+    under the Apache License, Version 2.0; the changes are listed in
+    rust/gm1-view/third_party/ArWen-volumetric-NOTICE.md.
+  * Spherical Harmonic Exponentials: GM1 View's SHE files port or adapt the
+    MIT-licensed SphericalHarmonicExponentials shaders: src/she.rs,
+    src/she_fp32.wgsl, src/she_glossy_upstream.wgsl and src/she_glossy.rs
+    port its HLSL; src/she_material.wgsl, src/she_glossy_material.wgsl and
+    src/she_admitted_terrain.wgsl use its basis and math; src/she_material.rs,
+    src/she_glossy_material.rs, src/she_glossy_upstream.rs and
+    src/she_admitted_terrain.rs drive them, and the programs
+    src/bin/gm1_view_she_fp32_oracle.rs, src/bin/gm1_view_she_glossy_fit.rs
+    and src/bin/gm1_view_she_glossy_upstream.rs run them against upstream's
+    math; and the fit coefficients
+    assets/t300-specular-she-provisional-fp32.f32le and
+    assets/gm1-she-gm1-alpha32-fp32.f32le were computed with the ported fit.
+    The copyright and permission notice is reproduced in full in
+    rust/gm1-view/third_party/SphericalHarmonicExponentials-LICENSE.txt, with
+    the upstream commit and the file list in
+    SphericalHarmonicExponentials-PROVENANCE.md.
+  * NOAA HRRR terrain: assets/hrrr-surround-v1/ holds a 64 x 64 sample of the
+    HRRR model's terrain height (SOILHGT), output of the U.S. National
+    Oceanic and Atmospheric Administration (a U.S. Government work), and
+    assets/gm1-t300-child-terrain-msl.f32le is the terrain of a GM1 nested
+    domain built from it.
+
+GM1 View's Rust dependencies (Cargo.lock) are fetched by cargo when it is
+built; none is bundled.
+
+DejaVu fonts
+------------
+
+The quick-look pictures are lettered in DejaVu Sans. matplotlib supplies the
+book and bold faces; three faces are redistributed as files in
+cm1core/quicklook/fonts/: DejaVu Sans Condensed, DejaVu Sans Condensed Bold
+and DejaVu Sans ExtraLight. The GUI's style sheet
+(cm1core/gui/static/css/fonts.css) embeds subsets (Latin and the science
+glyphs) of six faces: DejaVu Sans, DejaVu Sans Bold, DejaVu Sans Condensed,
+DejaVu Sans Condensed Bold, DejaVu Sans ExtraLight and DejaVu Sans Mono. The
+DejaVu fonts are (c) Bitstream (Bitstream Vera Fonts licence), with glyphs
+imported from the Arev fonts (c) Tavmjong Bah (Arev Fonts licence); DejaVu
+changes are in the public domain. The full upstream licence text is
+cm1core/quicklook/fonts/LICENSE-DejaVu.txt.
+
+Rust standard library
+---------------------
+
+The native tools and library in cm1core/bin/ and cm1core/lib/ are built from
+this package's own Rust crates (rust/ in the source distribution), which
+depend on no third-party crate. They statically link the Rust standard
+library, Copyright (c) The Rust Project Developers, available under the MIT
+licence or the Apache License, Version 2.0, at the user's option
+(https://github.com/rust-lang/rust/blob/master/COPYRIGHT).

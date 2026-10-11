@@ -1,0 +1,80 @@
+{
+  "abi": "gpuwm-cm1.stretch-z1-child-15km-profiles-f32/v1",
+  "authority": {
+    "anchors": [
+      "src/param.F:7814-7953",
+      "src/param.F:8162-8225"
+    ],
+    "src_param_f_sha256": "cac64a6cb4363c6b88367b5cb9391f1bcf2130c63ffedef6e5973c03b190c349",
+    "tarball_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7"
+  },
+  "claim_boundary": [
+    "Exact flat Cartesian CM1 r21.1 stretch_z=1 coordinate and metric profiles only.",
+    "The 15,000 m physical top matches the parent; no synthetic upper-column fill is admitted.",
+    "Terrain composition, adaptive moving domain, parent-to-child vertical remap, pressure integration, coupled child evolution, forecast skill, storm, and tornado behavior are not admitted."
+  ],
+  "cuda": {
+    "kernel_source_sha256": "fb015416dc07405654ea264b50b13ce7eb986b5406c4894ab4e5d082bb6a7441",
+    "receipt_path": "evidence/validation/stretch-z1-child-15km-v1/receipt.json",
+    "receipt_sha256": "ce75a4b2258b0b05b56cbc7834f22489c26defab285c29e08281994c6f453c0b",
+    "status": "PASS_NATIVE_CPU_CUDA_RAW_BIT_EXACT"
+  },
+  "derived": {
+    "c1_f32": 0.09502262622117996,
+    "c2_f32": 0.00013308490451890975,
+    "nk1": 10,
+    "nk2": 40,
+    "nk3": 25,
+    "nominal_dz_f32": 170.0
+  },
+  "grid_sha256": "f66aa7937e0f4942dfbc55001641f221b8a84352961058e81247ee4e3ca8db56",
+  "native_oracle": {
+    "record_count": 633,
+    "records_path": "evidence/oracles/stretch-z1-child-15km-v1/stretch-z1-child-15km-records.tsv",
+    "records_sha256": "fd136830621331f3ebfbcf991a45cc2c018a247c5cca2844c5e07fe0c44edb9c",
+    "status": "passed-exact-native-parent-matched-stretch-z1-child-grid"
+  },
+  "module_source_sha256": "bf5f1a4f96333e5e68eaba6847841d035bec515db71db78e5228108b5676d3d0",
+  "parameters": {
+    "dz": 100.0,
+    "dz_bot": 20.0,
+    "dz_top": 320.0,
+    "nk": 75,
+    "str_bot": 200.0,
+    "str_top": 7000.0,
+    "ztop": 15000.0
+  },
+  "physical": {
+    "horizontal_extent_m": [
+      15000.0,
+      15000.0
+    ],
+    "horizontal_spacing_m": 50.0,
+    "lowest_scalar_level_m": 10.0,
+    "physical_top_face_m": 15000.0
+  },
+  "profile_sha256": {
+    "mf": "e686a95701fb4694da25878934e7da4713b512831a06adf549ef61e1704e245f",
+    "mh": "bc520e91ecab72cd55662dbb301c29f78cc04864ec371b3abba5dca8d8c6cbcc",
+    "rmf": "ab5f395ab5c7726528eb7f7f4dd1946911d03537eb94ea9b38e1ed1dc8551515",
+    "rmh": "54833ee529867d7c005060a52c3d9e883bfe34731fd5fb74cdba15afbd039b35",
+    "sigma": "e0c800cd95ac68f526efef46de91db5463784e91860f52ea90ad76c9e18037c3",
+    "sigmaf": "ceb1624e4dc10eb31562c7e8003f939d6d157e1ecd73d1dee479de5459f2a90e",
+    "zf": "ceb1624e4dc10eb31562c7e8003f939d6d157e1ecd73d1dee479de5459f2a90e",
+    "zh": "e0c800cd95ac68f526efef46de91db5463784e91860f52ea90ad76c9e18037c3"
+  },
+  "profile_shapes": {
+    "mf": [78],
+    "mh": [77],
+    "rmf": [78],
+    "rmh": [77],
+    "sigma": [77],
+    "sigmaf": [78],
+    "zf": [78],
+    "zh": [77]
+  },
+  "proof_sha256": "277f2b8831f316b2e99a81a903f5ac20ee5d781e2c2b058963539f648f9ec02e",
+  "proof_semantics": "SHA-256 of canonical metric-proof JSON over the exact parameter tuple, combined eight-profile grid hash, full mh hash, and the nk+2 pressure-consumer mf prefix hash; it is not a terrain, remap, CUDA, or trajectory proof",
+  "schema": "gpuwm-cm1.stretch-z1-child-15km/v1",
+  "status": "native-cpu-cuda-raw-bit-exact-flat-grid"
+}

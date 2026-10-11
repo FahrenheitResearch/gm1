@@ -1,0 +1,90 @@
+# CM1 r21.1's rterm=1: the Rotunno-Emanuel Newtonian relaxation that stands
+# in for radiation in a long idealized integration.
+#
+#   src/solve1.F:1003-1054, README.namelist:555-558, RE87 p.546.
+#
+# The term relaxes the potential-temperature perturbation towards zero with a
+# 12 h e-folding, capped at 2 K/day.  It is what keeps a multi-day idealized
+# tropical domain from drifting to an unphysical temperature; it is not a
+# radiation scheme and does not know where the sun is.
+#
+# src/param.F:2283-2294 stops CM1 if radopt and rterm are both on, and this
+# port refuses the same pair by name -- both would add a radiative theta
+# tendency to thten1 and the column would be cooled twice.
+#
+# Measured: a receipt in the development repository (rterm-warm-bubble-32).
+
+[run]
+lane = "cartesian"
+duration_s = 440.0
+dt_s = 1.0
+history_interval_s = 20.0
+restart_interval_s = 440.0
+
+[grid]
+nx = 32
+ny = 32
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 3000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+# src/solve1.F:1006.  Absent, this is CM1's own rterm=0 and the document
+# keeps the exact sealed identity it had before the key existed.
+rterm = 1
+# src/param.F:752-753.  Declared as a pair, and 1/0 is CM1's LES deck --
+# the scale selection this lane's prognostic-TKE closure integrates.
+cm1setup = 1
+ipbl = 0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 32
+tile_ny = 32
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+# src/solve1.F:1510.  Absent, this is CM1's own cuparam=0.
+cuparam = 0

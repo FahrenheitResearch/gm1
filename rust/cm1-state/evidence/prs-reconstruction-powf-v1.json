@@ -1,0 +1,38 @@
+{
+  "schema": "gm1.reduced-history-prs-powf-measurement/v1",
+  "question": "Are reduced_history.rs's rebuilt prs words the words a complete GM1 frame carries, bit for bit?",
+  "expression": "prs = p00 * (pi0 + pp3d)**cpdrd, CM1 r21.1 solve2.F:1588",
+  "constants_f32_bits": {
+    "p00": "0x47c35000",
+    "rd": "0x438f851f",
+    "cp": "0x447b6ccd",
+    "cpdrd": "0x40603c81"
+  },
+  "sample": {
+    "field": "pi = pi0 + pp3d, the total Exner pressure the expression reads",
+    "words": 510000,
+    "coverage": "400,000 uniform-random and 100,000 evenly spaced words over 0.15..1.05, the range a 20 km GM1 column spans, plus the 10,000 consecutive binary32 words either side of 1.0",
+    "seed": "numpy default_rng(20260914)"
+  },
+  "premise_1_rust_powf_is_the_host_libm_powf": {
+    "left": "Rust f32::powf, the call reduced_history.rs makes, via rustc -O",
+    "right": "glibc 2.39 powf through ctypes",
+    "bit_identical_words": 510000,
+    "sampled_words": 510000,
+    "held_by_test": "cm1_state::reduced_history::tests::the_rebuilt_pressure_is_the_host_libm_powf_word_for_word"
+  },
+  "premise_2_the_producing_kernel_is_that_same_function": {
+    "left": "__fmul_rn(0x47c35000, gm1_glibc239_pow_cpdrd_positive_normal(pi)) -- cuda_gm1_tilestream_rk3_eqtset2_remove_eos.py:128-132 and :190-192 over the gm1.cuda-glibc239-pow13/v1 device source",
+    "right": "glibc 2.39 powf through ctypes, then the same f32 multiply by p00",
+    "bit_identical_words": 510000,
+    "sampled_words": 510000,
+    "compiled_with": "--std=c++17 --fmad=false --ftz=false --prec-div=true --prec-sqrt=true --device-as-default-execution-space --gpu-architecture=sm_86",
+    "device": "NVIDIA GeForce RTX 3080 (sm_86), NVRTC 12.8, cupy 14.2.0",
+    "not_held_by_a_test": "needs a CUDA device; the transcription itself is pinned by CUDA_GLIBC_POW13_DEVICE_SOURCE_SHA256 and tests/test_cuda_glibc_pow13.py"
+  },
+  "host": {
+    "libc": "Ubuntu GLIBC 2.39-0ubuntu8.9",
+    "platform": "x86-64 Linux (WSL2)"
+  },
+  "conclusion": "On a glibc 2.39 host the rebuilt prs is the complete frame's own word, bit for bit, across every sampled Exner value. The claim is conditional on the host libm and reduced_history.rs says so."
+}

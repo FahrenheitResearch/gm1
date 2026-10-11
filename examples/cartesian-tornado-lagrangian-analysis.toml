@@ -1,0 +1,164 @@
+# Inline Lagrangian and budget analysis on the configurable Cartesian lane.
+#
+# Everything in [lagrangian] is a diagnostic: nothing in this table writes a
+# prognostic carrier, so turning all of it on changes no simulated word.  The
+# run's history frames and its receipt are what they would be with the table
+# absent, plus a lagrangian-track/ directory beside them.
+#
+# The six mandatory tables below are examples/cartesian-uniform-grid.toml's,
+# unchanged, so the difference this document makes is exactly the one table
+# plus [initialization], which selects CM1's analytic Weisman-Klemp sounding
+# with quarter-circle shear (isnd = 5, iwnd = 2) so the deck runs without an
+# external input_sounding and has a rotating storm to analyse.
+
+[run]
+lane = "cartesian"
+duration_s = 600.0
+dt_s = 2.0
+history_interval_s = 300.0
+restart_interval_s = 600.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 96
+ny = 96
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[physics]
+# Double-moment Morrison (CM1 ptype=5), not single-moment WSM6: a single-
+# moment scheme fixes the rain intercept, so evaporation in the downdraft
+# over-cools the cold pool, and cold-pool strength controls whether a
+# low-level mesocyclone becomes a tornado. Double-moment microphysics is the
+# tornado-research standard. GPU run of this lane on Morrison: pending.
+component = "morrison-mp10"
+equation_set = 2
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 32
+tile_ny = 32
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[lagrangian]
+# --- CM1's own words -------------------------------------------------------
+# run/namelist.input:87-88, :24.  Positions are metres in param.F:7212-7213's
+# iorigin frame, which CM1 spells once, in [initialization]; this document
+# declares none, so it is iorigin = 1: x and y run from 0 at the domain's
+# west and south faces, and the domain centre is (48000, 48000).
+iprcl = 1
+nparcels = 4096
+prclfrq_s = 10.0
+
+# &param13, input.F:330-333.  CM1's own deck sets all sixteen to 1
+# (run/namelist.input:332-349).  These are requests: param.F:6257-6282
+# resolves them against the rest of the run before one column is laid out,
+# and the receipt's parcel_attributes records requested_switches, the
+# resolved switches and each switch_overrides rule.  On this deck
+# (cm1setup=1, ipbl=0) param.F:6273-6276 turns prcl_km and prcl_kh off, so
+# no kmh/kmv/khh/khv column is written, exactly as CM1 writes none.
+# prcl_ptra, prcl_nc, prcl_dbz and prcl_sfc are requested off here, so
+# there are no pt1.., nci/ncs/ncr/ncg, dbz, znt or ust columns either.  Of
+# the 23 columns laid out, qsl and qsi are the ones this lane holds no
+# carrier for; the receipt names them as unfilled rather than publishing
+# zeros.
+prcl_th = 1
+prcl_t = 1
+prcl_prs = 1
+prcl_ptra = 0
+prcl_q = 1
+prcl_nc = 0
+prcl_km = 1
+prcl_kh = 1
+prcl_tke = 1
+prcl_dbz = 0
+prcl_b = 1
+prcl_vpg = 1
+prcl_vort = 1
+prcl_rho = 1
+prcl_qsat = 1
+prcl_sfc = 0
+
+# run/namelist.input:277.  The forcings and Laplacian sources are published;
+# the elliptic inversion is not performed and the receipt says so.
+output_pdcomp = 1
+
+# cm1.F:2645-2647.  In CM1 these two are a source edit; here they are
+# configuration, and the window below is GM1's own addition.
+dohifrq = true
+hifrqfrq_s = 10.0
+hifrq_i0 = 32
+hifrq_i1 = 64
+hifrq_j0 = 32
+hifrq_j1 = 64
+hifrq_k0 = 0
+hifrq_k1 = 12
+
+# --- GM1 extensions --------------------------------------------------------
+# A dense box of parcels around the low-level mesocyclone, rather than
+# init3d.F:381-387's single 60x60x10 net over the whole domain.
+direction = "forward"
+seeding = "box"
+seed_nx = 15
+seed_ny = 15
+seed_nz = 8
+seed_dx_m = 500.0
+seed_dy_m = 500.0
+seed_dz_m = 250.0
+seed_x0_m = 44500.0
+seed_y0_m = 44500.0
+seed_z0_m = 250.0
+
+# Four material circuits, stacked every 250 m, each a 64-parcel ring of
+# radius 2 km about the domain centre.  They occupy the first 256 parcels.
+circuits = 4
+circuit_parcels = 64
+circuit_radius_m = 2000.0
+circuit_center_x_m = 48000.0
+circuit_center_y_m = 48000.0
+circuit_center_z_m = 250.0
+circuit_spacing_z_m = 250.0
+
+vorticity_budget = true
+vorticity_budget_frq_s = 10.0

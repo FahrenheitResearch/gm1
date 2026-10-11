@@ -1,0 +1,1492 @@
+{
+ "file": "cm1out_000002.nc",
+ "data_model": "NETCDF4_CLASSIC",
+ "dimensions": [
+  [
+   "xh",
+   24,
+   false
+  ],
+  [
+   "yh",
+   24,
+   false
+  ],
+  [
+   "zh",
+   40,
+   false
+  ],
+  [
+   "xf",
+   25,
+   false
+  ],
+  [
+   "yf",
+   25,
+   false
+  ],
+  [
+   "zf",
+   41,
+   false
+  ],
+  [
+   "time",
+   1,
+   true
+  ],
+  [
+   "one",
+   1,
+   false
+  ]
+ ],
+ "global_attributes": [
+  [
+   "CM1 version",
+   {
+    "type": "str",
+    "value": "cm1r21.1"
+   }
+  ],
+  [
+   "Conventions",
+   {
+    "type": "str",
+    "value": "CF-1.7"
+   }
+  ],
+  [
+   "missing_value",
+   {
+    "type": "float32",
+    "value": -999999.875
+   }
+  ],
+  [
+   "x_units",
+   {
+    "type": "str",
+    "value": "km"
+   }
+  ],
+  [
+   "x_label",
+   {
+    "type": "str",
+    "value": "x"
+   }
+  ],
+  [
+   "y_units",
+   {
+    "type": "str",
+    "value": "km"
+   }
+  ],
+  [
+   "y_label",
+   {
+    "type": "str",
+    "value": "y"
+   }
+  ],
+  [
+   "z_units",
+   {
+    "type": "str",
+    "value": "km"
+   }
+  ],
+  [
+   "z_label",
+   {
+    "type": "str",
+    "value": "z"
+   }
+  ],
+  [
+   "nx",
+   {
+    "type": "int32",
+    "value": 24
+   }
+  ],
+  [
+   "ny",
+   {
+    "type": "int32",
+    "value": 24
+   }
+  ],
+  [
+   "nz",
+   {
+    "type": "int32",
+    "value": 40
+   }
+  ],
+  [
+   "imoist",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "sgsmodel",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "tconfig",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "bcturbs",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "ptype",
+   {
+    "type": "int32",
+    "value": 5
+   }
+  ],
+  [
+   "wbc",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "ebc",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "sbc",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "nbc",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "bbc",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "tbc",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "iorigin",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "axisymm",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "iptra",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "npt",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "fcor",
+   {
+    "type": "float32",
+    "value": 0.0
+   }
+  ],
+  [
+   "radopt",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "dtrad",
+   {
+    "type": "float32",
+    "value": 300.0
+   }
+  ],
+  [
+   "ctrlat",
+   {
+    "type": "float32",
+    "value": 36.68000030517578
+   }
+  ],
+  [
+   "ctrlon",
+   {
+    "type": "float32",
+    "value": -98.3499984741211
+   }
+  ],
+  [
+   "year",
+   {
+    "type": "int32",
+    "value": 2009
+   }
+  ],
+  [
+   "month",
+   {
+    "type": "int32",
+    "value": 5
+   }
+  ],
+  [
+   "day",
+   {
+    "type": "int32",
+    "value": 15
+   }
+  ],
+  [
+   "hour",
+   {
+    "type": "int32",
+    "value": 21
+   }
+  ],
+  [
+   "minute",
+   {
+    "type": "int32",
+    "value": 38
+   }
+  ],
+  [
+   "second",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "sfcmodel",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "oceanmodel",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "ipbl",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "iice",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "idm",
+   {
+    "type": "int32",
+    "value": 1
+   }
+  ],
+  [
+   "idmplus",
+   {
+    "type": "int32",
+    "value": 0
+   }
+  ],
+  [
+   "numq",
+   {
+    "type": "int32",
+    "value": 10
+   }
+  ],
+  [
+   "nql1",
+   {
+    "type": "int32",
+    "value": 2
+   }
+  ],
+  [
+   "nql2",
+   {
+    "type": "int32",
+    "value": 3
+   }
+  ],
+  [
+   "nqs1",
+   {
+    "type": "int32",
+    "value": 4
+   }
+  ],
+  [
+   "nqs2",
+   {
+    "type": "int32",
+    "value": 6
+   }
+  ],
+  [
+   "nnc1",
+   {
+    "type": "int32",
+    "value": 7
+   }
+  ],
+  [
+   "nnc2",
+   {
+    "type": "int32",
+    "value": 10
+   }
+  ],
+  [
+   "nzl1",
+   {
+    "type": "int32",
+    "value": -2
+   }
+  ],
+  [
+   "nzl2",
+   {
+    "type": "int32",
+    "value": -2
+   }
+  ],
+  [
+   "nvl1",
+   {
+    "type": "int32",
+    "value": -2
+   }
+  ],
+  [
+   "nvl2",
+   {
+    "type": "int32",
+    "value": -2
+   }
+  ],
+  [
+   "c_m",
+   {
+    "type": "float32",
+    "value": 0.10000000149011612
+   }
+  ],
+  [
+   "c_e1",
+   {
+    "type": "float32",
+    "value": 0.20000168681144714
+   }
+  ],
+  [
+   "c_e2",
+   {
+    "type": "float32",
+    "value": 0.7869588136672974
+   }
+  ],
+  [
+   "c_s",
+   {
+    "type": "float32",
+    "value": 0.17841240763664246
+   }
+  ],
+  [
+   "cgs1",
+   {
+    "type": "float32",
+    "value": 1.875
+   }
+  ],
+  [
+   "cgs2",
+   {
+    "type": "float32",
+    "value": -1.25
+   }
+  ],
+  [
+   "cgs3",
+   {
+    "type": "float32",
+    "value": 0.375
+   }
+  ],
+  [
+   "dgs1",
+   {
+    "type": "float32",
+    "value": -2.0
+   }
+  ],
+  [
+   "dgs2",
+   {
+    "type": "float32",
+    "value": 3.0
+   }
+  ],
+  [
+   "dgs3",
+   {
+    "type": "float32",
+    "value": -1.0
+   }
+  ],
+  [
+   "cgt1",
+   {
+    "type": "float32",
+    "value": 1.875
+   }
+  ],
+  [
+   "cgt2",
+   {
+    "type": "float32",
+    "value": -1.25
+   }
+  ],
+  [
+   "cgt3",
+   {
+    "type": "float32",
+    "value": 0.375
+   }
+  ],
+  [
+   "dgt1",
+   {
+    "type": "float32",
+    "value": 2.0
+   }
+  ],
+  [
+   "dgt2",
+   {
+    "type": "float32",
+    "value": -3.0
+   }
+  ],
+  [
+   "dgt3",
+   {
+    "type": "float32",
+    "value": 1.0
+   }
+  ]
+ ],
+ "variables": [
+  {
+   "name": "ztop",
+   "dimensions": [
+    "one"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "height at top of model",
+    "units": "km"
+   },
+   "float32_words": [
+    "41a00000"
+   ]
+  },
+  {
+   "name": "time",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "time since beginning of simulation",
+    "units": "seconds",
+    "axis": "T"
+   },
+   "float32_words": [
+    "42700000"
+   ]
+  },
+  {
+   "name": "xh",
+   "dimensions": [
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "west-east location of scalar grid points",
+    "units": "km",
+    "axis": "X"
+   },
+   "float32_words": [
+    "c1380001",
+    "c1280001",
+    "c1180000",
+    "c1080000",
+    "c0f00001",
+    "c0d00001",
+    "c0b00001",
+    "c0900000",
+    "c0600001",
+    "c0200000",
+    "bfc00001",
+    "bf000000",
+    "3f000000",
+    "3fc00001",
+    "40200000",
+    "40600001",
+    "40900000",
+    "40b00001",
+    "40d00001",
+    "40f00001",
+    "41080000",
+    "41180000",
+    "41280001",
+    "41380001"
+   ]
+  },
+  {
+   "name": "xf",
+   "dimensions": [
+    "xf"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "west-east location of staggered u grid points",
+    "units": "km",
+    "axis": "X"
+   },
+   "float32_words": [
+    "c1400001",
+    "c1300001",
+    "c1200000",
+    "c1100000",
+    "c1000000",
+    "c0e00001",
+    "c0c00001",
+    "c0a00000",
+    "c0800000",
+    "c0400001",
+    "c0000000",
+    "bf800000",
+    "00000000",
+    "3f800000",
+    "40000000",
+    "40400001",
+    "40800000",
+    "40a00000",
+    "40c00001",
+    "40e00001",
+    "41000000",
+    "41100000",
+    "41200000",
+    "41300001",
+    "41400001"
+   ]
+  },
+  {
+   "name": "yh",
+   "dimensions": [
+    "yh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "south-north location of scalar grid points",
+    "units": "km",
+    "axis": "Y"
+   },
+   "float32_words": [
+    "c1380001",
+    "c1280001",
+    "c1180000",
+    "c1080000",
+    "c0f00001",
+    "c0d00001",
+    "c0b00001",
+    "c0900000",
+    "c0600001",
+    "c0200000",
+    "bfc00001",
+    "bf000000",
+    "3f000000",
+    "3fc00001",
+    "40200000",
+    "40600001",
+    "40900000",
+    "40b00001",
+    "40d00001",
+    "40f00001",
+    "41080000",
+    "41180000",
+    "41280001",
+    "41380001"
+   ]
+  },
+  {
+   "name": "yf",
+   "dimensions": [
+    "yf"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "south-north location of staggered v grid points",
+    "units": "km",
+    "axis": "Y"
+   },
+   "float32_words": [
+    "c1400001",
+    "c1300001",
+    "c1200000",
+    "c1100000",
+    "c1000000",
+    "c0e00001",
+    "c0c00001",
+    "c0a00000",
+    "c0800000",
+    "c0400001",
+    "c0000000",
+    "bf800000",
+    "00000000",
+    "3f800000",
+    "40000000",
+    "40400001",
+    "40800000",
+    "40a00000",
+    "40c00001",
+    "40e00001",
+    "41000000",
+    "41100000",
+    "41200000",
+    "41300001",
+    "41400001"
+   ]
+  },
+  {
+   "name": "zh",
+   "dimensions": [
+    "zh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "nominal height of scalar grid points",
+    "units": "km",
+    "axis": "Z"
+   },
+   "float32_words": [
+    "3e800000",
+    "3f400001",
+    "3fa00000",
+    "3fe00001",
+    "40100000",
+    "40300001",
+    "40500001",
+    "40700001",
+    "40880000",
+    "40980000",
+    "40a80001",
+    "40b80001",
+    "40c80001",
+    "40d80001",
+    "40e80001",
+    "40f80001",
+    "41040000",
+    "410c0000",
+    "41140000",
+    "411c0000",
+    "41240001",
+    "412c0001",
+    "41340001",
+    "413c0001",
+    "41440001",
+    "414c0001",
+    "41540001",
+    "415c0001",
+    "41640001",
+    "416c0001",
+    "41740001",
+    "417c0001",
+    "41820000",
+    "41860000",
+    "418a0000",
+    "418e0000",
+    "41920000",
+    "41960000",
+    "419a0000",
+    "419e0000"
+   ]
+  },
+  {
+   "name": "zf",
+   "dimensions": [
+    "zf"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "nominal height of staggered w grid points",
+    "units": "km",
+    "axis": "Z"
+   },
+   "float32_words": [
+    "00000000",
+    "3f000000",
+    "3f800000",
+    "3fc00001",
+    "40000000",
+    "40200000",
+    "40400001",
+    "40600001",
+    "40800000",
+    "40900000",
+    "40a00000",
+    "40b00001",
+    "40c00001",
+    "40d00001",
+    "40e00001",
+    "40f00001",
+    "41000000",
+    "41080000",
+    "41100000",
+    "41180000",
+    "41200000",
+    "41280001",
+    "41300001",
+    "41380001",
+    "41400001",
+    "41480001",
+    "41500001",
+    "41580001",
+    "41600001",
+    "41680001",
+    "41700001",
+    "41780001",
+    "41800000",
+    "41840000",
+    "41880000",
+    "418c0000",
+    "41900000",
+    "41940000",
+    "41980000",
+    "419c0000",
+    "41a00000"
+   ]
+  },
+  {
+   "name": "umove",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "umove",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "41480000"
+   ]
+  },
+  {
+   "name": "vmove",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vmove",
+    "units": "m/s"
+   },
+   "float32_words": [
+    "40400000"
+   ]
+  },
+  {
+   "name": "rain",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "accumulated surface rainfall",
+    "units": "cm"
+   }
+  },
+  {
+   "name": "prate",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "surface precipitation rate",
+    "units": "kg/m2/s"
+   }
+  },
+  {
+   "name": "sws",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max horiz wind speed at lowest model level",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "svs",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max vert vorticity at lowest model level",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "sps",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "min pressure at lowest model level",
+    "units": "Pa"
+   }
+  },
+  {
+   "name": "srs",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qr at lowest model level",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "sgs",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max qg at lowest model level",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "sus",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max w at 5 km AGL",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "shs",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "max integrated updraft helicity",
+    "units": "m2/s2"
+   }
+  },
+  {
+   "name": "rain2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated surface rainfall",
+    "units": "cm"
+   }
+  },
+  {
+   "name": "sws2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max horiz wspd at lowest model level",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "svs2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max vert vort at lowest model level",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "sps2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated min pressure at lowest model level",
+    "units": "Pa"
+   }
+  },
+  {
+   "name": "srs2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max qr at lowest model level",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "sgs2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max qg at lowest model level",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "sus2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max w at 5 km AGL",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "shs2",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "translated max integrated updraft helicity",
+    "units": "m2/s2"
+   }
+  },
+  {
+   "name": "uh",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "integrated (2-5 km) AGL) updraft helicity",
+    "units": "m2/s2"
+   }
+  },
+  {
+   "name": "cref",
+   "dimensions": [
+    "time",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "composite reflectivity",
+    "units": "dBZ"
+   }
+  },
+  {
+   "name": "th",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "potential temperature",
+    "units": "K"
+   }
+  },
+  {
+   "name": "prs",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "pressure",
+    "units": "Pa"
+   }
+  },
+  {
+   "name": "qv",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "water vapor mixing ratio",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qc",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qc",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qr",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qr",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qi",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qi",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qs",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qs",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qg",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qg",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "nci",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "nci",
+    "units": "#/kg"
+   }
+  },
+  {
+   "name": "ncs",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncs",
+    "units": "#/kg"
+   }
+  },
+  {
+   "name": "ncr",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncr",
+    "units": "#/kg"
+   }
+  },
+  {
+   "name": "ncg",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncg",
+    "units": "#/kg"
+   }
+  },
+  {
+   "name": "dbz",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "reflectivity",
+    "units": "dBZ"
+   }
+  },
+  {
+   "name": "uinterp",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "u interpolated to scalar points (grid-relative)",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "vinterp",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "v interpolated to scalar points (grid-relative)",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "winterp",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "w interpolated to scalar points",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "xvort",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "horizontal vorticity (x)",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "yvort",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "horizontal vorticity (y)",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "zvort",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical vorticity",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "u",
+   "dimensions": [
+    "time",
+    "zh",
+    "yh",
+    "xf"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "E-W (x) velocity (grid-relative)",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "v",
+   "dimensions": [
+    "time",
+    "zh",
+    "yf",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "N-S (y) velocity (grid-relative)",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "w",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical velocity",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "tke",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "subgrid turbulence kinetic energy",
+    "units": "m^2/s^2"
+   }
+  },
+  {
+   "name": "kmh",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "horizontal eddy viscosity for momentum",
+    "units": "m^2/s"
+   }
+  },
+  {
+   "name": "kmv",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical eddy viscosity for momentum",
+    "units": "m^2/s"
+   }
+  },
+  {
+   "name": "khh",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "horizontal eddy diffusivity for scalars",
+    "units": "m^2/s"
+   }
+  },
+  {
+   "name": "khv",
+   "dimensions": [
+    "time",
+    "zf",
+    "yh",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical eddy diffusivity for scalars",
+    "units": "m^2/s"
+   }
+  }
+ ]
+}

@@ -1,0 +1,115 @@
+# CM1-vs-GM1 differential for Lagrangian parcel trajectories.
+#
+# Term: advection -- the harness's own dx/U cell-crossing timescale.  A parcel position is the time integral of the interpolated
+# wind, so the only timescale that says anything is the one on which a parcel
+# crosses a cell: dx/U = 1000/20 = 50 s for this deck's Weisman-Klemp shear.
+# 280 s is between five and six crossings, which is decisive for the sampler,
+# the weights, the boundary fill and the RK2 update together -- an error in
+# any of them shows up as metres of separation per crossing, against
+# kilometres of displacement.
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+#   PYTHONPATH=src python3 $HARNESS/differential.py horizon --term advection \
+#       --nx 32 --ny 32 --nz 40 --dx 1000 --dy 1000 --dz 500 --dt 1.0
+#
+# The physical configuration is examples/oracle/acoustic-warm-bubble-32's,
+# unchanged, so the dycore agreement this case rests on is the one that case
+# already measured: interior u3d 3.8e-4, v3d 1.1e-3, w3d 2.3e-2 of peak at
+# t=280 s.  The only difference is the parcel block below.
+#
+# iprcl=1 with nparcels=36000 is CM1's own seeding: init3d.F:381-387 fills a
+# 60x60x10 net at 2000/2000/1000 m from (minx, miny, zh(1)) and stops the
+# model if nparcels is smaller.  GM1's [lagrangian] seeding defaults are that
+# formula, and the key map carries iprcl, nparcels, prclfrq, iorigin and the
+# sixteen &param13 switches across, so both sides come from this one file.
+#
+# On a 32x32 km domain with iorigin=2 only the first 17x17 columns of that
+# 120x120 km net are inside; a serial CM1 never claims a parcel outside the
+# domain, so $HARNESS/parcel_differential.py compares those and says how
+# many.
+#
+# Run it with:
+#   PYTHONPATH=src python3 $HARNESS/parcel_differential.py \
+#       examples/oracle/parcel-advection-32.differential.toml OUTDIR \
+#       --remote <user>@<cuda-host> --sounding <CM1 input_sounding>
+#
+[case]
+name = "parcel-advection-32"
+term = "advection"
+notes = """psolver=3 split-explicit acoustics with the vertically implicit
+step, on a 32x32x40 1 km / 500 m grid, no mean wind, no Coriolis, no moving
+frame. One hundred acoustic cell crossings."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 280.0
+tapfrq = 20.0
+rstfrq = 280.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+iprcl = 1
+nparcels = 36000
+prclfrq = 20.0
+iorigin = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

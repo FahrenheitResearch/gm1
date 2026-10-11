@@ -1,0 +1,106 @@
+# A two-leg run with CM1's restart cadence, and one ensemble member branched
+# from it.
+#
+# This document is the SECOND leg: it resumes restart file set 1 and carries
+# ensemble member 3.  The first leg is the same document with the restart selectors and
+# the [ensemble] table removed and run.duration_s set to 600.0; running it writes
+# cm1rst_000001.cm1fcp at 600 s into whatever --restart-dir names.
+#
+#   gpuwm-cm1 cartesian <leg one> --output r1.json --integrate \
+#       --history-dir frames-1 --restart-dir restarts
+#   gpuwm-cm1 cartesian <this file> --output r2.json --integrate \
+#       --history-dir frames-2 --restart-dir restarts
+#
+# The frame numbering continues across the two legs: leg one publishes
+# frame-000001 and frame-000002, this leg publishes frame-000003 and
+# frame-000004, so the two directories read as one series.
+#
+# Remove the [ensemble] table to resume the unperturbed control, which lands
+# bit-for-bit on the trajectory an uninterrupted run would have produced.
+
+[run]
+lane = "cartesian"
+duration_s = 1200.0
+dt_s = 1.0
+history_interval_s = 300.0
+# CM1's rstfrq (run/namelist.input:30).  A whole multiple of
+# history_interval_s, so every restart falls on a published frame and a
+# resumed leg can continue the series.
+restart_interval_s = 600.0
+# README.namelist:227-232 and README.restart:33-41.  CM1's restart selectors
+# live in [run] here, beside the cadence they are read with.
+irst = 1
+rstnum = 1
+# README.namelist:1488-1510; src/cm1.F:2711-2714.
+restart_reset_frqtim = false
+
+# CM1's irandp, with a seed so the member can be re-run.
+# README.namelist:692-695; src/init3d.F:1446-1483.
+[ensemble]
+member = 3
+seed = 20260914
+# src/init3d.F:1466's own amplitude, in kelvin.
+theta_amplitude_k = 0.25
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 32
+ny = 32
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+bbc = 1
+sfcmodel = 0
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 32
+tile_ny = 32
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

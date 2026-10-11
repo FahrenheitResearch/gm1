@@ -1,0 +1,37 @@
+{
+ "_about": "Two cards; a GM1 run holds 19 GB of the first",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-33333333-4444-5555-6666-777777777777",
+   "name": "NVIDIA GeForce RTX 5090",
+   "memory.total": 32607,
+   "memory.used": 19800,
+   "memory.free": 12357,
+   "memory.reserved": 450,
+   "compute_cap": "12.0",
+   "driver_version": "610.74",
+   "pci.bus_id": "00000000:01:00.0"
+  },
+  {
+   "index": 1,
+   "uuid": "GPU-44444444-5555-6666-7777-888888888888",
+   "name": "NVIDIA GeForce RTX 4090",
+   "memory.total": 24564,
+   "memory.used": 3,
+   "memory.free": 24161,
+   "memory.reserved": 400,
+   "compute_cap": "8.9",
+   "driver_version": "610.74",
+   "pci.bus_id": "00000000:02:00.0"
+  }
+ ],
+ "apps": [
+  {
+   "gpu_uuid": "GPU-33333333-4444-5555-6666-777777777777",
+   "pid": 962779,
+   "process_name": "python3",
+   "used_memory": 19400
+  }
+ ]
+}

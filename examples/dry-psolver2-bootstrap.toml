@@ -1,0 +1,53 @@
+[run]
+lane = "dry-dycore"
+duration_s = 60.0
+dt_s = 1.0
+history_interval_s = 60.0
+restart_interval_s = 60.0
+
+[grid]
+nx = 16
+ny = 16
+nz = 16
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 1000.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 2
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 0
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 1
+east = 1
+south = 1
+north = 1
+bottom = 1
+top = 1
+radiative_order = 1
+
+[closures]
+sgs_model = 0
+vertical_implicit_diffusion = false
+upper_damping = 0
+upper_damping_depth_m = 0.0
+upper_damping_rate_s_inv = 0.0
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[physics]
+component = "off"
+equation_set = 1

@@ -1,0 +1,945 @@
+{
+ "schema": "gm1.cm1-import-report/v1",
+ "title": "Check",
+ "namelist": {
+  "path": "supercell/namelist.input",
+  "name": "r21.1-supercell.namelist.input",
+  "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+  "groups": [
+   "param0",
+   "param1",
+   "param2",
+   "param3",
+   "param11",
+   "param12",
+   "param4",
+   "param5",
+   "param6",
+   "param7",
+   "param8",
+   "param9",
+   "param16",
+   "param10",
+   "param13",
+   "param14",
+   "param15",
+   "param17",
+   "param18",
+   "param19",
+   "param20",
+   "param21",
+   "nssl2mom_params"
+  ],
+  "settings_stated": 344,
+  "settings_defaulted": 225
+ },
+ "version": "r21.1",
+ "not_r21": "none",
+ "settings_not_in_r21": [],
+ "aliases": [],
+ "component": {
+  "ptype": 5,
+  "imoist": 1,
+  "scheme": "Morrison double-moment",
+  "component": "morrison-mp10",
+  "status": "runs",
+  "reason": "ArWen's WRF-lineage Morrison (mp_physics = 10) with CM1's ihail and ndcnst, not CM1's morrison.F"
+ },
+ "verdict": "runs",
+ "verdict_text": "Runs, with the differences below",
+ "exit": 0,
+ "first_refused": null,
+ "acknowledgments": {
+  "needed": [],
+  "given": [],
+  "missing": []
+ },
+ "sections": [
+  {
+   "id": "refused",
+   "label": "Refused",
+   "count": 0,
+   "rows": []
+  },
+  {
+   "id": "not_read",
+   "label": "Not read",
+   "count": 0,
+   "rows": []
+  },
+  {
+   "id": "differs",
+   "label": "Runs differently from CM1",
+   "count": 37,
+   "rows": [
+    {
+     "key": "output_km, output_kh",
+     "keys": [
+      "output_km",
+      "output_kh"
+     ],
+     "value": "1",
+     "text": "Not saved: eddy viscosity (kmh, kmv) and eddy diffusivity (khh, khv). GM1's turbulence closure does not keep them between steps",
+     "plain": "Two turbulence fields (eddy viscosity and diffusivity) are not saved.",
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "stage": "register"
+    },
+    {
+     "key": "output_pipert, output_rho, output_thpert",
+     "keys": [
+      "output_pipert",
+      "output_rho",
+      "output_thpert"
+     ],
+     "value": "0",
+     "text": "Written in every GM1 frame whatever the namelist says: GM1's resume and viewer read these fields, so a 0 here is not taken",
+     "plain": "Some fields are always saved, even where the namelist turns them off.",
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "stage": "register"
+    },
+    {
+     "key": "output_dbz",
+     "keys": [
+      "output_dbz"
+     ],
+     "value": "1",
+     "text": "GM1 has no reflectivity operator inside the Morrison step, so frames carry no dbz. It is computed after each frame with CM1's calc_refl10cm formula on the CPU by gpuwm-cm1 cm1out",
+     "plain": "Radar reflectivity is worked out after each saved frame, with CM1's own formula.",
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "stage": "register"
+    },
+    {
+     "key": "statfrq, stat_* (29 words)",
+     "keys": [
+      "statfrq",
+      "stat_cfl",
+      "stat_cloud",
+      "stat_div",
+      "stat_kh",
+      "stat_km",
+      "stat_mo",
+      "stat_pcn",
+      "stat_pipert",
+      "stat_prspert",
+      "stat_q",
+      "stat_qmass",
+      "stat_qsrc",
+      "stat_rh",
+      "stat_rhi",
+      "stat_rmw",
+      "stat_sfcprs",
+      "stat_tenerg",
+      "stat_the",
+      "stat_thpert",
+      "stat_tke",
+      "stat_tmass",
+      "stat_tmf",
+      "stat_tmois",
+      "stat_u",
+      "stat_v",
+      "stat_vort",
+      "stat_w",
+      "stat_wlevs",
+      "stat_wsp"
+     ],
+     "value": "60.0",
+     "text": "CM1 writes the &param10 statistics every 60.0 s. GM1 takes them from the history frames, every 900.0 s; it does not compute statistics during the run",
+     "plain": "Summary statistics come from the saved frames, not from every step.",
+     "evidence": "records/CM1-GM1-KEYMAP.json",
+     "stage": "register"
+    },
+    {
+     "key": "rstfrq",
+     "keys": [
+      "rstfrq"
+     ],
+     "value": "-3600.0",
+     "text": "CM1 writes no restart files for a negative rstfrq. GM1 writes one restart at the end (timax = 7200.0 s) so the run can be continued",
+     "plain": "GM1 saves one restart point at the end so the run can be continued; CM1 would save none.",
+     "evidence": "records/CM1-CADENCE-MAP.md",
+     "stage": "register"
+    }
+   ]
+  },
+  {
+   "id": "not_checked",
+   "label": "Not yet checked against CM1",
+   "count": 0,
+   "rows": []
+  },
+  {
+   "id": "not_needed",
+   "label": "Not needed on one GPU",
+   "count": 21,
+   "rows": [
+    {
+     "key": "ppnode",
+     "keys": [
+      "ppnode"
+     ],
+     "value": "128",
+     "text": "MPI layout",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "procfiles",
+     "keys": [
+      "procfiles"
+     ],
+     "value": ".false.",
+     "text": "per-process output files (MPI)",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "timeformat",
+     "keys": [
+      "timeformat"
+     ],
+     "value": "2",
+     "text": "time format of CM1's log",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "timestats",
+     "keys": [
+      "timestats"
+     ],
+     "value": "1",
+     "text": "CPU timing report",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "run_time",
+     "keys": [
+      "run_time"
+     ],
+     "value": "-999.9",
+     "text": "wall-clock limit for MPI jobs",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "restart_filetype",
+     "keys": [
+      "restart_filetype"
+     ],
+     "value": "2",
+     "text": "CM1's restart-file layout; GM1 restarts have their own",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "restart_format",
+     "keys": [
+      "restart_format"
+     ],
+     "value": "1",
+     "text": "CM1's restart-file format; GM1 restarts have their own",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "restart_use_theta",
+     "keys": [
+      "restart_use_theta"
+     ],
+     "value": ".false.",
+     "text": "CM1's restart-file contents; a GM1 restart always carries the full state",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    },
+    {
+     "key": "restart_file_* (13)",
+     "keys": [
+      "restart_file_dbz",
+      "restart_file_diags",
+      "restart_file_pi0",
+      "restart_file_prs0",
+      "restart_file_qv0",
+      "restart_file_rho0",
+      "restart_file_th0",
+      "restart_file_theta",
+      "restart_file_u0",
+      "restart_file_v0",
+      "restart_file_zf",
+      "restart_file_zh",
+      "restart_file_zs"
+     ],
+     "value": ".false.",
+     "text": "CM1's restart-file contents; a GM1 restart always carries the full state",
+     "plain": "Not needed for a run on one GPU.",
+     "stage": "register"
+    }
+   ],
+   "collapsed": true
+  },
+  {
+   "id": "same",
+   "label": "Same as CM1",
+   "collapsed": true,
+   "count": 286,
+   "families": [
+    {
+     "family": "Grid",
+     "id": "grid",
+     "n": 15,
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "keys": [
+      "nx",
+      "ny",
+      "nz",
+      "terrain_flag",
+      "dx",
+      "dy",
+      "dz",
+      "stretch_x",
+      "stretch_y",
+      "dz_bot",
+      "dz_top",
+      "str_bot",
+      "str_top",
+      "stretch_z",
+      "ztop"
+     ]
+    },
+    {
+     "family": "Run length, time step, output and restart times",
+     "id": "run",
+     "n": 4,
+     "evidence": "records/CM1-CADENCE-MAP.md",
+     "keys": [
+      "dtl",
+      "tapfrq",
+      "timax",
+      "iconly"
+     ]
+    },
+    {
+     "family": "Advection, diffusion, sound waves and Coriolis",
+     "id": "dynamics",
+     "n": 20,
+     "evidence": "records/CM1-DYNAMICS-BRANCH-MATRIX.json",
+     "keys": [
+      "adapt_dt",
+      "advwenos",
+      "advwenov",
+      "apmasscon",
+      "difforder",
+      "hadvordrs",
+      "hadvordrv",
+      "icor",
+      "idiff",
+      "lspgrad",
+      "mdiff",
+      "psolver",
+      "vadvordrs",
+      "vadvordrv",
+      "weno_order",
+      "alph",
+      "fcor",
+      "kdiff2",
+      "kdiff6",
+      "kdiv"
+     ]
+    },
+    {
+     "family": "Lateral, top and bottom boundaries",
+     "id": "boundaries",
+     "n": 10,
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "keys": [
+      "ebc",
+      "irbc",
+      "nbc",
+      "nudgeobc",
+      "roflux",
+      "sbc",
+      "tbc",
+      "wbc",
+      "alphobc",
+      "cstar"
+     ]
+    },
+    {
+     "family": "Turbulence, damping, surface layer and moving frame",
+     "id": "closures",
+     "n": 28,
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "keys": [
+      "bbc",
+      "cm1setup",
+      "doimpl",
+      "hrdamp",
+      "imove",
+      "ipbl",
+      "irdamp",
+      "rterm",
+      "sgsmodel",
+      "rdalpha",
+      "umove",
+      "vmove",
+      "xhd",
+      "zd",
+      "cecd",
+      "cnst_ust",
+      "cnst_znt",
+      "cnstcd",
+      "cnstce",
+      "isfcflx",
+      "ramp_sgs",
+      "ramp_time",
+      "set_ust",
+      "set_znt",
+      "sfcmodel",
+      "t2p_avg",
+      "adapt_move_frq",
+      "do_adapt_move"
+     ]
+    },
+    {
+     "family": "Surface",
+     "id": "surface",
+     "n": 7,
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "keys": [
+      "initsfc",
+      "lu0",
+      "oceanmodel",
+      "season",
+      "tmn0",
+      "tsk0",
+      "xland0"
+     ]
+    },
+    {
+     "family": "Microphysics",
+     "id": "physics",
+     "n": 5,
+     "evidence": "records/GM1-STOCK-DECK-RATIOS.json",
+     "keys": [
+      "cuparam",
+      "eqtset",
+      "ihail",
+      "imoist",
+      "ndcnst"
+     ]
+    },
+    {
+     "family": "Radiation settings (radopt = 0: read by neither model)",
+     "id": "radiation",
+     "n": 10,
+     "evidence": "records/CM1-GM1-KEYMAP.json",
+     "keys": [
+      "ctrlat",
+      "ctrlon",
+      "day",
+      "dtrad",
+      "hour",
+      "minute",
+      "month",
+      "radopt",
+      "second",
+      "year"
+     ]
+    },
+    {
+     "family": "Initial state",
+     "id": "initialization",
+     "n": 8,
+     "evidence": "records/CM1-INITIALIZATION-VALIDATION.json",
+     "keys": [
+      "ibalance",
+      "iinit",
+      "iorigin",
+      "irandp",
+      "irst",
+      "isnd",
+      "iwnd",
+      "testcase"
+     ]
+    },
+    {
+     "family": "Output words (&param9)",
+     "id": "output",
+     "n": 57,
+     "evidence": "records/CM1-SUPPORT-MATRIX.csv",
+     "keys": [
+      "output_basestate",
+      "output_buoyancy",
+      "output_cape",
+      "output_cin",
+      "output_coldpool",
+      "output_def",
+      "output_dissten",
+      "output_fallvel",
+      "output_filetype",
+      "output_format",
+      "output_interp",
+      "output_lcl",
+      "output_lfc",
+      "output_lwp",
+      "output_nm",
+      "output_pblten",
+      "output_pi",
+      "output_prs",
+      "output_prspert",
+      "output_psfc",
+      "output_pv",
+      "output_pwat",
+      "output_q",
+      "output_qv",
+      "output_qvbudget",
+      "output_qvpert",
+      "output_radten",
+      "output_rain",
+      "output_rhopert",
+      "output_sfcdiags",
+      "output_sfcflx",
+      "output_sfcparams",
+      "output_sgs",
+      "output_shs",
+      "output_sps",
+      "output_srs",
+      "output_sus",
+      "output_svs",
+      "output_sws",
+      "output_th",
+      "output_thbudget",
+      "output_tke",
+      "output_u",
+      "output_ubudget",
+      "output_uh",
+      "output_uinterp",
+      "output_upert",
+      "output_v",
+      "output_vbudget",
+      "output_vinterp",
+      "output_vort",
+      "output_vpert",
+      "output_w",
+      "output_wbudget",
+      "output_winterp",
+      "output_zh",
+      "output_zs"
+     ]
+    },
+    {
+     "family": "Parcels and pressure decomposition (&param13)",
+     "id": "lagrangian",
+     "n": 20,
+     "evidence": "records/CM1-LAGRANGIAN-ANALYSIS.md",
+     "keys": [
+      "prclfrq",
+      "iprcl",
+      "nparcels",
+      "output_pdcomp",
+      "prcl_b",
+      "prcl_dbz",
+      "prcl_kh",
+      "prcl_km",
+      "prcl_nc",
+      "prcl_prs",
+      "prcl_ptra",
+      "prcl_q",
+      "prcl_qsat",
+      "prcl_rho",
+      "prcl_sfc",
+      "prcl_t",
+      "prcl_th",
+      "prcl_tke",
+      "prcl_vort",
+      "prcl_vpg"
+     ]
+    },
+    {
+     "family": "Settings GM1 always runs at the value the namelist has",
+     "id": "_pinned",
+     "n": 15,
+     "evidence": "records/CM1-GM1-KEYMAP.json",
+     "keys": [
+      "axisymm",
+      "bcturbs",
+      "efall",
+      "horizturb",
+      "idiss",
+      "iptra",
+      "tconfig",
+      "pertflx",
+      "set_flx",
+      "do_recycle_e",
+      "do_recycle_n",
+      "do_recycle_s",
+      "do_recycle_w",
+      "do_lsnudge",
+      "do_ib"
+     ]
+    },
+    {
+     "family": "Settings neither model reads with these choices",
+     "id": "_inert",
+     "n": 75,
+     "evidence": "records/CM1-GM1-KEYMAP.json",
+     "keys": [
+      "iautoc",
+      "itern",
+      "npt",
+      "pdtra",
+      "rstnum",
+      "csound",
+      "l_h",
+      "l_inf",
+      "lhref1",
+      "lhref2",
+      "nt_c",
+      "v_t",
+      "cnst_lhflx",
+      "cnst_shflx",
+      "isftcflx",
+      "iz0tlnd",
+      "oml_gamma",
+      "oml_hml0",
+      "dx_inner",
+      "dx_outer",
+      "nos_x_len",
+      "tot_x_len",
+      "dy_inner",
+      "dy_outer",
+      "nos_y_len",
+      "tot_y_len",
+      "bc_temp",
+      "pr_num",
+      "ptc_bot",
+      "ptc_top",
+      "viscosity",
+      "var1",
+      "var10",
+      "var11",
+      "var12",
+      "var13",
+      "var14",
+      "var15",
+      "var16",
+      "var17",
+      "var18",
+      "var19",
+      "var2",
+      "var20",
+      "var3",
+      "var4",
+      "var5",
+      "var6",
+      "var7",
+      "var8",
+      "var9",
+      "les_subdomain_dlen",
+      "les_subdomain_shape",
+      "les_subdomain_trnslen",
+      "les_subdomain_xlen",
+      "les_subdomain_ylen",
+      "recycle_cap_loc_m",
+      "recycle_depth_m",
+      "recycle_inj_loc_m",
+      "recycle_width_dx",
+      "do_lsnudge_qv",
+      "do_lsnudge_th",
+      "do_lsnudge_u",
+      "do_lsnudge_v",
+      "lsnudge_end",
+      "lsnudge_ramp_time",
+      "lsnudge_start",
+      "lsnudge_tau",
+      "ib_init",
+      "side_cd",
+      "top_cd",
+      "hurr_rad",
+      "hurr_rotate",
+      "hurr_vg",
+      "hurr_vgpl"
+     ]
+    },
+    {
+     "family": "Settings for other schemes and outputs, unread or off here",
+     "id": "_unread_group",
+     "n": 11,
+     "evidence": "records/CM1-GM1-KEYMAP.json",
+     "keys": [
+      "restart_reset_frqtim",
+      "diagfrq",
+      "dodomaindiag",
+      "azimavgfrq",
+      "doazimavg",
+      "rlen",
+      "alphah",
+      "alphahl",
+      "ccn",
+      "cnoh",
+      "cnor"
+     ]
+    }
+   ],
+   "rows": [
+    {
+     "key": "ptype",
+     "keys": [
+      "ptype"
+     ],
+     "value": "5",
+     "text": "ArWen's WRF-lineage Morrison, not CM1's morrison.F. On CM1's stock supercell, GM1/CM1 mature-phase ratios are 0.99-1.05 (CM1 against itself: 0.98-1.00)",
+     "plain": "Rain and hail: Morrison. On CM1's own storm it matches CM1 within 5 % (measured).",
+     "evidence": "records/GM1-STOCK-DECK-RATIOS.json",
+     "expand": "ratios",
+     "family": "physics",
+     "stage": "register"
+    }
+   ]
+  }
+ ],
+ "guided": {
+  "offered": true,
+  "why_not": null,
+  "reasons": []
+ },
+ "output": {
+  "format": "GrADS",
+  "output_format": 1,
+  "output_filetype": 1,
+  "text": "GrADS (output_format = 1), every time in one file (output_filetype = 1), as the namelist asks.",
+  "also_netcdf": false,
+  "writer": "gpuwm-cm1 cm1out"
+ },
+ "sounding": {
+  "isnd": 5,
+  "reads_file": false,
+  "path": null,
+  "sha256": null,
+  "levels": 0,
+  "surface": null,
+  "top_m": null,
+  "first_level_m": null,
+  "highest_model_scalar_level_m": 19750.0,
+  "problems": [],
+  "warnings": [],
+  "environment_status": "not-computed"
+ },
+ "comparison": {
+  "title": "GM1 against CM1 r21.1 on CM1's stock supercell namelist",
+  "scheme": "morrison-mp10",
+  "reference": "CM1 r21.1 ptype = 5 (morrison.F), eqtset = 2",
+  "basis": "mature-phase means over 3600-7200 s (5 frames); 2026-09-23: GM1 on an RTX 3080; CM1 r21.1 built unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU; each CM1 twin adds 1e-4 K to th0 at the lowest level",
+  "deck": "CM1 r21.1 run/config_files/supercell/namelist.input (120 x 120 x 40, 1 km, 2 h)",
+  "evidence": "the supercell-fidelity comparison of the development repository (not distributed); the rows here are its numbers",
+  "rows": [
+   {
+    "key": "wmax",
+    "label": "max w",
+    "unit": "m/s",
+    "family": "updraft",
+    "band": 0.1,
+    "cm1": 57.670428,
+    "gm1": 57.93818,
+    "ratio": 1.004643,
+    "twin": 1.003204,
+    "ramp0": 1.003513,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "uh_max",
+    "label": "max 2-5 km updraft helicity",
+    "unit": "m2/s2",
+    "family": "updraft",
+    "band": 0.1,
+    "cm1": 675.279199,
+    "gm1": 680.01344,
+    "ratio": 1.007011,
+    "twin": 0.993476,
+    "ramp0": 1.048282,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "updraft_area_w_gt_10_at_k10_km2",
+    "label": "updraft area, w > 10 m/s at 5 km",
+    "unit": "km2",
+    "family": "updraft",
+    "band": 0.1,
+    "cm1": 151.8,
+    "gm1": 155.4,
+    "ratio": 1.023715,
+    "twin": 1.001318,
+    "ramp0": 0.969697,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "zvort_max",
+    "label": "max vertical vorticity",
+    "unit": "1/s",
+    "family": "updraft",
+    "band": 0.1,
+    "cm1": 0.027879,
+    "gm1": 0.029159,
+    "ratio": 1.045923,
+    "twin": 0.984124,
+    "ramp0": 1.054874,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "wmin",
+    "label": "min w",
+    "unit": "m/s",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": -33.298403,
+    "gm1": -33.201034,
+    "ratio": 0.997076,
+    "twin": 1.001116,
+    "ramp0": 1.031607,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "thpert_sfc_min",
+    "label": "lowest-level theta' min",
+    "unit": "K",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": -6.691174,
+    "gm1": -6.608569,
+    "ratio": 0.987655,
+    "twin": 1.001525,
+    "ramp0": 1.023333,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "coldpool_area_km2_lt_minus1K",
+    "label": "cold-pool area, theta' < -1 K",
+    "unit": "km2",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": 1860.6,
+    "gm1": 1834.2,
+    "ratio": 0.985811,
+    "twin": 0.997958,
+    "ramp0": 0.965602,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "rain_area_gt_1mm_km2",
+    "label": "rain area > 1 mm",
+    "unit": "km2",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": 1263.2,
+    "gm1": 1275.2,
+    "ratio": 1.0095,
+    "twin": 1.0,
+    "ramp0": 0.965643,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "rain_max_cm",
+    "label": "max rain",
+    "unit": "cm",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": 6.781575,
+    "gm1": 6.850197,
+    "ratio": 1.010119,
+    "twin": 0.998907,
+    "ramp0": 0.889972,
+    "inside_band": true,
+    "inside_target": true
+   },
+   {
+    "key": "qg_max_gkg",
+    "label": "max graupel/hail mixing ratio",
+    "unit": "g/kg",
+    "family": "downdraft",
+    "band": 0.15,
+    "cm1": 13.347839,
+    "gm1": 13.438733,
+    "ratio": 1.00681,
+    "twin": 0.997781,
+    "ramp0": 1.002307,
+    "inside_band": true,
+    "inside_target": true
+   }
+  ],
+  "ratio_range": [
+   0.985811,
+   1.045923
+  ],
+  "twin_range": [
+   0.984124,
+   1.003204
+  ],
+  "location": {
+   "rule": "max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s",
+   "frames": [
+    {
+     "t_s": 1800.0,
+     "cells": 0.0
+    },
+    {
+     "t_s": 2700.0,
+     "cells": 0.0
+    },
+    {
+     "t_s": 3600.0,
+     "cells": 0.0
+    },
+    {
+     "t_s": 4500.0,
+     "cells": 0.0
+    },
+    {
+     "t_s": 5400.0,
+     "cells": 0.0
+    },
+    {
+     "t_s": 6300.0,
+     "cells": 1.0
+    },
+    {
+     "t_s": 7200.0,
+     "cells": 0.0
+    }
+   ],
+   "worst_cells": 1.0,
+   "inside": true
+  },
+  "onset": {
+   "rule": "max w at 1800 s within 15 % of CM1's",
+   "cm1": 29.348,
+   "gm1": 29.273,
+   "ratio": 0.997452,
+   "inside": true
+  },
+  "gates_release": true,
+  "all_inside_band": true,
+  "all_inside_target": true,
+  "target": "within 5 % on every statistic (about 3 x CM1's twin spread): printed, not a gate",
+  "families": {
+   "updraft": "updraft family",
+   "downdraft": "downdraft, cold-pool and precipitation family"
+  }
+ },
+ "check": {
+  "passes": 1,
+  "status": "passed",
+  "first_refusal": null,
+  "set_aside": {}
+ },
+ "settings": {},
+ "notes": [],
+ "command": null
+}

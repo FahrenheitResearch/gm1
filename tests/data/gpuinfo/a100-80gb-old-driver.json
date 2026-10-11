@@ -1,0 +1,20 @@
+{
+ "_about": "An A100 80 GB whose driver predates memory.reserved and compute_cap",
+ "unsupported_fields": [
+  "memory.reserved",
+  "compute_cap"
+ ],
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-55555555-6666-7777-8888-999999999999",
+   "name": "NVIDIA A100-SXM4-80GB",
+   "memory.total": 81920,
+   "memory.used": 1,
+   "memory.free": 81408,
+   "driver_version": "550.54",
+   "pci.bus_id": "00000000:07:00.0"
+  }
+ ],
+ "apps": []
+}

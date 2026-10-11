@@ -1,0 +1,461 @@
+{
+  "schema": "gpuwm-cm1.authority/v1",
+  "audited_at": "2026-08-28",
+  "mathematical_authority": {
+    "kind": "official-release-tarball",
+    "release": "21.1",
+    "release_date": "2024-03-24",
+    "url": "https://www2.mmm.ucar.edu/people/bryan/cm1/cm1r21.1.tar.gz",
+    "bytes": 345874148,
+    "sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7",
+    "file_count": 195,
+    "extracted_bytes": 513809706,
+    "decision": "The dated UCAR release artifact is authoritative because it is contemporaneous, complete, and includes the runtime payload. The Git tag is corroborating metadata only."
+  },
+  "corroborating_git": {
+    "repository": "https://github.com/NCAR/CM1",
+    "tag": "21.1",
+    "tag_kind": "lightweight",
+    "commit": "0f734f64efa89a684963a66d2ac32db67617912b",
+    "tree": "e9740e756758001e6a0f6a4f4dbcc591d45b9d96",
+    "commit_date": "2025-03-16T11:14:10-06:00",
+    "tracked_files": 319,
+    "source_manifest_sha256": "ece38d94c2ef09e7e6706027b40f920fd92253a8f21b08af058e3e0a1eac8ece",
+    "comparison": {
+      "common_fortran_files": 91,
+      "common_fortran_equal_after_newline_normalization": 91,
+      "differing_common_src_paths": ["src/Makefile"],
+      "tag_only_src_paths": ["src/Makefile.old"]
+    }
+  },
+  "authority_evidence_in_development_repository": [
+    {
+      "path": "development-repository:evidence/authority/authority-audit.md",
+      "sha256": "fa2bc596976ad47035c5a2bc7f51ed4402ffc43b199779768ee284364e9093da"
+    },
+    {
+      "path": "development-repository:evidence/authority/cm1r21.1-content-sha256.tsv",
+      "sha256": "8c5ac7e916fc43c74e33790e6c456c7cd0d9cfafba766b2deb810e559dfea373"
+    },
+    {
+      "path": "development-repository:evidence/authority/cm1r21.1-tar-entry-manifest.txt",
+      "sha256": "364c363c3b7f9b5d029c76cb1f5528ac5347440dd3b2a8e0524cadd4b2a989b0"
+    },
+    {
+      "path": "development-repository:evidence/authority/tag-21.1-tracked-manifest.txt",
+      "sha256": "3c6a9f2509b883fc7af6cc622f643d3a57c7cfa1681c337737b2a8960768d3d8"
+    },
+    {
+      "path": "development-repository:evidence/authority/verification-receipt.json",
+      "sha256": "fab8e78dcb5596c371846c31e84caf08c1429dca8242b20a594d75a46f17d2e0"
+    }
+  ],
+  "authority_content_identity_in_source_distribution": {
+    "path": "tools/authority/cm1r21.1-content-sha256.tsv",
+    "sha256": "8c5ac7e916fc43c74e33790e6c456c7cd0d9cfafba766b2deb810e559dfea373"
+  },
+  "native_reference": {
+    "status": "two-build-byte-identical-and-one-step-smoke-passed",
+    "authoritative_source": "byte-copy of the tarball extraction",
+    "allowed_patches": ["recorded build-only Makefile patch"],
+    "toolchain": "GNU Fortran 13.3.0, single process, NetCDF/NCFPLUS, -O2 -finline-functions -fallow-argument-mismatch",
+    "executable_sha256": "6b273363457386d32dbb7f882cb70b87dd51a1572edd91b76caada28924f6281",
+    "onefile_F_sha256": "cf9e902193facba211f1724f72c52e0325c6400da2fae26320c8b3a88407c7df",
+    "onefile_member_count": 91,
+    "changed_or_missing_fortran_sources": 0,
+    "native_receipt_source_sha256": "8fc2d77abca0cac0d2193b4e22d1577b93ea0953af916ee32a1e151a83057d3b",
+    "distributed_text_receipt_sha256": "e53294f66e6033902e33e5725e2a330f1d7292d3c2d312c2a967eb8091f21883",
+    "rebuild_comparison": "evidence/native-reference/native-rebuild-comparison.json",
+    "rebuild_comparison_sha256": "d2ec410c7b743046b54240cc3e8715bf126d7a2ed6830498fe676f97cd2d322b",
+    "rebuild_claim_boundary": "byte-identical repeat on the same machine (x86-64 Linux under WSL2) and pinned toolchain; not cross-platform or cross-compiler",
+    "one_step_reproduction": "evidence/native-reference/native-one-step-reproduction.json",
+    "one_step_reproduction_sha256": "15ac8af7825b63cc7b766048cfbb1e21bb9f53f0876b8e90ef2c2e9fce6e67f6",
+    "one_step_reproduction_result": "all generated scientific outputs and t=0/t=6 records byte-identical across the two same-host builds/runs; raw timing text excluded by documented normalization",
+    "one_step_smoke": {
+      "grid": [120, 120, 40],
+      "duration_s": 6.0,
+      "dt_s": 6.0,
+      "rk_stages": 3,
+      "psolver": 3,
+      "ptype": 5,
+      "equation_set": 2,
+      "exit_status": 0,
+      "normal_termination": true,
+      "maximum_resident_set_kib": 352512,
+      "claim": "native context smoke only; no internal operator instrumentation or port/product parity"
+    },
+    "required_receipts": [
+      "source-tree manifest",
+      "Makefile patch",
+      "compiler and library versions",
+      "build transcript",
+      "cm1.exe SHA-256",
+      "onefile.F SHA-256",
+      "zero-step receipt",
+      "short-run receipt"
+    ]
+  },
+  "redistribution": {
+    "package_license": "Apache-2.0",
+    "cm1_root_notice": "MIT-like release grant, copyright 2024 UCAR",
+    "undifferentiated_upstream_bundle_redistributable": false,
+    "blockers": [
+      "src/lfoice.F carries copyleft licence terms separate from the CM1 grant",
+      "RRTMG sources carry AER no-sale and notice-preservation terms",
+      "embedded Mersenne Twister terms must be preserved",
+      "fourteen tar-only runtime assets have no standalone license sidecar"
+    ],
+    "package_policy": "Do not bundle the CM1 source tree, native physics, binary lookup tables, or reference executable. Ship identities, maps, independently written port code, and small derived oracle fixtures only after provenance review. Every bundled CM1 file or datum is listed under bundled, with its review.",
+    "bundled": [
+      {
+        "path": "src/cm1core/data/cm1r21.1-supercell-namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "CM1's supercell and squall_line namelists, shipped unchanged as the GUI's examples, with UCAR's notice",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "src/cm1core/data/cm1r21.1-squall_line-namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "CM1's supercell and squall_line namelists, shipped unchanged as the GUI's examples, with UCAR's notice",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "src/cm1core/records/CM1-LANDUSE-TBL.json",
+        "source_path": "run/LANDUSE.TBL",
+        "source_sha256": "92fef4134ac35dca6177e5afc79a1d0517383e9061cf113629d4d41755b88806",
+        "form": "the table's values (33 categories in two seasons, seven columns and each category's name), transcribed to JSON by tools/build_cm1_landuse_table.py; not the file's bytes",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "getlanduse (src/init_surface.F:365-466) overwrites the surface fields from this table in every run with a surface layer, and GM1 has no working directory beside an executable to read it from",
+        "review": "a text runtime table under the root release grant: run/LANDUSE.TBL is in both the r21.1 tarball and the official tag with the same content, carries no notice of its own, and is not one of the blockers above (not a tar-only asset, not RRTMG, not lfoice.F); its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "src/cm1core/records/CM1-R21-NAMELIST-DEFAULTS.json",
+        "source_path": "CM1 r21.1 namelist defaults: run/namelist.input and the initial values in src/cm1.F, src/input.F, src/module_mp_nssl_2mom.F and src/module_ra_etc.F",
+        "form": "each r21.1 namelist key's default value, its type and the file and line that sets it, read by tools/generate_cm1_r21_namelist_support.py; values and citations, not any file's bytes (the record's authority block names each file's sha256)",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the importer states every key a namelist leaves unset at CM1 r21.1's own default",
+        "review": "numbers, logicals, short strings and file:line citations from text files under the root release grant; none of those files is one of the blockers above (not RRTMG, not lfoice.F, not a tar-only asset)"
+      },
+      {
+        "path": "tests/data/decks/stock-imported.gpuwm-cm1.toml",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "e0d6e2b0010657aca93bb6b8a88f22c5f7a1fce21219f3bb7d310a3e25e184e5",
+        "form": "the gpuwm-cm1 deck the importer writes from that namelist: CM1's settings under GM1's names",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the estimator, cm1out and GUI tests run on CM1's stock supercell",
+        "review": "settings of a text configuration file under the root release grant"
+      },
+      {
+        "path": "tests/data/cm1-ref-24x24/",
+        "source_path": "output of CM1 r21.1 built from the release (tests/data/cm1-ref-24x24/README.md)",
+        "form": "one history file, file layouts, GrADS descriptors and records, statistics and fields as written by CM1 r21.1 on its supercell namelist at 24 x 24 x 40, and the namelists that made them",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the cm1out conformance tests hold GM1's CM1-format output to CM1's own",
+        "review": "data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
+      },
+      {
+        "path": "rust/cm1-state/evidence/cm1-base-columns.txt",
+        "source_path": "output of CM1 r21.1 built from the release (the file's header names the build and the run)",
+        "form": "th0, qv0, qc0 and qi0 at model time zero, one column per analytic sounding, as the binary32 words CM1 r21.1 wrote",
+        "distribution": "the source distribution and the public source snapshot: not in the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the Rust crate's test holds every analytic sounding arm to CM1's own base-state column word for word",
+        "review": "data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
+      },
+      {
+        "path": "src/cm1core/presets/bmx-2011-04-27/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "9dfb9c72a45a435c827a4e0afb4c8dc53e2add1b4d97adc7c19a46c2f1e31f42",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/bubble-cloud-250m/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "29a593796c69321059285b564a878e124ebcd132e1c463fa97f4e536f415a34b",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (17: nx, ny, nz, dx, dy, dz, dtl, timax, rstfrq, tapfrq, zd, output_format, output_filetype, isnd, iwnd, umove, vmove) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/dnr-2015-06-01/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "6ac3524e1a1eda7cab8a58b604de02ba39fb405c621e9136b772236f32794b2c",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/gust-front/namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "sha256": "2e7fcadad9937efd7d8e6d5dc2cae41c9cc5c26965f1e3f5b8dd7433ec4dcc2d",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (12: nx, ny, dx, dy, dtl, timax, tapfrq, sbc, nbc, iinit, output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/iln-2012-06-29/namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "sha256": "62979e10b06a229268077a096718f5e356ac27e051ab57ffea051f75966d64ac",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (14: nx, ny, sbc, nbc, iinit, isnd, iwnd, umove, vmove, tapfrq, output_format, output_filetype, iprcl, nparcels) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/jan-2014-06-30/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "f81fd288eb0da94d8f573b80a7744de081862f870a9b808e048cb277acef3c1e",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (12: tapfrq, timax, rstfrq, output_format, output_filetype, isnd, iwnd, iprcl, nparcels, iinit, umove, vmove) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/line-open/namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "sha256": "19a67b5817dcbcfc7a6d159646b87efb124f8fedd97d14fd24c42f725f13f2bf",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (11: nx, ny, sbc, nbc, iinit, umove, tapfrq, output_format, output_filetype, iprcl, nparcels) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/multicell-wk/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "a65de5fa4aef66870399c0ac2f1cacd01151cf6f47be7718347e868095903997",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (8: tapfrq, iwnd, output_format, output_filetype, iprcl, nparcels, umove, vmove) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/oun-1999-05-03/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "0fde1544cb56166fd20558cfa3db299d39bc3ef22f350f3481bd62628f130978",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/oun-2011-05-24/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "16a5b56b47ae8bdcac3fd205092eeae57364354b6f4029747125e3d8d795a4a3",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/oun-2013-05-20/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "a0574948f81203f6ac00bfa4a823b5cad37733e9177ef6f0f6cb8fb61a17a2fa",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/oun-2019-05-20/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "bc78df37e4c232d5b8862cd64a9cce73126b006ed45f0d4c619ff5c626147be1",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/pulse-calm/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "fcd880f0ac8170b1fb7cae3a714a13f9fc30f02cd0b88b3ec752ed960c4a1955",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (12: tapfrq, timax, rstfrq, imove, umove, vmove, output_format, output_filetype, isnd, iwnd, iprcl, nparcels) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/split-straight/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "b82ee3dbe5cdd89ef2c400ae96208c30f71ffb0540406746f57f8d3f822e6009",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (11: nx, ny, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iprcl, nparcels) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/squall-line-1km/namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "sha256": "c88ca5437ed1f7ddb0aef82e5d409d2ab27b68b3ba3ef8060a4654b1dfe3faa2",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (2: output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/squall-line-250m/namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "sha256": "bd10cfee7c353b49eefa2f891481b13364697f5916df80ee6cf87b4e10e4d5f4",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (9: nx, ny, nz, dx, dy, dz, dtl, output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/supercell-100m/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "272382e0d9264d44a706c8caa2e4d1e78d8fd116089d2930bd11701d62f925e5",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (9: nx, ny, nz, dx, dy, dz, dtl, output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/supercell-1km/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "ca16f37dba56bb7e6ab5fe0652683be2735ae6d0e87623b3c09e627847f806a0",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (3: tapfrq, output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/supercell-250m/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "42d1b5fce0cd4fadb4f2ab67bd9c2acc58fc96851a5cf3ed16081312639ed327",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (10: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/tlh-2004-09-15/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "0058bfc34f3f336ab30f4adfa61832e8aa034f785c5043bc4c31c63e27bdc417",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (15: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype, isnd, iwnd, umove, vmove, iinit) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/your-environment/namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "sha256": "e98d0a05cceb90074963f84aa9f5ba8de5fed434c679b828d6c6b2f05c0c4cd1",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (9: tapfrq, output_format, output_filetype, isnd, iwnd, iprcl, nparcels, umove, vmove) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "tests/data/cm1import/r21.1-supercell.namelist.input",
+        "source_path": "run/config_files/supercell/namelist.input",
+        "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "byte copies the namelist importer's tests read",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "tests/data/cm1import/r21.1-squall_line.namelist.input",
+        "source_path": "run/config_files/squall_line/namelist.input",
+        "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "byte copies the namelist importer's tests read",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "tests/data/cm1import/r21.1-run.namelist.input",
+        "source_path": "run/namelist.input",
+        "sha256": "3cf17aa1ac513544d4695994013fd30ea89c2bb0f7d926e41e348635882a6ca5",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "byte copies the namelist importer's tests read",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "src/cm1core/records/CM1-R22-NEW-KEYS.json",
+        "source_path": "CM1 r22.0 (cm1r22.0.tar.gz): README.namelist, CHANGES, run/config_files/supercell/namelist.input and the namelist declarations in src/",
+        "form": "every namelist key CM1 r22.0 declares that r21.1 does not, with its default, type and file:line citations; each citation quotes the short source line it rests on (76 lines of r22.0's CHANGES, README.namelist and src/module_mp_nssl_2mom.F, and 18 of r21.1's); not any file's bytes (the record's release block names each file's sha256)",
+        "notice": "NOTICE, section Other CM1 releases (the CM1 r22.0 release grant, copyright 2026 UCAR, the same terms as r21.1's)",
+        "why": "the importer reads a CM1 r22.0 namelist and says which of its keys r21.1 cannot honour",
+        "review": "short lines and values from text files of a release under UCAR's permissive grant (its tarball's README); src/module_mp_nssl_2mom.F carries no notice of its own; none is RRTMG, lfoice.F or a tar-only asset"
+      },
+      {
+        "path": "src/cm1core/records/CM1-KEY-ALIASES.json",
+        "source_path": "CM1 r16, r17, r18 (release 18.3), r19.10 and r20.3 (their tarballs): README.namelist, CHANGES and the namelist declarations in src/",
+        "form": "every key those releases declared that r21.1 does not, with its r21.1 equivalent and file:line citations; lines of r19.10, r20.3 and r21.1 are quoted (11, 4 and 8 short lines); lines of r16, r17 and r18 are not quoted but described in the record's own words and pinned by their digest",
+        "notice": "NOTICE, section Other CM1 releases (r19.10 and r20.3: UCAR's permissive grant, copyright 2020 and 2021 UCAR; r16, r17 and r18: not quoted)",
+        "why": "the importer reads namelists written for older CM1 releases and maps their keys to r21.1's",
+        "review": "r19.10 and r20.3 carry UCAR's permissive grant (each tarball's README), the same as r21.1's, so their short lines are quoted with the notice; r16, r17 and 18.3 carry their author's earlier terms, which do not permit redistribution beyond the user's working group, so nothing of theirs is reproduced beyond the setting names a namelist uses and facts about them"
+      },
+      {
+        "path": "src/cm1core/records/CM1-STOCK-SUPERCELL-SERIES.json",
+        "source_path": "output of CM1 r21.1 built from the release, on run/config_files/supercell/namelist.input",
+        "form": "CM1 r21.1's domain extremes at each output time (max and min w, max updraft helicity, the lowest level's theta' minimum and the area below -1 K, max rain), computed from the history files CM1 wrote by tools/generate_stock_supercell_series.py",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the quick-look time series draws CM1's own curve beside a run of the stock supercell",
+        "review": "numbers derived from data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
+      },
+      {
+        "path": "src/cm1core/records/GM1-STOCK-DECK-RATIOS.json",
+        "source_path": "output of CM1 r21.1 built from the release, on run/config_files/supercell/namelist.input",
+        "form": "mature-phase means of CM1 r21.1's domain statistics (and of its twin runs) on its stock supercell, beside GM1's, as ratios",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the release notes and doctor state how close GM1 comes to CM1 on CM1's own example",
+        "review": "numbers derived from data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
+      }
+    ],
+    "source_snapshot_excluded": [
+      {
+        "path": "tests/data/cm1import/r22.0-supercell.namelist.input",
+        "why": "a CM1 r22.0 file: NOTICE quotes only the r21.1 grant, so it stays in the development repository and its tests skip in the snapshot"
+      },
+      {
+        "path": "tests/data/cm1import/r18-run.namelist.input",
+        "why": "a CM1 r18 file: NOTICE quotes only the r21.1 grant, so it stays in the development repository and its tests skip in the snapshot"
+      }
+    ]
+  },
+  "name_gate": {
+    "checked_at": "2026-08-28",
+    "github_authenticated_exact_name_count": 0,
+    "pypi_project_http_status": 404,
+    "chosen_distribution": "gpuwm-cm1",
+    "chosen_import": "cm1core",
+    "remote_created": false
+  }
+}

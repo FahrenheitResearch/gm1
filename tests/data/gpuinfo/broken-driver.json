@@ -1,0 +1,7 @@
+{
+ "_about": "A driver that does not answer",
+ "fail": {
+  "code": 9,
+  "message": "NVIDIA-SMI has failed because it couldn't communicate with the NVIDIA driver."
+ }
+}

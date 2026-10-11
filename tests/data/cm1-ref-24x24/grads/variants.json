@@ -1,0 +1,61 @@
+{
+ "g1": {
+  "output_format": "1",
+  "output_filetype": "1",
+  "timax": "120.0"
+ },
+ "g2": {
+  "output_format": "1",
+  "output_filetype": "2",
+  "timax": "60.0"
+ },
+ "g3": {
+  "output_format": "1",
+  "output_filetype": "3",
+  "timax": "60.0"
+ },
+ "gn": {
+  "output_format": "1",
+  "output_filetype": "2",
+  "timax": "60.0",
+  "imove": "0"
+ },
+ "gs": {
+  "statfrq": "60.0",
+  "str_bot": "375.0",
+  "str_top": "2875.0",
+  "stretch_z": "1",
+  "tapfrq": "60.0",
+  "timax": "60.0",
+  "ztop": "17375.0",
+  "output_format": "1",
+  "output_filetype": "2"
+ },
+ "gu": {
+  "iorigin": "1",
+  "outunits": "2",
+  "statfrq": "60.0",
+  "tapfrq": "60.0",
+  "timax": "60.0",
+  "output_format": "1",
+  "output_filetype": "2"
+ },
+ "pg": {
+  "nx": "120",
+  "ny": "120",
+  "output_format": "1",
+  "output_filetype": "2",
+  "iprcl": "1",
+  "nparcels": "36000",
+  "timax": "60.0"
+ },
+ "pn": {
+  "nx": "120",
+  "ny": "120",
+  "output_format": "2",
+  "output_filetype": "2",
+  "iprcl": "1",
+  "nparcels": "36000",
+  "timax": "60.0"
+ }
+}

@@ -1,0 +1,102 @@
+{
+  "abi": "gpuwm-cm1.cuda-stretch-z1-terrain-physical-carriers-f32/v1",
+  "authority": {
+    "anchors": {
+      "fixed_terrain_moving_domain_refusal": "src/param.F:1890-1904",
+      "flx6": "src/adv_routines.F:6025-6037",
+      "nominal_stretch_z1_profiles": "src/param.F:7814-7953,8162-8225",
+      "open_edge_bc2d": "src/bc.F:12-172",
+      "physical_face_interpolation": "src/param.F:8603-8627",
+      "physical_vertical_metrics": "src/param.F:8464-8492",
+      "terrain_coordinates_and_metrics": "src/init_terrain.F:160-297",
+      "terrain_dispatch": "src/param.F:8283-8324",
+      "terrain_gradient_dispatch": "src/adv_routines.F:9255-9322"
+    },
+    "source_sha256": {
+      "src/adv_routines.F": "265723c8b19e300592ddbad3839ee689aa4933ac2f0ae236c61f4d5d40ef7f00",
+      "src/bc.F": "5b7353a08b13eb9f69e4b89e250aec0e7918df3c93bd48c8539ab850787716e3",
+      "src/init_terrain.F": "813e579983c0f55347d5eb54828709eedb5911a08587b216ea668c9d03cbca7c",
+      "src/param.F": "cac64a6cb4363c6b88367b5cb9391f1bcf2130c63ffedef6e5973c03b190c349"
+    },
+    "tarball_sha256": "dc49fe84531056d1ae6249b37a5e3ee453fd96861c3b6bafd63828d92e64edf7"
+  },
+  "claim_boundary": [
+    "Compact CM1-native O0/O2 and current CPU records are raw-bit exact.",
+    "Compact CPU/CUDA outputs are raw-bit exact for all 23 published physical metric carriers.",
+    "The exact 300x300x75, 50 m, 15 km-top CUDA carrier shapes pass finite, positivity, monotonicity, surface, top, and signed-zero invariants on an analytic terrain surface.",
+    "The full-size analytic fixture is operator validation only, not a real-data child, forecast, storm, or tornado simulation.",
+    "Real child terrain, atmospheric remap, hydrostatic/base-state repair, open-boundary initialization, pressure integration, and evolved trajectory remain unadmitted."
+  ],
+  "cuda": {
+    "combined_full_analytic_output_sha256": "b3d0904e8f17f4d056ab1e7ee5249447e27db4457a5cc4515a3a3302ceab243a",
+    "kernel_source_sha256": "905bec56020e2bf1a73c0c854a9d5f462ccc372334ab3ceee2ad50f041be2f18",
+    "receipt_path": "evidence/validation/stretch-z1-terrain-v1/validation-receipt.json",
+    "receipt_sha256": "9c99ba42f47363329323cd5ac088f988a7a8380b60712ad9f00d176caa390515",
+    "status": "PASS_NATIVE_CPU_CUDA_COMPACT_AND_FULL_ANALYTIC_HARDWARE"
+  },
+  "geometry": {
+    "dx_m": 50.0,
+    "dy_m": 50.0,
+    "shape_zyx": [75, 300, 300],
+    "ztop_m": 15000.0
+  },
+  "module_source_sha256": "20de1598b073b0f02db3f14f6b3ab8bba1dfdc704e6b3e8f1c0cd7a4acd881fa",
+  "native_oracle": {
+    "compact_combined_sha256": "bce78c7679ea4aca52435153706d38c8d7198d604b72f066862177a913849fcb",
+    "record_count": 39734,
+    "records_path": "evidence/oracles/stretch-z1-terrain-v1/stretch-z1-terrain-records.tsv",
+    "records_sha256": "e034bf3796213fad975310380af8f81b750ea7f8639996e38213b619dd889b84",
+    "status": "passed-exact-native-fixed-terrain-stretch-z1-metrics"
+  },
+  "physical_carriers": [
+    "terrain_msl",
+    "zh",
+    "zf",
+    "mh",
+    "rmh",
+    "mf",
+    "rmf",
+    "c1",
+    "c2",
+    "gz",
+    "rgz",
+    "gzu",
+    "rgzu",
+    "gzv",
+    "rgzv",
+    "dzdx",
+    "dzdy",
+    "gx",
+    "gxu",
+    "gy",
+    "gyv",
+    "rds",
+    "rdsf"
+  ],
+  "real_child_product_gate": {
+    "accepted_parent_checkpoint_sha256": "4f3a00ae66e0b68f0f05f4eff54a3625e846c0efee31b3ecbdee01c3c87ac1b4",
+    "required_next_input": "authorized source-coordinate child terrain_msl float32[300,300] derived from the accepted parent without field translation",
+    "status": "BLOCKED_PENDING_SOURCE_COORDINATE_TERRAIN_PRODUCER",
+    "validated_parent_plan_sha256": "14609494f7c87937fcb5ec0db3f214809ed514380560c43beb18183e6eebce17"
+  },
+  "runner_source_sha256": "0b8fea07bf0dedb99432c0557978d0d47a7c11e143907c05ae503becdd8ac207",
+  "schema": "gpuwm-cm1.stretch-z1-terrain-admission/v1",
+  "selection": {
+    "axisymm": 0,
+    "do_ib": false,
+    "hadvordrs": 5,
+    "hadvordrv": 5,
+    "imove": 0,
+    "lateral_bc": [2, 2, 2, 2],
+    "serial": true,
+    "stretch_x": 0,
+    "stretch_y": 0,
+    "stretch_z": 1,
+    "terrain_flag": true
+  },
+  "status": "operator-admitted-real-child-blocked",
+  "vertical": {
+    "grid_sha256": "f66aa7937e0f4942dfbc55001641f221b8a84352961058e81247ee4e3ca8db56",
+    "proof_sha256": "277f2b8831f316b2e99a81a903f5ac20ee5d781e2c2b058963539f648f9ec02e"
+  }
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "gust-front",
+  "order": 41,
+  "group": "other",
+  "name": "Cold air spreading out: a gust front",
+  "line": "A block of cold air collapses and spreads along the ground, lifting the warm air ahead of it.",
+  "budget": "10m",
+  "note": "CM1's squall-line environment with its cold pool start. The picture is the cold air near the ground.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/squall_line/namelist.input",
+    "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 300,
+        "to": 160,
+        "why": "an 80 km area"
+      },
+      {
+        "key": "ny",
+        "from": 60,
+        "to": 160,
+        "why": "an 80 km area"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 500.0,
+        "why": "500 m grid spacing, fine enough to see the gust front's head"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 500.0,
+        "why": "500 m grid spacing"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 3.0,
+        "why": "the time step scaled with the grid spacing"
+      },
+      {
+        "key": "timax",
+        "from": 10800.0,
+        "to": 3600.0,
+        "why": "1 hour"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes"
+      },
+      {
+        "key": "sbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides"
+      },
+      {
+        "key": "nbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides"
+      },
+      {
+        "key": "iinit",
+        "from": 8,
+        "to": 2,
+        "why": "CM1's cold pool (a dam break) instead of warm air"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      }
+    ]
+  },
+  "ladder_m": [
+    1000
+  ],
+  "min_width_km": {
+    "default": 60
+  },
+  "min_duration_s": 1800,
+  "shrink": "both",
+  "picture_look": "surface"
+}

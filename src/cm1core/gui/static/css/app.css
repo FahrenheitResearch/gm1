@@ -1,0 +1,190 @@
+/* What the live pages add to gm1.css: the mode switch and the pieces every screen shares. In the Recast
+   design language (gm1.css says what that is); layout and words unchanged. */
+
+/* The mode is a view: an element marked for one mode is not drawn in the other. */
+body[data-mode="guided"] .advanced-only { display: none !important; }
+body[data-mode="advanced"] .guided-only { display: none !important; }
+
+/* The Guided | Advanced switch: a segmented control (Recast .toggles); the pressed side is accent on accent-dim. */
+.modes { display: inline-flex; border: 1px solid var(--gm1-faint); border-radius: var(--gm1-r-md); background: var(--gm1-control); }
+.modes button {
+  background: transparent; border: 0; padding: 4px 12px; min-height: 26px; cursor: pointer;
+  color: var(--gm1-muted); font-size: var(--fs-small); font-weight: 600; letter-spacing: .02em;
+  transition: background var(--gm1-dur) var(--gm1-ease), color var(--gm1-dur) var(--gm1-ease);
+}
+.modes button:first-child { border-radius: 4px 0 0 4px; }
+.modes button:last-child { border-radius: 0 4px 4px 0; }
+.modes button + button { border-left: 1px solid var(--gm1-rule-soft); }
+.modes button:hover { background: var(--gm1-hover); color: var(--gm1-title); }
+.modes button.on { color: var(--gm1-accent); background: var(--gm1-accent-dim); }
+
+/* "Show command": a link that reveals the exact gpuwm-cm1 line, copyable. */
+.showcmd { margin-top: 6px; font-size: var(--fs-small); }
+.showcmd > button {
+  background: none; border: 0; padding: 0; cursor: pointer; color: var(--gm1-muted);
+  border-bottom: 1px dotted var(--gm1-faint);
+}
+.showcmd > button:hover { color: var(--gm1-accent); border-bottom-color: var(--gm1-accent-line); }
+.showcmd .copyline { margin-top: 4px; }
+
+.hint { color: var(--gm1-dim); font-size: var(--fs-micro); margin-left: 6px; }
+.notice { border-left: 2px solid var(--gm1-accent); padding: 6px 10px; margin: 0 0 12px; color: var(--gm1-text);
+  background: var(--gm1-accent-dim); border-radius: 0 var(--gm1-r-md) var(--gm1-r-md) 0; }
+.events { max-height: 260px; overflow-y: auto; }
+
+/* Narrow screens: the rail is a top bar, and a short page must not stretch it to fill the window. */
+@media (max-width: 760px) {
+  .app { grid-template-rows: auto 1fr; }
+}
+
+/* ---- the setup screens */
+
+/* CM1's own words as small grey hints after the plain words. */
+.hint.cm1 { font-family: var(--gm1-font-mono); font-size: var(--fs-micro); }
+label .hint.cm1 { margin-left: 5px; }
+.notice.warn { border-left-color: var(--gm1-warn); background: var(--gm1-warn-dim); }
+.notice.stop { border-left-color: var(--gm1-stop); background: var(--gm1-stop-dim); }
+.lead { color: var(--gm1-text); font-size: 14px; max-width: 70em; margin: 14px 0; }
+.lead:first-child { margin-top: 0; }
+.lead.big { font-weight: 300; font-size: 20px; line-height: 1.35; color: var(--gm1-title); }
+.lead .sub { display: block; margin-top: 4px; font-size: var(--fs-small); color: var(--gm1-muted); }
+.banner .sub { display: block; margin-top: 3px; font-size: var(--fs-small); color: var(--gm1-muted); }
+.linkbtn { background: none; border: 0; padding: 0; cursor: pointer; color: var(--gm1-text); font: inherit;
+  border-bottom: 1px solid var(--gm1-faint); }
+.linkbtn:hover { color: var(--gm1-title); border-bottom-color: var(--gm1-accent-line); }
+.btn.big { padding: 8px 26px; font-size: 15px; }
+.result { margin-top: 8px; }
+.result .banner, .result .diff { margin-top: 8px; }
+.cols-main-rev { grid-template-columns: minmax(0, 1fr) minmax(0, 1.55fr); }
+.pathrow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
+.formgrid { display: grid; grid-template-columns: minmax(0, max-content) minmax(0, 1fr); gap: 6px 14px; align-items: center; }
+.formgrid .input.num { width: 140px; }
+.panel.off { background: var(--gm1-panel); box-shadow: none; border-style: dashed; color: var(--gm1-dim); }
+.panel.off .cap, .panel.off label, .panel.off .unit, .panel.off .hint { color: var(--gm1-dim); }
+.panel.off .cap .n { color: var(--gm1-warn); }
+.plainlist { margin: 0 0 8px; padding-left: 18px; color: var(--gm1-text); }
+.plainlist li { margin-bottom: 6px; }
+.fixline { margin: -3px 0 8px 16px; }
+.hodo { max-width: 460px; }
+.hodo .legend .sw { border-top-width: 3px; }
+table.words td.key { white-space: normal; }
+table.words td.key .sub.fields { font-family: var(--gm1-font-mono); font-size: var(--fs-micro); }
+textarea.input { resize: vertical; min-height: 12em; line-height: 1.35; }
+
+/* guided: the storm gallery */
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.card { background: var(--gm1-sheen), var(--gm1-panel); border: 1px solid var(--gm1-rule); border-radius: var(--gm1-r-lg);
+  box-shadow: var(--gm1-shadow); padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.card h3 { margin: 6px 0 0; font-size: 16px; font-weight: 700; color: var(--gm1-title); }
+.card p { margin: 0; }
+.card .when { color: var(--gm1-accent); }
+.card .why { color: var(--gm1-warn); font-size: var(--fs-small); }
+.card .btns { margin-top: auto; padding-top: 8px; }
+.card.off { box-shadow: none; }
+.card.off figure img { opacity: .6; }
+.card.off h3 { color: var(--gm1-muted); }
+.card figure img { aspect-ratio: 16 / 9; object-fit: cover; }
+.card figcaption { font-size: var(--fs-micro); }
+/* An empty picture is a state, not a gap: a dashed well with a mono reason (Recast .emptyrow). */
+.nopic { aspect-ratio: 16 / 9; border: 1px dashed var(--gm1-faint); border-radius: var(--gm1-r-md); display: flex;
+  align-items: center; justify-content: center; gap: 8px; color: var(--gm1-dim); font-family: var(--gm1-font-mono);
+  font-size: var(--fs-micro); letter-spacing: .04em; text-transform: uppercase; text-align: center; padding: 12px;
+  background: rgba(0, 0, 0, 0.25); }
+
+/* the commands this page ran (advanced): every action is one gpuwm-cm1 command */
+.ran { margin-top: 24px; padding-top: 10px; border-top: 1px solid var(--gm1-rule); }
+.ran:empty { display: none; }
+.ranline code { display: block; color: var(--gm1-data); font-size: 11.5px; overflow-x: auto; white-space: nowrap; padding: 2px 0; }
+.ranline.old code { color: var(--gm1-dim); }
+
+/* ---- advanced mode: Show command beside every button, the namelist editor, Continue or extend */
+
+/* A button with its "Show command" under it; the line opens below the button when asked for. */
+.action { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 0; max-width: 100%; min-width: 0;
+  vertical-align: top; }
+.action > .showcmd { margin-top: 3px; font-size: var(--fs-micro); max-width: 100%; }
+/* An opened line is as wide as it can be without leaving its panel. */
+.action > .showcmd .copyline, .action > .showcmd .livecmd { width: min(640px, calc(100vw - 64px)); max-width: 100%; }
+.panel .btns > .action { max-width: 100%; }
+.showcmd.live .livecmd { margin-top: 4px; }
+.showcmd .cmdnote { margin: 2px 0 0; }
+.showcmd[data-command=""] .cmdnote { color: var(--gm1-warn); }
+.head .right .modebox { display: flex; flex-direction: column; align-items: flex-end; }
+.head .right .modebox .showcmd { font-size: var(--fs-micro); }
+.head .right .modebox .showcmd .copyline { width: min(360px, calc(100vw - 48px)); }
+
+.nltext { min-height: 28em; font-size: 12px; tab-size: 8; white-space: pre; overflow-wrap: normal; overflow-x: auto; }
+.nlreport .nlcounts { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 10px 0 6px; font-size: var(--fs-small); }
+.nlreport .nlcount b { margin-left: 5px; font-weight: 400; color: var(--gm1-title); }
+.nlreport details.cat { margin-top: 6px; }
+.nlrow { padding: 6px 0; border-top: 1px solid var(--gm1-rule-soft); }
+.nlrow:first-child { border-top: 0; }
+.nlrow .key { font-family: var(--gm1-font-mono); color: var(--gm1-text); }
+.nlrow .note { margin-top: 2px; }
+.nlrow .fix { color: var(--gm1-accent); font-size: var(--fs-small); margin-top: 2px; }
+.nlrow .jumps { margin-left: 8px; font-size: var(--fs-micro); }
+.nlrow .jumps .linkbtn + .linkbtn { margin-left: 6px; }
+.nlwords details.nlgroup { margin-top: 8px; }
+.nlwords details.nlgroup > summary { cursor: pointer; color: var(--gm1-text); }
+.nlwords details.nlgroup > summary .count { margin-left: 10px; color: var(--gm1-muted); font-size: var(--fs-small); }
+table.nltable td.key { font-family: var(--gm1-font-mono); white-space: nowrap; }
+table.nltable td .input { width: 150px; padding: 2px 6px; }
+table.nltable td .sub.fix { color: var(--gm1-accent); }
+.input.changed { border-color: var(--gm1-accent); box-shadow: 0 0 0 1px var(--gm1-accent-dim); }
+.sub.warn { color: var(--gm1-warn); }
+
+.jsform { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px 12px; }
+.jsfield { display: flex; flex-direction: column; gap: 3px; font-size: var(--fs-small); }
+.jsfield .input { width: 100%; }
+.jsfield.jswide { grid-column: 1 / -1; }
+.jsfield textarea.input { min-height: 3.6em; }
+code.cmdline { display: block; color: var(--gm1-data); font-size: 11.5px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.fitout { margin-top: 8px; }
+.kvline { margin: 8px 0; font-size: var(--fs-small); }
+
+@media (max-width: 760px) {
+  .cols-main-rev { grid-template-columns: minmax(0, 1fr); }
+  .pathrow { grid-template-columns: minmax(0, 1fr) auto; }
+  .formgrid { grid-template-columns: minmax(0, 1fr); }
+  .gallery { grid-template-columns: minmax(0, 1fr); }
+  .lead.big { font-size: 17px; }
+}
+
+/* ---- Run, Results, Runs and System */
+
+/* a button with its "Show command" link under it */
+.act { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 2px; min-width: 0; max-width: 100%; }
+.act .showcmd { margin-top: 2px; }
+.act .showcmd .copyline { max-width: min(640px, 80vw); }
+.runline { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; margin-bottom: 8px; }
+.runbtns, .resultbtns { align-items: flex-start; }
+.resultbtns { margin-bottom: 10px; }
+.untilbox .input, .resultbtns .input { display: inline-block; margin: 0 4px; }
+.strips { display: grid; gap: 8px; }
+.strips:empty { display: none; }
+.gpu-strip .gpu-note { flex-basis: 100%; font-size: var(--fs-small); }
+.viewer .thumbs { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+.viewer .thumbs .nopic { aspect-ratio: 16 / 9; }
+.viewer figure img { width: 100%; }
+.slices figure img { cursor: crosshair; }
+.slices figure a img { cursor: zoom-in; }
+.log.events { white-space: pre-wrap; }
+/* Results: one row per action (what it does and its choices, then the button and its command) */
+.actrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; align-items: start;
+  padding: 10px 0; border-top: 1px solid var(--gm1-rule-soft); }
+.panel .cap + .actrow { border-top: 0; padding-top: 2px; }
+.actrow .what b { display: block; color: var(--gm1-text); font-weight: 400; }
+.actrow .what .note { display: block; margin: 2px 0 6px; }
+.actrow > .act { align-items: flex-end; }
+
+@media (max-width: 760px) {
+  .actrow { grid-template-columns: minmax(0, 1fr); }
+  .actrow > .act { align-items: flex-start; }
+  .viewer .thumbs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .act .showcmd .copyline { max-width: calc(100vw - 2 * var(--gutter)); }
+}
+/* a folder path in a panel's caption wraps at any character rather than widening the page */
+.cap .n { overflow-wrap: anywhere; }
+.panel .note code { overflow-wrap: anywhere; }
+/* a sentence that names a folder: a long path breaks inside the panel, not past it (400 px) */
+.note.haspath { overflow-wrap: anywhere; }

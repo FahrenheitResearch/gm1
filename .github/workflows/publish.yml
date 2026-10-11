@@ -1,0 +1,79 @@
+name: publish
+
+# Publishes gpuwm-cm1 to PyPI from the GitHub release's own assets.
+#
+# The only automatic trigger is a published release. Nothing here fires on a
+# push or on a tag alone. workflow_dispatch exists to retry a failed upload for
+# an existing release tag.
+#
+# The file name is part of the PyPI trusted publisher binding:
+#   <owner> / <repository> / publish.yml / (no environment)
+# Renaming this file, moving the job, or adding an environment breaks it.
+#
+# No API token or secret is read. The runner proves its identity to PyPI by
+# OIDC (id-token: write).
+#
+# The job does not rebuild. It downloads the exact wheel and sdist bytes that
+# are attached to the release, checks them against the release's SHA256SUMS,
+# and uploads those bytes, so PyPI carries the files that were checked.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish from, for example v0.1.0"
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-gpuwm-cm1-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: download the release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          set -euo pipefail
+          case "$TAG" in
+            v[0-9]*) ;;
+            *) echo "tag $TAG is not vX.Y.Z"; exit 1 ;;
+          esac
+          VERSION="${TAG#v}"
+          mkdir -p dist
+          files=(
+            "gpuwm_cm1-${VERSION}-py3-none-manylinux_2_28_x86_64.whl"
+            "gpuwm_cm1-${VERSION}.tar.gz"
+          )
+          for f in "${files[@]}"; do
+            gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern "$f" --dir dist
+          done
+          gh release download "$TAG" --repo "$GITHUB_REPOSITORY" --pattern SHA256SUMS --dir .
+          # exactly these files and nothing else go to PyPI
+          [ "$(ls dist | wc -l)" = "${#files[@]}" ] || { ls -l dist; echo "unexpected file count"; exit 1; }
+          for f in "${files[@]}"; do
+            want=$(awk -v n="$f" '{p=$2; sub(/^\*/, "", p); sub(/^.*\//, "", p); if (p == n) print $1}' SHA256SUMS)
+            have=$(sha256sum "dist/$f" | cut -d' ' -f1)
+            [ -n "$want" ] || { echo "$f is not in SHA256SUMS"; exit 1; }
+            [ "$want" = "$have" ] || { echo "$f digest $have does not match SHA256SUMS $want"; exit 1; }
+            echo "$have  $f"
+          done
+
+      - name: publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
+          attestations: true
+          print-hash: true

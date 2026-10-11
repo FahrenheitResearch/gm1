@@ -1,0 +1,76 @@
+CM1 namelist: supercell/namelist.input
+Settings not in CM1 r21.1: none
+Sounding: none needed (isnd = 5)
+Result: Runs, with the differences below
+
+Refused (0)
+Not read (0)
+Runs differently from CM1 (37)
+  output_km, output_kh = 1: Not saved: eddy viscosity (kmh, kmv) and eddy diffusivity (khh, khv).
+      GM1's turbulence closure does not keep them between steps
+    Evidence: records/CM1-SUPPORT-MATRIX.csv
+  output_pipert, output_rho, output_thpert = 0: Written in every GM1 frame whatever the namelist
+      says: GM1's resume and viewer read these fields, so a 0 here is not taken
+    Evidence: records/CM1-SUPPORT-MATRIX.csv
+  output_dbz = 1: GM1 has no reflectivity operator inside the Morrison step, so frames carry no dbz.
+      It is computed after each frame with CM1's calc_refl10cm formula on the CPU by gpuwm-cm1
+      cm1out
+    Evidence: records/CM1-SUPPORT-MATRIX.csv
+  statfrq, stat_* (29 words) = 60.0: CM1 writes the &param10 statistics every 60.0 s. GM1 takes them
+      from the history frames, every 900.0 s; it does not compute statistics during the run
+    Evidence: records/CM1-GM1-KEYMAP.json
+  rstfrq = -3600.0: CM1 writes no restart files for a negative rstfrq. GM1 writes one restart at the
+      end (timax = 7200.0 s) so the run can be continued
+    Evidence: records/CM1-CADENCE-MAP.md
+Not yet checked against CM1 (0)
+Not needed on one GPU (21)
+  ppnode = 128: MPI layout
+  procfiles = .false.: per-process output files (MPI)
+  timeformat = 2: time format of CM1's log
+  timestats = 1: CPU timing report
+  run_time = -999.9: wall-clock limit for MPI jobs
+  restart_filetype = 2: CM1's restart-file layout; GM1 restarts have their own
+  restart_format = 1: CM1's restart-file format; GM1 restarts have their own
+  restart_use_theta = .false.: CM1's restart-file contents; a GM1 restart always carries the full
+      state
+  restart_file_* (13) = .false.: CM1's restart-file contents; a GM1 restart always carries the full
+      state
+Same as CM1 (286)
+  ptype = 5: ArWen's WRF-lineage Morrison, not CM1's morrison.F. On CM1's stock supercell, GM1/CM1
+      mature-phase ratios are 0.99-1.05 (CM1 against itself: 0.98-1.00)
+  Grid (15)    records/CM1-SUPPORT-MATRIX.csv
+  Run length, time step, output and restart times (4)    records/CM1-CADENCE-MAP.md
+  Advection, diffusion, sound waves and Coriolis (20)    records/CM1-DYNAMICS-BRANCH-MATRIX.json
+  Lateral, top and bottom boundaries (10)    records/CM1-SUPPORT-MATRIX.csv
+  Turbulence, damping, surface layer and moving frame (28)    records/CM1-SUPPORT-MATRIX.csv
+  Surface (7)    records/CM1-SUPPORT-MATRIX.csv
+  Microphysics (5)    records/GM1-STOCK-DECK-RATIOS.json
+  Radiation settings (radopt = 0: read by neither model) (10)    records/CM1-GM1-KEYMAP.json
+  Initial state (8)    records/CM1-INITIALIZATION-VALIDATION.json
+  Output words (&param9) (57)    records/CM1-SUPPORT-MATRIX.csv
+  Parcels and pressure decomposition (&param13) (20)    records/CM1-LAGRANGIAN-ANALYSIS.md
+  Settings GM1 always runs at the value the namelist has (15)    records/CM1-GM1-KEYMAP.json
+  Settings neither model reads with these choices (75)    records/CM1-GM1-KEYMAP.json
+  Settings for other schemes and outputs, unread or off here (11)    records/CM1-GM1-KEYMAP.json
+
+Output: GrADS (output_format = 1), every time in one file (output_filetype = 1), as the namelist asks.   [Also write netCDF]
+
+GM1 against CM1 r21.1 on CM1's stock supercell namelist (CM1 r21.1 ptype = 5 (morrison.F), eqtset = 2)
+mature-phase means over 3600-7200 s (5 frames); 2026-09-23: GM1 on an RTX 3080; CM1 r21.1 built
+unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU; each CM1 twin adds
+1e-4 K to th0 at the lowest level
+  statistic                                        CM1       GM1  GM1/CM1   twin   band
+  max w                                          57.67     57.94    1.005  1.003   ±10%
+  max 2-5 km updraft helicity                      675       680    1.007  0.993   ±10%
+  updraft area, w > 10 m/s at 5 km                 152       155    1.024  1.001   ±10%
+  max vertical vorticity                        0.0279    0.0292    1.046  0.984   ±10%
+  min w                                         -33.30    -33.20    0.997  1.001   ±15%
+  lowest-level theta' min                        -6.69     -6.61    0.988  1.002   ±15%
+  cold-pool area, theta' < -1 K                  1,861     1,834    0.986  0.998   ±15%
+  rain area > 1 mm                               1,263     1,275    1.010  1.000   ±15%
+  max rain                                        6.78      6.85    1.010  0.999   ±15%
+  max graupel/hail mixing ratio                  13.35     13.44    1.007  0.998   ±15%
+  max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s: worst 1 cells
+  max w at 1800 s within 15 % of CM1's: 29.273 against 29.348 m/s (ratio 0.997)
+  Target: within 5 % on every statistic (about 3 x CM1's twin spread): printed, not a gate.
+  Evidence: the supercell-fidelity comparison of the development repository (not distributed); the rows here are its numbers

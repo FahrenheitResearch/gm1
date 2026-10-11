@@ -1,0 +1,36 @@
+{
+  "schema": "gpuwm-cm1.preset-picture/v1",
+  "caption": "Reflectivity at 1 km, T+1:30:00, from a run at 1 km on an RTX 4090. Simulated. Setting: instability 1, shear 0.",
+  "run": {
+    "name": "your-environment",
+    "preset": "your-environment",
+    "budget": "10m",
+    "grid": {
+      "nx": 120,
+      "ny": 120,
+      "nz": 40,
+      "dx_m": 1000.0,
+      "dz_m": 500.0,
+      "duration_s": 7200.0
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gm1_version": "0.1.0",
+    "gm1_commit": null,
+    "model_time_s": 5400.0,
+    "look": "reflectivity",
+    "quicklook_sha256": "d1f5171515f7656303fdaee79daae14609d57b674a10189fdc2f32ccb9a908d9",
+    "renderer": "gpuwm-cm1 quicklook",
+    "made_utc": "2026-10-02T19:03:18.126+00:00",
+    "environment": {
+      "instability": 1.0,
+      "shear": 0.0,
+      "hodograph": "curved",
+      "cape_target_j_kg": 3000.0,
+      "shear_0_6km_target_m_s": 2.0
+    }
+  },
+  "size": [
+    960,
+    540
+  ]
+}

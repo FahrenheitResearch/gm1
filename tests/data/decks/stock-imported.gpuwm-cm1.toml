@@ -1,0 +1,177 @@
+# gpuwm-cm1 configuration imported from CM1 namelist namelist.input
+# (sha256 3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4) by cm1core.cm1import through records/CM1-GM1-KEYMAP.json.
+# Do not hand-edit: edit the namelist and import it again.
+
+[run]
+dt_s = 6.0
+duration_s = 7200.0
+history_interval_s = 900.0
+iconly = 0
+lane = "cartesian"
+restart_interval_s = 3600.0
+
+[initialization]
+ibalance = 0
+iinit = 1
+iorigin = 2
+irandp = 0
+irst = 0
+isnd = 5
+iwnd = 2
+testcase = 0
+
+[grid]
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+nx = 120
+ny = 120
+nz = 40
+stretch_x = false
+stretch_y = false
+terrain = false
+
+[dynamics]
+adaptive_timestep = false
+alph = 0.6
+beta_plane = 0
+coriolis = 0
+difforder = 6
+dry_mass_correction = true
+fcor_s_inv = 5e-05
+idiff = 0
+kdiff2 = 75.0
+kdiff6 = 0.04
+kdiv = 0.1
+mdiff = 0
+psolver = 3
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+scalar_weno = 2
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+velocity_weno = 0
+weno_order = 5
+
+[boundaries]
+alphobc = 60.0
+bottom = 1
+cstar = 30.0
+east = 2
+north = 2
+nudgeobc = 0
+radiative_order = 4
+roflux = 0
+south = 2
+top = 1
+west = 2
+
+[closures]
+adapt_move_frq = 3600.0
+bbc = 1
+cecd = 3
+cm1setup = 1
+cnst_ust = 0.25
+cnst_znt = 0.16
+cnstcd = 0.001
+cnstce = 0.001
+do_adapt_move = false
+hrdamp = 0
+ipbl = 0
+isfcflx = 0
+moving_frame = true
+ramp_sgs = 1
+ramp_time = 1800.0
+rterm = 0
+set_ust = 0
+set_znt = 0
+sfcmodel = 0
+sgs_model = 1
+t2p_avg = 1
+u_move_m_s = 12.5
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+v_move_m_s = 3.0
+vertical_implicit_diffusion = true
+xhd = 100000.0
+
+[runtime]
+acoustic_substeps = 4
+capacity_profile = "default"
+memory_budget_mib = 5000
+warmup_steps = 0
+
+[physics]
+component = "morrison-mp10"
+cuparam = 0
+equation_set = 2
+ihail = 1
+ndcnst = 250.0
+output_dbz = false
+
+[output]
+output_basestate = 0
+output_buoyancy = 0
+output_coldpool = 0
+output_def = 0
+output_dissten = 0
+output_fallvel = 0
+output_format = 1
+output_interp = 0
+output_lwp = 0
+output_nm = 0
+output_pblten = 0
+output_pi = 0
+output_prs = 1
+output_prspert = 0
+output_psfc = 0
+output_pwat = 0
+output_q = 1
+output_qv = 1
+output_qvbudget = 0
+output_qvpert = 0
+output_radten = 0
+output_rain = 1
+output_rhopert = 0
+output_sfcdiags = 0
+output_sfcflx = 0
+output_sfcparams = 0
+output_th = 1
+output_thbudget = 0
+output_tke = 1
+output_u = 1
+output_ubudget = 0
+output_uinterp = 1
+output_upert = 0
+output_v = 1
+output_vbudget = 0
+output_vinterp = 1
+output_vpert = 0
+output_w = 1
+output_wbudget = 0
+output_winterp = 1
+output_zh = 0
+output_zs = 0
+
+[diagnostics]
+adiabat = 1
+mixed_layer_depth_m = 500.0
+output_cape = false
+output_cin = false
+output_lcl = false
+output_lfc = false
+output_pv = 0
+output_sgs = 0
+output_shs = 1
+output_sps = 1
+output_srs = 0
+output_sus = 1
+output_svs = 1
+output_sws = 1
+output_uh = 1
+output_vort = 1
+parcel_source = 3
+pressure_increment_pa = 200.0
+storm_motion = "bunkers-right"
+tornado_report = false

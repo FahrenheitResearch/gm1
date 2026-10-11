@@ -1,0 +1,96 @@
+# CM1 r21.1's supercell deck on CM1's ptype=3, the classic Thompson scheme.
+# src/param.F:3322-3398 is the axis: eight transported scalars, the same
+# qv,qc,qr,qi,qs,qg mass mixing ratios as ptype=5 and ptype=7 followed by two
+# number concentrations, cloud ice and rain (qname(7)='nci', qname(8)='ncr').
+# ArWen's classic Thompson launcher requires exactly that pair under its own
+# names ni and nr, and physics.component binds the rename by name rather than
+# by position.
+#
+# What changes against cartesian-supercell-morrison-hail.toml:
+#
+#   physics.component = "thompson-mp8"
+#     CM1 ptype=3, ArWen mp_physics=8.  Eight transported scalars rather than
+#     ten.  src/param.F:936-950 does not list ptype=3, so CM1 keeps eqtset=2
+#     for it, which is the source order this lane's large step executes.
+#
+#   physics.ihail is absent, and declaring it is refused
+#     Thompson diagnoses its graupel size distribution from the rime mass and
+#     the local graupel content rather than from a compiled hail/graupel
+#     constant pair, so WRF exposes no hail_opt for mp_physics=8 and ArWen's
+#     RunConfig carries none.  A declared ihail would be sealed into this
+#     run's configuration identity while changing nothing the scheme computed,
+#     so cm1core.dense_ice refuses it by name.
+#
+#   physics.ndcnst is absent
+#     ndcnst is CM1's constant cloud-droplet concentration for ptype=5 only
+#     (src/morrison.F:329).  Thompson's droplet number is its own.
+#
+# VALIDATION STATUS: this component is exposed and has never been run against
+# native CM1 ptype=3.  The run receipt and `gpuwm-cm1 doctor` both carry the
+# unvalidated marker naming exactly that.
+#
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "thompson-mp8"
+equation_set = 2

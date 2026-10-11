@@ -1,0 +1,164 @@
+# A supercell that stays in its own domain.
+#
+# Two 2026-09-13 runs at 100 m and 125 m on 44.8 km domains produced no storm.
+# Their environment was right -- the model measured its own initial state at
+# CAPE 3670 J/kg, CIN -1.9 J/kg, 0-6 km shear 33.0 m/s, 0-1 km SRH
+# 382 m2/s2 -- and their geometry was wrong.  Both declared CM1's translating
+# frame (base.F:2663-2669) at the sounding's Bunkers right-mover motion and
+# left the iinit=1 warm bubble at the domain centre, which is what
+# init3d.F:456-457 assigns.  A warm bubble that has not organised does not
+# move at a mature supercell's motion; it advects with the wind through its
+# own depth.  The measured difference was 15.6 m/s, so the bubble's western
+# flank reached the radiative lateral boundary at minute 16 and the cloud
+# centre left at minute 29, of a storm that needed 30-45 minutes to organise.
+# The run-geometry record of the development repository has the whole arithmetic.
+#
+# This deck fixes the geometry and nothing else.
+#
+# SOUNDING.  This document does not carry a profile; pass it with --sounding.
+#   name    moore-20130520-18z
+#   source  Norman OK (KOUN) 1800 UTC 20 May 2013
+#   sha256  aa7d5afa3701ebf14f46221e532c144b01a94c4bc36baad0275db0c3da79e83d
+#   SBCAPE 4899 J/kg, SBCIN 0 J/kg, 0-6 km bulk shear 26.5 m/s,
+#   0-1 km SRH 137 m2/s2, from that record's own PROVENANCE.md section 6.
+#   The run receipt records sounding_sha256, so the pairing is checkable
+#   after the fact and not only before it.
+#   A frame velocity and a bubble placement are properties of ONE hodograph.
+#   Running this document against a different profile reinstates exactly the
+#   defect it exists to remove -- and the door refuses it by name
+#   (CM1-CARTESIAN-RUN-GEOMETRY) before a GPU is touched.
+#
+# THE FRAME.  base.F:2667 subtracts (u_move_m_s, v_move_m_s) from every
+# base-state wind word once, so the whole integration runs in coordinates
+# that travel at that velocity.  The velocities this profile offers, over this
+# run's own 7200 s, with the storm-track model of
+# src/cm1core/run_geometry.py:
+#
+#   bubble steering wind   ( 11.43,  11.60) m/s   the unorganised plume's own advection
+#   0-6 km mean wind       ( 16.24,  13.03) m/s   the non-deviant motion
+#   Bunkers right mover    ( 17.73,   5.68) m/s   the MATURE motion
+#   Bunkers left  mover    ( 14.75,  20.38) m/s
+#
+# The frame below, (15.25, 8.0) m/s, is the one that minimizes the tracked
+# right mover's excursion across the whole run: it sits between the steering
+# wind the bubble starts with and the motion the mature storm ends with, so
+# the storm drifts one way early and back the other way late instead of
+# leaving in one direction.  It is rounded to a quarter of a metre per second
+# because base.F:2667 carries it as CM1 `real` and cm1.F:3512 integrates the
+# same word into domainlocx/domainlocy; a speed with no exact binary32
+# spelling is refused by name (CM1-CFG-MOVING-FRAME-PRECISION).
+#
+# THE BUBBLE.  initialization.bubble_center_x_m / _y_m are init3d.F:456-457's
+# ric and rjc in domain metres.  Undeclared they are param.F:7408's
+# centerx/centery -- the domain centre, 27200 m here.  Declared at
+# (31300, 21200) m they put the storm's whole frame-relative excursion in the
+# middle of the grid instead of only its start, which is worth about
+# 4 km of upwind runway on x and 6 km on y.
+#
+# WHAT THAT BUYS, from the same arithmetic the door refuses on:
+#   tracked right mover  minimum clearance 20.9 km, needs 17.5 km, never leaves
+#   left mover           leaves at model time 3405 s (57 min)
+# The left member of the split is reported, not admitted on.  Bunkers puts the
+# two members 15 m/s apart, so over two hours they separate by about 54 km per
+# hour of mature life; holding both would need roughly 95 km on the axis they
+# part along, and at this resolution that is past the 2 GiB history payload cap
+# (rust/cm1-state/src/forecast.rs:29).  This run keeps the right mover.
+#
+# THE GRID, priced on the host and not guessed:
+#   544 x 544 x 80 at 100 m / 250 m  =  54.4 x 54.4 km, model top 20 km
+#   23.675 M gridpoints, 81 WSM6 tile blocks at tile_nx = tile_ny = 64
+#   history payload 1,521,459,200 B = 1451 MiB per frame
+#     (cap 2,147,483,648 B; this grid uses 71% of it)
+#   24 frames at 300 s  =  37 GB of history on disk
+#   device memory about 9.9 GB: 0.91 GB driver, context and the
+#     WSM6 component, plus 380 B/gridpoint of model state
+#   step cost about 0.983 s on an NVIDIA GeForce RTX 5090 (31.4 GiB)
+#     14,400 steps for 120 simulated minutes  ->  about 3.9 h
+#     10,800 steps for  90 simulated minutes  ->  about 2.9 h
+#   The step cost is fitted to the measured 400x400x237 and 13x11x237
+#   Cartesian receipts of 2026-09-07, both taken on an RTX 5070 Ti; the RTX
+#   5090 figure is those scaled by the 5090/5070 Ti mean-step ratio measured
+#   in a benchmark receipt.  The run-geometry record names the receipts,
+#   the fit and its residuals.
+#
+# THE GROUND EXERTS STRESS.  bbc = 3 is CM1's semi-slip bottom
+# (README.namelist:574-580): turb.F:4596-4605 puts a real surface stress at
+# k=1 instead of the free-slip copy at turb.F:4536-4545, and the horizontal
+# vorticity that stress generates is the vorticity a near-ground vortex tilts
+# and stretches.  param.F:2073-2088 requires sfcmodel >= 1 with it; cecd = 1
+# is sfcphys.F:120-136's constant drag coefficient and cnstcd = 0.001 is
+# CM1's own namelist value (run/namelist.input:140).  isfcflx = 0 keeps
+# surface heat and moisture fluxes off, exactly as CM1's supercell deck does.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 300.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 7
+iwnd = 0
+# init3d.F:456-457 ric/rjc, in domain metres from the (0, 0) corner.
+bubble_center_x_m = 31300.0
+bubble_center_y_m = 21200.0
+
+[grid]
+nx = 544
+ny = 544
+nz = 80
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 250.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 15.25
+v_move_m_s = 8.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 24576
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

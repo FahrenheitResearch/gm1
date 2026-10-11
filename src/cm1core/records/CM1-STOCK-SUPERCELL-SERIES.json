@@ -1,0 +1,884 @@
+{
+ "schema": "gm1.cm1-stock-supercell-series/v1",
+ "what": "CM1 r21.1's own domain extremes on its stock supercell namelist, for the quick-look time series",
+ "statistics": "the quick-look series definitions (cm1core.quicklook.series): max/min w over the domain, max uh, lowest-level theta' minimum and area below -1 K (km2), max rain (cm)",
+ "match": {
+  "excluded_groups": [
+   "param9",
+   "param10",
+   "param13",
+   "param14",
+   "param15",
+   "param16",
+   "logging",
+   "nssl2mom_params",
+   "nssl_mp_params"
+  ],
+  "excluded_keys": [
+   "timax",
+   "run_time",
+   "tapfrq",
+   "rstfrq",
+   "statfrq",
+   "prclfrq",
+   "irst",
+   "rstnum",
+   "output_format",
+   "output_filetype",
+   "output_interp",
+   "restart_format",
+   "restart_filetype",
+   "restart_reset_frqtim",
+   "restart_file_theta",
+   "restart_use_theta",
+   "restart_file_dbz",
+   "restart_file_th0",
+   "restart_file_prs0",
+   "restart_file_pi0",
+   "restart_file_rho0",
+   "restart_file_qv0",
+   "restart_file_u0",
+   "restart_file_v0",
+   "restart_file_zs",
+   "restart_file_zh",
+   "restart_file_zf",
+   "restart_file_diags",
+   "restart_file_azimavg",
+   "timestats",
+   "terrain_flag",
+   "procfiles",
+   "outunits",
+   "iorigin",
+   "nodex",
+   "nodey",
+   "ppnode",
+   "timeformat",
+   "timestats",
+   "dowriteout",
+   "stopit"
+  ],
+  "excluded_prefixes": [
+   "output_",
+   "restart_"
+  ]
+ },
+ "generator": "tools/generate_stock_supercell_series.py",
+ "references": [
+  {
+   "id": "cm1-ptype5",
+   "ptype": 5,
+   "label": "CM1 r21.1, same namelist",
+   "provenance": "CM1 r21.1 reference: the same namelist, pristine cm1.exe (gfortran -O2 -fopenmp, 8 threads) on a Linux workstation, 2026-09-23; domain extremes at every saved time (900 s)",
+   "evidence": "evidence/oracle/supercell-fidelity/storm-morrison.json table.cm1; decks/cm1-namelist-morrison.input",
+   "series": {
+    "wmax": [
+     [
+      900.0,
+      4.102125
+     ],
+     [
+      1800.0,
+      29.347679
+     ],
+     [
+      2700.0,
+      49.000618
+     ],
+     [
+      3600.0,
+      55.241241
+     ],
+     [
+      4500.0,
+      60.187428
+     ],
+     [
+      5400.0,
+      58.959923
+     ],
+     [
+      6300.0,
+      58.614365
+     ],
+     [
+      7200.0,
+      55.349186
+     ]
+    ],
+    "wmin": [
+     [
+      900.0,
+      -1.349386
+     ],
+     [
+      1800.0,
+      -7.285233
+     ],
+     [
+      2700.0,
+      -24.289488
+     ],
+     [
+      3600.0,
+      -27.611673
+     ],
+     [
+      4500.0,
+      -29.693274
+     ],
+     [
+      5400.0,
+      -34.320644
+     ],
+     [
+      6300.0,
+      -35.475067
+     ],
+     [
+      7200.0,
+      -39.391357
+     ]
+    ],
+    "uh_max": [
+     [
+      900.0,
+      4.680273
+     ],
+     [
+      1800.0,
+      901.335815
+     ],
+     [
+      2700.0,
+      662.911987
+     ],
+     [
+      3600.0,
+      646.530334
+     ],
+     [
+      4500.0,
+      701.21167
+     ],
+     [
+      5400.0,
+      622.162354
+     ],
+     [
+      6300.0,
+      756.860291
+     ],
+     [
+      7200.0,
+      649.631348
+     ]
+    ],
+    "thpert_sfc_min": [
+     [
+      900.0,
+      -0.206563
+     ],
+     [
+      1800.0,
+      -0.325472
+     ],
+     [
+      2700.0,
+      -2.689423
+     ],
+     [
+      3600.0,
+      -4.932312
+     ],
+     [
+      4500.0,
+      -6.350311
+     ],
+     [
+      5400.0,
+      -6.26825
+     ],
+     [
+      6300.0,
+      -7.710815
+     ],
+     [
+      7200.0,
+      -8.194183
+     ]
+    ],
+    "coldpool_area_km2_lt_minus1K": [
+     [
+      900.0,
+      0.0
+     ],
+     [
+      1800.0,
+      0.0
+     ],
+     [
+      2700.0,
+      61.0
+     ],
+     [
+      3600.0,
+      305.0
+     ],
+     [
+      4500.0,
+      745.0
+     ],
+     [
+      5400.0,
+      1581.0
+     ],
+     [
+      6300.0,
+      2690.0
+     ],
+     [
+      7200.0,
+      3982.0
+     ]
+    ],
+    "rain_max_cm": [
+     [
+      900.0,
+      0.0
+     ],
+     [
+      1800.0,
+      0.001897
+     ],
+     [
+      2700.0,
+      1.503955
+     ],
+     [
+      3600.0,
+      3.786917
+     ],
+     [
+      4500.0,
+      6.551866
+     ],
+     [
+      5400.0,
+      7.650731
+     ],
+     [
+      6300.0,
+      7.849705
+     ],
+     [
+      7200.0,
+      8.068657
+     ]
+    ]
+   },
+   "storm_settings": {
+    "nx": 120,
+    "ny": 120,
+    "nz": 40,
+    "dtl": 6.0,
+    "dx": 1000.0,
+    "dy": 1000.0,
+    "dz": 500.0,
+    "ctrlat": 36.68,
+    "ctrlon": -98.35,
+    "day": 15,
+    "dtrad": 300.0,
+    "hour": 21,
+    "minute": 38,
+    "month": 5,
+    "radopt": 0,
+    "second": 0,
+    "year": 2009,
+    "cecd": 3,
+    "cnst_lhflx": 5.2e-05,
+    "cnst_shflx": 0.24,
+    "cnst_ust": 0.25,
+    "cnst_znt": 0.16,
+    "cnstcd": 0.001,
+    "cnstce": 0.001,
+    "initsfc": 1,
+    "isfcflx": 0,
+    "isftcflx": 0,
+    "iz0tlnd": 0,
+    "lu0": 16,
+    "oceanmodel": 0,
+    "oml_gamma": 0.14,
+    "oml_hml0": 50.0,
+    "pertflx": 0,
+    "ramp_sgs": 1,
+    "ramp_time": 1800.0,
+    "season": 1,
+    "set_flx": 0,
+    "set_ust": 0,
+    "set_znt": 0,
+    "sfcmodel": 0,
+    "t2p_avg": 1,
+    "tmn0": 297.28,
+    "tsk0": 299.28,
+    "xland0": 2.0,
+    "les_subdomain_dlen": 200000.0,
+    "les_subdomain_shape": 1,
+    "les_subdomain_trnslen": 5000.0,
+    "les_subdomain_xlen": 200000.0,
+    "les_subdomain_ylen": 200000.0,
+    "do_recycle_e": false,
+    "do_recycle_n": false,
+    "do_recycle_s": false,
+    "do_recycle_w": false,
+    "recycle_cap_loc_m": 4000.0,
+    "recycle_depth_m": 1500.0,
+    "recycle_inj_loc_m": 0.0,
+    "recycle_width_dx": 6.0,
+    "do_lsnudge": false,
+    "do_lsnudge_qv": false,
+    "do_lsnudge_th": false,
+    "do_lsnudge_u": false,
+    "do_lsnudge_v": false,
+    "lsnudge_end": 7200.0,
+    "lsnudge_ramp_time": 600.0,
+    "lsnudge_start": 3600.0,
+    "lsnudge_tau": 1800.0,
+    "adapt_dt": 0,
+    "advwenos": 2,
+    "advwenov": 0,
+    "apmasscon": 1,
+    "axisymm": 0,
+    "bbc": 1,
+    "bcturbs": 1,
+    "cm1setup": 1,
+    "cuparam": 0,
+    "difforder": 6,
+    "doimpl": 1,
+    "ebc": 2,
+    "efall": 0,
+    "eqtset": 2,
+    "hadvordrs": 5,
+    "hadvordrv": 5,
+    "horizturb": 0,
+    "hrdamp": 0,
+    "iautoc": 1,
+    "ibalance": 0,
+    "iconly": 0,
+    "icor": 0,
+    "idiff": 0,
+    "idiss": 1,
+    "ihail": 1,
+    "iinit": 1,
+    "imoist": 1,
+    "imove": 1,
+    "ipbl": 0,
+    "iprcl": 0,
+    "iptra": 0,
+    "irandp": 0,
+    "irbc": 4,
+    "irdamp": 1,
+    "isnd": 5,
+    "itern": 0,
+    "iwnd": 2,
+    "lspgrad": 0,
+    "mdiff": 0,
+    "nbc": 2,
+    "nparcels": 1,
+    "npt": 1,
+    "nudgeobc": 0,
+    "pdtra": 1,
+    "psolver": 3,
+    "ptype": 5,
+    "roflux": 0,
+    "rterm": 0,
+    "sbc": 2,
+    "sgsmodel": 1,
+    "tbc": 1,
+    "tconfig": 1,
+    "testcase": 0,
+    "vadvordrs": 5,
+    "vadvordrv": 5,
+    "wbc": 2,
+    "weno_order": 5,
+    "do_ib": false,
+    "ib_init": 4,
+    "side_cd": 0.4,
+    "top_cd": 0.4,
+    "hurr_rad": 40000.0,
+    "hurr_rotate": 0.0,
+    "hurr_vg": 40.0,
+    "hurr_vgpl": -0.7,
+    "alph": 0.6,
+    "alphobc": 60.0,
+    "csound": 300.0,
+    "cstar": 30.0,
+    "fcor": 0.0,
+    "kdiff2": 75.0,
+    "kdiff6": 0.04,
+    "kdiv": 0.1,
+    "l_h": 100.0,
+    "l_inf": 75.0,
+    "lhref1": 100.0,
+    "lhref2": 1000.0,
+    "ndcnst": 250.0,
+    "nt_c": 250.0,
+    "rdalpha": 0.0033333333333,
+    "umove": 12.5,
+    "v_t": 7.0,
+    "vmove": 3.0,
+    "xhd": 100000.0,
+    "zd": 15000.0,
+    "dx_inner": 1000.0,
+    "dx_outer": 7000.0,
+    "nos_x_len": 40000.0,
+    "stretch_x": 0,
+    "tot_x_len": 120000.0,
+    "dy_inner": 1000.0,
+    "dy_outer": 7000.0,
+    "nos_y_len": 40000.0,
+    "stretch_y": 0,
+    "tot_y_len": 120000.0,
+    "dz_bot": 125.0,
+    "dz_top": 500.0,
+    "str_bot": 0.0,
+    "str_top": 2000.0,
+    "stretch_z": 0,
+    "ztop": 18000.0,
+    "bc_temp": 1,
+    "pr_num": 0.72,
+    "ptc_bot": 300.0,
+    "ptc_top": 250.0,
+    "viscosity": 25.0,
+    "var1": 0.0,
+    "var10": 0.0,
+    "var11": 0.0,
+    "var12": 0.0,
+    "var13": 0.0,
+    "var14": 0.0,
+    "var15": 0.0,
+    "var16": 0.0,
+    "var17": 0.0,
+    "var18": 0.0,
+    "var19": 0.0,
+    "var2": 0.0,
+    "var20": 0.0,
+    "var3": 0.0,
+    "var4": 0.0,
+    "var5": 0.0,
+    "var6": 0.0,
+    "var7": 0.0,
+    "var8": 0.0,
+    "var9": 0.0,
+    "betaplane": 0
+   }
+  },
+  {
+   "id": "cm1-ptype7",
+   "ptype": 7,
+   "label": "CM1 r21.1, same namelist",
+   "provenance": "CM1 r21.1 reference: the same namelist with ptype = 7, pristine cm1.exe (gfortran -O2 -fopenmp, 8 threads) on a Linux workstation, 2026-09-23; domain extremes at every saved time (900 s)",
+   "evidence": "evidence/oracle/supercell-fidelity/storm-wsm6.json table.cm1_ptype7; decks/cm1-namelist-wsm6.input",
+   "series": {
+    "wmax": [
+     [
+      900.0,
+      3.865073
+     ],
+     [
+      1800.0,
+      23.091347
+     ],
+     [
+      2700.0,
+      38.134357
+     ],
+     [
+      3600.0,
+      46.165955
+     ],
+     [
+      4500.0,
+      53.802498
+     ],
+     [
+      5400.0,
+      50.965515
+     ],
+     [
+      6300.0,
+      55.786995
+     ],
+     [
+      7200.0,
+      49.996609
+     ]
+    ],
+    "wmin": [
+     [
+      900.0,
+      -1.29004
+     ],
+     [
+      1800.0,
+      -7.560611
+     ],
+     [
+      2700.0,
+      -13.426203
+     ],
+     [
+      3600.0,
+      -22.27903
+     ],
+     [
+      4500.0,
+      -26.683357
+     ],
+     [
+      5400.0,
+      -27.981586
+     ],
+     [
+      6300.0,
+      -34.824272
+     ],
+     [
+      7200.0,
+      -32.503777
+     ]
+    ],
+    "uh_max": [
+     [
+      900.0,
+      4.103137
+     ],
+     [
+      1800.0,
+      711.43103
+     ],
+     [
+      2700.0,
+      689.240601
+     ],
+     [
+      3600.0,
+      603.687744
+     ],
+     [
+      4500.0,
+      636.876465
+     ],
+     [
+      5400.0,
+      759.064026
+     ],
+     [
+      6300.0,
+      655.72522
+     ],
+     [
+      7200.0,
+      529.093384
+     ]
+    ],
+    "thpert_sfc_min": [
+     [
+      900.0,
+      -0.207368
+     ],
+     [
+      1800.0,
+      -1.439026
+     ],
+     [
+      2700.0,
+      -2.829712
+     ],
+     [
+      3600.0,
+      -5.170563
+     ],
+     [
+      4500.0,
+      -6.030212
+     ],
+     [
+      5400.0,
+      -7.434204
+     ],
+     [
+      6300.0,
+      -9.223724
+     ],
+     [
+      7200.0,
+      -9.354675
+     ]
+    ],
+    "coldpool_area_km2_lt_minus1K": [
+     [
+      900.0,
+      0.0
+     ],
+     [
+      1800.0,
+      10.0
+     ],
+     [
+      2700.0,
+      108.0
+     ],
+     [
+      3600.0,
+      365.0
+     ],
+     [
+      4500.0,
+      858.0
+     ],
+     [
+      5400.0,
+      1684.0
+     ],
+     [
+      6300.0,
+      2793.0
+     ],
+     [
+      7200.0,
+      4145.0
+     ]
+    ],
+    "rain_max_cm": [
+     [
+      900.0,
+      0.0
+     ],
+     [
+      1800.0,
+      0.43312
+     ],
+     [
+      2700.0,
+      3.34459
+     ],
+     [
+      3600.0,
+      6.927496
+     ],
+     [
+      4500.0,
+      9.738807
+     ],
+     [
+      5400.0,
+      10.351744
+     ],
+     [
+      6300.0,
+      10.442375
+     ],
+     [
+      7200.0,
+      10.535524
+     ]
+    ]
+   },
+   "storm_settings": {
+    "nx": 120,
+    "ny": 120,
+    "nz": 40,
+    "dtl": 6.0,
+    "dx": 1000.0,
+    "dy": 1000.0,
+    "dz": 500.0,
+    "ctrlat": 36.68,
+    "ctrlon": -98.35,
+    "day": 15,
+    "dtrad": 300.0,
+    "hour": 21,
+    "minute": 38,
+    "month": 5,
+    "radopt": 0,
+    "second": 0,
+    "year": 2009,
+    "cecd": 3,
+    "cnst_lhflx": 5.2e-05,
+    "cnst_shflx": 0.24,
+    "cnst_ust": 0.25,
+    "cnst_znt": 0.16,
+    "cnstcd": 0.001,
+    "cnstce": 0.001,
+    "initsfc": 1,
+    "isfcflx": 0,
+    "isftcflx": 0,
+    "iz0tlnd": 0,
+    "lu0": 16,
+    "oceanmodel": 0,
+    "oml_gamma": 0.14,
+    "oml_hml0": 50.0,
+    "pertflx": 0,
+    "ramp_sgs": 1,
+    "ramp_time": 1800.0,
+    "season": 1,
+    "set_flx": 0,
+    "set_ust": 0,
+    "set_znt": 0,
+    "sfcmodel": 0,
+    "t2p_avg": 1,
+    "tmn0": 297.28,
+    "tsk0": 299.28,
+    "xland0": 2.0,
+    "les_subdomain_dlen": 200000.0,
+    "les_subdomain_shape": 1,
+    "les_subdomain_trnslen": 5000.0,
+    "les_subdomain_xlen": 200000.0,
+    "les_subdomain_ylen": 200000.0,
+    "do_recycle_e": false,
+    "do_recycle_n": false,
+    "do_recycle_s": false,
+    "do_recycle_w": false,
+    "recycle_cap_loc_m": 4000.0,
+    "recycle_depth_m": 1500.0,
+    "recycle_inj_loc_m": 0.0,
+    "recycle_width_dx": 6.0,
+    "do_lsnudge": false,
+    "do_lsnudge_qv": false,
+    "do_lsnudge_th": false,
+    "do_lsnudge_u": false,
+    "do_lsnudge_v": false,
+    "lsnudge_end": 7200.0,
+    "lsnudge_ramp_time": 600.0,
+    "lsnudge_start": 3600.0,
+    "lsnudge_tau": 1800.0,
+    "adapt_dt": 0,
+    "advwenos": 2,
+    "advwenov": 0,
+    "apmasscon": 1,
+    "axisymm": 0,
+    "bbc": 1,
+    "bcturbs": 1,
+    "cm1setup": 1,
+    "cuparam": 0,
+    "difforder": 6,
+    "doimpl": 1,
+    "ebc": 2,
+    "efall": 0,
+    "eqtset": 1,
+    "hadvordrs": 5,
+    "hadvordrv": 5,
+    "horizturb": 0,
+    "hrdamp": 0,
+    "iautoc": 1,
+    "ibalance": 0,
+    "iconly": 0,
+    "icor": 0,
+    "idiff": 0,
+    "idiss": 1,
+    "ihail": 1,
+    "iinit": 1,
+    "imoist": 1,
+    "imove": 1,
+    "ipbl": 0,
+    "iprcl": 0,
+    "iptra": 0,
+    "irandp": 0,
+    "irbc": 4,
+    "irdamp": 1,
+    "isnd": 5,
+    "itern": 0,
+    "iwnd": 2,
+    "lspgrad": 0,
+    "mdiff": 0,
+    "nbc": 2,
+    "nparcels": 1,
+    "npt": 1,
+    "nudgeobc": 0,
+    "pdtra": 1,
+    "psolver": 3,
+    "ptype": 7,
+    "roflux": 0,
+    "rterm": 0,
+    "sbc": 2,
+    "sgsmodel": 1,
+    "tbc": 1,
+    "tconfig": 1,
+    "testcase": 0,
+    "vadvordrs": 5,
+    "vadvordrv": 5,
+    "wbc": 2,
+    "weno_order": 5,
+    "do_ib": false,
+    "ib_init": 4,
+    "side_cd": 0.4,
+    "top_cd": 0.4,
+    "hurr_rad": 40000.0,
+    "hurr_rotate": 0.0,
+    "hurr_vg": 40.0,
+    "hurr_vgpl": -0.7,
+    "alph": 0.6,
+    "alphobc": 60.0,
+    "csound": 300.0,
+    "cstar": 30.0,
+    "fcor": 0.0,
+    "kdiff2": 75.0,
+    "kdiff6": 0.04,
+    "kdiv": 0.1,
+    "l_h": 100.0,
+    "l_inf": 75.0,
+    "lhref1": 100.0,
+    "lhref2": 1000.0,
+    "ndcnst": 250.0,
+    "nt_c": 250.0,
+    "rdalpha": 0.0033333333333,
+    "umove": 12.5,
+    "v_t": 7.0,
+    "vmove": 3.0,
+    "xhd": 100000.0,
+    "zd": 15000.0,
+    "dx_inner": 1000.0,
+    "dx_outer": 7000.0,
+    "nos_x_len": 40000.0,
+    "stretch_x": 0,
+    "tot_x_len": 120000.0,
+    "dy_inner": 1000.0,
+    "dy_outer": 7000.0,
+    "nos_y_len": 40000.0,
+    "stretch_y": 0,
+    "tot_y_len": 120000.0,
+    "dz_bot": 125.0,
+    "dz_top": 500.0,
+    "str_bot": 0.0,
+    "str_top": 2000.0,
+    "stretch_z": 0,
+    "ztop": 18000.0,
+    "bc_temp": 1,
+    "pr_num": 0.72,
+    "ptc_bot": 300.0,
+    "ptc_top": 250.0,
+    "viscosity": 25.0,
+    "var1": 0.0,
+    "var10": 0.0,
+    "var11": 0.0,
+    "var12": 0.0,
+    "var13": 0.0,
+    "var14": 0.0,
+    "var15": 0.0,
+    "var16": 0.0,
+    "var17": 0.0,
+    "var18": 0.0,
+    "var19": 0.0,
+    "var2": 0.0,
+    "var20": 0.0,
+    "var3": 0.0,
+    "var4": 0.0,
+    "var5": 0.0,
+    "var6": 0.0,
+    "var7": 0.0,
+    "var8": 0.0,
+    "var9": 0.0,
+    "betaplane": 0
+   }
+  }
+ ]
+}

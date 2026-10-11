@@ -1,0 +1,29 @@
+{
+  "schema": "gpuwm-cm1.preset-picture/v1",
+  "caption": "Lowest level \u03b8\u2032 and wind, T+0:30:00, from a run at 500 m on an RTX 4090. Simulated.",
+  "run": {
+    "name": "gust-front",
+    "preset": "gust-front",
+    "budget": "10m",
+    "grid": {
+      "nx": 160,
+      "ny": 160,
+      "nz": 40,
+      "dx_m": 500.0,
+      "dz_m": 500.0,
+      "duration_s": 3600.0
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gm1_version": "0.1.0",
+    "gm1_commit": null,
+    "model_time_s": 1800.0,
+    "look": "surface",
+    "quicklook_sha256": "197333f04449d852e53a36f9adf999cb3cf61b281baffa106f9341e75477f463",
+    "renderer": "gpuwm-cm1 quicklook",
+    "made_utc": "2026-10-02T19:03:02.162+00:00"
+  },
+  "size": [
+    960,
+    540
+  ]
+}

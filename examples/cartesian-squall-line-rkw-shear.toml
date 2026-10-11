@@ -1,0 +1,88 @@
+# CM1's own squall_line deck initialization, which GM1 could not express
+# before: base.F:2286-2311's RKW shear profile (iwnd=1) under the
+# Weisman-Klemp sounding, triggered by init3d.F:1257-1296's two-dimensional
+# line thermal with random perturbations (iinit=8).
+#
+# run/config_files/squall_line/namelist.input: isnd=5, iwnd=1, iinit=8.
+# The named parameter block is init3d.F:1263-1275: a 2 K thermal of 10 km
+# horizontal and 1500 m vertical radius centred at 1500 m, plus 0.20 K of
+# random noise inside it.  That noise needs a seed here, for the same reason
+# irandp does, and the seed is recorded in the receipt.
+#
+# The deterministic envelope of this arm is validated against the real CM1
+# binary at model time zero (a receipt in the development repository); the random
+# component inside the thermal is UNVALIDATED by construction and both the
+# receipt and doctor say so.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 1
+iinit = 8
+bubble_center_x_m = 60000.0
+zc_m = 1500.0
+bhrad_m = 10000.0
+bvrad_m = 1500.0
+bptpert_k = 2.0
+random_line_amplitude_k = 0.20
+random_seed = 20240611
+
+[grid]
+nx = 120
+ny = 120
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

@@ -1,0 +1,29 @@
+{
+  "schema": "gpuwm-cm1.preset-picture/v1",
+  "caption": "Reflectivity at 1 km, T+1:00:00, from a run at 1 km on an RTX 4090. Simulated. Fitted to its 1 km rung for this picture.",
+  "run": {
+    "name": "bmx-2011-04-27",
+    "preset": "bmx-2011-04-27",
+    "budget": "10m",
+    "grid": {
+      "nx": 96,
+      "ny": 96,
+      "nz": 80,
+      "dx_m": 1000.0,
+      "dz_m": 250.0,
+      "duration_s": 7200.0
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gm1_version": "0.1.0",
+    "gm1_commit": null,
+    "model_time_s": 3600.0,
+    "look": "reflectivity",
+    "quicklook_sha256": "9750510a0279c0187e41b115cd27c728d3fd878696963bf8b545ab147c021c1b",
+    "renderer": "gpuwm-cm1 quicklook",
+    "made_utc": "2026-10-02T19:02:59.269+00:00"
+  },
+  "size": [
+    960,
+    540
+  ]
+}

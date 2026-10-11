@@ -1,0 +1,110 @@
+# CM1 r21.1's own supercell deck, on the physics switch GM1 previously could
+# not select.  run/config_files/supercell/namelist.input sets ptype=5 (the
+# Morrison double-moment scheme) with ihail=1 (hail, not graupel), isnd=5 and
+# iwnd=2 (the Weisman-Klemp analytic sounding and its analytic shear),
+# imove=1 with umove=12.5 and vmove=3.0, psolver=3, sgsmodel=1, eqtset=2,
+# bbc=1, radopt=0, ipbl=0, sfcmodel=0, isfcflx=0, advwenos=2, advwenov=0,
+# weno_order=5 and apmasscon=1.  Every one of those is what this document
+# declares; the Cartesian lane's own half-second large step replaces CM1's
+# dtl=6.0, so 7200 s is 14400 large steps.
+#
+# What changes against cartesian-supercell-translating-frame.toml, which is
+# the same storm with GM1's previous physics:
+#
+#   physics.component = "morrison-mp10"
+#     CM1's ptype=5.  Ten transported scalars instead of six: the same
+#     qv,qc,qr,qi,qs,qg mass mixing ratios plus nci,ncs,ncr,ncg number
+#     concentrations (src/param.F:3417-3473).  Cloud-droplet number is not
+#     transported because src/morrison.F:325 fixes INUM=1; GM1 reassigns it
+#     from ndcnst and the prognostic density before every call, exactly as
+#     src/morrison.F:1830-1833 does.
+#
+#   physics.ihail = 1
+#     CM1's own supercell setting (run/config_files/supercell/namelist.input:55,
+#     run/namelist.input:56), and the one GM1 has never been able to select.
+#     It is also what an undeclared physics.ihail binds for this component, so
+#     it is written out here to say what the run executes rather than to change
+#     it.  src/param.F:3407 passes it into GRAUPEL_INIT and
+#     src/morrison.F:407-412,441-444 turns it into the dense-ice fall-speed
+#     and density constants: hail is AG=114.5, BG=0.5, RHOG=900 against
+#     graupel's AG=19.3, BG=0.37, RHOG=400.  On V = A*D**B that is about
+#     3.3x the fall speed at a one-centimetre particle, so precipitation
+#     reaches the ground much closer to the updraft, which moves where the
+#     cold pool forms and what the low-level mesocyclone develops over.
+#
+#   physics.ndcnst = 250.0
+#     CM1's &param3 default and its supercell deck's value, in cm-3.  It is
+#     declared rather than left implicit because the admitted ArWen kernel
+#     writes the conversion as a literal, so any other value is refused by
+#     name instead of being silently ignored.
+#
+# Every wind this run publishes is frame-relative; the ground-relative wind
+# is u_move_m_s + u (init3d.F:32-33), and the running domain-location
+# integral of cm1.F:3512-3513 travels in every history frame.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "morrison-mp10"
+equation_set = 2
+ihail = 1
+ndcnst = 250.0

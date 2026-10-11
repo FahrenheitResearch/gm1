@@ -1,0 +1,100 @@
+# Long-horizon companion: 600 s is 6.75 acoustic transits of the 32 km
+# domain and 16.8 km of mean advection, so the lateral boundary's own
+# effect on the solution is far larger than the two codes' baseline
+# rounding disagreement and the switch-response comparison can resolve it.
+# The horizon is not a fixed number: the boundary horizon (134 s) is the
+# earliest a wrong boundary can be seen, and this is the horizon at which
+# a RIGHT one can be distinguished from a no-op.
+# roflux=1, the outward mass-flux restriction.
+#
+# README.namelist:595-602 states the failure this prevents: without it an
+# open-boundary run can develop a runaway outward mass flux causing
+# domain-total mass loss and spurious pressure falls.  gpuwm-cm1 runs all-open
+# by construction, so it is exposed to exactly that.
+#
+# Term: boundary.  The rescale cannot act until there is net outward flux,
+# which starts when the bubble's signal reaches a boundary, so the horizon is
+# the transit time.  This case runs 280 s -- three transits -- so the
+# accumulated mass difference between the two codes is not one boundary's
+# rounding.
+
+[case]
+name = "boundary-roflux-600"
+term = "boundary"
+notes = """all-open laterals with roflux=1 (src/bc.F:2180-2391) on a 32x32x40
+1 km / 500 m grid, three acoustic transits of the domain."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 600.0
+tapfrq = 60.0
+rstfrq = 600.0
+statfrq = 60.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+hrdamp = 0
+xhd = 100000.0
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+roflux = 1
+nudgeobc = 0
+alphobc = 60.0
+cstar = 30.0
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

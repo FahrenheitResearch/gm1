@@ -1,0 +1,56 @@
+/* "Customize this storm" on the budget screen: a disclosure under the three times, its rows in four groups, and the
+   live line that stays in view while the rows scroll. Only the base's --gm1-* variables, so the skin re-points these
+   too. */
+
+.g-cz-wrap { margin: 0 0 12px; }
+.g-cz-toggle { display: inline-flex; align-items: center; gap: 8px; }
+.g-cz-toggle::before { content: ""; width: 0; height: 0; border-left: 5px solid currentColor;
+  border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform var(--gm1-dur) var(--gm1-ease); }
+.g-cz-toggle.on::before { transform: rotate(90deg); }
+.g-cz-toggle.on { border-color: var(--gm1-accent-line); color: var(--gm1-accent); }
+.g-cz { margin-top: 10px; padding: 0 12px 12px; border: 1px solid var(--gm1-rule); border-radius: var(--gm1-r-md);
+  background: var(--gm1-panel); }
+.g-cz[hidden] { display: none; }
+.g-cz-live { position: sticky; top: 0; z-index: 1; margin: 0 -12px 8px; padding: 9px 12px; background: var(--gm1-panel);
+  border-bottom: 1px solid var(--gm1-rule-soft); color: var(--gm1-accent); font-weight: 600; overflow-wrap: anywhere; }
+.g-cz-live:empty { display: none; }
+.g-cz-intro { margin: 0 0 6px; }
+.g-cz-group { border: 0; margin: 10px 0 0; padding: 0; min-width: 0; }
+.g-cz-group legend.cap { padding: 0; margin: 0 0 4px; }
+.g-cz-row { display: grid; grid-template-columns: minmax(150px, 34%) minmax(0, 1fr); gap: 4px 14px; padding: 8px 0;
+  border-top: 1px solid var(--gm1-rule-soft); align-items: start; }
+.g-cz-row.changed .g-cz-label { color: var(--gm1-title); }
+.g-cz-row.changed .g-cz-label::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: 7px;
+  border-radius: 50%; background: var(--gm1-accent); vertical-align: middle; }
+.g-cz-label { color: var(--gm1-text); padding-top: 4px; overflow-wrap: anywhere; }
+.g-cz-control { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; min-width: 0; }
+.g-cz-control select.input { max-width: 100%; min-width: 180px; }
+.g-cz-control .note { margin: 0; overflow-wrap: anywhere; }
+.g-cz-why { color: var(--gm1-muted); }
+.g-cz-why .linkbtn, .g-cz-live .linkbtn { color: var(--gm1-title); border-bottom: 1px solid var(--gm1-accent-line); }
+.g-cz-clamp { color: var(--gm1-muted); }
+.g-cz-was { color: var(--gm1-muted); font-size: var(--fs-small); }
+.g-cz-seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.g-cz-seg .btn { padding: 4px 12px; }
+/* A greyed choice stays readable: its reason is right under it. */
+.g-cz-seg .btn:disabled { color: var(--gm1-dim); border-color: var(--gm1-rule); }
+.g-cz-seg .btn.on { border-color: var(--gm1-accent-line); color: var(--gm1-accent); background: var(--gm1-accent-dim); }
+.g-cz-slider { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; width: 100%; max-width: 420px; }
+.g-cz-slider input[type="range"] { width: 100%; margin: 2px 0 0; accent-color: var(--gm1-title); }
+.g-cz-value { color: var(--gm1-data); font-size: var(--fs-small); }
+.g-cz-ends { display: flex; justify-content: space-between; gap: 8px; color: var(--gm1-dim); font-size: var(--fs-micro); }
+.g-cz-foot { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gm1-rule-soft); }
+.g-cz-foot .note { margin: 6px 0 0; }
+.g-cz-help { margin: 0 0 12px; }
+.g-cz-help:empty { display: none; }
+.g-cz-help .text { margin: 0 0 8px; }
+.g-cz-help .btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.g-card .btns .g-cz-link { margin-left: 6px; }
+
+@media (max-width: 640px) {
+  .g-cz { padding: 0 10px 10px; }
+  .g-cz-live { margin: 0 -10px 8px; padding: 8px 10px; }
+  .g-cz-row { grid-template-columns: minmax(0, 1fr); }
+  .g-cz-label { padding-top: 0; }
+  .g-cz-control select.input { min-width: 0; width: 100%; }
+}

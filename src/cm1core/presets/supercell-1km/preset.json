@@ -1,0 +1,45 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "supercell-1km",
+  "order": 1,
+  "group": "start",
+  "name": "Supercell, quick look, 1 km",
+  "line": "One rotating thunderstorm on a coarse grid. About 2 minutes on most GPUs.",
+  "budget": "10m",
+  "note": "CM1's own supercell case. On it GM1 matches CM1 r21.1 within 5% on ten storm measures (measured).",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 64
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "storm_appears": {
+    "from_s": 1200.0,
+    "to_s": 1800.0,
+    "basis": "measured: on the 1 km grid the first echo above 5 dBZ is in the column at T+0:20:00 and at 1 km at T+0:30:00; on the 250 m grid there is none at T+0:15:00 and both at T+0:30:00 (CM1's warm bubble)"
+  }
+}

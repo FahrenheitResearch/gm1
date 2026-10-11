@@ -1,0 +1,18 @@
+{
+ "_about": "A 32 GB RTX 5090 with nothing on it",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-33333333-4444-5555-6666-777777777777",
+   "name": "NVIDIA GeForce RTX 5090",
+   "memory.total": 32607,
+   "memory.used": 2,
+   "memory.free": 32155,
+   "memory.reserved": 450,
+   "compute_cap": "12.0",
+   "driver_version": "610.43.02",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

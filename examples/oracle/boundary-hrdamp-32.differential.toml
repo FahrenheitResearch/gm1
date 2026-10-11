@@ -1,0 +1,96 @@
+# hrdamp=1 with xhd=8000 m: the lateral Rayleigh sponge.
+#
+# src/param.F:8687-8802 builds a four-side cosine taper into tauf, and since
+# cm1r19.6 it acts on w only.  CM1's own hurricane decks use it.  param.F:725
+# then forces hrdamp to equal irdamp whenever both are on, so this case
+# declares irdamp=1 and hrdamp=1 together, as CM1 would run them.
+#
+# Term: damping.  The sponge's own timescale is 1/rdalpha = 300 s, but the
+# sponge only acts where w is nonzero inside xhd of a boundary, so the run must
+# first be long enough for the bubble's signal to reach the sponge: one
+# transit, 89 s.  280 s is three transits and 0.93 e-foldings of the damper,
+# which is a factor of 2.5 in w inside the sponge.
+#
+# xhd=8000 m is a quarter of the 32 km side, so the sponge covers a quarter of
+# the domain from each edge and param.F:8689's half-domain stop does not fire.
+
+[case]
+name = "boundary-hrdamp-32"
+term = "damping"
+notes = """all-open laterals with hrdamp=1 and xhd=8000 m on a 32x32x40
+1 km / 500 m grid; the lateral sponge acts on w only."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 280.0
+tapfrq = 20.0
+rstfrq = 280.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+hrdamp = 1
+xhd = 8000.0
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+roflux = 0
+nudgeobc = 0
+alphobc = 60.0
+cstar = 30.0
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

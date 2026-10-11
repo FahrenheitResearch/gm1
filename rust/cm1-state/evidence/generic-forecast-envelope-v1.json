@@ -1,0 +1,75 @@
+{
+  "artifact_execution": {
+    "example": "cargo run --release --example forecast_fixture -- NEW.cm1fcp NEW.cm1fhs",
+    "history_write_read_receipts_equal": true,
+    "checkpoint_write_read_receipts_equal": true
+  },
+  "checkpoint": {
+    "arrays": 2,
+    "artifact_nbytes": 2541,
+    "artifact_sha256": "579687b14f161bd489653c2ee440f06f48856ca9c3fc8dc85d73775655a517d5",
+    "capability": "caller-contracted-complete-step-forecast-state",
+    "component_blobs": 1,
+    "contract_sha256": "3cb0542e0b118b1a1f4c0bfeabf74c48b761f68dc1f66d2e7be077f7f88be430",
+    "dt_f64_bits": "4018000000000000",
+    "header_sha256": "babf32242ef390088fb61a67afe75f4877fa63861ce2a4e19c007731dc494c81",
+    "model_time_f64_bits": "40ac200000000000",
+    "payload_nbytes": 37,
+    "payload_sha256": "86cc5e767ca0a06d3992c1485fc0556acb03decba756f787bd8931f5977a79b2",
+    "scheduler_scalars": 4,
+    "schema": "gpuwm-cm1.forecast-checkpoint/generic-v1",
+    "step": 600
+  },
+  "claim_limit": "This evidence proves deterministic caller-contracted Rust host serialization, strict readback, opaque component bytes, and no-overwrite publication. It does not prove that a live CM1 forecast supplied a semantically complete inventory, copy state from CUDA, restore device allocations, or pass uninterrupted/resumed trajectory identity.",
+  "history": {
+    "arrays": 2,
+    "artifact_nbytes": 2521,
+    "artifact_sha256": "7acbcfcc8ca41901e852968140d1a1453667cee33213e553536a5dce026f68f9",
+    "capability": "caller-contracted-observational-forecast-frame",
+    "component_blobs": 1,
+    "contract_sha256": "3cb0542e0b118b1a1f4c0bfeabf74c48b761f68dc1f66d2e7be077f7f88be430",
+    "dt_f64_bits": "4018000000000000",
+    "header_sha256": "a11510dcdf97745a35d32c516e225abb81fe41e54c9cfde49e7166f017e8cdc8",
+    "model_time_f64_bits": "40ac200000000000",
+    "payload_nbytes": 37,
+    "payload_sha256": "86cc5e767ca0a06d3992c1485fc0556acb03decba756f787bd8931f5977a79b2",
+    "scheduler_scalars": 4,
+    "schema": "gpuwm-cm1.forecast-history/generic-v1",
+    "step": 600
+  },
+  "live_state_wiring": "deferred-no-cuda-device-copy-or-forecast-driver-restore",
+  "negative_controls": [
+    "missing-extra-duplicate-array-scalar-component",
+    "array-shape-drift",
+    "scheduler-scalar-type-drift",
+    "component-schema-and-size-drift",
+    "contract-identity-drift",
+    "payload-bit-corruption",
+    "noncanonical-header",
+    "wrong-artifact-kind",
+    "existing-target-no-overwrite",
+    "invalid-clock"
+  ],
+  "schema": "gpuwm-cm1.generic-forecast-envelope-evidence/v1",
+  "sealed_artifacts": {
+    "note": "The two envelopes this record describes are committed beside it and compiled into the test binary by rust/cm1-state/src/forecast.rs, which checks these hashes, reads each artifact back, and re-encodes what it holds byte for byte. They were published before the payload ceiling was raised from 2 GiB, so they are also the compatibility fixture for that change.",
+    "checkpoint": {
+      "path": "generic-forecast-envelope-v1.cm1fcp",
+      "nbytes": 2541,
+      "sha256": "579687b14f161bd489653c2ee440f06f48856ca9c3fc8dc85d73775655a517d5"
+    },
+    "history": {
+      "path": "generic-forecast-envelope-v1.cm1fhs",
+      "nbytes": 2521,
+      "sha256": "7acbcfcc8ca41901e852968140d1a1453667cee33213e553536a5dce026f68f9"
+    }
+  },
+  "startup_compatibility": {
+    "checkpoint_magic": "CM1CKP1\\0",
+    "forecast_checkpoint_magic": "CM1FCP1\\0",
+    "forecast_history_magic": "CM1FHS1\\0",
+    "history_magic": "CM1HST1\\0",
+    "result": "separate magic and schema; existing startup artifacts unchanged"
+  },
+  "status": "passed-bounded-generic-rust-forecast-envelope"
+}

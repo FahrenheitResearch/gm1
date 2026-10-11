@@ -1,0 +1,93 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "line-open",
+  "order": 40,
+  "group": "other",
+  "name": "A line of storms (open ends)",
+  "line": "A line of warm bubbles grows into a line of storms with a pool of cold air behind it.",
+  "budget": "10m",
+  "note": "CM1's squall-line environment and moving frame with open sides: the ends of the line feel the sides. The repeating-sides squall line comes once those sides are checked against CM1. The area is not made smaller than 120 km, because CM1's parcel grid covers 120 km; the fit makes the grid coarser or the storm shorter instead.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/squall_line/namelist.input",
+    "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 300,
+        "to": 200,
+        "why": "a 200 km long area"
+      },
+      {
+        "key": "ny",
+        "from": 60,
+        "to": 120,
+        "why": "a 120 km wide area with open sides"
+      },
+      {
+        "key": "sbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides, which GM1 runs as CM1 does (repeating sides are not yet checked)"
+      },
+      {
+        "key": "nbc",
+        "from": 1,
+        "to": 2,
+        "why": "open south and north sides"
+      },
+      {
+        "key": "iinit",
+        "from": 8,
+        "to": 3,
+        "why": "a line of warm bubbles starts the storms (CM1's line of bubbles, no random noise)"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 7.5,
+        "why": "the view moves east at 7.5 m/s, about as fast as this line moves (measured on the RTX 3080: in CM1's 12.5 m/s frame it drifted west out of view)"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "iprcl",
+        "from": 0,
+        "to": 1,
+        "why": "follow air parcels, so Results can show air rising into the storm"
+      },
+      {
+        "key": "nparcels",
+        "from": 1,
+        "to": 36000,
+        "why": "CM1's own parcel grid: 60 x 60 across, every 2 km, and 10 levels, every 1 km"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 120
+  },
+  "min_duration_s": 5400,
+  "shrink": "both",
+  "gm1_settings": {
+    "initialization.bubble_center_x_m": 100000.0,
+    "initialization.bubble_center_y_m": 60000.0
+  },
+  "gm1_settings_why": "The line of warm bubbles starts in the middle of the 200 km area, 100 km from its west side, so it stays in view. The setting goes in pairs, so it also places the first of the three bubbles 60 km from the south side, with the other two 30 and 60 km north of it (CM1 puts them 3, 33 and 63 km from the south side). CM1 keeps the bubbles' place in its code, not the namelist, so this is a GM1 setting."
+}

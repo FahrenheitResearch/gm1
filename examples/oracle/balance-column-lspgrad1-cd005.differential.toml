@@ -1,0 +1,99 @@
+# No-storm balance column for a 100 m El Reno storm deck's lower boundary and rotation.
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+# The archived CM1 r21.1 column the lspgrad=1 port quotes (a CM1 run kept
+# outside this repository, variant A: 0-1 km SRH 232.4 -> 224.5 m2/s2 in
+# 5400 s) with two changes:
+# cnstcd = 0.005, that deck's drag (cecd=1, z0 = 0.035 m, sfcphys.F:120-136),
+# and tconfig left at the distributed deck's 1, which is the value GM1 pins
+# (records/CM1-GM1-KEYMAP.json: tconfig has no GM1 key).  Everything else is
+# that column: 8x8x115 periodic, 100 m / stretched 20-280 m levels under
+# 18160 m, Morrison with hail, semi-slip bbc=3 with sfcmodel=1 and no surface
+# fluxes, icor=1 lspgrad=1 at f = 1e-4, a (8.5, 0.5) m/s frame, no bubble,
+# and the Coffer & Parker (2017) VORTEX2 tornadic composite sounding whose
+# rows are the model's scalar levels ($HARNESS/balance_column_differential.py
+# reads its heights from input_sounding).
+#
+# Reduce with $HARNESS/balance_column_differential.py --cm1-variant <cm1>
+# --gm1-history <gm1 history>: 0-500 m and 0-1 km SRH within 1 m2/s2 of CM1
+# at every output time, lowest ten levels' mean u, v within 0.05 m/s.
+
+[case]
+name = "balance-column-lspgrad1-cd005"
+term = "metric"
+notes = """No-storm 8x8x115 periodic column, 100 m horizontal spacing,
+stretched 20 m to 280 m levels under 18160 m; Morrison with hail; semi-slip
+bbc=3, sfcmodel=1, isfcflx=0, cecd=1, cnstcd=0.005; icor=1, lspgrad=1,
+fcor=1e-4; frame (8.5, 0.5) m/s; 5400 s, frames every 600 s."""
+
+[cm1]
+nx = 8
+ny = 8
+nz = 115
+dx = 100.0
+dy = 100.0
+dz = 100.0
+dtl = 0.5
+timax = 5400.0
+tapfrq = 600.0
+rstfrq = 5400.0
+statfrq = 600.0
+
+psolver = 3
+adapt_dt = 0
+advwenov = 0
+sgsmodel = 1
+# GM1 runs no SGS startup ramp (sgs_startup_ramp.py has no TOML key), so the
+# CM1 side is ramp_sgs = 0 like the archived column; with CM1's default
+# ramp_sgs = 1 the two differ by 30 m2/s2 of 0-1 km SRH at 600 s for that
+# reason alone.  The translator reports it as an unrepresentable override.
+ramp_sgs = 0
+eqtset = 2
+
+irdamp = 1
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 1
+ebc = 1
+sbc = 1
+nbc = 1
+bbc = 3
+tbc = 1
+
+icor = 1
+lspgrad = 1
+fcor = 1.0e-4
+imove = 1
+umove = 8.5
+vmove = 0.5
+
+isnd = 7
+iwnd = 0
+iinit = 0
+irandp = 0
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 1
+ztop = 18160.0
+str_bot = 300.0
+str_top = 12000.0
+dz_bot = 20.0
+dz_top = 280.0
+
+isfcflx = 0
+sfcmodel = 1
+cecd = 1
+cnstcd = 0.005
+
+ihail = 1
+ndcnst = 250.0
+
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "morrison-mp10"
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 2048
+"runtime.capacity_profile" = "default"

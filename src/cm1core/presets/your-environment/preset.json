@@ -1,0 +1,99 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "your-environment",
+  "order": 19,
+  "group": "explore",
+  "name": "Make your own environment",
+  "line": "Pick how unstable the air is and how much the wind changes with height; see which storm it makes.",
+  "budget": "10m",
+  "note": "Temperature and moisture follow Weisman and Klemp (1982), CM1's own analytic sounding, with the moisture near the ground set for your instability; the wind is calm at the ground and changes by your shear over the lowest 6 km, turning as in CM1's supercell case. The view follows the storm your air makes. The area is not made smaller than 120 km, because CM1's parcel grid covers 120 km; the fit makes the grid coarser or the storm shorter instead.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "isnd",
+        "from": 5,
+        "to": 7,
+        "why": "the sounding is the file input_sounding beside this namelist"
+      },
+      {
+        "key": "iwnd",
+        "from": 2,
+        "to": 0,
+        "why": "the wind comes from the sounding file (CM1 sets iwnd = 0 with isnd = 7)"
+      },
+      {
+        "key": "iprcl",
+        "from": 0,
+        "to": 1,
+        "why": "follow air parcels, so Results can show air rising into the storm"
+      },
+      {
+        "key": "nparcels",
+        "from": 1,
+        "to": 36000,
+        "why": "CM1's own parcel grid: 60 x 60 across, every 2 km, and 10 levels, every 1 km"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 7.625,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 3.0,
+        "to": -0.75,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 120
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "card": "environment",
+  "gm1_settings": {
+    "initialization.bubble_center_x_m": 6300.0,
+    "initialization.bubble_center_y_m": -7000.0
+  },
+  "gm1_settings_why": "The warm bubble that starts the storm sits 6.3 km east and 7 km south of the centre, the storm-track check's recommended place for this sounding, so the storm keeps the most room to every side. CM1 keeps the bubble in its code, not the namelist, so this is a GM1 setting.",
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "4d1d5c91d6b1e953c5344804ff8a25fd2e7b1aed9a6ae28add731b680a4f40b4",
+    "source": "gpuwm-cm1 preset environment --instability 0.5 --shear 0.5 --hodograph curved",
+    "rights": "written by GM1 (gpuwm-cm1 preset environment) from Weisman and Klemp's (1982) formulas as CM1 r21.1 base.F transcribes them",
+    "environment": {
+      "schema": "gpuwm-cm1.environment/v1",
+      "instability": 0.5,
+      "shear": 0.5,
+      "hodograph": "curved",
+      "cape_target_j_kg": 1650.0,
+      "shear_0_6km_target_m_s": 21.0,
+      "boundary_layer_cap_g_kg": 13.5745,
+      "sha256": "4d1d5c91d6b1e953c5344804ff8a25fd2e7b1aed9a6ae28add731b680a4f40b4",
+      "method": "Weisman and Klemp (1982) temperature and moisture as CM1 r21.1 base.F isnd = 5 builds them, with the boundary-layer mixing-ratio cap set for the CAPE target; wind calm at the ground with the chosen 0-6 km shear (curved: CM1's iwnd = 2 shape, scaled)"
+    }
+  }
+}

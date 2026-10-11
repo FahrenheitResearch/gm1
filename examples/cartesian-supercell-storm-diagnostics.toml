@@ -1,0 +1,126 @@
+# The same supercell attempt, with CM1's storm-diagnostic output turned on.
+#
+# This profile exists to show the &param9 door: it is
+# cartesian-supercell-attempt.toml with an [output] table, and nothing else
+# differs.  Every word below is CM1 r21.1's own namelist name from
+# run/namelist.input:213-278, and each selects the fields writeout.F selects.
+#
+# What is turned on below is what you look at to say whether a run made a
+# supercell and whether it made a tornado:
+#
+#   output_uh    integrated 2-5 km AGL updraft helicity (misclibs.F:1417).
+#                THE operational supercell/tornado proxy.  Its run-long
+#                maximum is output_shs, which is on by default.
+#   output_vort  xvort/yvort/zvort at scalar points (misclibs.F:1540).  The
+#                lowest level of zvort is where a tornado shows up; the
+#                run-long maximum of the same quantity at that level is
+#                output_svs, on by default.
+#   output_pv    potential vorticity, for the balanced dynamics.
+#   output_cape  and output_cin / output_lcl / output_lfc: getcape.F per
+#                column, so the frame carries the environment the storm is
+#                working on as well as the storm.
+#
+# The default selection already carries reflectivity (output_dbz), the
+# surface accumulation (output_rain) and all seven run-long surface swaths,
+# which are the damage-track fields.
+#
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 220
+ny = 220
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+
+[output]
+# Column moisture, for the water budget at a glance (writeout.F 'pwat','lwp').
+output_pwat = 1
+output_lwp  = 1
+
+# CM1 run/namelist.input:265-268 ships these off; getcape.F is one column
+# routine and the four fields are 2-D planes.  They are declared here rather
+# than in [output] because this table also carries getcape.F's own parcel
+# controls, which decide what the four planes mean.
+[diagnostics]
+# CM1 run/namelist.input:252-255 ships the rotation diagnostics and the seven
+# solve3.F swaths off; this deck turns the three rotation fields on.  The
+# family is all-or-none, so the swaths are named too.
+output_vort = 1
+output_pv = 1
+output_uh = 1
+output_sws = 0
+output_svs = 0
+output_sps = 0
+output_srs = 0
+output_sgs = 0
+output_sus = 0
+output_shs = 0
+tornado_report = false
+output_cape = true
+output_cin = true
+output_lcl = true
+output_lfc = true
+# getcape.F:65-68, :73-77, :70, :60 -- CM1's own shipped values.
+parcel_source = 3
+adiabat = 1
+mixed_layer_depth_m = 500.0
+pressure_increment_pa = 200.0
+storm_motion = "bunkers-right"

@@ -1,0 +1,452 @@
+{
+ "file": "cm1out_pdata.nc",
+ "data_model": "NETCDF4_CLASSIC",
+ "dimensions": [
+  [
+   "xh",
+   36000,
+   false
+  ],
+  [
+   "yh",
+   1,
+   false
+  ],
+  [
+   "zh",
+   1,
+   false
+  ],
+  [
+   "time",
+   2,
+   true
+  ]
+ ],
+ "global_attributes": [
+  [
+   "CM1 version",
+   {
+    "type": "str",
+    "value": "cm1r21.1"
+   }
+  ],
+  [
+   "Conventions",
+   {
+    "type": "str",
+    "value": "CF-1.7"
+   }
+  ],
+  [
+   "missing_value",
+   {
+    "type": "float32",
+    "value": -999999.875
+   }
+  ]
+ ],
+ "variables": [
+  {
+   "name": "xh",
+   "dimensions": [
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "west-east location ... actually, really parcel ID number",
+    "units": "degree_east"
+   },
+   "float32_words_first4": [
+    "3f800000",
+    "40000000",
+    "40400000",
+    "40800000"
+   ],
+   "size": 36000
+  },
+  {
+   "name": "yh",
+   "dimensions": [
+    "yh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "south-north location",
+    "units": "degree_north"
+   },
+   "float32_words_first4": [
+    "00000000"
+   ],
+   "size": 1
+  },
+  {
+   "name": "zh",
+   "dimensions": [
+    "zh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "height",
+    "units": "m"
+   },
+   "float32_words_first4": [
+    "00000000"
+   ],
+   "size": 1
+  },
+  {
+   "name": "time",
+   "dimensions": [
+    "time"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "time",
+    "units": "seconds",
+    "axis": "T"
+   },
+   "float32_words_first4": [
+    "00000000",
+    "42700000"
+   ],
+   "size": 2
+  },
+  {
+   "name": "x",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "x position",
+    "units": "m"
+   }
+  },
+  {
+   "name": "y",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "y position",
+    "units": "m"
+   }
+  },
+  {
+   "name": "z",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "z position (above sea level)",
+    "units": "m"
+   }
+  },
+  {
+   "name": "u",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "u velocity",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "v",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "v velocity",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "w",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "w velocity",
+    "units": "m/s"
+   }
+  },
+  {
+   "name": "mtime",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "model time (seconds since beginning of s",
+    "units": "s"
+   }
+  },
+  {
+   "name": "th",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "potential temperature",
+    "units": "K"
+   }
+  },
+  {
+   "name": "t",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "temperature",
+    "units": "K"
+   }
+  },
+  {
+   "name": "prs",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "pressure",
+    "units": "Pa"
+   }
+  },
+  {
+   "name": "qv",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "water vapor mixing ratio",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qc",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qc",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qr",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qr",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qi",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qi",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qs",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qs",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qg",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "qg",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "nci",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "nci",
+    "units": "1/kg"
+   }
+  },
+  {
+   "name": "ncs",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncs",
+    "units": "1/kg"
+   }
+  },
+  {
+   "name": "ncr",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncr",
+    "units": "1/kg"
+   }
+  },
+  {
+   "name": "ncg",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "ncg",
+    "units": "1/kg"
+   }
+  },
+  {
+   "name": "tke",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "subgrid tke",
+    "units": "m^2/s^2"
+   }
+  },
+  {
+   "name": "dbz",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "reflectivity",
+    "units": "dBZ"
+   }
+  },
+  {
+   "name": "b",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "buoyancy",
+    "units": "m/s/s"
+   }
+  },
+  {
+   "name": "vpg",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical perturbation pressure gradient",
+    "units": "m/s/s"
+   }
+  },
+  {
+   "name": "zvort",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "vertical vorticity",
+    "units": "1/s"
+   }
+  },
+  {
+   "name": "rho",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "dry-air density",
+    "units": "kg/m^3"
+   }
+  },
+  {
+   "name": "qsl",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "saturation mixing ratio wrt liquid",
+    "units": "kg/kg"
+   }
+  },
+  {
+   "name": "qsi",
+   "dimensions": [
+    "time",
+    "xh"
+   ],
+   "dtype": "float32",
+   "attributes": {
+    "long_name": "saturation mixing ratio wrt ice",
+    "units": "kg/kg"
+   }
+  }
+ ]
+}

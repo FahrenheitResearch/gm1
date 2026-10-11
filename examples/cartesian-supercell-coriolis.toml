@@ -1,0 +1,120 @@
+# CM1's own supercell deck, with the Coriolis term this port could not reach
+# until now.
+#
+# icor.  Seventeen of CM1 r21.1's twenty-three shipped decks set icor=1;
+# run/config_files/supercell/namelist.input:58 is one of the six that do not,
+# because at supercell scale over two hours the Earth's rotation does little
+# to the storm and icor=0 makes the translating frame an exact change of
+# variable.  This document turns it on anyway, at f = 1e-4 1/s (about 43.4
+# north), because the point of a configuration is to be a choice.
+#
+# The interaction with the moving frame is not free.  base.F:2667 subtracts
+# umove/vmove from every base-state wind once, so every wind this run carries
+# is frame-relative; solve2.F:645,647 add the frame velocity back inside the
+# Coriolis term so the acceleration is still a function of the ground-relative
+# wind.  That is ported exactly, and measured: see
+# a CM1 word record in the development repository (coriolis-fplane-moving-32).
+# dynamics.beta_plane = 1 is refused with a nonzero frame, because
+# solve2.F:667-672 omits that add-back and the run would carry a steady
+# spurious acceleration of fcor*|vmove| for its whole length.
+#
+# lspgrad = 1.  With icor=1 alone the base-state wind itself feels
+# fcor x (V0 + Vmove): nothing in the sounding balances it, so the whole
+# hodograph turns inertially while the storm grows.  CM1 r21.1 measured this,
+# no storm, in an 8x8x115 periodic column under a tornadic-composite sounding
+# with semi-slip drag, f = 1e-4 and a (8.5, 0.5) m/s frame: 0-1 km SRH went
+# 232.4 -> 171.9 m2/s2 in 5400 s with icor=1 lspgrad=0, and 232.4 -> 224.5
+# with icor=1 lspgrad=1 (the residual is the drag).  lspgrad=1 is
+# solve1.F:590-612: after the Rayleigh assignment it subtracts
+# fcor x (V0 + Vmove), so the Coriolis term acts on V - V0 only.  It is
+# refused without icor=1 on the f plane, beside an adaptive moving domain,
+# and for 2/3/4, whose ug/vg, gradient-wind or ulspg profiles this lane's
+# closure does not carry.  The run receipt's dynamics_validation names what it has not yet been
+# checked against.
+#
+# adapt_dt is NOT set here, and cannot be while this deck translates.  The
+# controller gives every large step its own length (misclibs.F:785), and the
+# published domain location's exactness proof --
+# rust/cm1-state/src/domain_location.rs, which checks cm1.F:3512's running sum
+# against completed_steps*dt*umove -- needs one dt for the whole run.  The
+# configuration refuses the pair by name rather than spending GPU time on a
+# run the history publisher stops partway through.  None of CM1's own 23
+# shipped decks sets both either: imove=1 appears in supercell and
+# squall_line, and both set adapt_dt=0.  For a worked adaptive run see
+# examples/oracle/adaptive-timestep-32.differential.toml.
+#
+# What the receipt will tell you: `dynamics_validation` names every CM1
+# selector this run used and what each rests on, and `adaptive_timestep`
+# carries the step the controller chose at every large step and why it was
+# limited.  `gpuwm-cm1 doctor` prints the same register.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 6.0
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 60
+ny = 60
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+coriolis = 1
+beta_plane = 0
+fcor_s_inv = 1.0e-4
+lspgrad = 1
+alph = 0.60
+kdiv = 0.10
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+
+[runtime]
+acoustic_substeps = 4
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

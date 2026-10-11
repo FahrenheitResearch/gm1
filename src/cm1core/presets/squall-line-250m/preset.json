@@ -1,0 +1,80 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "squall-line-250m",
+  "order": 49,
+  "group": "other",
+  "name": "Squall line, 250 m",
+  "line": "The line at 250 m: single storm cells and waves along the gust front.",
+  "budget": "1h",
+  "note": "Its random starting noise comes from GM1's own random numbers, so the details differ from CM1's as they would with another seed.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/squall_line/namelist.input",
+    "sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 300,
+        "to": 1200,
+        "why": "the same 300 km length at 250 m"
+      },
+      {
+        "key": "ny",
+        "from": 60,
+        "to": 240,
+        "why": "the same 60 km width at 250 m"
+      },
+      {
+        "key": "nz",
+        "from": 40,
+        "to": 80,
+        "why": "80 levels of 250 m: the same 20 km depth at twice the vertical detail (CM1's file has 40 of 500 m)"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dz",
+        "from": 500.0,
+        "to": 250.0,
+        "why": "250 m levels"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 1.5,
+        "why": "the time step scaled with the grid spacing, as CM1 advises (6 s at 1 km)"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      }
+    ]
+  },
+  "ladder_m": [
+    500,
+    1000
+  ],
+  "min_width_km": {
+    "default": 30
+  },
+  "min_duration_s": 7200,
+  "shrink": "repeating-first",
+  "min_along_repeating_km": 30
+}

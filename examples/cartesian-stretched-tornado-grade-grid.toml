@@ -1,0 +1,141 @@
+# A tornado-scale vortex lives in the lowest few hundred metres, and it is
+# concentrated from vorticity generated at the ground.  Resolving it needs
+# tens-of-metres spacing in all three directions down there, and a model top
+# high enough to hold a supercell's anvil.  A uniform grid cannot do both: 20 m
+# layers under a 15 km top would be 750 levels.
+#
+# CM1 r21.1 solves this with the Wilhelmson-Chen analytic stretching function,
+# param.F:7819-7953 (stretch_z=1).  Three segments:
+#
+#   * param.F:7925-7927, k=1..nk1+1:  uniform dz_bot up to str_bot.
+#     nk1 = round(str_bot/dz_bot) = round(200/20) = 10 layers of exactly 20 m,
+#     so the first scalar level zh(1) is 10 m above ground.
+#   * param.F:7928-7931, k=nk1+1..nk1+nk2+1:  a quadratic in the layer index
+#     with c1 and c2 from param.F:7881-7882, thickening from 20 m to 320 m
+#     across str_bot..str_top.  The nominal dz, the mean of dz_bot and dz_top, is 170 m and
+#     nk2 = nk-(nk1+nk3) = 40, so nk2*nominal_dz = 6800 m is exactly
+#     str_top-str_bot and param.F:7828-7877's feasibility check passes.
+#   * param.F:7932-7934, above str_top:  uniform dz_top to the model top.
+#     nk3 = round((ztop-str_top)/dz_top) = round(8000/320) = 25.
+#
+# 10+40+25 = 75 = nz, which is param.F:7867-7877's requirement.  The result is
+# 22 scalar levels below 1 km under a 15 km top.
+#
+# dz_m is not a layer thickness here.  It is CM1's namelist dz, the metric
+# reference that every mh and mf word divides by (param.F:8170,8176), and
+# ztop_m is therefore declared separately rather than derived from nz*dz_m the
+# way param.F:2608 derives it for stretch_z=0.
+#
+# The horizontal grid and the translating frame are the ones the fixed-frame
+# 60 km profile beside this file establishes: base.F:2663-2669 with
+# imove=1 removes the storm's own translation, so 60 km of width is enough.
+# Every wind this run publishes is frame-relative.
+#
+# The 20 m layers do not constrain the large step.  psolver=3 is vertically
+# implicit (README.namelist:404-425), so the vertical acoustic CFL is not a
+# stability condition; the horizontal one is, and with nsound=6 the acoustic
+# substep is dt/nsound = 0.0833 s, which carries a 350 m/s wave 29 m per
+# substep against dx = 50 m.
+#
+# This deck reaches the profile-bound operator family.  Every Cartesian large
+# step phase selects on grid.stretch_z: the pre-acoustic momentum advection,
+# the psolver=3 acoustic stage, the post-acoustic getdiv/getdivx bridge and
+# the scalar/moisture RK stage all bind this coordinate's sigma, sigmaf, rds
+# and rdsf and carry no scalar dz.  adv.F:551 and adv.F:710 are the vertical
+# flux divergences that make the difference: on a uniform column
+# param.F:8170 makes every mh word one and adv.F:572's rdz*mh collapses to
+# 1/dz, which is why the unstretched family may bind a scalar; here the
+# lowest layer is 20 m under a 100 m metric reference, so a scalar dz would
+# advect it five times too slowly.  The run receipt publishes the family and
+# the generated coordinate under operator_family and vertical_coordinate.
+#
+# The lower boundary is CM1's semi-slip bottom, and it belongs with this grid
+# rather than beside it.  bbc=3 replaces the free-slip t13/t23 copy of
+# turb.F:4536-4545 with turb.F:4596-4605's surface stress at k=1, which
+# turbtend.F:1454 feeds into the lowest row of the implicit vertical momentum
+# solve.  That stress is what generates the near-ground horizontal vorticity
+# a vortex tilts and stretches -- and it is applied across the lowest model
+# layer, so a deck that generates it on a 500 m layer has resolved the wrong
+# thing.  Twenty metres is the point of this coordinate.  sfcmodel=1 is not
+# optional: param.F:2073-2088 stops CM1 when bbc=3 has no surface layer,
+# because ust comes from it and the stress above would be exactly zero.
+# cecd=1 and cnstcd=0.001 are CM1's own constant-drag branch and value
+# (sfcphys.F:120-136; run/namelist.input:140).  isfcflx=0 keeps surface heat
+# and moisture fluxes off, as CM1's supercell deck does.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.5
+history_interval_s = 60.0
+restart_interval_s = 7200.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 1200
+ny = 1200
+nz = 75
+dx_m = 50.0
+dy_m = 50.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 15000.0
+str_bot_m = 200.0
+str_top_m = 7000.0
+dz_bot_m = 20.0
+dz_top_m = 320.0
+# param.F:8019-8026 and :8085-8089 read an explicit level list; stretch_z=1
+# generates its own, so grid.levels_m is left undeclared.
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 3
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 12.5
+v_move_m_s = 3.0
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.001
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 65536
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

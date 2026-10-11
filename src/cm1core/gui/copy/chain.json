@@ -1,0 +1,203 @@
+{
+  "schema": "gm1.gui-copy/v1",
+  "about": "Words for the Downscale a WRF or ArWen run (3D) screen and the plain lines gpuwm-cm1 chain check prints. {name} fields are filled with numbers.",
+  "screen": {
+    "title": "Downscale a WRF or ArWen run (3D)",
+    "nav": "Downscale (3D)",
+    "lead": "A finer GM1 domain inside your WRF or ArWen run: it starts from one saved time of your run, and its four sides follow the saved times after it.",
+    "verified_hint": "GM1-ARWEN-CHAIN.md sections 8 and 9, in the records folder installed with gpuwm-cm1 (cm1core/records)",
+    "example_title": "A worked example",
+    "example": "An ArWen run of the atmospheric river of 25 December 2025 over California: 3 km cells, P3 microphysics, saved hourly. A box of 36 x 66 of its cells over the ocean, from cell (6, 40), finer by 3, water vapour only with Morrison, 01:00 to 03:00 UTC: 108 x 198 GM1 cells of 1015 m on the ground. It ran 2 h in 87 s on an RTX 3080. GM1 made its own clouds within 30 min, and inside the relaxed rows it kept its air and water to 0.02 %. Idealized physics in a real-weather box, not a reconstruction.",
+    "example_hint": "GM1-ARWEN-CHAIN.md section 9.2, in the records folder installed with gpuwm-cm1 (cm1core/records)",
+    "limits": "GM1 is flat, so the box must sit over flat ground. On a mapped run GM1 takes the cell size on the ground at the box, so the map scale must not change by more than 1% across it. Terrain is on the roadmap.",
+    "column_route": "For one column of your run as a storm's environment (flat, the same air everywhere), use New run, From a WRF or ArWen run.",
+    "file_label": "History file or folder",
+    "file_placeholder": "a wrfout file, a folder of them, or a folder of extracted frames",
+    "open": "Open",
+    "map_caption": "Ground height of your run. Drag on the map to draw the box GM1 runs in; the grey edge is too close to your run's own sides.",
+    "map_caption_flat": "Your run is idealized: flat, no map. Drag on the map to draw the box GM1 runs in.",
+    "box": "Box",
+    "box_cells": "{ni} x {nj} of your run's cells, from cell ({i0}, {j0})",
+    "ratio": "Finer by",
+    "ratio_help": "GM1 cells per cell of your run, along each side: 3, 5, 7 or 9.",
+    "span": "Time span",
+    "start": "Start",
+    "end": "End",
+    "every": "Sides updated every",
+    "check": "Check",
+    "checks_title": "Can GM1 run this box?",
+    "admitted": "Every check passes. GM1 can run this box.",
+    "refused": "{n} check(s) do not pass. Each line says why.",
+    "estimate_title": "What it takes",
+    "estimate_line": "{cells} cells of {dx} m, {steps} steps. About {gpu} GB on the GPU and {wall} on this card; {disk} GB of disk with its saved times.",
+    "prepare_line": "Preparing it reads your run and writes {prepare} beside the run.",
+    "name_label": "Run name",
+    "make": "Make the run",
+    "made": "Made {name}. Check it and start it like any run.",
+    "pass": "Passes",
+    "fail": "Does not pass",
+    "not_checked": "Not checked",
+    "code_hint": "refusal code",
+    "verified_title": "What has been checked",
+    "limits_title": "What this is",
+    "step_file": "1. Your run",
+    "step_box": "2. The box and the time",
+    "step_check": "3. Can GM1 run this box?",
+    "step_make": "4. Make the run",
+    "found_files": "Found under the runs folder:",
+    "found_none": "No wrfout files under the runs folder. Type the full path of a file or a folder of one domain's files.",
+    "facts": "{producer} run: {n} saved times, {first} to {last}, every {interval}. {nx} x {ny} cells of {dx}, {levels} levels, {projection}.",
+    "facts_one": "{producer} run: one saved time, {first}; downscaling needs two or more. {nx} x {ny} cells of {dx}, {levels} levels, {projection}.",
+    "facts_scheme_ok": "Microphysics {scheme}: GM1 runs the same scheme.",
+    "facts_scheme_no": "Microphysics {scheme}: GM1 does not run it, so only its water vapour can be taken (Moisture: water vapour only); clouds and rain then form in GM1.",
+    "facts_ground": "Ground from {lo} to {hi} m.",
+    "facts_flat": "Flat ground everywhere.",
+    "map_legend_updraft": "Orange: updrafts of 5 m/s or more (ground-relative) at the time shown.",
+    "map_time": "Map at",
+    "box_hint": "Drag on the map, or type the first cell and the size.",
+    "i0": "First cell east",
+    "j0": "First cell north",
+    "ni": "Cells east",
+    "nj": "Cells north",
+    "grid_line": "GM1 grid: {nx} x {ny} cells of {dx} m, {km_x} x {km_y} km.",
+    "every_all": "every saved time",
+    "check_first": "Draw a box first.",
+    "open_first": "Open your run first.",
+    "name_hint": "Letters, digits, '.', '_' or '-'.",
+    "make_needs_check": "Check the box first; Make the run is on once every check passes.",
+    "making": "Preparing the box from your run. This reads every saved time and can take a minute.",
+    "opening": "Reading your run.",
+    "checking": "Checking the box.",
+    "estimate_none": "No estimate: {why}",
+    "moisture": "Moisture from your run",
+    "moisture_all": "every cloud and rain field",
+    "moisture_vapour": "water vapour only",
+    "moisture_help": "Water vapour only is WRF's own default for real-data runs: clouds and rain start at zero and form in GM1. It is the only choice when GM1 does not run your run's scheme.",
+    "scheme": "GM1 microphysics",
+    "scheme_help": "With water vapour only, GM1 can run WSM6 or Morrison whatever your run used.",
+    "grid_line_scaled": "GM1 grid: {nx} x {ny} cells of about {dx} m on the ground (map scale about {scale}), {km_x} x {km_y} km.",
+    "grid_line_checked": "GM1 grid: {nx} x {ny} cells of {dx} m on the ground (the box's map scale {scale}, as checked), {km_x} x {km_y} km."
+  },
+  "checks": {
+    "frame_count": {
+      "label": "At least two saved times",
+      "pass": "{n} saved times",
+      "refused": "Only {n} saved time: the sides need a later time to move toward."
+    },
+    "frame_grid": {
+      "label": "Every saved time from one grid",
+      "pass": "One grid, one scheme, one ground",
+      "refused": "The saved times do not share one grid or microphysics scheme.",
+      "refused_ground": "The ground height changes by up to {dhgt} m between {t0} and {t1}, so heights above ground would move. If only the first saved time differs, start at the next one."
+    },
+    "cadence": {
+      "label": "Evenly spaced saved times",
+      "pass": "Every {interval}",
+      "refused": "The saved times are not evenly spaced, so the sides would move at uneven rates."
+    },
+    "window": {
+      "label": "Start and end are saved times",
+      "pass": "{start} to {end}",
+      "refused": "The start or end is not one of the saved times."
+    },
+    "interval_step": {
+      "label": "Time step fits between saved times",
+      "pass": "{steps} steps of {dt} s between saved times",
+      "refused": "The GM1 time step does not divide the time between saved times."
+    },
+    "duration": {
+      "label": "The run stays inside the saved times",
+      "pass": "{duration} of your run",
+      "refused": "The run would go past the last saved time."
+    },
+    "projection": {
+      "label": "A grid GM1 can use",
+      "pass": "{projection}, square cells of {cell_km} km",
+      "refused": "{projection}: GM1 needs square cells on a Lambert, polar, Mercator or idealized grid."
+    },
+    "placement": {
+      "label": "The box sits inside your domain",
+      "pass": "At least 3 cells from every side",
+      "refused": "The box is closer than 3 cells to your run's own sides, or does not cover whole cells."
+    },
+    "spacing": {
+      "label": "GM1 cells nest exactly",
+      "pass": "{ratio} GM1 cells of {cell_m} m per cell of your run, on the ground",
+      "refused": "GM1's cell size is not your run's cell size on the ground divided by the ratio."
+    },
+    "terrain": {
+      "label": "Flat ground",
+      "pass": "Ground varies by {relief} m (limit {limit} m)",
+      "refused": "Ground varies by {relief} m, over the {limit} m limit. GM1 is flat and would leave the hills out. Move the box over flatter ground or water."
+    },
+    "map_factor": {
+      "label": "Map scale even over the box",
+      "pass": "GM1 takes your run's cell size on the ground here (map scale {scale}); the scale changes by {departure}% across the box (limit {limit}%)",
+      "pass_unit": "No map scale to take: your run is flat and has no map",
+      "refused": "The map scale changes by {departure}% across the box, over the {limit}% limit, so some GM1 lengths would be off by that much. Make the box smaller."
+    },
+    "coriolis": {
+      "label": "Earth's rotation matches",
+      "pass": "{rotation}",
+      "refused": "GM1's rotation does not match your run's at the box centre."
+    },
+    "microphysics": {
+      "label": "Microphysics GM1 has",
+      "pass": "{scheme} in your run, the same scheme in GM1",
+      "refused": "Your run used {scheme}. GM1 downscales every cloud and rain field only from WSM6 (6), Thompson (8) and Morrison (10) runs; its water vapour alone can be taken (Moisture: water vapour only, or --moisture vapour-only).",
+      "pass_vapour": "Your run used {scheme}. GM1 runs {gm1_scheme} and takes only your run's water vapour: its clouds and rain start at zero and form in GM1"
+    },
+    "species": {
+      "label": "Every cloud and rain field saved",
+      "pass": "All saved",
+      "refused": "Your run did not save {missing}, which this microphysics scheme carries.",
+      "pass_vapour": "Water vapour saved"
+    },
+    "variables": {
+      "label": "Every field the downscaling needs",
+      "pass": "All saved",
+      "refused": "Your run did not save {missing}, which the downscaling needs."
+    },
+    "theta_m": {
+      "label": "Temperature saved as dry theta",
+      "pass": "Dry theta",
+      "refused": "The saved temperature includes moisture, so GM1 would start moist air too warm.",
+      "refused_no_thm": "Your run says its temperature is moist theta (use_theta_m = 1) but did not save THM beside T, so GM1 cannot confirm T is dry theta. Save THM, or run with use_theta_m = 0."
+    },
+    "model_top": {
+      "label": "Your run reaches GM1's top",
+      "pass": "Your run's top is above GM1's",
+      "refused": "GM1's top is above your run's; lower GM1's top."
+    },
+    "crossing": {
+      "label": "Saved often enough",
+      "pass": "The fastest wind crosses the box in {crossing}; saved every {interval}",
+      "refused": "The fastest wind crosses the box in {crossing}, sooner than the {interval} between saved times: air could enter and leave unseen. Save more often, or draw a bigger box."
+    },
+    "not_checked": "Not checked until the {after} check passes."
+  },
+  "labels": {
+    "frame_count": "two saved times",
+    "frame_grid": "one grid",
+    "cadence": "even spacing",
+    "window": "start and end",
+    "interval_step": "time step",
+    "duration": "run length",
+    "projection": "grid",
+    "placement": "the box",
+    "spacing": "nesting",
+    "terrain": "flat ground",
+    "map_factor": "map scale",
+    "coriolis": "rotation",
+    "microphysics": "microphysics",
+    "species": "cloud fields",
+    "variables": "fields",
+    "theta_m": "temperature",
+    "model_top": "model top",
+    "crossing": "saving often enough"
+  },
+  "rotation": {
+    "none": "No rotation, as in your run",
+    "f": "Rotation of latitude {lat}"
+  }
+}

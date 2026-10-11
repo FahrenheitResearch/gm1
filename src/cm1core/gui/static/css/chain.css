@@ -1,0 +1,58 @@
+/* Downscale a WRF or ArWen run (3D), advanced mode. Only the base's --gm1-* tokens (re-pointed by the Recast
+   skin; --gm1-accent where the skin has it, else the data colour) and .is-new; nothing here changes a picture. */
+
+.chain-about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; margin-bottom: 20px; }
+.chain-about > section { border-left: 2px solid var(--gm1-accent, var(--gm1-data)); padding: 8px 14px;
+  background: var(--gm1-ground); min-width: 0; }
+.chain-about > section.chain-limits { border-left-color: var(--gm1-muted); }
+.chain-about > section.chain-limits { grid-column: 1 / -1; }
+.chain-about > section.chain-example { border-left-color: var(--gm1-data); }
+.chain-about .cap { margin: 0 0 6px; }
+.chain-about p { margin: 0 0 6px; color: var(--gm1-text); }
+.chain-about p:last-child { margin-bottom: 0; }
+.chain-about a { color: var(--gm1-data); }
+
+.chain-pathrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: start; }
+.chain-pathrow .action { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.chain-found { margin: 0 0 6px; }
+.chain-facts p { margin: 4px 0; color: var(--gm1-text); }
+.chain-facts:empty { display: none; }
+.chain-facts .chain-warn { color: var(--gm1-warn); }
+
+.chain-mapwrap { max-width: 960px; }
+.chain-map { margin: 0; }
+.chain-stage { position: relative; touch-action: none; user-select: none; }
+.chain-stage img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; border: 1px solid var(--gm1-rule);
+  background: var(--gm1-void); cursor: crosshair; }
+.chain-box { position: absolute; border: 2px solid var(--gm1-accent, var(--gm1-data)); pointer-events: none;
+  box-sizing: border-box; min-width: 2px; min-height: 2px; }
+.chain-map figcaption { margin-top: 6px; }
+
+.chain-form { margin-top: 12px; max-width: 760px; }
+.chain-boxfields { margin-bottom: 10px; }
+.chain-boxfields .note { margin: 0 0 6px; }
+.chain-cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.chain-cell { display: flex; flex-direction: column; gap: 3px; color: var(--gm1-muted); font-size: var(--fs-small); min-width: 0; }
+.chain-cell .input { width: 100%; min-width: 0; box-sizing: border-box; }
+.chain-grid { margin: 6px 0 0; color: var(--gm1-data); font-family: var(--gm1-font-mono); overflow-wrap: anywhere; }
+
+.chain-checks:empty { display: none; }
+.chain-checks { margin-top: 10px; }
+.chain-rows { margin-top: 10px; }
+.chain-check { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--gm1-rule); padding: 6px 0; }
+.chain-check .checkline { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.chain-check b { font-weight: 600; color: var(--gm1-title); }
+.chain-check .hint { margin-left: 8px; }
+.chain-mark { flex: none; font-size: var(--fs-small); color: var(--gm1-muted); }
+.chain-check.refused .chain-mark { color: var(--gm1-stop); }
+.chain-check.pass .chain-mark { color: var(--gm1-data); }
+.chain-h { margin: 14px 0 4px; font-size: var(--fs-small); color: var(--gm1-muted); font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; }
+
+@media (max-width: 760px) {
+  .chain-about { grid-template-columns: minmax(0, 1fr); }
+  .chain-pathrow { grid-template-columns: minmax(0, 1fr); }
+  .chain-cells { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .chain-check { flex-direction: column; gap: 2px; }
+}

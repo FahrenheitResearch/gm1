@@ -1,0 +1,156 @@
+# param.F:8005-8064's explicit scalar-level branch.
+#
+# stretch_z=3 reads nk *scalar* (half) levels from input_grid_z and builds every
+# face by the alternating recursion of param.F:8025:
+#
+#     sigmaf(1) = 0;  sigmaf(k+1) = 2*sigma(k) - sigmaf(k)
+#
+# That recursion is the branch's whole character, and it is not a halving: it
+# is a first-order difference equation in binary32, so each face carries the
+# representation error of every level below it and the errors alternate in sign
+# rather than cancelling.  A level list that is merely "close to" a nice column
+# comes out with a top segment whose layer depths differ in the sixth digit,
+# and this port refuses that by CM1-CFG-VERTICAL-FORNBERG: param.F:8985-9060's
+# quadratic through three levels that are not equally spaced is not the
+# (1.875, -1.25, 0.375) the compiled kernels carry inline.
+#
+# So this column is chosen so the recursion is exact.  Every face is a multiple
+# of 64 m and every scalar level therefore a multiple of 32 m, all well inside
+# binary32's integer range, so 2*sigma(k) - sigmaf(k) is exact at every level
+# and the faces come back bit for bit:
+#
+#   12 layers of 128 m, then 16 thickening 128 -> 512 m in 64 m steps, then
+#   12 layers of 512 m.  40 layers, top 13184 m.
+#
+# The lowest three and highest three layers are uniform by construction, which
+# is what makes param.F:8985-9060's pinned quadratic this coordinate's own.
+#
+# dz = 256 m is the param.F:8170 metric reference and is no layer's thickness.
+# zd = 9184 m is a height (param.F:8655); 13184 - 9184 = 4000 m of damping,
+# inside half the model top.
+#
+# Horizon: one advective cell crossing, as in the other stretched cases.
+
+[case]
+name = "explicit-scalar-levels-32"
+term = "metric"
+notes = """CM1 r21.1 stretch_z=3 explicit scalar levels read from
+input_grid_z, with param.F:8025's alternating face recursion building a 128 m
+to 512 m column under a 13184 m top. One advective cell crossing."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 256.0
+dtl = 1.0
+timax = 100.0
+tapfrq = 20.0
+rstfrq = 100.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 9184.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 3
+ztop = 0.0
+str_bot = 0.0
+str_top = 0.0
+dz_bot = 0.0
+dz_top = 0.0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+# param.F:8021 reads nz = 40 scalar (half) levels, in metres above ground.
+"grid.levels_m" = [
+  64.0,
+  192.0,
+  320.0,
+  448.0,
+  576.0,
+  704.0,
+  832.0,
+  960.0,
+  1088.0,
+  1216.0,
+  1344.0,
+  1472.0,
+  1600.0,
+  1728.0,
+  1888.0,
+  2080.0,
+  2304.0,
+  2560.0,
+  2848.0,
+  3168.0,
+  3520.0,
+  3904.0,
+  4320.0,
+  4768.0,
+  5248.0,
+  5760.0,
+  6272.0,
+  6784.0,
+  7296.0,
+  7808.0,
+  8320.0,
+  8832.0,
+  9344.0,
+  9856.0,
+  10368.0,
+  10880.0,
+  11392.0,
+  11904.0,
+  12416.0,
+  12928.0,
+]
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 2048
+"runtime.capacity_profile" = "default"

@@ -1,0 +1,116 @@
+[build-system]
+requires = ["setuptools>=77", "wheel>=0.45"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gpuwm-cm1"
+dynamic = ["version"]
+description = "CM1 r21.1 on one NVIDIA GPU: import a CM1 namelist, run it, get CM1-format output, with a local web GUI"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "src/cm1core/quicklook/fonts/LICENSE-DejaVu.txt"]
+# `pip install gpuwm-cm1` installs everything a run on an NVIDIA GPU needs: ArWen,
+# CuPy for CUDA 13 with NVIDIA's CUDA libraries, and NVRTC. NVRTC compiles every
+# kernel at run time; 13.3.x is the validated compiler. Without the NVRTC range
+# cupy's [ctk] extra resolves the newest cuda-toolkit, which no device test has
+# run under. nvJitLink (loaded by cuFFT and cuSPARSE, which cupy.fft uses) is held
+# to the same 13.3 line for the same reason. constraints/gpu-cu13-validated.txt
+# pins the whole validated stack exactly.
+dependencies = [
+    "gpuwm>=2.8.0,<2.8.1",
+    "gpuwm-data>=2.8.0,<2.8.1",
+    "cupy-cuda13x[ctk]>=14.2,<15",
+    "nvidia-cuda-nvrtc>=13.3,<13.4",
+    "nvidia-nvjitlink>=13.3,<13.4",
+]
+keywords = [
+    "atmospheric-model",
+    "CM1",
+    "CUDA",
+    "GPU",
+    "weather",
+    "simulation",
+    "C-grid",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: GPU :: NVIDIA CUDA :: 13",
+    "Environment :: Web Environment",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Atmospheric Science",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.optional-dependencies]
+# Accepted and empty: the GPU stack is in the base dependencies now, so the
+# install lines of older guides (gpuwm-cm1[gpu-cu13], gpuwm-cm1[gpu]) still work.
+gpu-cu13 = []
+gpu = []
+dev = ["pytest>=8.0", "build>=1.2", "setuptools>=77"]
+# MP4 films of the looks. imageio-ffmpeg (BSD-2) provides a separately licensed ffmpeg
+# binary that GM1 runs as a separate program; nothing of it is bundled in this wheel. Without it: APNG, PNGs, GIF.
+film = ["imageio-ffmpeg>=0.5"]
+
+[project.scripts]
+gpuwm-cm1 = "cm1core.cli:main"
+cm1-state = "cm1core.rust_tools:state_main"
+gm1-forecast-checkpoint = "cm1core.rust_tools:gm1_forecast_checkpoint_main"
+gm1-cartesian-restart = "cm1core.rust_tools:gm1_cartesian_restart_main"
+cm1-render = "cm1core.rust_tools:render_main"
+cm1-f64-window = "cm1core.rust_tools:f64_window_main"
+gm1-history-grads-export = "cm1core.rust_tools:grads_export_main"
+checkpoint-wind-grads = "cm1core.rust_tools:checkpoint_wind_grads_main"
+cm1-r21-namelist = "cm1core.rust_tools:cm1_r21_namelist_main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cm1core", "cm1core.*"]
+
+[tool.setuptools.dynamic]
+version = {attr = "cm1core._version.__version__"}
+
+[tool.setuptools.package-data]
+cm1core = [
+    "bin/*",
+    "data/*",
+    "data/soundings/*",
+    "examples/*.toml",
+    "lib/*",
+    "native-tools.json",
+    "records/*.json",
+    "records/*.md",
+    "records/*.csv",
+    # The local web GUI's pages.  static/mock/ (the taste-check mock) is
+    # repository content, not package data.
+    "gui/static/index.html",
+    "gui/static/css/*.css",
+    "gui/static/js/*.js",
+    "gui/static/js/*/*.js",
+    "gui/static/img/*.png",
+    # The quick-looks' condensed and extra-light DejaVu faces (matplotlib ships
+    # the book and bold ones), with their licence.
+    "quicklook/fonts/*.ttf",
+    "quicklook/fonts/LICENSE-DejaVu.txt",
+    # Guided mode: its pages, its words, and the presets (CM1 namelists, fit rules and card pictures).
+    "gui/static/guided/*.js",
+    "gui/static/guided/*.css",
+    "gui/copy/*.json",
+    "presets/*/namelist.input",
+    "presets/*/preset.json",
+    "presets/*/picture.png",
+    "presets/*/picture.json",
+    # A preset's own sounding file, and the measured settings of a card that has several.
+    "presets/*/input_sounding",
+    "presets/*/pictures/*.png",
+    "presets/*/pictures/*.json",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]

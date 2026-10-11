@@ -1,0 +1,222 @@
+# A 50 m supercell domain that follows its own storm.
+#
+# A domain that translates has to be aimed, and until this profile the only
+# way to aim one was to guess: declare src/base.F:2663-2669's umove and vmove
+# once, before a single step, and hope the storm went that way.  It does not.
+# The 2026-09-13 runs declared the sounding's mature right-mover motion and
+# lost their bubble through the western boundary at minute 16, because an
+# unorganised bubble advects with the wind through its own depth and a mature
+# supercell does not.  A splitting storm makes the guess impossible in
+# principle: the left and right movers diverge by construction, and no single
+# constant velocity holds both.
+#
+# CM1 r21.1 already solves this.  src/azimavg.F:4376-4528
+# is ``update_adapt_move``: it finds the storm from a smoothed field of the
+# lowest model level's pressure and adjusts umove and vmove to keep it near the
+# domain centre.  README.namelist:1789-1797 names the two words that select it,
+# and they are the two this document declares.
+#
+# WHY THESE NUMBERS
+#
+#   * closures.do_adapt_move = true is README.namelist:1789-1794's own word.
+#     src/param.F:704-717 is what it means: CM1 sets umove = vmove = 0.0,
+#     zeroes the two lag registers beside them, and raises imove to 1.  The
+#     frame velocity stops being a namelist constant and becomes model state.
+#     That is why closures.u_move_m_s and closures.v_move_m_s are 0.0 here and
+#     why declaring anything else is refused: CM1 would silently zero it, and
+#     a document that named a frame the run did not integrate would describe
+#     every published wind wrongly by that amount.
+#
+#   * closures.adapt_move_frq = 300.0 is how often the storm is found again
+#     and the frame re-aimed (README.namelist:1796-1797; the cadence is
+#     src/cm1.F:3671-3679, which fires when mtime reaches adaptmovetim and
+#     advances adaptmovetim by exactly this number).  CM1's own distributed
+#     deck ships run/namelist.input:361 adapt_move_frq = 3600.0, which is a
+#     tropical-cyclone cadence on a domain hundreds of kilometres wide.  On
+#     48 km of grid a storm moving at 15 m/s covers 54 km in an hour, so an
+#     hourly correction arrives after the storm has already gone.  Five
+#     minutes is 4.5 km of storm motion, roughly one updraft diameter, which
+#     is the scale the correction is trying to remove.
+#
+#     The controller is a damped servo, not a snap: src/azimavg.F:4431-4435
+#     sets the new umove to the old one, less term2 times the centre's
+#     departure (centerx - xcenter) over adapt_move_frq, plus 1 - term2 times
+#     the change between the two previous frame speeds,
+#
+#     with term2 = 0.5.  A 4.5 km departure at this cadence changes the frame
+#     by 0.5*4500/300 = 7.5 m/s, and the second term damps the oscillation the
+#     first term would otherwise set up.  Halving the cadence would double the
+#     gain on the same departure; that is the knob, and this is the setting
+#     that matches a supercell's own timescale.
+#
+#   * 300.0 is five times run.history_interval_s, and that is a requirement,
+#     not a coincidence.  src/cm1.F:3642-3651 runs ``getpsmth``/``getpcent``
+#     only on a step that writes history, high-frequency or azimuthal output: CM1 finds
+#     the storm centre only on a step that is already writing output.  A
+#     cadence that lands between two frames leaves xcenter at
+#     src/cm1.F:2527-2529's domain centre, ``centerx-xcenter`` is identically
+#     zero, and the frame never moves at all -- a run that looks adaptive in
+#     its document and integrates a fixed frame.  The door refuses that
+#     combination by value rather than discovering it three GPU-hours in.
+#
+#   * boundaries west/east/south/north = 2 selects the open branch of the
+#     controller.  ``getpsmth`` calls ``bc2d`` (src/bc.F:12-172) before every
+#     one of its hundred smoothing passes and again before the final
+#     interpolation to zeta points, and CM1's open ``bc2d`` replicates the edge
+#     while its periodic one wraps.  The two reach different minima on the same
+#     pressure field -- most of all on the two nearly equal minima a splitting
+#     supercell presents -- so the port selects the open-halo operator here
+#     (cm1core.cuda_adaptive_move_open) and the wrapping one
+#     (cm1core.cuda_adaptive_move) for a four-periodic domain, and refuses
+#     every other combination instead of approximating one.  CM1's CHANGES for
+#     r21.0 records that this centroid-of-a-smoothed-surface-pressure-field
+#     form of the tracker is itself the current one.
+#
+#   * grid.dx_m = grid.dy_m = 50.0 is this document's choice, not the
+#     controller's.  getpsmth and getpcent (src/azimavg.F:4012-4330) never
+#     read dx: the grid reaches them only as xh/yh/xfref/yfref, which
+#     src/param.F:6649-6687,7393 forms as dble(dx)*(i-1) and narrows to real.
+#     Any spacing whose faces and mass points survive that narrowing
+#     unrounded is admitted -- a 100.0 m or 250.0 m storm parent follows its
+#     storm with the same arithmetic -- and one that would round (dx =
+#     33.333332 m, say) is refused as CM1-CARTESIAN-ADAPT-MOVE-GRID before a
+#     device is opened.
+#
+#   * The centre is diagnosed from the lowest scalar level
+#     (src/azimavg.F:4046-4058 -- zref = 0.0 selects kval = 1) whatever height
+#     that level has, and the receipt's frame_mode block names it as
+#     lowest_scalar_level_m.  On these seven stretch_z=1 words
+#     nk1 = round(str_bot/dz_bot) = round(200/20) = 10 layers of 20 m, so
+#     sigma(1) = 10 m.  The remaining two segments follow
+#     src/param.F:7867-7877's feasibility rule: nk3 = round((17650-9650)/400)
+#     = 20, nk2 = 75-30 = 45, and nk2 * 0.5*(20+400) = 45*210 = 9450 m is
+#     exactly str_top - str_bot.  Another column -- a 50 m bottom layer, a
+#     uniform stretch_z = 0 grid, a stretch_z = 3/4 level list -- is diagnosed
+#     at its own sigma(1) and reported as such.
+#
+#   * 960 x 960 at 50 m is 48.0 km square, and the controller is what makes
+#     that enough.  A fixed-frame 50 m supercell needs something like 120 km of
+#     width to hold a two-hour right-mover track; a following frame needs only
+#     enough to hold the storm, its outflow and the inflow it feeds on -- plus
+#     however far it drifts before the first correction.
+#
+#     That last part is the number this grid is actually sized by.  The door's
+#     own lateral admission is the bubble's 10 km radius (src/init3d.F:459)
+#     plus the three-cell fifth-order halo, 10.15 km, plus a 4.0 m/s
+#     steering-error allowance over the 1800 s unorganised phase, 7.2 km:
+#     17.35 km of clearance from every boundary.  Half of 48 km is 24.0 km,
+#     which leaves 6.65 km beyond that clearance -- 443 s at a 15 m/s residual
+#     steering wind, against the 300 s this run spends stationary.
+#
+#     What the controller does not remove is the split itself: the frame
+#     follows the centroid of the whole smoothed pressure field
+#     (src/azimavg.F:4173-4330 weights every cell within 300 km of the domain
+#     centre), so once the storm divides the frame sits between the two movers
+#     and drifts toward whichever is deeper.  48 km holds a split for roughly
+#     the first half hour after it happens, and this document claims nothing
+#     more than that.
+#
+#   * The first correction does not arrive until model time 300 s.
+#     src/param.F:706-707 starts the run stationary and src/cm1.F:3642-3651
+#     makes the first update one adapt_move_frq later, so for the first five
+#     minutes this is a fixed 48 km domain with a warm bubble at its centre.
+#     The door refuses a grid that cannot survive that interval
+#     (CM1-CARTESIAN-ADAPT-MOVE-SPINUP) rather than discovering it three
+#     GPU-hours in.
+#
+#   * dt_s = 0.25 with four acoustic substeps.  src/misclibs.F:867 bounds the
+#     psolver=3 small step at 0.60*min(dx,dy)/360 = 0.60*50/360 = 0.0833 s;
+#     0.25/4 = 0.0625 s is inside it with margin, and src/misclibs.F:883-885
+#     would itself derive four substeps for this pair.  0.25 s divides
+#     run.history_interval_s, run.restart_interval_s and run.duration_s into
+#     whole large steps, which the fixed clock requires.
+#
+#   * The lower boundary is CM1's free-slip deck (run/namelist.input:70:
+#     bbc = 1, no surface model, no surface fluxes), which is why [closures]
+#     declares none of the five surface words.  That is required beside an
+#     adaptive frame in this port: src/turb.F:296-307 forms the surface stress
+#     from the ground-relative wind ugr = ua + umove, and this runtime reads
+#     umove from the configuration it was built with rather than from the
+#     controller, so a semi-slip or no-slip run would drag on a wind that is
+#     wrong by the whole accumulated frame velocity.  The door refuses it.
+#
+# Every wind this run publishes is frame-relative, as it always was
+# (src/init3d.F:32-33), but the frame is no longer one number in this file.
+# Where the domain is at each published model time is carried per frame as
+# domainlocx/domainlocy, the src/cm1.F:3512-3513 integral, which the controller
+# advances with the velocity as it stood before its own update -- CM1's own
+# order.  The receipt's frame_mode block names the branch, the cadence and the
+# controller's state, so a reader can tell from the document alone that this
+# run followed its storm and by what rule.
+[run]
+lane = "cartesian"
+duration_s = 7200.0
+dt_s = 0.25
+history_interval_s = 60.0
+restart_interval_s = 1800.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 960
+ny = 960
+nz = 75
+dx_m = 50.0
+dy_m = 50.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1
+ztop_m = 17650.0
+str_bot_m = 200.0
+str_top_m = 9650.0
+dz_bot_m = 20.0
+dz_top_m = 400.0
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+do_adapt_move = true
+adapt_move_frq = 300.0
+
+[runtime]
+acoustic_substeps = 4
+tile_nx = 64
+tile_ny = 64
+warmup_steps = 0
+memory_budget_mib = 30720
+capacity_profile = "default"
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2

@@ -1,0 +1,148 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "bubble-cloud-250m",
+  "order": 42,
+  "group": "other",
+  "name": "A warm bubble grows into a cloud (250 m, 20 minutes)",
+  "line": "A small blob of warm air rises, cools and turns into a growing cloud.",
+  "budget": "10m",
+  "note": "Weisman and Klemp's temperature and moisture with almost no wind shear (2 m/s over 6 km). The area is 40 km wide because a run keeps a storm about 18 km from every open side.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 120,
+        "to": 160,
+        "why": "a 40 km area at 250 m"
+      },
+      {
+        "key": "ny",
+        "from": 120,
+        "to": 160,
+        "why": "a 40 km area at 250 m"
+      },
+      {
+        "key": "nz",
+        "from": 40,
+        "to": 64,
+        "why": "64 levels of 250 m, 16 km deep"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dz",
+        "from": 500.0,
+        "to": 250.0,
+        "why": "250 m levels"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 1.5,
+        "why": "the time step scaled with the grid spacing"
+      },
+      {
+        "key": "timax",
+        "from": 7200.0,
+        "to": 1200.0,
+        "why": "20 minutes"
+      },
+      {
+        "key": "rstfrq",
+        "from": -3600.0,
+        "to": -1200.0,
+        "why": "a restart point at the end of the 20 minutes"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 60.0,
+        "why": "a picture every minute"
+      },
+      {
+        "key": "zd",
+        "from": 15000.0,
+        "to": 12000.0,
+        "why": "the damping layer starts 4 km below the 16 km top (CM1's file: 5 km below its 20 km top)"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "isnd",
+        "from": 5,
+        "to": 7,
+        "why": "the sounding is the file input_sounding beside this namelist"
+      },
+      {
+        "key": "iwnd",
+        "from": 2,
+        "to": 0,
+        "why": "the wind comes from the sounding file (CM1 sets iwnd = 0 with isnd = 7)"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 0.5,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 3.0,
+        "to": 0.0,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 40
+  },
+  "min_duration_s": 600,
+  "shrink": "both",
+  "gm1_settings": {
+    "initialization.bhrad_m": 2000.0,
+    "initialization.bvrad_m": 1000.0,
+    "initialization.zc_m": 1000.0,
+    "initialization.bptpert_k": 2.0
+  },
+  "gm1_settings_why": "The warm bubble is 4 km across and 2 degrees warmer than its surroundings (CM1's is 20 km across and 1 degree), so it fits the small area. CM1 keeps the bubble in its code, not the namelist, so these are GM1 settings.",
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "557b36961d617b23e7c05f7a55cc70918e4641bbb12648c86a480ce838b3a8fd",
+    "source": "gpuwm-cm1 preset environment --instability 0.6 --shear 0 --hodograph straight",
+    "rights": "written by GM1 (gpuwm-cm1 preset environment) from Weisman and Klemp's (1982) formulas as CM1 r21.1 base.F transcribes them",
+    "environment": {
+      "schema": "gpuwm-cm1.environment/v1",
+      "instability": 0.6,
+      "shear": 0.0,
+      "hodograph": "straight",
+      "cape_target_j_kg": 1920.0,
+      "shear_0_6km_target_m_s": 2.0,
+      "boundary_layer_cap_g_kg": 14.0883,
+      "sha256": "557b36961d617b23e7c05f7a55cc70918e4641bbb12648c86a480ce838b3a8fd",
+      "method": "Weisman and Klemp (1982) temperature and moisture as CM1 r21.1 base.F isnd = 5 builds them, with the boundary-layer mixing-ratio cap set for the CAPE target; wind calm at the ground with the chosen 0-6 km shear (curved: CM1's iwnd = 2 shape, scaled)"
+    }
+  }
+}

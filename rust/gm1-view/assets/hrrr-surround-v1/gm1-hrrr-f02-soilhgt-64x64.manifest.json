@@ -1,0 +1,89 @@
+{
+  "claim_limit": "source-backed HRRR f02 SOILHGT display context with spherical ECEF-to-child-ENU curvature and exact-child ownership; not model terrain, evolved meteorology, sub-grid topography, roads, buildings, or procedural fill",
+  "decoder": {
+    "atmosphere_f02_fingerprint_sha256": "ece46a8b431097fc9c1c040b292d14745e4130b8a7974fe11b75f6999e0df985",
+    "atmosphere_f03_fingerprint_sha256": "935264cc4d7c5878b1fecf1b63c243152e150122d20174b690239595a07b1109",
+    "build_manifest_sha256": "b440948e2a238210fd9377496bb2f885f4fe27f74a7fc5d957fd8af93b4c1a0b",
+    "decoded_tree_sha256": "965328c88efa20ae2567264664f9b26869674b8410688d1ea5415a476f2dcfcf",
+    "executable_sha256": "c45e31cb323850a13985b9a83266e69d6b00a3f5827c6103787653a6cce60183",
+    "gate_sha256": "0fc1f176e1a228f2927f507ec7f00f3662ee720b6a50a742dcfb5754596de0a8",
+    "inventory_sha256": "a9c127752fface24ad6ef6c7e8352a1740ba77a0e9627134e90e97e6dd387a56",
+    "name": "ArWen RW-WPS hrrr_grib2_bridge @ 09e69271017d13632846dec2a858e3f2d4e5c923",
+    "output_schema": "gpuwm-cm1.hrrr-decoded-f32-window/v1",
+    "source_commit": "09e69271017d13632846dec2a858e3f2d4e5c923"
+  },
+  "grid": {
+    "full_shape_xy": [
+      1799,
+      1059
+    ],
+    "name": "HRRR Lambert GDT3.30",
+    "scan_mode": "0x40",
+    "spacing_m_xy": [
+      3000,
+      3000
+    ],
+    "window_origin_ij": [
+      959,
+      609
+    ],
+    "window_shape_xy": [
+      64,
+      64
+    ]
+  },
+  "overlay": {
+    "exact_child_half_extent_km_f32_bits": "40ef3333",
+    "exact_child_terrain_sha256": "afbec69ee1f23c881f5337f1eb7828eeb29ab7b34f7236a284980dc29681ba91",
+    "height_treatment": "native decoded binary32 SOILHGT heights; triangle-edge interpolation only; no extrapolation, displacement, noise, or authored extension",
+    "ownership": "the exact 300x300 50m child terrain is authoritative inside its +/-7.475km mass-point footprint; clipped HRRR triangles own only the exterior"
+  },
+  "payload": {
+    "dtype": "little-endian binary32",
+    "name": "SOILHGT.f32le",
+    "nbytes": 16384,
+    "order": "south-to-north row-major",
+    "sha256": "4519dc86ea4713131bdc9471d6ed65dd68ce2a467457b8ec1830475d203ab8b8",
+    "shape": [
+      64,
+      64
+    ]
+  },
+  "schema": "gm1.view.hrrr-source-backed-surround-manifest/v1",
+  "source": {
+    "cycle_utc": "2024-05-21T19:00:00Z",
+    "fetch_manifest_sha256": "d53e5b659dcb47b4a0e0a9d8a4bb6d9c31db839b3460d1f0ebe6f29b65fc77c0",
+    "files": [
+      {
+        "name": "hrrr.t19z.soilf02.grib2",
+        "nbytes": 431574022,
+        "sha256": "703945dc2a10e2416ae5773444aa0483cd5e645c2ca116f554f101ebd29c1fbf"
+      },
+      {
+        "name": "hrrr.t19z.soilf03.grib2",
+        "nbytes": 434331894,
+        "sha256": "8e6fcc42a50dd26bd349475383480578d25a861bb740f67cf039bf1514c9efbd"
+      },
+      {
+        "name": "hrrr.t19z.wrfnatf02.grib2",
+        "nbytes": 763838413,
+        "sha256": "63c75fba7f25f619e219d9a23b3e0c07cfb8e362b4e2f23ee54937be2f63d218"
+      },
+      {
+        "name": "hrrr.t19z.wrfnatf03.grib2",
+        "nbytes": 766890103,
+        "sha256": "acec58d144f6a3398159af604f8f6436e277de74a2baf5cdcb5c6574b44ab8f0"
+      }
+    ],
+    "forecast_hour": 2,
+    "valid_time_utc": "2024-05-21T21:00:00Z"
+  },
+  "status": "PASS_SOURCE_BACKED_HRRR_SURROUND_TERRAIN",
+  "transform": {
+    "child_center_lat_f64_bits": "4044bb15cda77904",
+    "child_center_lon_f64_bits": "c0578c5ebb59704f",
+    "earth_radius_m_f64_bits": "41584de740000000",
+    "method": "HRRR Lambert inverse -> spherical ECEF -> child ENU",
+    "output_axes_units": "east-km, up-km, north-km"
+  }
+}

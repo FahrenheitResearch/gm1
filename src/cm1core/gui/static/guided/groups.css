@@ -1,0 +1,27 @@
+/* The gallery's groups: Start here open, the other three folded to one row with "Show all N",
+   and the Make-your-own-environment card's two sliders. Only the base's --gm1-* variables, so the skin
+   re-points these too; no picture is clipped, filtered or restyled. */
+
+.g-group { margin: 0 0 26px; }
+.g-group-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; margin: 0 0 10px; }
+.g-group-head h2.cap { margin: 0; }
+.g-group-line { margin: 0; color: var(--gm1-muted); min-width: 0; }
+.g-more-row { margin-top: 10px; }
+.g-more-row [hidden] { display: none !important; }
+/* A registered card's cell is not a box of its own: its card (and a panel it opens) are the grid's items. */
+.g-cell { display: contents; }
+
+.g-card .g-idealized { margin: 0; color: var(--gm1-muted); font-size: var(--fs-small); }
+
+.g-env .g-env-slider { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; margin-top: 4px; }
+.g-env .g-env-slider label { color: var(--gm1-text); }
+.g-env .g-env-slider input[type="range"] { width: 100%; margin: 2px 0 0; accent-color: var(--gm1-title); }
+.g-env .g-env-ends { display: flex; justify-content: space-between; gap: 8px; color: var(--gm1-dim);
+  font-size: var(--fs-micro); }
+.g-env .g-env-value { color: var(--gm1-data); font-family: var(--gm1-font-mono); font-size: var(--fs-small); }
+.g-env .g-env-sentence { margin: 6px 0 0; color: var(--gm1-title); }
+.g-env .g-env-sentence:empty, .g-env .g-facts:empty { display: none; }
+
+/* A card's words and "The air" row wrap inside their box at any width, even an unbroken word or a sounding file's
+   long path (measured: a 60-letter word overflowed a 400 px screen by 161 px). */
+.g-card h2, .g-card .g-line, .g-card .g-why, .g-card .g-idealized, .g-got td { overflow-wrap: anywhere; }

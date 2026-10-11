@@ -1,0 +1,33 @@
+[package]
+name = "gm1-view"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+license = "Apache-2.0"
+publish = false
+description = "GPU-native scientific viewer for exact GM1 forecast artifacts"
+
+[dependencies]
+bevy = { version = "0.19.1", default-features = false, features = ["3d"] }
+bevy_egui = { version = "0.42.0", default-features = false, features = ["default_fonts", "render"] }
+bytemuck = { version = "1.24", features = ["derive"] }
+cm1-state = { path = "../cm1-state" }
+image = { version = "0.25", default-features = false, features = ["hdr", "png"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+wgpu = { version = "29.0.4", default-features = false, features = ["std", "dx12", "vulkan", "wgsl"] }
+pollster = "0.4"
+
+[dev-dependencies]
+naga = { version = "29.0.4", features = ["wgsl-in"] }
+
+[profile.release]
+codegen-units = 1
+lto = "thin"
+strip = true
+
+# Keep the viewer edit/link loop fast while optimizing the strict 977 MB
+# CM1 artifact decoder that otherwise dominates debug startup.
+[profile.dev.package.cm1-state]
+opt-level = 3

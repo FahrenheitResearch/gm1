@@ -1,0 +1,606 @@
+{
+  "schema": "gpuwm-cm1.shipped-soundings/v1",
+  "soundings": [
+    {
+      "bytes": 7518,
+      "dropped": [
+        {
+          "hght_m_msl": 31057.0,
+          "index": 116,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 10.2
+        }
+      ],
+      "filename": "koun-2013-05-20-1800z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.584,
+      "icao": "OUN",
+      "launch_utc": "2013-05-20T18:00Z",
+      "levels_in_archive": 117,
+      "levels_used": 116,
+      "observation": "NWS rawinsonde, Norman, Oklahoma (OUN, WMO 72357), 1800 UTC 20 May 2013",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          17.71,
+          5.66
+        ],
+        "el_m_agl": 12364.2,
+        "lcl_m_agl": 642.1,
+        "lfc_m_agl": 651.7,
+        "mean_wind_0_6km_m_s": [
+          16.22,
+          13.01
+        ],
+        "sbcape_j_kg": 4898.6,
+        "sbcin_j_kg": 0.0,
+        "shear_0_1km_m_s": 10.1,
+        "shear_0_6km_m_s": 26.49,
+        "srh_0_1km_m2_s2": 136.5,
+        "srh_0_3km_m2_s2": 166.9,
+        "surface_dewpoint_depression_K": 5.0
+      },
+      "place": "Norman, Oklahoma",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 16484,
+      "response_sha256": "94aae7f790e5092234e57fc6bced01c1162ccda280a6a82fc93fb7f597c22be2",
+      "response_stored": "tests/data/uwyo/72357-2013-05-20T18.html",
+      "retrieved_utc": "2026-09-14",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "a well-known day's environment: the Norman midday balloon of 20 May 2013",
+      "sha256": "aa7d5afa3701ebf14f46221e532c144b01a94c4bc36baad0275db0c3da79e83d",
+      "station": "72357",
+      "surface": {
+        "T_C": 27.4,
+        "Td_C": 22.4,
+        "p_hPa": 966.0,
+        "qv_g_kg": 17.939,
+        "theta_K": 303.532
+      },
+      "top_m_agl": 30440.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2013-05-20%2018:00:00&id=72357&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 7128,
+      "dropped": [
+        {
+          "hght_m_msl": 33439.0,
+          "index": 110,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 7.2
+        },
+        {
+          "hght_m_msl": 33535.0,
+          "index": 111,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 7.1
+        }
+      ],
+      "filename": "koun-2019-05-21-0000z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.34,
+      "icao": "OUN",
+      "launch_utc": "2019-05-21T00:00Z",
+      "levels_in_archive": 112,
+      "levels_used": 110,
+      "observation": "NWS rawinsonde, Norman, Oklahoma (OUN, WMO 72357), 0000 UTC 21 May 2019",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          17.12,
+          16.46
+        ],
+        "el_m_agl": 14423.1,
+        "lcl_m_agl": 451.2,
+        "lfc_m_agl": 499.6,
+        "mean_wind_0_6km_m_s": [
+          14.03,
+          23.3
+        ],
+        "sbcape_j_kg": 4201.4,
+        "sbcin_j_kg": -0.6,
+        "shear_0_1km_m_s": 21.4,
+        "shear_0_6km_m_s": 33.54,
+        "srh_0_1km_m2_s2": 417.5,
+        "srh_0_3km_m2_s2": 528.2,
+        "surface_dewpoint_depression_K": 3.5
+      },
+      "place": "Norman, Oklahoma",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 16096,
+      "response_sha256": "77cf0b8548ff71c82ec59840c1a837220b43551bdde89a7532980b96057c0365",
+      "response_stored": "tests/data/uwyo/72357-2019-05-21T00.html",
+      "retrieved_utc": "2026-09-14",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "a well-known day's environment: the Norman evening balloon of 20 May 2019, 0000 UTC on the 21st",
+      "sha256": "c172f77023e9c9bcfecfaf67d4f8e229bb3bb475fa10aa24f3d8b9389645b997",
+      "station": "72357",
+      "surface": {
+        "T_C": 26.4,
+        "Td_C": 22.9,
+        "p_hPa": 961.0,
+        "qv_g_kg": 18.608,
+        "theta_K": 302.97
+      },
+      "top_m_agl": 32878.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2019-05-21%2000:00:00&id=72357&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 4918,
+      "dropped": [
+        {
+          "hght_m_msl": 30634.0,
+          "index": 76,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 10.6
+        }
+      ],
+      "filename": "koun-1999-05-03-1800z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_exception": "the archive's own lowest layer: 964 hPa at the station (345 m) and 925 hPa at 716 m are 13 m further apart than hydrostatic balance allows at that temperature, so CM1's reconstruction runs 1.0 to 1.3 hPa low from there up (0.2 hPa at 20 km); every level above it is consistent with the next to within 0.3 hPa. The 0000 UTC launch that evening stopped at 9.7 km, below any model top.",
+      "hydrostatic_limit_hPa": 1.3,
+      "hydrostatic_max_abs_hPa": 1.293,
+      "icao": "OUN",
+      "launch_utc": "1999-05-03T18:00Z",
+      "levels_in_archive": 77,
+      "levels_used": 76,
+      "observation": "NWS rawinsonde, Norman, Oklahoma (OUN, WMO 72357), 1800 UTC 3 May 1999",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          9.76,
+          1.32
+        ],
+        "el_m_agl": 11792.5,
+        "lcl_m_agl": 773.8,
+        "lfc_m_agl": 777.9,
+        "mean_wind_0_6km_m_s": [
+          11.92,
+          8.5
+        ],
+        "sbcape_j_kg": 3039.5,
+        "sbcin_j_kg": 0.0,
+        "shear_0_1km_m_s": 8.51,
+        "shear_0_6km_m_s": 22.19,
+        "srh_0_1km_m2_s2": 112.0,
+        "srh_0_3km_m2_s2": 92.8,
+        "surface_dewpoint_depression_K": 6.0
+      },
+      "place": "Norman, Oklahoma",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 13766,
+      "response_sha256": "5a28566dfe578d03bca3a6a51efc61b80954104df9b6f6b796cbda0a754f9c75",
+      "response_stored": "tests/data/uwyo/72357-1999-05-03T18.html",
+      "retrieved_utc": "2026-09-24T09:00:50Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "the target was 0000 UTC 4 May; that balloon stopped at 9.7 km (30 levels), so the 1800 UTC special launch of 3 May is used (29.8 km)",
+      "sha256": "2da08f23539b4b381e86113b647d54a89e41325a92634102faef32a0986c5517",
+      "station": "72357",
+      "surface": {
+        "T_C": 23.8,
+        "Td_C": 17.8,
+        "p_hPa": 964.0,
+        "qv_g_kg": 13.425,
+        "theta_K": 300.074
+      },
+      "top_m_agl": 29830.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=1999-05-03%2018:00:00&id=72357&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 7128,
+      "dropped": [
+        {
+          "hght_m_msl": 28909.0,
+          "index": 110,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 13.8
+        }
+      ],
+      "filename": "koun-2011-05-24-1800z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.521,
+      "icao": "OUN",
+      "launch_utc": "2011-05-24T18:00Z",
+      "levels_in_archive": 111,
+      "levels_used": 110,
+      "observation": "NWS rawinsonde, Norman, Oklahoma (OUN, WMO 72357), 1800 UTC 24 May 2011",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          12.27,
+          7.73
+        ],
+        "el_m_agl": 12502.4,
+        "lcl_m_agl": 591.3,
+        "lfc_m_agl": 592.9,
+        "mean_wind_0_6km_m_s": [
+          9.18,
+          14.57
+        ],
+        "sbcape_j_kg": 3257.6,
+        "sbcin_j_kg": 0.0,
+        "shear_0_1km_m_s": 11.55,
+        "shear_0_6km_m_s": 23.71,
+        "srh_0_1km_m2_s2": 165.4,
+        "srh_0_3km_m2_s2": 194.0,
+        "surface_dewpoint_depression_K": 4.6
+      },
+      "place": "Norman, Oklahoma",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 16422,
+      "response_sha256": "f279408e84036e1bb68e65d7876e7ad471595813d92e1b67c571e568630b841e",
+      "response_stored": "tests/data/uwyo/72357-2011-05-24T18.html",
+      "retrieved_utc": "2026-09-24T08:58:56Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "the 1800 UTC special launch of 24 May 2011 is archived",
+      "sha256": "d72f8ee9189ca0eaefcb3e3cfc332a7ddfb844a346adf9027baf3b9e5c5acd56",
+      "station": "72357",
+      "surface": {
+        "T_C": 25.8,
+        "Td_C": 21.2,
+        "p_hPa": 964.0,
+        "qv_g_kg": 16.672,
+        "theta_K": 302.095
+      },
+      "top_m_agl": 28306.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2011-05-24%2018:00:00&id=72357&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 6348,
+      "dropped": [
+        {
+          "hght_m_msl": 21336.0,
+          "index": 82,
+          "missing": [],
+          "not_rising": true,
+          "pres_hPa": 44.2
+        },
+        {
+          "hght_m_msl": 28313.0,
+          "index": 99,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 14.9
+        }
+      ],
+      "filename": "kbmx-2011-04-27-1800z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.442,
+      "icao": "BMX",
+      "launch_utc": "2011-04-27T18:00Z",
+      "levels_in_archive": 100,
+      "levels_used": 98,
+      "observation": "NWS rawinsonde, Birmingham, Alabama (BMX, WMO 72230), 1800 UTC 27 April 2011",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          19.98,
+          11.56
+        ],
+        "el_m_agl": 12910.0,
+        "lcl_m_agl": 1016.5,
+        "lfc_m_agl": 1021.3,
+        "mean_wind_0_6km_m_s": [
+          19.98,
+          19.06
+        ],
+        "sbcape_j_kg": 2799.5,
+        "sbcin_j_kg": 0.0,
+        "shear_0_1km_m_s": 14.47,
+        "shear_0_6km_m_s": 34.51,
+        "srh_0_1km_m2_s2": 275.8,
+        "srh_0_3km_m2_s2": 558.2,
+        "surface_dewpoint_depression_K": 8.0
+      },
+      "place": "Birmingham, Alabama",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 15546,
+      "response_sha256": "38e85f65d825e84f2bdfa7e38ce4e102eac154f0abedde3effe62c19f6e22f30",
+      "response_stored": "tests/data/uwyo/72230-2011-04-27T18.html",
+      "retrieved_utc": "2026-09-24T08:59:02Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "the 1800 UTC special launch of 27 April 2011 is archived",
+      "sha256": "a7e8bd7b3efb89f184fae792b00e6de806bbcb7313b1f79ed7c4fa886c8250be",
+      "station": "72230",
+      "surface": {
+        "T_C": 28.0,
+        "Td_C": 20.0,
+        "p_hPa": 984.0,
+        "qv_g_kg": 15.131,
+        "theta_K": 302.54
+      },
+      "top_m_agl": 27864.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2011-04-27%2018:00:00&id=72230&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 8883,
+      "dropped": [
+        {
+          "hght_m_msl": 33892.0,
+          "index": 137,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 6.9
+        }
+      ],
+      "filename": "kdnr-2015-06-02-0000z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.679,
+      "icao": "DNR",
+      "launch_utc": "2015-06-02T00:00Z",
+      "levels_in_archive": 138,
+      "levels_used": 137,
+      "observation": "NWS rawinsonde, Denver, Colorado (DNR, WMO 72469), 0000 UTC 2 June 2015",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          4.04,
+          -5.98
+        ],
+        "el_m_agl": 11156.0,
+        "lcl_m_agl": 2252.6,
+        "lfc_m_agl": 2717.5,
+        "mean_wind_0_6km_m_s": [
+          6.32,
+          1.16
+        ],
+        "sbcape_j_kg": 1266.3,
+        "sbcin_j_kg": -51.8,
+        "shear_0_1km_m_s": 9.44,
+        "shear_0_6km_m_s": 24.12,
+        "srh_0_1km_m2_s2": 178.1,
+        "srh_0_3km_m2_s2": 184.7,
+        "surface_dewpoint_depression_K": 18.0
+      },
+      "place": "Denver, Colorado",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 17783,
+      "response_sha256": "ae78e3d0e6ce49ac5e782f304c2ec5414470c9e8ff5a948a8b431669746a8f8c",
+      "response_stored": "tests/data/uwyo/72469-2015-06-02T00.html",
+      "retrieved_utc": "2026-09-24T09:52:20Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "the rule (surface T-Td >= 12 K, LCL >= 1.8 km, CAPE 800-2500 J/kg, 0-6 km shear >= 20 m/s, top >= 20 km, hydrostatic <= 1 hPa), first pass of a scan of 0000 UTC launches at DNR, LBF, AMA and DDC, May-June",
+      "sha256": "9c557edb543f994e3e1d3f476b59b78afc801873353d610d1f082e174e5ac172",
+      "station": "72469",
+      "surface": {
+        "T_C": 26.6,
+        "Td_C": 8.6,
+        "p_hPa": 836.0,
+        "qv_g_kg": 8.421,
+        "theta_K": 315.473
+      },
+      "top_m_agl": 32222.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2015-06-02%2000:00:00&id=72469&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 7583,
+      "dropped": [
+        {
+          "hght_m_msl": 31231.0,
+          "index": 117,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 10.3
+        }
+      ],
+      "filename": "kiln-2012-06-29-1800z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.672,
+      "icao": "ILN",
+      "launch_utc": "2012-06-29T18:00Z",
+      "levels_in_archive": 118,
+      "levels_used": 117,
+      "observation": "NWS rawinsonde, Wilmington, Ohio (ILN, WMO 72426), 1800 UTC 29 June 2012",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          9.88,
+          -10.73
+        ],
+        "el_m_agl": 14742.4,
+        "lcl_m_agl": 1405.9,
+        "lfc_m_agl": 1760.9,
+        "mean_wind_0_6km_m_s": [
+          13.62,
+          -4.24
+        ],
+        "sbcape_j_kg": 6260.2,
+        "sbcin_j_kg": -6.7,
+        "shear_0_1km_m_s": 4.39,
+        "shear_0_6km_m_s": 18.51,
+        "srh_0_1km_m2_s2": 23.2,
+        "srh_0_3km_m2_s2": 86.4,
+        "surface_dewpoint_depression_K": 11.0
+      },
+      "place": "Wilmington, Ohio",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 16957,
+      "response_sha256": "e59bc4cdd248058c15d8e6f9524bb9971a7314466850aa4a80de5693ddcd4cd2",
+      "response_stored": "tests/data/uwyo/72426-2012-06-29T18.html",
+      "retrieved_utc": "2026-09-24T09:00:14Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "of ILN, ILX and DVN at 1200 and 1800 UTC on 29 June 2012, the only launch with CAPE >= 3000 J/kg that reaches 20 km (ILX 1200 UTC stopped at 12 km)",
+      "sha256": "08b7bc5abd1d404707cd95a1ca14c8001f3b928b6a4d2b11e57c223775333dde",
+      "station": "72426",
+      "surface": {
+        "T_C": 35.0,
+        "Td_C": 24.0,
+        "p_hPa": 974.0,
+        "qv_g_kg": 19.652,
+        "theta_K": 310.476
+      },
+      "top_m_agl": 30773.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2012-06-29%2018:00:00&id=72426&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 3488,
+      "dropped": [
+        {
+          "hght_m_msl": 20512.0,
+          "index": 54,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 52.6
+        }
+      ],
+      "filename": "ktlh-2004-09-16-0000z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.342,
+      "icao": "TLH",
+      "launch_utc": "2004-09-16T00:00Z",
+      "levels_in_archive": 55,
+      "levels_used": 54,
+      "observation": "NWS rawinsonde, Tallahassee, Florida (TLH, WMO 72214), 0000 UTC 16 September 2004",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          -1.56,
+          19.6
+        ],
+        "el_m_agl": 13869.7,
+        "lcl_m_agl": 375.0,
+        "lfc_m_agl": 885.3,
+        "mean_wind_0_6km_m_s": [
+          -8.8,
+          21.54
+        ],
+        "sbcape_j_kg": 1755.9,
+        "sbcin_j_kg": -31.4,
+        "shear_0_1km_m_s": 19.8,
+        "shear_0_6km_m_s": 26.88,
+        "srh_0_1km_m2_s2": 378.4,
+        "srh_0_3km_m2_s2": 468.9,
+        "surface_dewpoint_depression_K": 2.9
+      },
+      "place": "Tallahassee, Florida",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 12045,
+      "response_sha256": "29e4fa30ed271adb64df67230521b178bea764af851a0b46bd565e2817893645",
+      "response_stored": "tests/data/uwyo/72214-2004-09-16T00.html",
+      "retrieved_utc": "2026-09-24T09:00:57Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "a Gulf-coast launch in a landfalling tropical cyclone's rainbands with 0-1 km shear >= 10 m/s and a moist column that reaches 20 km (LIX 2005-08-29 0000 UTC has 0-1 km shear 16.8 m/s but CAPE 1125 J/kg; LCH 2005-09-24 stopped at 15.5 km)",
+      "sha256": "394ba7900c473dca192abf851e058a3a47d290cff04c09ed8194b8617af72a6f",
+      "station": "72214",
+      "surface": {
+        "T_C": 27.0,
+        "Td_C": 24.1,
+        "p_hPa": 1003.0,
+        "qv_g_kg": 19.185,
+        "theta_K": 299.893
+      },
+      "top_m_agl": 20064.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2004-09-16%2000:00:00&id=72214&src=UNKNOWN&type=TEXT:LIST"
+    },
+    {
+      "bytes": 8948,
+      "dropped": [
+        {
+          "hght_m_msl": 12497.0,
+          "index": 69,
+          "missing": [],
+          "not_rising": true,
+          "pres_hPa": 197.0
+        },
+        {
+          "hght_m_msl": 32476.0,
+          "index": 139,
+          "missing": [
+            "DRCT",
+            "SPED"
+          ],
+          "not_rising": false,
+          "pres_hPa": 8.5
+        }
+      ],
+      "filename": "kjan-2014-07-01-0000z.input_sounding",
+      "format": "CM1 r21.1 isnd=7 input_sounding",
+      "hydrostatic_limit_hPa": 1.0,
+      "hydrostatic_max_abs_hPa": 0.381,
+      "icao": "JAN",
+      "launch_utc": "2014-07-01T00:00Z",
+      "levels_in_archive": 140,
+      "levels_used": 138,
+      "observation": "NWS rawinsonde, Jackson, Mississippi (JAN, WMO 72235), 0000 UTC 1 July 2014",
+      "parameters": {
+        "basis": "this tool's own numbers from the measured profile on a 1 hPa grid: surface-based parcel, pseudoadiabatic, virtual-temperature buoyancy, Bolton LCL, Bunkers (2000) right mover",
+        "bunkers_right_m_s": [
+          -3.55,
+          5.03
+        ],
+        "el_m_agl": 14383.0,
+        "lcl_m_agl": 1273.6,
+        "lfc_m_agl": 1278.9,
+        "mean_wind_0_6km_m_s": [
+          3.0,
+          1.37
+        ],
+        "sbcape_j_kg": 3251.5,
+        "sbcin_j_kg": -0.0,
+        "shear_0_1km_m_s": 2.56,
+        "shear_0_6km_m_s": 2.64,
+        "srh_0_1km_m2_s2": -11.9,
+        "srh_0_3km_m2_s2": 11.3,
+        "surface_dewpoint_depression_K": 10.0
+      },
+      "place": "Jackson, Mississippi",
+      "provenance": "PROVENANCE.md",
+      "response_bytes": 18689,
+      "response_sha256": "aad70d4e096666890ae6546d0575c1acfea10020693e7e2382ce95043db3e448",
+      "response_stored": "tests/data/uwyo/72235-2014-07-01T00.html",
+      "retrieved_utc": "2026-09-24T09:55:05Z",
+      "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive",
+      "selection": "the rule (a July 0000 UTC launch from JAN, BMX, FFC or TLH with 0-6 km shear < 8 m/s and CAPE >= 2000 J/kg, top >= 20 km, hydrostatic <= 1 hPa), first pass of a scan of July 2012-2016; a 2019 pass was set aside because its archive page has 6467 levels",
+      "sha256": "ececf9e35ea24b0b508d77da4b241e1d00576478037e35b9fa0a10ea21d43018",
+      "station": "72235",
+      "surface": {
+        "T_C": 32.2,
+        "Td_C": 22.2,
+        "p_hPa": 1005.0,
+        "qv_g_kg": 17.009,
+        "theta_K": 304.916
+      },
+      "top_m_agl": 32218.0,
+      "url": "https://weather.uwyo.edu/wsgi/sounding?datetime=2014-07-01%2000:00:00&id=72235&src=UNKNOWN&type=TEXT:LIST"
+    }
+  ]
+}

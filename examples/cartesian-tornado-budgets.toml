@@ -1,0 +1,118 @@
+# CM1's per-process budgets and the GM1 vorticity budget on the Cartesian lane.
+#
+# [output] selects CM1's own &param9 budget words (README.namelist:1432-1447):
+# every history frame then carries the ub_*/vb_*/wb_*/ptb_*/qvb_* terms
+# param.F:5302-5875 selects for this configuration, each the tendency of the
+# large step whose state the frame carries (cm1.F:3268-3296).
+#
+# [lagrangian] adds two GM1 extensions on top of CM1's parcel words: the
+# vorticity budget as history carriers (xvortb_*, yvortb_*, zvortb_*: calcvort
+# of every momentum budget term, plus stretching, tilting, divergence,
+# advection and the residual against the model's own advection), and the same
+# budget sampled along every parcel, so a trajectory can be integrated term by
+# term: tilting vs stretching vs baroclinic (the curl of wb_buoy) vs friction
+# (the curl of the hturb/vturb split).
+#
+# Nothing here writes a prognostic carrier: the budget stage replays the
+# model's kernels on its own scratch through a write guard, and a run with
+# these tables removed integrates identical words.
+#
+# The six mandatory tables are examples/cartesian-uniform-grid.toml's.  The
+# [initialization] table selects CM1's analytic Weisman-Klemp sounding with
+# quarter-circle shear (isnd = 5, iwnd = 2), as the other storm decks do, so
+# the deck runs without an external input_sounding and has a storm to budget.
+
+[run]
+lane = "cartesian"
+duration_s = 600.0
+dt_s = 2.0
+history_interval_s = 300.0
+restart_interval_s = 600.0
+
+[initialization]
+isnd = 5
+iwnd = 2
+
+[grid]
+nx = 96
+ny = 96
+nz = 40
+dx_m = 1000.0
+dy_m = 1000.0
+dz_m = 500.0
+terrain = false
+stretch_x = false
+stretch_y = false
+
+[dynamics]
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2
+east = 2
+south = 2
+north = 2
+bottom = 1
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = false
+u_move_m_s = 0.0
+v_move_m_s = 0.0
+
+[physics]
+component = "wsm6-mp6"
+equation_set = 2
+
+[runtime]
+acoustic_substeps = 6
+tile_nx = 32
+tile_ny = 32
+warmup_steps = 0
+memory_budget_mib = 8192
+capacity_profile = "default"
+
+[output]
+# README.namelist:1432-1447, CM1's own names.
+output_ubudget = 1
+output_vbudget = 1
+output_wbudget = 1
+output_thbudget = 1
+output_qvbudget = 1
+
+[lagrangian]
+iprcl = 1
+nparcels = 1125
+prclfrq_s = 10.0
+seeding = "box"
+seed_nx = 15
+seed_ny = 15
+seed_nz = 5
+seed_dx_m = 500.0
+seed_dy_m = 500.0
+seed_dz_m = 250.0
+seed_x0_m = -3500.0
+seed_y0_m = -3500.0
+seed_z0_m = 250.0
+prcl_ptra = 0
+prcl_nc = 0
+prcl_dbz = 0
+prcl_sfc = 0
+# --- GM1 extensions ---------------------------------------------------------
+vorticity_budget_history = true
+parcel_vorticity_budget = true

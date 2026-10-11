@@ -1,0 +1,592 @@
+{
+  "authority": "the CM1 r21.1 release source (base.F, init3d.F, param.F)",
+  "driver": "the CM1 differential oracle of the development repository (not distributed): CM1 r21.1 built from the release and GM1 run on the same deck",
+  "horizon": "model time zero. Initialization is the one part of the model whose correctness needs no trajectory: the initial state either is CM1's or it is not, and the difference is visible before a single step. Both sides therefore stop before stepping, which also makes the whole comparison GPU-free.",
+  "purpose": "Per-selector record of what has and has not been checked against CM1 r21.1. A value whose status is not 'validated' is reported as UNVALIDATED in every run receipt that selects it and in gpuwm-cm1 doctor.",
+  "schema": "gpuwm-cm1.initialization-validation/v1",
+  "selectors": {
+    "ibalance": {
+      "0": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "integration": {
+          "admission": "admitted for a run (the control for ibalance = 2: the same warm bubble without the balance)",
+          "at_60_s": {
+            "th_nrmsd": 0.0,
+            "w_nrmsd": 0.0004
+          },
+          "case": "ibalance-0-warm-bubble",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": [
+            0.9997,
+            1.0
+          ],
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.0009,
+          "verdict": "PASS",
+          "w_nrmsd_max": 0.0011
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'ibalance-0', fields prs,rho,th3d,qv",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'ibalance-1', fields prs,rho,th3d,qv",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "2": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "admitted for a run",
+          "at_60_s": {
+            "th_nrmsd": 0.0001,
+            "w_nrmsd": 0.0008
+          },
+          "case": "ibalance-2-warm-bubble",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": [
+            0.9998,
+            1.0
+          ],
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.0016,
+          "verdict": "PASS",
+          "w_nrmsd_max": 0.0017
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; cases 'ibalance-2', 'ibalance-2-periodic', 'ibalance-2-iinit-4', 'isnd-3-ibalance-2', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and within 5 binary32 steps against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 7.852931065225146e-08
+      }
+    },
+    "iinit": {
+      "0": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-0', fields th3d (CM1 thpert)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-1', fields th3d (CM1 thpert); and case 'iinit-1-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "10": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-10', fields th3d,u3d,v3d; the arm builds no tha (init3d.F:1334-1347), so at model time zero both sides hold the undisturbed state. The forcing it applies during the run is checked against CM1 r21.1 over 2 h on CM1's supercell deck (docs/CM1-USERS.md, The initiation options)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "11": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-11', fields th3d (CM1 thpert); and case 'iinit-11-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "12": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-12', fields th3d,u3d,v3d; the arm builds no tha (init3d.F:1370-1396), so at model time zero both sides hold the undisturbed state. The forcing it applies during the run is checked against CM1 r21.1 over 2 h on CM1's supercell deck (docs/CM1-USERS.md, The initiation options)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "13": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-13', fields th3d (CM1 thpert); and case 'iinit-13-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "2": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-2', fields th3d (CM1 thpert); and case 'iinit-2-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "3": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-3', fields th3d (CM1 thpert); and case 'iinit-3-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "4": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-MOIST-BENCHMARK-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "at_60_s": {
+            "th_nrmsd": 0.2756,
+            "w_nrmsd": 0.3427
+          },
+          "case": "bf02-moist-benchmark",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": [
+            0.9576,
+            1.358
+          ],
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.2756,
+          "verdict": "FAIL",
+          "w_nrmsd_max": 0.4611
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; cases 'iinit-4-isnd-4', 'iinit-4-isnd-5', 'iinit-4-irandp-cm1-stream', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and within 2 binary32 steps against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 6.626302154140812e-08
+      },
+      "5": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-5', fields th3d (CM1 thpert); and case 'iinit-5-cm1-words': CM1's stock 120 km centred grid (iorigin = 2) with none of init3d.F's words declared, the imported-namelist case, so the arm's own literals are what is compared; word for word since GM1 transcribed init3d.F:688-692's (th0*pi0 + dum1)/pi0 - th0 (it was dum1/pi0, 2.2e-6 nrmse)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "7": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; cases 'iinit-7' (32 x 32 km, 1 km) and 'iinit-7-500km' (100 x 100 cells of 5 km, where the warm core passes 0.1 K and takes init3d.F:1250's random noise), fields th3d,u3d,v3d,prs,rho,qv, iorigin = 2, random_generator = \"cm1\": the vortex, its gradient-wind pressure and its noise are CM1's word for word (max |GM1-CM1| = 0 in every field)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "8": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-8', field th3d, checked as a BOUND rather than a norm: init3d.F:1277 adds amplitude*(2*rand-1) inside the thermal, so the two sides cannot agree word for word there. max|GM1-CM1| = 0.396 K against the 2*amplitude = 0.4 K bound, and the field is identical outside the thermal, so the deterministic envelope -- placement, radii, shape and amplitude -- is what is confirmed.",
+        "not_checked": "the random component of init3d.F:1257-1296's line thermal. CM1 adds amplitude*(2*rand-1) inside the thermal from gfortran's generator, and GM1 draws from its own; the two fields differ everywhere inside the thermal even when everything else is identical. What IS confirmed is the deterministic envelope -- placement, radii, shape and amplitude -- as a bound: max|GM1-CM1| stays under 2*amplitude inside the thermal and is exactly zero outside it. See irandp=1 for the same limitation. With random_generator = \"cm1\" (the importer's default for a CM1 namelist) the noise is CM1's word for word: see the row \"8:cm1\".",
+        "status": "UNVALIDATED",
+        "worst_nrmse": null
+      },
+      "8:cm1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-8-cm1-stream', fields th3d with initialization.random_generator = \"cm1\": libgfortran's xoshiro256** random_number, seeded as init3d.F:427-440 seeds it, so the thermal's random noise is CM1's word for word (max |GM1-CM1| = 0.0 K); and case 'iinit-8-cm1-words' (CM1's stock grid, no words declared)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "9": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iinit-9', fields th3d,u3d,v3d; the arm builds no tha (init3d.F:1303-1333), so at model time zero both sides hold the undisturbed state. The forcing it applies during the run is checked against CM1 r21.1 over 2 h on CM1's supercell deck (docs/CM1-USERS.md, The initiation options)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "imoist": {
+      "0": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'imoist-0', fields th3d,prs,rho",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 6.739215852156152e-08
+      },
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'isnd-7-external-sounding', fields th3d,prs,rho,qv",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "iorigin": {
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "identity: mult=0.0 at param.F:7212 is the corner frame every case above runs in",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "2": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iorigin-2', fields th3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "irandp": {
+      "0": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "identity: irandp=0 adds nothing, so the field is whatever the iinit arm built, and every iinit case above ran with it",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "structure and reproducibility only, in rust/cm1-state/src/initial_perturbation.rs: CM1's traversal order, CM1's draw count per global point including the margin cells, CM1's amplitude and depth limit per testcase, a zero mean, the variance of a uniform on [-A,A], bit reproducibility from one seed, and a different field from a different seed",
+        "not_checked": "init3d.F:427-440 seeds gfortran's random_number; its sequence is a property of one libgfortran build, not of CM1, and GM1 declares its own generator (splitmix64/top24-binary32) and its own recorded seed. A word-for-word differential is impossible by construction. What is checked instead, in rust/cm1-state/src/initial_perturbation.rs, is everything about the field that is not the numbers: CM1's traversal order, CM1's draw count per global point including the margin cells, CM1's amplitude and depth limit per testcase, a zero mean, the variance of a uniform on [-A,A], bit reproducibility from one seed and a different field from a different seed. With random_generator = \"cm1\" (the importer's default for a CM1 namelist) the field is CM1's word for word: see the row \"1:cm1\". GM1's own stream also walks one more row and column than CM1's testcase-0 loop (jj = 0..ny+3 against 0..ny+2) and centres them one cell further out; it is kept so every seeded run recorded before keeps its field.",
+        "status": "UNVALIDATED",
+        "worst_nrmse": null
+      },
+      "1:cm1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'irandp-1-cm1-stream', fields th3d with initialization.random_generator = \"cm1\" and CM1's own traversal (jj = 0..ny+2, two draws per point, init3d.F:1459-1482): the field is CM1's word for word (max |GM1-CM1| = 0.0 K)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "isnd": {
+      "1": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-1', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "10": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-BASE-CLOUD-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "at_60_s": {
+            "th_nrmsd": 0.0585,
+            "w_nrmsd": 0.5655
+          },
+          "case": "isnd-10-warm-bubble",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": [
+            0.9914,
+            1.0556
+          ],
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.065,
+          "verdict": "FAIL",
+          "w_nrmsd_max": 0.8024
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; cases 'isnd-10', 'isnd-10-morrison', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "11": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's. Its base state carries no cloud (qc0 = qi0 = 0 in CM1's own output), so the departure is not the base cloud's alone",
+          "at_60_s": {
+            "th_nrmsd": 0.0701,
+            "w_nrmsd": 0.0584
+          },
+          "case": "isnd-11-warm-bubble",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": null,
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.1813,
+          "verdict": "FAIL",
+          "w_nrmsd_max": 0.0858
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-11', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "12": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-12', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "13": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-13', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "14": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-14', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "17": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'isnd-17-thermodynamics-only', fields u3d,v3d,th3d,prs,rho,qv",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "18": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-18', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "19": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; cases 'isnd-19', 'isnd-19-testcase-11', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "2": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-2', fields prs,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and within 5 binary32 steps against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 1.320103573684059e-07
+      },
+      "20": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-20', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "21": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-21', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "22": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-22', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "23": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-23', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "3": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-3', fields prs,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and within 3 binary32 steps against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 6.905583773889904e-08
+      },
+      "4": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-BASE-CLOUD-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "at_60_s": {
+            "th_nrmsd": 0.2756,
+            "w_nrmsd": 0.3427
+          },
+          "case": "bf02-moist-benchmark",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": [
+            0.9576,
+            1.358
+          ],
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.2756,
+          "verdict": "FAIL",
+          "w_nrmsd_max": 0.4611
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-4', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "5": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-2', fields u3d,v3d (and, through every iinit/ibalance case on the same base, th3d, prs, rho and qv)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "7": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'isnd-7-external-sounding', fields u3d,v3d,th3d,prs,rho,qv",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "8": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "refused for a run (config.py CM1-CFG-ANALYTIC-SOUNDING-INTEGRATION); admitted with run.iconly = 1 to inspect the initial state, which stays word for word CM1's",
+          "verdict": "NOT COMPARED",
+          "why": "no time integration from it has been compared with CM1's like for like; a run starts only from a sounding whose integration matched CM1's (isnd = 5, 7, 9, 17), and isnd = 9's match does not stand for another sounding"
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; cases 'isnd-8', 'isnd-8-testcase-10', 'isnd-8-testcase-15', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "9": {
+        "evidence": "evidence/oracle/initialization/analytic-t0-differential-cm1-stock.json; evidence/oracle/initialization/analytic-t0-differential-cm1-novec.json",
+        "integration": {
+          "admission": "admitted for a run",
+          "at_60_s": {
+            "th_nrmsd": 0.0,
+            "w_nrmsd": 0.0003
+          },
+          "case": "isnd-9-warm-bubble",
+          "evidence": "evidence/oracle/initialization/analytic-integration-like-for-like.json",
+          "max_w_ratio_range": null,
+          "method": "the first 15 minutes, output every minute, GM1 on an RTX 4090 against CM1 r21.1 (CPU), both on Morrison (GM1 morrison-mp10, CM1 ptype = 5) at eqtset = 2 (the oracle's integration vs cm1 driver --like-for-like); pass: w nrmsd <= 0.02 to 300 s and <= 0.10 to 900 s, max w ratio 0.97-1.03 where CM1's max w >= 1 m/s, theta' nrmsd <= 0.02",
+          "th_nrmsd_max": 0.0008,
+          "verdict": "PASS",
+          "w_nrmsd_max": 0.0022
+        },
+        "method": "differential against the real CM1 r21.1 binary at model time zero (the oracle's initialization differential driver, its analytic-sounding rows; CM1 writes its initial output time, GM1 runs run.iconly = 1), field by field by cm1core.oracle.compare; case 'isnd-9', fields prs,q3d:qc,q3d:qi,q3d:qv,rho,th3d,u3d,v3d: word for word against CM1 built with -fno-tree-vectorize, and word for word against the stock -O2 build, whose libmvec-vectorized loops round differently (evidence/oracle/initialization/cm1-libmvec-probe.txt)",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "iwnd": {
+      "0": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-0', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "1": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-1', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "10": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-10', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "11": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-11', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "2": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-2', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "3": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-3', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "4": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-4', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "5": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-5', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "6": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-6', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "8": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-8', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "9": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'iwnd-9', fields u3d,v3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    },
+    "maintain_rh": {
+      "False": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "identity: CM1's default leaves qa(:,:,:,nqv) exactly qv0, and every case above with maintain_rh unset matched qv exactly",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      },
+      "True": {
+        "evidence": "evidence/oracle/initialization/initialization-differential.json",
+        "method": "differential against the real CM1 r21.1 binary at model time zero: both sides build the same deck and stop before a single step (CM1 writes its initial output time, GM1 runs initialization.iconly = 1), and the published frames are compared field by field by cm1core.oracle.compare; case 'maintain-rh', fields qv (CM1 qv), th3d",
+        "not_checked": null,
+        "status": "validated",
+        "worst_nrmse": 0.0
+      }
+    }
+  }
+}

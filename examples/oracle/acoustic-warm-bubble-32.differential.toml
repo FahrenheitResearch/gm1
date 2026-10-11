@@ -1,0 +1,114 @@
+# The cheapest decisive differential this port can run.
+#
+# gpuwm-cm1's configurable lane is "cartesian" at equation_set = 2, and it has
+# no dry configuration: the shortest honest comparison is a moist one, kept
+# short enough that the dycore -- not the microphysics -- is what the
+# divergence curve is measuring (this case never condenses in 280 s).
+#
+# The component is Morrison because that is the scheme CM1 integrates at
+# eqtset=2 (ptype=5, CM1's own supercell deck).  CM1 has no eqtset=2 WSM6:
+# src/param.F:936-948 forces eqtset=1 for ptype=7, so a WSM6 case would
+# difference two equation sets, and the translator names that.  The
+# 2026-09-14 capture ran GM1's WSM6 against CM1's ptype 5 with 6 acoustic
+# substeps against CM1's 4 (a receipt in the development repository).
+#
+# Term: acoustic.  A sound wave crosses one 1000 m cell in 1000/360 = 2.78 s,
+# so the decisive horizon is
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+#   PYTHONPATH=src python3 $HARNESS/differential.py horizon --term acoustic \
+#       --nx 32 --ny 32 --nz 40 --dx 1000 --dy 1000 --dz 500 --dt 1.0
+#
+#   timescale 2.778 s, horizon 278 s = 278 large steps = 1668 acoustic substeps.
+#
+# Rounded up to 280 s so the 20 s history cadence divides the duration exactly,
+# which gpuwm-cm1's config.py:1874-1895 requires.  14 frames, 32x32x40 cells:
+# seconds of CM1 wall time and a small GPU run.
+#
+# The base state is base.F's Weisman-Klemp analytic sounding (isnd=5) with its
+# analytic shear profile (iwnd=2).
+#
+# iwnd=0 would be the cleaner acoustic test -- no mean wind, so nothing is
+# advected and the only signal is the bubble's acoustic and buoyant
+# adjustment -- and config.py:816-826 admits the (isnd=5, iwnd=0) pair.  The
+# runtime does not: gm1_idealized_residency.py refuses it with "the analytic
+# Weisman-Klemp sounding lane admits iwnd=2 only".  The door and the
+# initializer disagree, so the pair is configurable and unrunnable.  Until
+# that is fixed this case carries the shear, and the advective timescale
+# (dx/U = 1000/20 = 50 s) sits inside the acoustic horizon rather than
+# outside it.
+
+[case]
+name = "acoustic-warm-bubble-32"
+term = "acoustic"
+notes = """psolver=3 split-explicit acoustics with the vertically implicit
+step, on a 32x32x40 1 km / 500 m grid, no mean wind, no Coriolis, no moving
+frame. One hundred acoustic cell crossings."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 280.0
+tapfrq = 20.0
+rstfrq = 280.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 1
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "morrison-mp10"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid (4 here), and the translator does the same so both
+# codes take the same number of acoustic small steps per large step.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 4000
+"runtime.capacity_profile" = "default"

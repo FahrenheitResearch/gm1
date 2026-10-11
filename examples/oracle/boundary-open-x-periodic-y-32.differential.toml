@@ -1,0 +1,90 @@
+# CM1's own squall_line family: open in x, periodic in y.
+#
+# run/config_files/squall_line/namelist.input uses wbc=ebc=2 with sbc=nbc=1,
+# and three of the les_* decks do the same.  A mixed family exercises both
+# branches of src/bc.F in one run, which an all-periodic or all-open case
+# cannot: the x ghost planes are a zero-gradient copy and the y ghost planes
+# wrap, in the same fill.
+#
+# Term: boundary, horizon 134 s, rounded to 140 s for the 20 s cadence.
+
+[case]
+name = "boundary-open-x-periodic-y-32"
+term = "boundary"
+notes = """open-radiative x with periodic y (CM1's squall-line family) on a
+32x32x40 1 km / 500 m grid, one and a half acoustic transits."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 140.0
+tapfrq = 20.0
+rstfrq = 140.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+hrdamp = 0
+xhd = 100000.0
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 1
+nbc = 1
+bbc = 1
+tbc = 1
+irbc = 4
+roflux = 0
+nudgeobc = 0
+alphobc = 60.0
+cstar = 30.0
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

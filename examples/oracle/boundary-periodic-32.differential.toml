@@ -1,0 +1,100 @@
+# CM1's own LES family: doubly periodic laterals.
+#
+# Nineteen of CM1 r21.1's twenty-three shipped decks use wbc=ebc=sbc=nbc=1.
+# gpuwm-cm1 expresses all of them (wbc, ebc, sbc and nbc = 1).
+#
+# Term: boundary.  A lateral boundary condition cannot be wrong until a wave
+# reaches it, and a periodic boundary is wrong in a way the interior sees only
+# once the signal that left one side comes back in the other:
+#
+# $HARNESS is the CM1 differential harness (docs/ORACLE-DIFFERENTIAL-HARNESS.md), kept with the development repository.
+#   PYTHONPATH=src python3 $HARNESS/differential.py horizon --term boundary \
+#       --nx 32 --ny 32 --nz 40 --dx 1000 --dy 1000 --dz 500 --dt 1.0
+#
+#   timescale 88.9 s (L/c), horizon 134 s = one transit plus a half.
+#
+# Rounded up to 140 s so the 20 s history cadence divides it exactly: seven
+# frames, the last two of them after the wrap has happened.
+
+[case]
+name = "boundary-periodic-32"
+term = "boundary"
+notes = """doubly periodic laterals (wbc=ebc=sbc=nbc=1) on a 32x32x40
+1 km / 500 m grid. One and a half acoustic transits of the domain, so the
+signal that leaves the east side is back in the west side before the last
+frame."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 40
+dx = 1000.0
+dy = 1000.0
+dz = 500.0
+dtl = 1.0
+timax = 140.0
+tapfrq = 20.0
+rstfrq = 140.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+hrdamp = 0
+xhd = 100000.0
+zd = 15000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 1
+ebc = 1
+sbc = 1
+nbc = 1
+bbc = 1
+tbc = 1
+irbc = 4
+roflux = 0
+nudgeobc = 0
+alphobc = 60.0
+cstar = 30.0
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 0
+
+isfcflx = 0
+sfcmodel = 0
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 8192
+"runtime.capacity_profile" = "default"

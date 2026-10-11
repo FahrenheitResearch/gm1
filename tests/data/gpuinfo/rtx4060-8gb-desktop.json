@@ -1,0 +1,18 @@
+{
+ "_about": "An 8 GB card driving a Linux desktop with 4.3 GB in use",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-11111111-2222-3333-4444-555555555555",
+   "name": "NVIDIA GeForce RTX 4060",
+   "memory.total": 8188,
+   "memory.used": 4101,
+   "memory.free": 3937,
+   "memory.reserved": 150,
+   "compute_cap": "8.9",
+   "driver_version": "610.74",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

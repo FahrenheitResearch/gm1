@@ -1,0 +1,157 @@
+# gpuwm-cm1 configuration derived from differential case 'supercell'
+# by cm1core.oracle.spec through records/CM1-GM1-KEYMAP.json.
+# Do not hand-edit: edit the case and re-emit, or the two sides drift.
+
+[run]
+dt_s = 7.5
+duration_s = 7200.0
+history_interval_s = 900.0
+iconly = 0
+lane = "cartesian"
+restart_interval_s = 3600.0
+
+[initialization]
+ibalance = 0
+iinit = 1
+iorigin = 2
+irandp = 0
+irst = 0
+isnd = 5
+iwnd = 2
+testcase = 0
+
+[grid]
+dx_m = 2000.0
+dy_m = 2000.0
+dz_m = 500.0
+nx = 60
+ny = 60
+nz = 40
+stretch_x = false
+stretch_y = false
+terrain = false
+
+[dynamics]
+adaptive_timestep = false
+alph = 0.6
+beta_plane = 0
+coriolis = 0
+difforder = 6
+dry_mass_correction = true
+fcor_s_inv = 5e-05
+idiff = 0
+kdiff2 = 75.0
+kdiff6 = 0.04
+kdiv = 0.1
+mdiff = 0
+psolver = 3
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+scalar_weno = 2
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+velocity_weno = 0
+weno_order = 5
+
+[boundaries]
+alphobc = 60.0
+bottom = 1
+cstar = 30.0
+east = 2
+north = 2
+nudgeobc = 0
+radiative_order = 4
+roflux = 0
+south = 2
+top = 1
+west = 2
+
+[closures]
+adapt_move_frq = 3600.0
+bbc = 1
+cecd = 3
+cm1setup = 1
+cnst_ust = 0.25
+cnst_znt = 0.16
+cnstcd = 0.001
+cnstce = 0.001
+do_adapt_move = false
+hrdamp = 0
+ipbl = 0
+isfcflx = 0
+moving_frame = true
+rterm = 0
+set_ust = 0
+set_znt = 0
+sfcmodel = 0
+sgs_model = 1
+t2p_avg = 1
+u_move_m_s = 12.5
+upper_damping = 1
+upper_damping_depth_m = 5000.0
+upper_damping_rate_s_inv = 0.0033333333333
+v_move_m_s = 3.0
+vertical_implicit_diffusion = true
+xhd = 100000.0
+
+[runtime]
+acoustic_substeps = 4
+capacity_profile = "default"
+memory_budget_mib = 8192
+warmup_steps = 0
+
+[physics]
+component = "morrison-mp10"
+cuparam = 0
+equation_set = 2
+ihail = 1
+ndcnst = 250.0
+output_dbz = false
+
+[output]
+output_basestate = 0
+output_filetype = 2
+output_format = 1
+output_interp = 0
+output_kh = 0
+output_km = 0
+output_lwp = 1
+output_prs = 1
+output_pwat = 1
+output_q = 1
+output_qv = 1
+output_rain = 1
+output_rho = 1
+output_th = 1
+output_thpert = 1
+output_tke = 1
+output_u = 1
+output_uinterp = 0
+output_v = 1
+output_vinterp = 0
+output_w = 1
+output_winterp = 0
+output_zh = 0
+output_zs = 0
+
+[diagnostics]
+adiabat = 1
+mixed_layer_depth_m = 500.0
+output_cape = true
+output_cin = true
+output_lcl = true
+output_lfc = true
+output_pv = 1
+output_sgs = 0
+output_shs = 1
+output_sps = 1
+output_srs = 0
+output_sus = 1
+output_svs = 1
+output_sws = 1
+output_uh = 1
+output_vort = 1
+parcel_source = 3
+pressure_increment_pa = 200.0
+storm_motion = "bunkers-right"
+tornado_report = false

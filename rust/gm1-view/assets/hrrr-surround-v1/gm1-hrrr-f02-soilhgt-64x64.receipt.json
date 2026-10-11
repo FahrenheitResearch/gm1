@@ -1,0 +1,10 @@
+{
+  "claim_limit": "source-backed HRRR f02 SOILHGT display context with spherical ECEF-to-child-ENU curvature and exact-child ownership; not model terrain, evolved meteorology, sub-grid topography, roads, buildings, or procedural fill",
+  "earth_curvature_retained": true,
+  "exact_child_terrain_sha256": "afbec69ee1f23c881f5337f1eb7828eeb29ab7b34f7236a284980dc29681ba91",
+  "manifest_sha256": "6848ec20541d67c20079982959935907e27e9169aa3bc95517c6f126c7155b6a",
+  "no_extrapolation": true,
+  "payload_sha256": "4519dc86ea4713131bdc9471d6ed65dd68ce2a467457b8ec1830475d203ab8b8",
+  "schema": "gm1.view.hrrr-source-backed-surround-receipt/v1",
+  "status": "PASS_SOURCE_BACKED_HRRR_SURROUND_TERRAIN"
+}

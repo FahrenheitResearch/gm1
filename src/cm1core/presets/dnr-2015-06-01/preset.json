@@ -1,0 +1,129 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "dnr-2015-06-01",
+  "order": 15,
+  "group": "famous",
+  "name": "Denver, Colorado, 1 June 2015 (evening balloon)",
+  "line": "Dry air near the ground and cloud bases over 2 km up, moderate instability (CAPE about 1300 J/kg) and strong wind shear (24 m/s over 6 km): high-based storms with little rain.",
+  "budget": "10m",
+  "note": "The balloon launched at 0000 UTC on 2 June (6 pm local time on the 1st). Picked by a stated rule (dry, high cloud base, moderate instability, strong shear) from Great Plains evening balloons. The storm is started by a gentle push of rising air, as CM1's updraft nudging does. In a 1 km run the storm stays weak, with little rain, and is gone within about 45 minutes (measured). This day's sounding in an idealized storm, not a reconstruction of that day's storms.",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/supercell/namelist.input",
+    "sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 120,
+        "to": 480,
+        "why": "the same 120 km area at 250 m"
+      },
+      {
+        "key": "ny",
+        "from": 120,
+        "to": 480,
+        "why": "the same 120 km area at 250 m"
+      },
+      {
+        "key": "nz",
+        "from": 40,
+        "to": 80,
+        "why": "80 levels of 250 m: the same 20 km depth at twice the vertical detail (CM1's file has 40 of 500 m)"
+      },
+      {
+        "key": "dx",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dy",
+        "from": 1000.0,
+        "to": 250.0,
+        "why": "250 m grid spacing"
+      },
+      {
+        "key": "dz",
+        "from": 500.0,
+        "to": 250.0,
+        "why": "250 m levels"
+      },
+      {
+        "key": "dtl",
+        "from": 6.0,
+        "to": 1.5,
+        "why": "the time step scaled with the grid spacing, as CM1 advises (6 s at 1 km)"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      },
+      {
+        "key": "output_filetype",
+        "from": 1,
+        "to": 2,
+        "why": "one file per saved time, so each picture has its own file"
+      },
+      {
+        "key": "isnd",
+        "from": 5,
+        "to": 7,
+        "why": "the sounding is the file input_sounding beside this namelist"
+      },
+      {
+        "key": "iwnd",
+        "from": 2,
+        "to": 0,
+        "why": "the wind comes from the sounding file (CM1 sets iwnd = 0 with isnd = 7)"
+      },
+      {
+        "key": "umove",
+        "from": 12.5,
+        "to": 2.625,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "vmove",
+        "from": 3.0,
+        "to": -2.5,
+        "why": "the moving frame follows the storm this sounding makes (the storm-track check's recommended frame)"
+      },
+      {
+        "key": "iinit",
+        "from": 1,
+        "to": 12,
+        "why": "CM1's updraft nudging starts the storm: a gentle push of rising air for its first 20 minutes (Naylor and Gilmore 2012), with CM1's own strength, size and timing"
+      }
+    ]
+  },
+  "ladder_m": [
+    500,
+    1000
+  ],
+  "min_width_km": {
+    "default": 64
+  },
+  "min_duration_s": 3600,
+  "shrink": "both",
+  "gm1_settings": {
+    "initialization.xc_wnudge": 100.0,
+    "initialization.yc_wnudge": -6500.0
+  },
+  "gm1_settings_why": "The push of rising air that starts the storm is centred 0.1 km east and 6.5 km south of the centre, the storm-track check's recommended place for this sounding, so the storm keeps the most room to every side. CM1 keeps the nudging's centre in its code (xc_wnudge, yc_wnudge), not the namelist, so this is a GM1 setting.",
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "9c557edb543f994e3e1d3f476b59b78afc801873353d610d1f082e174e5ac172",
+    "shipped_as": "data/soundings/kdnr-2015-06-02-0000z.input_sounding",
+    "observation": "NWS rawinsonde, Denver, Colorado (DNR, WMO 72469), 0000 UTC 2 June 2015",
+    "source": "https://weather.uwyo.edu/wsgi/sounding?datetime=2015-06-02%2000:00:00&id=72469&src=UNKNOWN&type=TEXT:LIST",
+    "retrieved_utc": "2026-09-24T09:52:20Z",
+    "rights": "U.S. Government work (NOAA/NWS observation), not subject to copyright in the United States (17 U.S.C. 105); retrieved from the University of Wyoming radiosonde archive"
+  }
+}
