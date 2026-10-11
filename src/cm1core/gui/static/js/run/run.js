@@ -30,6 +30,29 @@ function newer(polled, held) {
   return !held || !held.time_utc || !polled.time_utc || polled.time_utc >= held.time_utc;
 }
 
+// The share done, from the same sample as the storm time beside it. The event stream brings the storm time as
+// it moves; the status (and its percent) comes with the slower poll, so on a fast GPU the two drifted apart
+// ("4% done" beside a clock a third of the way through). While the run goes the share is worked out from the
+// clock shown; once it has ended the status's own figure stands.
+export function sharePercent(model, total, status) {
+  const st = status || {};
+  if (st.state === "running" && total > 0 && Number.isFinite(Number(model))) {
+    return Math.max(0, Math.min(100, 100 * Number(model) / total));
+  }
+  return st.percent;
+}
+
+// The status as the badge shows it: "Running NN%" with the same share, from the same sample and rounded the same
+// way, as the "NN% done" beside it. The server's label is worked out from its own, older sample (and rounds a
+// half the other way), so the two read differently for a moment on every update ("Running 65%" by "74% done").
+export function shownStatus(status, model, total) {
+  const st = status || {};
+  if (st.state !== "running" || !/^Running \d+%$/.test(st.label || "")) return st;
+  const share = sharePercent(model, total, st);
+  if (share === null || share === undefined || !Number.isFinite(Number(share))) return st;
+  return { ...st, label: `Running ${Math.round(Math.max(0, Math.min(100, Number(share))))}%` };
+}
+
 // ------------------------------------------------------------------ guided: Watching
 
 async function guidedRun(body, id, page) {
@@ -75,6 +98,8 @@ async function guidedRun(body, id, page) {
   let behind = null;
   let closed = false;
   let painting = false;
+  // Stop was pressed here and its "Stopping" line is showing.
+  let stopAsked = false;
   function paint() {
     if (painting) return;
     painting = true;
@@ -85,7 +110,8 @@ async function guidedRun(body, id, page) {
     const total = progress.duration_s ?? status.duration_s;
     const left = status.state === "running" ? (progress.eta_s ?? status.eta_s) : null;
     clockEl.set(model);
-    page.setData(`${id} · ${status.label || ""}`);
+    const badge = shownStatus(status, model, total);
+    page.setData(`${id} · ${badge.label || ""}`);
     // Time left is shown only while the run goes; a run that has ended has none to show. The next picture's time
     // (and, before the first, when the first comes) is said under the bar while the run goes.
     const going = LIVE_STATES.includes(status.state);
@@ -97,11 +123,11 @@ async function guidedRun(body, id, page) {
     const drawing = behind && (over ? behind.behind > 0 : behind.behind > 1) ? behind : null;
     const drawWords = !drawing ? "" : t(over ? "watch.drawing" : "watch.behind",
       { drawn: drawing.drawn, saved: drawing.saved, wall: wallWords(drawing.about_s) });
-    progressEl.set({ model, total, percent: status.percent, leftS: left, going, running: status.state === "running",
-      next: [first ? "" : next, drawWords].filter(Boolean).join(" ") });
+    progressEl.set({ model, total, percent: sharePercent(model, total, status), leftS: left, going,
+      running: status.state === "running", next: [first ? "" : next, drawWords].filter(Boolean).join(" ") });
     if (first && next) view.setEmpty(next);
     if (OVER_STATES.includes(status.state) && !status.frames) view.setEmpty(t("results.no_frames"));
-    chip.replaceChildren(stateChip(status));
+    chip.replaceChildren(stateChip(badge));
     const s = status.state;
     const actions = new Set(status.actions || []);
     stop.hidden = !actions.has("stop");
@@ -113,7 +139,12 @@ async function guidedRun(body, id, page) {
       finished: t(drawing ? "watch.finished_drawing" : "watch.finished", { wall: drawing ? wallWords(drawing.about_s) : "" }),
       stopped: t("watch.stopped"), paused: t("watch.stopped"), failed: t("watch.failed") };
     let text = words[s] || "";
-    if (s === "running" && !status.model_time_s && !progress.model_time_s) text = t("watch.starting");
+    // "Starting" is said while the badge says so (the GPU is being prepared), and no longer: once it reads
+    // Running the bar and the picture line carry on.
+    if (s === "running" && /^Starting/.test(status.label || "")) text = t("watch.starting");
+    // "Stopping at the next step" has done its job once the run has ended.
+    if (stopAsked && over) { stopAsked = false; notice(""); }
+    progressEl.classList.toggle("starting", s === "waiting" || (s === "running" && /^Starting/.test(status.label || "")));
     const notStarted = ["imported", "ready"].includes(s);
     if (notStarted) { text = t("watch.not_started"); view.setEmpty(t("watch.not_started")); }
     startIt.hidden = !notStarted;
@@ -126,6 +157,7 @@ async function guidedRun(body, id, page) {
     stop.disabled = true;
     try {
       const reply = await api.post(`${api.runPath(id)}/stop`);
+      stopAsked = Boolean(reply.ok);
       notice(reply.ok ? t("watch.stopping") : `${reply.message} ${reply.fix || ""}`.trim());
     } catch (err) {
       notice(`${err.message} ${err.fix || ""}`.trim());
@@ -243,7 +275,8 @@ async function advancedRun(body, id, page) {
     page.setData([id, live.case, grid, schemeName(st.microphysics || (live.admitted || {}).microphysics)].filter(Boolean).join(" · "));
     const steps = p.step != null && p.total_steps ? ` · step ${num(p.step)} of ${num(p.total_steps)}` : "";
     const started = (live.admitted || {}).time_utc ? Date.parse(live.admitted.time_utc) : null;
-    stateLine.replaceChildren(stateChip(st), h("span", { class: "muted" }, steps,
+    stateLine.replaceChildren(stateChip(shownStatus(st, model || 0, p.duration_s ?? st.duration_s)),
+      h("span", { class: "muted" }, steps,
       started && LIVE_STATES.includes(st.state) ? ` · started ${wallWords((Date.now() - started) / 1000)} ago` : "",
       st.host ? ` · ${st.host}` : ""));
     const total = p.duration_s ?? st.duration_s;
@@ -251,7 +284,7 @@ async function advancedRun(body, id, page) {
     const next = pictureWords(live.pictures, { model: model || 0, total, left: leftS, going: st.state === "running" },
       frameCopy);
     const first = Boolean(live.pictures) && (live.pictures.shown_s === null || live.pictures.shown_s === undefined);
-    bar.set({ model: model || 0, total, percent: st.percent, leftS, going: LIVE_STATES.includes(st.state),
+    bar.set({ model: model || 0, total, percent: sharePercent(model || 0, total, st), leftS, going: LIVE_STATES.includes(st.state),
       running: st.state === "running", next: first ? "" : next });
     if (first && next) view.setEmpty(next);
     readouts.replaceChildren(...advancedReadouts(live, st, p));

@@ -240,8 +240,14 @@ def test_install_sh_installs_the_newest_release_with_its_exact_versions_and_reru
     assert any(line == "gpuwm-cm1 doctor --plain" for line in calls())
     assert "gpuwm-cm1 gui" in done.stdout and "gpuwm-cm1 doctor --report" in done.stdout
     assert "NVIDIA driver 581.42" in done.stdout
-    # Run again: it updates, and the PATH lines are written once.
-    assert run().returncode == 0
+    # The first install says what it downloads.
+    assert "==> Installing GM1 0.1.0 with Python 3.12 (about 2.5 GB, mostly NVIDIA's libraries)" in done.stdout
+    assert "Updating GM1" not in done.stdout
+    # Run again: it updates, says so (nothing like 2.5 GB is downloaded again), and the PATH lines are written once.
+    again = run()
+    assert again.returncode == 0
+    assert "==> Updating GM1 to 0.1.0 with Python 3.12 (only what changed is downloaded)" in again.stdout
+    assert "about 2.5 GB" not in again.stdout
     for name in (".profile", ".bashrc"):
         text = (home / name).read_text(encoding="utf-8")
         assert text.count("# Added by the GM1 installer") == 1, name
@@ -417,6 +423,8 @@ def test_install_ps1_parses_in_powershell() -> None:
 # ---------------------------------------------------------------- 3. the browser
 
 class _Popen:
+    """Stands in for subprocess.Popen: a program named in ``fail`` cannot be started; the others exit 0."""
+
     def __init__(self, fail: tuple[str, ...] = ()) -> None:
         self.calls: list[tuple[list[str], str | None]] = []
         self.fail = fail
@@ -426,7 +434,14 @@ class _Popen:
             raise OSError(8, "Exec format error")
         self.calls.append((list(words), kwargs.get("cwd")))
         assert kwargs["stdin"] == subprocess.DEVNULL and kwargs["start_new_session"]
-        return object()
+
+        class Exited:
+            pid = 0
+
+            def wait(self, timeout=None):  # noqa: ANN001
+                return 0
+
+        return Exited()
 
 
 def test_the_browser_opens_only_where_there_is_a_screen() -> None:
@@ -445,28 +460,37 @@ def test_the_browser_opens_only_where_there_is_a_screen() -> None:
     assert why_not({}, wsl=True, terminal=True, platform="linux") is None
 
 
-def test_under_wsl_the_windows_browser_opens_through_wslview_explorer_or_cmd() -> None:
+def test_under_wsl_the_windows_browser_opens_through_rundll32_then_cmd_powershell_or_wslview() -> None:
+    """The order measured on Windows 11 (tests/test_gui_windows_fixes.py has the command shapes and the failures)."""
+
     from cm1core.gui.browser import open_link
 
     url = "http://127.0.0.1:8765/?token=abc"
+    system = "/mnt/c/Windows/System32/"
     found = {"wslview": "/usr/bin/wslview", "explorer.exe": "/mnt/c/Windows/explorer.exe",
-             "cmd.exe": "/mnt/c/Windows/System32/cmd.exe"}
+             "rundll32.exe": system + "rundll32.exe", "cmd.exe": system + "cmd.exe",
+             "powershell.exe": system + "WindowsPowerShell/v1.0/powershell.exe"}
     popen = _Popen()
+    assert open_link(url, env={}, wsl=True, terminal=True, which=found.get, exists=lambda _p: True,
+                     popen=popen) == (True, "rundll32.exe")
+    assert popen.calls == [([system + "rundll32.exe", "url.dll,FileProtocolHandler", url], "/mnt/c")]
+    popen = _Popen(fail=("rundll32.exe",))
+    assert open_link(url, env={}, wsl=True, terminal=True, which=found.get, exists=lambda _p: True,
+                     popen=popen) == (True, "cmd.exe")
+    assert popen.calls == [([system + "cmd.exe", "/c", "start", "", url], "/mnt/c")]
+    popen = _Popen(fail=("rundll32.exe", "cmd.exe", "powershell.exe"))
     assert open_link(url, env={}, wsl=True, terminal=True, which=found.get, exists=lambda _p: True,
                      popen=popen) == (True, "wslview")
     assert popen.calls == [(["/usr/bin/wslview", url], None)]
-    popen = _Popen(fail=("wslview",))
+    # explorer.exe is never given a link: with a query in it, it opens a File Explorer window instead.
+    popen = _Popen(fail=("rundll32.exe", "cmd.exe", "powershell.exe", "wslview"))
     assert open_link(url, env={}, wsl=True, terminal=True, which=found.get, exists=lambda _p: True,
-                     popen=popen) == (True, "explorer.exe")
-    popen = _Popen(fail=("wslview", "explorer.exe"))
-    opened = open_link(url, env={}, wsl=True, terminal=True, which=found.get, exists=lambda _p: True, popen=popen)
-    assert opened == (True, "cmd.exe")
-    assert popen.calls == [(["/mnt/c/Windows/System32/cmd.exe", "/c", "start", "", url], "/mnt/c")]
+                     popen=popen)[0] is False and popen.calls == []
     # Windows' programs off PATH: their usual place.
     popen = _Popen()
     assert open_link(url, env={}, wsl=True, terminal=True, which=lambda _name: None, exists=lambda _p: True,
                      popen=popen)[0]
-    assert popen.calls[0][0] == ["/mnt/c/Windows/explorer.exe", url]
+    assert popen.calls[0][0] == [system + "rundll32.exe", "url.dll,FileProtocolHandler", url]
     # Nothing to open it with: the printed link stays, nothing raises.
     assert open_link(url, env={}, wsl=True, terminal=True, which=lambda _name: None, exists=lambda _p: False,
                      popen=_Popen()) == (False, "no Windows program to open it with was found")

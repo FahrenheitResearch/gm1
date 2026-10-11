@@ -528,7 +528,7 @@ def test_the_text_report_lists_every_setting_not_in_r21() -> None:
 
 @pytest.mark.parametrize("cecd", ["2", "3"])
 def test_a_wind_dependent_drag_coefficient_is_refused_up_front(cecd: str, tmp_path: Path) -> None:
-    """With the surface layer on (bbc = 3, sfcmodel = 1), only CM1's constant drag coefficient runs in 0.1.0.
+    """With the surface layer on (bbc = 3, sfcmodel = 1), only CM1's constant drag coefficient runs in 0.1.1.
 
     The run itself would otherwise stop before its first step, after an import that reported it runnable."""
 
@@ -538,7 +538,7 @@ def test_a_wind_dependent_drag_coefficient_is_refused_up_front(cecd: str, tmp_pa
     assert len(rows) == 1, [row.as_dict() for row in report.category("refused")]
     row = rows[0]
     assert row.code == "CM1-IMPORT-CECD-UNSUPPORTED" and row.value == cecd
-    assert row.text == f"Only cecd = 1 (constant drag coefficient) is implemented in 0.1.0; cecd = {cecd} is not."
+    assert row.text == f"Only cecd = 1 (constant drag coefficient) is implemented in 0.1.1; cecd = {cecd} is not."
     assert row.fix == "Set cecd = 1."
     assert row.plain and row.plain_fix
     assert report.guided()["offered"] is False

@@ -445,18 +445,52 @@ def python_row() -> Row:
 ROOM_FIX = "Free some disk space, or keep the runs on a disk with room: gpuwm-cm1 gui --root FOLDER"
 
 
-def disk_row(host: gpuinfo.HostInfo) -> Row:
+def disk_row(host: gpuinfo.HostInfo, *, drive: Mapping[str, Any] | None = None,
+             in_windows: str | None = None) -> Row:
+    """The free disk under the runs folder, and under WSL2 what that figure is.
+
+    Under WSL2 the runs folder is on the Linux disk, one file on a Windows drive that may have far less room
+    than the Linux disk claims.  ``drive`` (:func:`.wslpaths.windows_drive`) is that drive: the row names
+    both figures and judges the smaller.  Without it the row says plainly that its figure is the Linux
+    disk's.  ``in_windows``: the runs folder as File Explorer names it.
+    """
+
     free, total = host.disk_free_bytes, host.disk_total_bytes
     where = host.disk_root
     if free is None:
         return Row("disk", "Disk", "note", f"{where}: free space could not be read.")
     text = f"{where}: {_gb(free)} free of {_gb(total)}."
+    # The folder's File Explorer name comes last, after the verdict, so each sentence ends before the next.
+    tail = ""
+    if host.wsl2:
+        mounted = mounted_windows_drive(where)
+        if mounted:
+            # A folder under /mnt/c is on the Windows drive itself: one figure, and it is that drive's.
+            text = f"{where} (on the Windows drive {mounted}): {_gb(free)} free of {_gb(total)}."
+        else:
+            text = f"{where} (the Linux disk inside WSL): {_gb(free)} free of {_gb(total)}."
+            drive_free = (drive or {}).get("free_bytes")
+            if isinstance(drive_free, (int, float)):
+                text += (f" The Windows drive that holds it ({drive.get('drive')}) has {_gb(drive_free)} free; "
+                         "count on the smaller of the two.")
+                free = min(free, int(drive_free))
+            else:
+                text += " That is the Linux disk's figure: the Windows drive that holds it may have less free."
+        if in_windows:
+            tail = f" In File Explorer this folder is {in_windows}"
     if free < DISK_FAIL_BYTES:
-        return Row("disk", "Disk", "fail", text + " Not enough for even a small run's output.", ROOM_FIX)
+        return Row("disk", "Disk", "fail", text + " Not enough for even a small run's output." + tail, ROOM_FIX)
     if free < DISK_NOTE_BYTES:
         return Row("disk", "Disk", "note", text + " Enough for 1 km runs; a 250 m run writes up to about 120 GB. "
-                   "The estimate says what each run needs, and a storm that does not fit is greyed.", ROOM_FIX)
-    return Row("disk", "Disk", "ok", text)
+                   "The estimate says what each run needs, and a storm that does not fit is greyed." + tail, ROOM_FIX)
+    return Row("disk", "Disk", "ok", text + tail)
+
+
+def mounted_windows_drive(path: str | os.PathLike[str]) -> str | None:
+    """``"C:"`` for a folder WSL reaches under ``/mnt/c``, else None (it is on the Linux disk)."""
+
+    found = re.match(r"^/mnt/([A-Za-z])(/|$)", os.fspath(path))
+    return f"{found.group(1).upper()}:" if found else None
 
 
 #: Giving WSL2 more memory, as a line to paste into Windows PowerShell (Notepad would save .wslconfig.txt).
@@ -537,9 +571,17 @@ def system_report(root: str | os.PathLike[str] = ".", *, native_dir: str | os.Pa
     query = gpuinfo.query_gpus() if query is None else query
     host = gpuinfo.query_host(root) if host is None else host
     method = install_method()
+    drive = in_windows = None
+    if host.wsl2:
+        from . import wslpaths
+
+        # A runs folder on a Windows drive (/mnt/c/...) is not on the Linux disk: no second drive to look for.
+        if mounted_windows_drive(Path(host.disk_root).expanduser()) is None:
+            drive = wslpaths.windows_drive()
+        in_windows = wslpaths.windows_path(Path(host.disk_root).expanduser())
     rows = [libcuda_row(query) or driver_row(query), cuda_row(method), *gpu_rows(query), arwen_row(method),
-            native_row(None if native_dir is None else Path(native_dir), method), python_row(), disk_row(host),
-            ram_row(host)]
+            native_row(None if native_dir is None else Path(native_dir), method), python_row(),
+            disk_row(host, drive=drive, in_windows=in_windows), ram_row(host)]
     fitted = presets_row(query, host) if presets else None
     if fitted is not None:
         rows.append(fitted)

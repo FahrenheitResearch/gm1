@@ -212,6 +212,12 @@ class RunViews:
             self._disk[key] = (now, size)
         return size
 
+    def forget_disk(self, rundir: Path) -> None:
+        """A folder just deleted or emptied is measured again the next time it is asked for."""
+
+        with self._lock:
+            self._disk.pop(os.fspath(rundir), None)
+
     def row_extra(self, rundir: Path, row: dict[str, Any]) -> dict[str, Any]:
         """The Runs table's Wall and Disk columns, and the GPU the run used."""
 

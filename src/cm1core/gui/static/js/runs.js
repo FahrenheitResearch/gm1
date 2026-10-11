@@ -4,11 +4,17 @@
 // with a run.json under the runs folder, and plain gpuwm-cm1 cartesian output folders, view-only. A run on
 // another host reads Stale when it has written nothing for 60 s, and "Stopped without a final record" once its
 // batch job is no longer listed. Guided mode shows the same list in fewer columns.
+//
+// Every row says how much disk the run uses, and the line over the list says the total. Delete removes a run's
+// folder; "Keep pictures only" removes its big files (the cm1out files, the saved frames and restarts) and keeps
+// the pictures. Both ask first, naming the run and its size, and neither is offered while the run is going.
+// Under Windows (WSL2) the runs folder is also named as File Explorer sees it, with a button that opens it.
 
 import { h, num, clock, bytes, button, table, meter, copyline, status as statusChip } from "./core.js";
 import * as api from "./api.js";
-import { register, go, homeRoute, openRunRoute } from "./router.js";
+import { register, go, notice, homeRoute, openRunRoute } from "./router.js";
 import { wallWords } from "./run/parts.js";
+import { folderLine } from "./folder.js";
 
 const EVERY_MS = 3000;
 
@@ -38,11 +44,22 @@ function gpuStrip(g) {
     g.note ? h("span", { class: "muted gpu-note" }, g.note) : null);
 }
 
+// The words the two delete buttons ask with: the run by name, and its size.
+export function deleteWords(name, size, keepPictures) {
+  return keepPictures
+    ? `Delete the big files of ${name} and keep its pictures?\n\nIt uses ${size} now; nearly all of that is freed. ` +
+      "Its pictures and its results page stay. Its data files go, so it can no longer be run longer, and no new " +
+      "pictures or slices can be drawn from it. This cannot be undone."
+    : `Delete ${name}?\n\nIt uses ${size}. Its whole folder is removed: the pictures, the files and its settings. ` +
+      "This cannot be undone.";
+}
+
 async function render(body, args, page) {
   const strips = h("div", { class: "strips" });
+  const where = h("div", { class: "section runs-where" });
   const holder = h("div", { class: "section" });
   const foot = h("div", { class: "section" });
-  body.append(strips, holder, foot);
+  body.append(strips, where, holder, foot);
   const newRun = button("New run", { kind: "primary", onclick: () => go(homeRoute() === "guided" ? "guided" : "new-run") });
   const right = document.querySelector(".head .right");
   if (right) right.prepend(h("div", { class: "btns" }, newRun));
@@ -70,13 +87,38 @@ async function render(body, args, page) {
     } catch (_) { /* the next tick tries again */ }
   }
 
+  let busy = false;
+  // Delete a run, or its big files: ask first (the run by name, and its size), then say what was freed.
+  async function remove(r, keepPictures) {
+    if (busy) return;
+    if (!window.confirm(deleteWords(r.name, bytes(r.disk_bytes || 0), keepPictures))) return;
+    busy = true;
+    try {
+      const reply = await api.post(`${api.runPath(r.id)}/delete`, keepPictures ? { keep_pictures: true } : {});
+      notice(`${reply.message} ${bytes(reply.freed_bytes || 0)} freed.${reply.note ? ` ${reply.note}` : ""}`);
+    } catch (err) {
+      notice(`${err.message} ${err.fix || ""}`.trim(), "warn");
+    } finally { busy = false; }
+    try { await draw(); } catch (_) { /* the next tick draws it */ }
+  }
+
+  let shownWhere = null;
   async function draw() {
     const d = await api.get("/api/runs");
     const mode = api.currentMode();
     // Guided names the runs folder by its last part; advanced gives the whole path.
-    const where = mode === "guided" ? shortPath(d.root) : d.root;
-    page.setData([where, `${d.runs.length} ${d.runs.length === 1 ? "run" : "runs"}`,
+    const short = mode === "guided" ? shortPath(d.root) : d.root;
+    page.setData([short, `${d.runs.length} ${d.runs.length === 1 ? "run" : "runs"}`,
+      d.runs.length ? `${bytes(d.total_bytes || 0)} on disk` : "",
       mode === "guided" ? "" : d.host || session.host || ""].filter(Boolean).join(" · "));
+    // Where the runs are, as this computer's file manager names it; drawn again only when it changes, so a
+    // "Copied" on its button is not wiped by the next tick.
+    const key = [d.root, d.root_windows || "", d.can_open_folder ? "1" : "", mode].join("|");
+    if (key !== shownWhere) {
+      shownWhere = key;
+      where.replaceChildren(folderLine({ label: "Your runs are in", path: d.root, windows: d.root_windows,
+        canOpen: d.can_open_folder }));
+    }
     if (!d.runs.length) {
       holder.replaceChildren(h("p", { class: "text" }, "No runs in this folder yet."),
         h("div", { class: "btns" }, button(mode === "guided" ? "Pick a storm" : "New run", {
@@ -104,17 +146,37 @@ async function render(body, args, page) {
       h("td", {}, statusChip(st.state || "imported", st.label || ""), sub.length ? h("span", { class: "sub" }, sub.join(" · ")) : null),
       h("td", { class: "num" }, model, st.duration_s ? h("span", { class: "sub" }, `of ${clock(st.duration_s)}`) : null),
       h("td", { class: "num wide-only advanced-only" }, r.wall_s != null ? wallWords(r.wall_s) : ""),
-      h("td", { class: "num wide-only advanced-only" }, r.disk_bytes != null ? bytes(r.disk_bytes) : ""),
-      h("td", { class: "wide-only advanced-only" }, r.host || "", job ? h("span", { class: "sub" }, job) : null));
-      tr.addEventListener("keydown", (ev) => { if (ev.key === "Enter") go(target); });
+      h("td", { class: "num rundisk" }, r.disk_bytes != null ? bytes(r.disk_bytes) : "",
+        r.trimmed ? h("span", { class: "sub" }, "pictures only") : null),
+      h("td", { class: "wide-only advanced-only" }, r.host || "", job ? h("span", { class: "sub" }, job) : null),
+      h("td", { class: "runacts" }, r.view_only ? "" : deleteButtons(r, st)));
+      tr.addEventListener("keydown", (ev) => { if (ev.key === "Enter" && ev.target === tr) go(target); });
       return tr;
     });
     holder.replaceChildren(table(["Name", { label: "Case", cls: "wide-only" },
       { label: "Grid", cls: "wide-only advanced-only" }, "Status",
       { label: mode === "guided" ? "Storm time" : "Model time", num: true },
       { label: "Wall", num: true, cls: "wide-only advanced-only" },
-      { label: "Disk", num: true, cls: "wide-only advanced-only" },
-      { label: "Host", cls: "wide-only advanced-only" }], rows, { stack: true, cls: "runs" }));
+      { label: mode === "guided" ? "Size" : "Disk", num: true },
+      { label: "Host", cls: "wide-only advanced-only" },
+      { label: "", cls: "runacts" }], rows, { stack: true, cls: "runs" }));
+  }
+
+  // A run that is going is stopped first; a run on another computer that went quiet may still be going.
+  function deleteButtons(r, st) {
+    const going = ["running", "waiting", "stale"].includes(st.state);
+    const why = going ? "Stop it first: a storm that is running is not deleted." : null;
+    const trim = button("Keep pictures only", { small: true, disabled: going, title: why ||
+      "Delete the big files, keep the pictures" });
+    trim.dataset.action = "trim";
+    trim.hidden = Boolean(r.trimmed) || ["imported", "ready"].includes(st.state);
+    const del = button("Delete", { small: true, kind: "stop", disabled: going, title: why || "Delete this run's folder" });
+    del.dataset.action = "delete";
+    for (const [b, keep] of [[trim, true], [del, false]]) {
+      b.addEventListener("click", (ev) => { ev.stopPropagation(); ev.preventDefault(); remove(r, keep); });
+      b.addEventListener("keydown", (ev) => ev.stopPropagation());
+    }
+    return h("div", { class: "btns" }, trim, del);
   }
 
   let timer = null;

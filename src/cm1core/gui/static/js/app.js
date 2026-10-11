@@ -9,6 +9,7 @@ import {
   SCREENS, NAV, RUN_PAGES, register, go, notice, setNoticeBox, titleOf, runRoute, homeRoute, onOpenRun, openRunRoute,
 } from "./router.js";
 import { showCommand as sharedShowCommand } from "./command.js";
+import { landingRoute, runningCard } from "./running.js";
 import "./setup/index.js";
 import "../guided/index.js";
 import "./runs.js";
@@ -138,12 +139,31 @@ function frame(page, sessionInfo) {
 
 let cleanup = null;
 let routing = 0;
+// A page that was just opened (no screen named in its address) goes straight to the one storm that is running.
+// Asked once per page load, so coming back to the first screen afterwards stays there (the card leads it).
+let landed = false;
+let card = null;
+// The screens that lead with the "A storm is running" card: each mode's first screens, and Runs.
+const FIRST_SCREENS = ["guided", "new-run", "runs"];
 
 async function route() {
   const ticket = ++routing;
   if (cleanup) { try { cleanup(); } catch (_) { /* a screen that failed to clean up */ } cleanup = null; }
+  if (card) { card.stop(); card = null; }
   const [name, ...args] = (location.hash.replace(/^#\/?/, "") || "").split("/");
   const s = await api.session();
+  if (!landed) {
+    landed = true;
+    if (!name) {
+      const to = await landingRoute(api.currentMode());
+      if (ticket !== routing) return;
+      if (to) {
+        // Replaced, not pushed: Back leaves GM1 instead of coming back to this hop.
+        history.replaceState(null, "", `#/${to}`);
+        return route();
+      }
+    }
+  }
   let screen = name;
   if (!SCREENS.has(screen)) {
     // Guided mode opens on the storm gallery; without it, a first launch with no runs opens New run.
@@ -163,6 +183,10 @@ async function route() {
   const mode = api.currentMode();
   const run = entry.runPage && args[0] ? decodeURIComponent(args[0]) : null;
   const page = frame({ screen, title: titleOf(screen, mode), run }, s);
+  if (FIRST_SCREENS.includes(screen) && !(screen === "guided" && args[0])) {
+    card = runningCard(go);
+    page.body.before(card.el);
+  }
   document.body.dataset.screen = screen;
   document.body.dataset.route = String(ticket);
   delete document.body.dataset.ready;
@@ -186,7 +210,7 @@ export async function start() {
     api.applyMode(s.mode);
   } catch (err) {
     document.body.replaceChildren(h("p", { class: "banner stop", style: "margin:24px" },
-      `${err.message} ${err.fix || "Open the link gpuwm-cm1 gui printed."}`));
+      `${err.message} ${err.fix || "Start GM1 again and use the page it opens."}`));
     return;
   }
   window.addEventListener("hashchange", route);

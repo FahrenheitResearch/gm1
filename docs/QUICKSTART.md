@@ -67,11 +67,17 @@ type:
 gpuwm-cm1 gui
 ```
 
-The GUI opens in your browser. If it does not, open the link GM1 prints, like `http://127.0.0.1:8765/?token=...`.
+The GUI opens in your browser, and the GM1 window says so: "Opened the link in your browser". If it could not, the
+window says "Open this link in your browser:" with the link, like `http://127.0.0.1:8765/?token=...`: copy it into
+your browser. The link stays the same each time you start GM1, so a tab or a bookmark from an earlier start still
+works.
+
 Closing the browser is always fine, and so is closing the GM1 window (on Linux, the terminal): that closes the GUI,
-never a running storm, which keeps going until it finishes. Open GM1 again to see it; opening GM1 while it is open
-shows the page that is already open. On Windows, shutting down or restarting the computer, or `wsl --shutdown`, stops
-a running storm (Run it longer or Resume continues it later from its last saved point).
+never a running storm, which keeps going until it finishes. Open GM1 again to see it: when one storm is running, the
+page opens straight on **Watching**, and otherwise the first screen leads with "A storm is running", its name, how far
+it is and a **Watch it** button. Opening GM1 while it is open brings the page that is already open up in your browser
+again. On Windows, shutting down or restarting the computer, or `wsl --shutdown`, stops a running storm (Run it longer
+or Resume continues it later from its last saved point).
 
 The GUI starts in **Guided** mode. The switch at the top right changes to **Advanced**, which shows every setting;
 you can switch back at any time, and nothing about your storms changes when you do.
@@ -83,7 +89,7 @@ first launch; each other group shows one row of cards and a **Show all** button 
 
 | Group | Cards |
 |---|---|
-| Start here | Supercell, quick look, 1 km (about 2 minutes on most GPUs); Supercell, 250 m; Supercell, 100 m, overnight (greyed in 0.1.0) |
+| Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight (greyed in 0.1.1) |
 | Explore | Make your own environment; storms that split in two; clusters of short-lived storms; a storm in almost calm air |
 | Other storm types | A line of storms; cold air spreading out as a gust front; a warm bubble growing into a cloud; the two squall lines |
 | Famous environments | The air measured by weather balloons on well-known days (Norman, Oklahoma; Birmingham, Alabama; Denver, Colorado; Wilmington, Ohio; Tallahassee, Florida; Jackson, Mississippi), each named by its station and date |
@@ -174,8 +180,15 @@ MP4 when the film add-on is installed. The installers add it; with pip it is `pi
 
 ## 9. Find the files
 
-**Open the files** says where the storm's output is: a folder of netCDF files in CM1's own format, which any CM1
-tool reads. It gives lines to copy for `ncview` and for Python.
+**Open the files** says where the storm's folder is, with an **Open folder** button that shows it in your file
+manager. On Windows the folder is inside Ubuntu, so it is named as File Explorer names it
+(`\\wsl.localhost\Ubuntu-24.04\home\YOUR-NAME\gm1-runs\STORM`), with the Linux path under it. The output is a
+folder of netCDF files in CM1's own format, which any CM1 tool reads, with lines to copy for `ncview` and for Python.
+
+Storms take disk space: a quick look takes a few GB, a fine one tens of GB. **Runs** on the left lists every storm
+with its size, and the total at the top. **Delete** removes a storm's whole folder. **Keep pictures only** deletes
+its big files and keeps its pictures and its results page; such a storm can no longer be run longer, and no new
+pictures can be drawn from it. Both ask first, and neither is offered while the storm is running.
 
 **Run it 1 hour longer** continues the same storm from where it ended. **Show everything** switches to Advanced on
 the same storm: its settings, the check against CM1, the estimate and the log.
@@ -218,6 +231,8 @@ GUI can run is listed in [`COMMANDS.md`](COMMANDS.md).
   rising air; until then there is little to see. Keep watching.
 - **The GUI does not open.** Check that the GM1 window (or the terminal running `gpuwm-cm1 gui`) is still open, and
   open the exact link it printed, with its token.
+- **"This link is out of date."** The page was opened without its key, or with an old one. Start GM1 again (Start
+  menu: GM1) and use the page it opens.
 - **Anything else.** Run `gpuwm-cm1 doctor --plain` (on Windows: **GM1 check** in the Start menu) and follow its fix
   lines. In the GUI, **System** on the left shows the same check. [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) has the
   common problems with their fixes, and how to ask for help.

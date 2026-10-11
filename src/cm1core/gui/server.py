@@ -16,7 +16,10 @@ import argparse
 import errno
 import http.server
 import json
+import os
 from pathlib import Path
+import re
+import signal
 import socket
 import sys
 import threading
@@ -137,7 +140,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002 - stdlib signature
         if not self.server.quiet:
-            super().log_message(format, *args)
+            # The token is kept from start to start, so a --verbose log never shows it.
+            super().log_message(format, *[hide_token(arg) if isinstance(arg, str) else arg for arg in args])
 
     def _headers(self, status: int, kind: str, length: int | None, extra: dict[str, str] | None = None,
                  cache: str = "no-store") -> None:
@@ -154,6 +158,12 @@ class Handler(http.server.BaseHTTPRequestHandler):
     def _json(self, status: int, body: Any, extra: dict[str, str] | None = None) -> None:
         data = (json.dumps(body, indent=None, sort_keys=True, allow_nan=False, default=str) + "\n").encode("utf-8")
         self._headers(status, "application/json; charset=utf-8", len(data), extra)
+        if self.command != "HEAD":
+            self.wfile.write(data)
+
+    def _html(self, status: int, page: str) -> None:
+        data = page.encode("utf-8")
+        self._headers(status, "text/html; charset=utf-8", len(data))
         if self.command != "HEAD":
             self.wfile.write(data)
 
@@ -228,9 +238,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
         decision = self.server.guard.check(method, raw_path, view, query, self.client_address[0])
         if not decision.allowed:
             self._drain_body()
+            # A browser opening a page (an old tab, a bookmark, a link from an earlier start) is told so in
+            # a page it can read; the page's own requests, and every program, still get JSON.
+            if (decision.token_refused and method in ("GET", "HEAD")
+                    and not raw_path.startswith(("/api/", "/static/"))):
+                self._html(decision.status, auth.out_of_date_page(bool(self.server.guard.start_menu)))
+                return
             self._json(decision.status, {"ok": False, "message": decision.message,
-                                         "fix": "Open the link gpuwm-cm1 gui printed."
-                                         if decision.status == 403 else ""})
+                                         "fix": auth.OUT_OF_DATE_FIX if decision.token_refused else ""})
             return
         if decision.set_cookie:
             self._headers(303, "text/plain; charset=utf-8", 0,
@@ -345,6 +360,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.server.streams.release()
 
 
+_TOKEN_IN_TEXT = re.compile(r"(token=)[A-Za-z0-9_%.~-]+")
+
+
+def hide_token(text: str) -> str:
+    """``text`` with the value of every ``token=`` taken out (a request line on its way to a log)."""
+
+    return _TOKEN_IN_TEXT.sub(r"\1...", text)
+
+
 class _Caseless:
     """A read-only header mapping looked up case-insensitively."""
 
@@ -443,6 +467,9 @@ def add_command(commands: "argparse._SubParsersAction") -> None:
     command.add_argument("--no-browser", action="store_true",
                          help="only print the link; by default it also opens in your browser when this computer "
                               "has a screen (never over ssh)")
+    command.add_argument("--new-token", action="store_true",
+                         help="make a new link: the link is kept with the runs folder so an old tab or bookmark "
+                              "still works after a restart; this replaces it, and every earlier link stops working")
     command.add_argument("--verbose", action="store_true", help="log every request on stderr")
     command.add_argument("--fake-runner", action="store_true", help=argparse.SUPPRESS)
     # Real host-only commands, fake GPU work (screen checks on a machine whose GPU is busy or absent).
@@ -486,21 +513,25 @@ def gui_door(arguments: argparse.Namespace) -> int:
     if arguments.port is None and arguments.bind in LOOPBACK_BINDS and not fake:
         running = running_gui(Path(arguments.root).expanduser())
         if running is not None:
-            print("GM1 is already open. Its link:", f"  {running['url']}", sep="\n", flush=True)
-            if not arguments.no_browser:
-                from .browser import open_link
-
-                opened, how = open_link(running["url"])
-                if opened:
-                    print(f"Opened it in your browser ({how}).", flush=True)
-            return 0
+            if arguments.new_token:
+                print(NEW_TOKEN_WHILE_OPEN, file=sys.stderr)
+                return 2
+            return show_running(running["url"], browser=not arguments.no_browser)
+        forget_stale(Path(arguments.root).expanduser())
+    elif arguments.new_token and not fake and running_gui(Path(arguments.root).expanduser()) is not None:
+        # A port was named, so a second GUI may start beside the open one; its link all the same cannot change
+        # under it.
+        print(NEW_TOKEN_WHILE_OPEN, file=sys.stderr)
+        return 2
+    # A new link is made here and kept only once the GUI has its port: a start that fails leaves the old one.
+    rotate = bool(arguments.new_token) and keeps_token(arguments)
     try:
         server = build_server(
             arguments.root, host=arguments.bind, port=port, allow_remote=arguments.allow_remote,
             extra_hosts=tuple(arguments.allow_host),
             runner=(fake_runner() if arguments.fake_runner else mixed_runner() if arguments.fake_gpu
                     else real_runner()),
-            prefs=prefs, quiet=not arguments.verbose,
+            prefs=prefs, quiet=not arguments.verbose, token=auth.new_token() if rotate else kept_token(arguments),
             port_tries=PORT_TRIES if arguments.port is None else 1, block_gpu=True, native=native)
     except auth.BindRefused as error:
         print(f"gpuwm-cm1 gui: {error.what}\n{error.fix}", file=sys.stderr)
@@ -512,6 +543,8 @@ def gui_door(arguments: argparse.Namespace) -> int:
                   "pass --port with another number, for example: gpuwm-cm1 gui --port 8800", file=sys.stderr)
             return 2
         raise
+    if rotate:
+        auth.keep_token(server.root.server_dir, server.token)
     from ..cm1run.gpuinfo import is_wsl2
 
     wsl = is_wsl2()
@@ -520,8 +553,16 @@ def gui_door(arguments: argparse.Namespace) -> int:
         "GM1 is ready. Open this link in your browser:",
         f"  {server.url}",
         f"Runs folder: {server.root.path}",
-        f"Mode: {mode} (switch at the top of the page)",
     ]
+    if wsl:
+        from ..cm1run.wslpaths import windows_path
+
+        in_windows = windows_path(server.root.path, wsl=True)
+        if in_windows:
+            lines.append(f"  in Windows (File Explorer): {in_windows}")
+    lines.append(f"Mode: {mode} (switch at the top of the page)")
+    if arguments.new_token:
+        lines.append("This is a new link: links and tabs from earlier starts no longer work.")
     if arguments.fake_runner:
         lines.append("Fake runner: nothing here runs a model; every result is made up for testing.")
     elif arguments.fake_gpu:
@@ -547,11 +588,7 @@ def gui_door(arguments: argparse.Namespace) -> int:
         from .browser import open_link
 
         opened, how = open_link(server.url)
-        if opened:
-            print(f"Opened the link in your browser ({how}; gpuwm-cm1 gui --no-browser only prints it).",
-                  flush=True)
-        else:
-            print(f"The browser was not opened ({how}): open the link above yourself.", flush=True)
+        print(opened_words(opened, how, server.url), flush=True)
         if record is not None:
             # doctor --report says how the link was last opened (a "the browser did not open" report).
             try:
@@ -559,15 +596,134 @@ def gui_door(arguments: argparse.Namespace) -> int:
                     json.dumps({"opened": bool(opened), "how": str(how)}) + "\n", encoding="utf-8")
             except OSError:
                 pass
+    # The window closed (SIGHUP) or the process was asked to end (SIGTERM): leave as Ctrl+C does, so the record
+    # of the open GUI goes with it.  Nothing is printed then: the window that would show it is gone.
+    restore = _on_window_closed()
     try:
         server.serve_forever(poll_interval=0.5)
     except KeyboardInterrupt:
         print("\nClosed the GUI. Runs keep going; gpuwm-cm1 gui opens it again.", flush=True)
+    except _WindowClosed:
+        pass
     finally:
         if record is not None:
             forget_running(record)
         server.server_close()
+        restore()
     return 0
+
+
+class _WindowClosed(BaseException):
+    """The GUI's terminal went away, or the process was asked to end."""
+
+
+def _on_window_closed():
+    """Turn SIGHUP and SIGTERM into :class:`_WindowClosed`; returns what puts the old handlers back."""
+
+    def closed(signum, frame):  # noqa: ANN001 - the signal module's shape
+        raise _WindowClosed()
+
+    old = {}
+    for name in ("SIGHUP", "SIGTERM"):
+        number = getattr(signal, name, None)
+        if number is None:
+            continue
+        try:
+            old[number] = signal.signal(number, closed)
+        except (ValueError, OSError):  # not the main thread: the default stays
+            continue
+
+    def restore() -> None:
+        for number, handler in old.items():
+            try:
+                signal.signal(number, handler)
+            except (ValueError, OSError, TypeError):
+                pass
+
+    return restore
+
+
+def opened_words(opened: bool, how: str, url: str) -> str:
+    """What the console says after trying the browser: "Opened" only when the opener reported success."""
+
+    if opened:
+        return f"Opened the link in your browser ({how}; gpuwm-cm1 gui --no-browser only prints it)."
+    return f"The browser was not opened ({how}). Open this link in your browser:\n  {url}"
+
+
+#: How long the window of a second start stays up so its words can be read (it has nothing else to do).
+SHOWN_AGAIN_S = 4.0
+NOT_SHOWN_S = 120.0
+
+
+def show_running(url: str, *, browser: bool = True, wsl: bool | None = None) -> int:
+    """A second start while GM1 is open: bring its page up in the browser, or say where it is.
+
+    From the Windows shortcut this runs in a window that closes when it returns, so there it waits a little:
+    a few seconds when the page was opened, long enough to read and copy the link when it was not.  Nowhere
+    else: in a terminal that stays (an ssh login, a Linux desktop, a start with the browser switched off) it
+    prints the link and returns at once.
+    """
+
+    opened, how, hold = False, "", False
+    if browser:
+        from . import browser as opener
+
+        # Only where a browser is tried at all, and only under Windows, is there a window that would close.
+        if opener.why_not() is None:
+            if wsl is None:
+                from ..cm1run.gpuinfo import is_wsl2
+
+                wsl = is_wsl2()
+            hold = bool(wsl)
+        opened, how = opener.open_link(url)
+    if opened:
+        print(f"GM1 is already open. Opened it in your browser again ({how}). Its link:", f"  {url}",
+              sep="\n", flush=True)
+    else:
+        why = f" (the browser was not opened: {how})" if how else ""
+        print(f"GM1 is already open{why}. Open this link in your browser:", f"  {url}", sep="\n", flush=True)
+    if hold:
+        _hold_window(SHOWN_AGAIN_S if opened else NOT_SHOWN_S)
+    return 0
+
+
+def _hold_window(seconds: float) -> None:
+    """Keep a terminal window up for ``seconds``, or until Enter; nothing when this is not a terminal."""
+
+    try:
+        if not (sys.stdin.isatty() and sys.stdout.isatty()):
+            return
+        import select
+
+        print(f"This window closes in {seconds:.0f} seconds. Press Enter to close it now.", flush=True)
+        select.select([sys.stdin], [], [], seconds)
+    except (OSError, ValueError, AttributeError, KeyboardInterrupt):
+        return
+
+
+NEW_TOKEN_WHILE_OPEN = ("gpuwm-cm1 gui: GM1 is open, and its link cannot change while it is.\nClose it (Ctrl+C in "
+                        "its window, or close the window), then run gpuwm-cm1 gui --new-token again.")
+
+
+def keeps_token(arguments: argparse.Namespace) -> bool:
+    """Whether this GUI's token is the runs folder's kept one: a GUI on this computer alone."""
+
+    return arguments.bind in LOOPBACK_BINDS and not arguments.allow_remote
+
+
+def kept_token(arguments: argparse.Namespace) -> str | None:
+    """The runs folder's kept token for a GUI on this computer alone; None (a new one per start) otherwise.
+
+    ``--new-token`` is not handled here: :func:`gui_door` makes the new one and keeps it once the GUI is up.
+    """
+
+    if not keeps_token(arguments):
+        return None
+    try:
+        return auth.stored_token(Path(arguments.root).expanduser().resolve() / SERVER_DIR)
+    except OSError:
+        return None
 
 
 # ---------------------------------------------------------------- one GUI per runs folder
@@ -579,8 +735,6 @@ RUNNING_FILE = "gui.json"
 
 def write_running(server: GuiServer) -> Path | None:
     """Record the open GUI's link in the runs folder (mode 0600), so a second ``gpuwm-cm1 gui`` shows it."""
-
-    import os
 
     path = server.root.server_dir / RUNNING_FILE
     record = {"pid": os.getpid(), "port": server.port, "url": server.url, "root": str(server.root.path)}
@@ -597,8 +751,6 @@ def write_running(server: GuiServer) -> Path | None:
 
 
 def forget_running(path: Path) -> None:
-    import os
-
     try:
         if json.loads(path.read_text(encoding="utf-8")).get("pid") == os.getpid():
             path.unlink()
@@ -606,10 +758,21 @@ def forget_running(path: Path) -> None:
         pass
 
 
+def forget_stale(root: Path) -> None:
+    """Remove the record of a GUI that no longer answers (its window was closed, or the computer restarted).
+
+    Called only after :func:`running_gui` found no open GUI on ``root``.
+    """
+
+    try:
+        (Path(root) / SERVER_DIR / RUNNING_FILE).unlink()
+    except OSError:
+        pass
+
+
 def running_gui(root: Path, timeout_s: float = 2.0) -> dict[str, Any] | None:
     """The GUI already open on ``root`` and answering its link, or None."""
 
-    import os
     import urllib.request
 
     try:
@@ -664,7 +827,12 @@ __all__ = [
     "add_command",
     "block_gpu_imports",
     "build_server",
+    "forget_stale",
     "gui_door",
+    "hide_token",
+    "kept_token",
+    "opened_words",
+    "show_running",
     "running_gui",
     "serve_in_thread",
 ]

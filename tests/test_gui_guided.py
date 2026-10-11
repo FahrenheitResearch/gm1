@@ -91,7 +91,7 @@ def test_fit_returns_its_command_and_what_start_would_run(live):
     ]
     not_here = client.post("/api/fit", {"preset": "supercell-100m", "budget": "overnight"}).json
     assert not_here["ok"] and not not_here["offered"]
-    assert not_here["message"].startswith("Not offered in 0.1.0: "), not_here      # withheld by its preset.json
+    assert not_here["message"].startswith("Not offered in 0.1.1: "), not_here      # withheld by its preset.json
     assert client.post("/api/fit", {"preset": "supercell-1km", "budget": "2h"}).status == 400
     assert client.post("/api/fit", {"budget": "10m"}).status == 400
     unknown = client.post("/api/fit", {"preset": "no-such", "budget": "10m"})
@@ -260,7 +260,7 @@ def test_guided_start_refuses_a_name_in_use_and_a_run_that_does_not_fit(live):
     assert taken.status == 409 and taken.json["fix"] == "Pick another name."
     too_big = client.post("/api/guided/start", {"preset": "supercell-100m", "budget": "overnight", "name": "big"})
     assert too_big.status == 409
-    assert "Not offered in 0.1.0" in too_big.json["message"] and too_big.json["command"].startswith("gpuwm-cm1 preset new")
+    assert "Not offered in 0.1.1" in too_big.json["message"] and too_big.json["command"].startswith("gpuwm-cm1 preset new")
     assert not (root / "big").exists()
     bad = client.post("/api/guided/start", {"preset": "supercell-1km", "budget": "10m", "name": "../x"})
     assert bad.status == 400

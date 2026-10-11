@@ -4,7 +4,7 @@
   "order": 1,
   "group": "start",
   "name": "Supercell, quick look, 1 km",
-  "line": "One rotating thunderstorm on a coarse grid. About 2 minutes on most GPUs.",
+  "line": "One rotating thunderstorm on a coarse grid. The quickest storm to try.",
   "budget": "10m",
   "note": "CM1's own supercell case. On it GM1 matches CM1 r21.1 within 5% on ten storm measures (measured).",
   "source": {

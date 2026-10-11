@@ -948,7 +948,7 @@ class _Builder:
             keys=keys,
             value=self.values(keys),
             text=(f"cecd = {cecd} selects one of CM1's wind-dependent drag coefficients (sfcphys.F:138-194); "
-                  "only cecd = 1 (constant drag coefficient) is implemented in 0.1.0"),
+                  "only cecd = 1 (constant drag coefficient) is implemented in 0.1.1"),
             fix="set cecd = 1",
             code="CM1-IMPORT-CECD-UNSUPPORTED",
             stage="value-rule",

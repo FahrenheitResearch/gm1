@@ -15,7 +15,7 @@
 #
 #   curl -LsSf https://raw.githubusercontent.com/FahrenheitResearch/gm1/main/install.sh | sh -s -- --uninstall
 #
-# Settings, as environment variables (GM1_VERSION=0.1.0 sh install.sh):
+# Settings, as environment variables (GM1_VERSION=0.1.1 sh install.sh):
 #
 #   GM1_VERSION=X.Y.Z        install this release instead of the newest
 #   GM1_WHEEL=FILE.whl       install this wheel file (a build not on PyPI yet)
@@ -360,7 +360,12 @@ do_install() {
   [ -n "${GM1_FIND_LINKS:-}" ] && set -- "$@" --find-links "$(absolute "$GM1_FIND_LINKS")"
   set -- "$@" --with "$FILM_PACKAGE" "$spec"
 
-  step "Installing GM1${version:+ $version} with Python $PYTHON_VERSION (about 2.5 GB, mostly NVIDIA's libraries)"
+  # An update finds the big packages already on this computer: the 2.5 GB is the first install's.
+  if "$UV" tool list 2>/dev/null | grep -q '^gpuwm-cm1 '; then
+    step "Updating GM1${version:+ to $version} with Python $PYTHON_VERSION (only what changed is downloaded)"
+  else
+    step "Installing GM1${version:+ $version} with Python $PYTHON_VERSION (about 2.5 GB, mostly NVIDIA's libraries)"
+  fi
   if [ -n "$constraints" ]; then
     say "With the exact versions GM1 was tested with."
   else

@@ -65,6 +65,8 @@ def scrub(text: str, *, home: str | None = None, hosts: Sequence[str] | None = N
     text = re.sub(r"(?<![\w.])(" + re.escape(HOMES) + r")" + _NAME, r"\1<user>", text)
     text = re.sub(r"(?i)(/mnt/[a-z]/users/)" + _NAME, r"\1<user>", text)
     text = re.sub(r"(?i)(\b[a-z]:\\+users\\+)" + _NAME, r"\1<user>", text)
+    # The runs folder as Windows names it under WSL: \\wsl.localhost\DISTRO\home\NAME\...
+    text = re.sub(r"(?i)(\\wsl(?:\.localhost|\$)\\+[^\\\s]+\\+home\\+)" + _NAME, r"\1<user>", text)
     text = re.sub(r"(?<![\w.])(/Users/)" + _NAME, r"\1<user>", text)
     for host in hosts:
         text = re.sub(r"(?<![\w-])" + re.escape(host) + r"(?![\w-])", "<host>", text)

@@ -291,6 +291,10 @@ def about_seconds(index: Mapping[str, Any] | None, look: str, between: int = 8) 
     return max(2, int(round(frames * SECONDS_PER_FILM_PICTURE)))
 
 
+#: The films drawn from the run's data files, not from its pictures (quicklook.film.DERIVED).
+DATA_FILMS = ("swirl", "parcels")
+
+
 class LooksApi:
     """The film and look endpoints of one server (an :class:`.api.Api`)."""
 
@@ -348,6 +352,14 @@ class LooksApi:
             self.api.jobs.log_command(rundir, "film", line, "stopped")
             return Reply(200, {"ok": True, "action": "film", "run": run_id, "command": line, "stopped": True,
                                "message": "Stopped. The pictures made so far are kept.", "fix": ""})
+        if look in DATA_FILMS and payload.get("stop") is not True:
+            from .api import TRIMMED_FILE
+
+            if (rundir / TRIMMED_FILE).is_file():
+                # These two are drawn from the run's data, which "Keep pictures only" deleted.
+                raise ApiError(409, "This run's data files were deleted to free disk space, and this film is "
+                                    "drawn from them.", "A film of any look that has pictures can still be made.",
+                               command=line)
         if look == "parcels":
             state = self.api.status(run_id, rundir).get("state")
             if state in ("running", "waiting", "stale"):
@@ -373,7 +385,13 @@ class LooksApi:
     def look(self, run_id: str, rundir: Path, payload: dict[str, Any]) -> "Reply":
         from .api import ApiError, Reply
 
+        from .api import TRIMMED_FILE
+
         look = payload.get("look")
+        if (rundir / TRIMMED_FILE).is_file():
+            # "Keep pictures only" deleted what a look is drawn from; a redraw would have nothing to read.
+            raise ApiError(409, "This run's data files were deleted to free disk space, so no new picture can be "
+                                "drawn from it.", "The pictures it has are kept: open Results to see them.")
         if look == "all":
             args = C.quicklook_pass_args(rundir)
             line = C.display(args)

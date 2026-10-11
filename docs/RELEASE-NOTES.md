@@ -1,5 +1,62 @@
 # gpuwm-cm1 release notes
 
+## 0.1.1
+
+A release of fixes for Windows. The model, the engine pin (gpuwm 2.8.0 and gpuwm-data 2.8.0) and every number in
+the tables are those of 0.1.0, and everything under "0.1.0" below describes 0.1.1 too. Verified on Windows 11 with an
+RTX 3080.
+
+### Fixed on Windows
+
+- **GM1 opens your browser.** 0.1.0 opened a File Explorer window (showing Documents) instead of the browser, and
+  the link had to be copied from the console. 0.1.1 opens the link in the Windows default browser. The console says
+  "Opened" only when that worked, and otherwise prints the link for you to open.
+- **Opening GM1 again goes to the running storm.** A page that was just opened goes straight to the storm that is
+  running, and the first screen and Runs say "A storm is running" with a **Watch it** button. Starting GM1 while it
+  is already open brings its page up in the browser again.
+- **The link survives a restart.** A tab or a bookmark from an earlier start keeps working: GM1 keeps the link's key
+  with your runs folder, readable by you only, so a link stays good until you ask for a new one with `gpuwm-cm1 gui
+  --new-token`. A page opened with an old key, or with none, says "This link is out of date" and how to get the
+  right one.
+- **Folders are shown as Windows paths**, the way File Explorer names them
+  (`\\wsl.localhost\Ubuntu-24.04\home\YOUR-NAME\gm1-runs`), in the console, the doctor, Runs and Results, with an
+  **Open folder** button. The installer ends by naming the folder your storms will be in.
+- **Storm sizes, Delete and Keep pictures only.** Runs shows the size of each storm and the total. **Delete**
+  removes a storm. **Keep pictures only** removes its large model files and keeps the pictures; such a storm can no
+  longer be continued. Both ask first, naming the storm and its size, and both are refused while the storm is
+  running or while GM1 is still drawing its pictures.
+- **The doctor's disk line names the Windows drive.** Under WSL2 it gives the free space of the Windows drive that
+  holds Ubuntu's disk as well as the Linux figure, and judges by the smaller of the two.
+- **Smaller wording fixes.** The "Starting" sentence goes once the storm is running, and "Stopping at the next step"
+  goes once it has stopped. The per cent done agrees with the storm time shown beside it. The first card no longer
+  says "about 2 minutes on most GPUs" above your own GPU's time. The installer says "Updating" when it updates.
+
+The running-storm page, the kept link, the storm sizes, Delete and Keep pictures only work the same way on Linux.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"). With pip: `pip install --upgrade gpuwm-cm1`. Close GM1 and let a running storm finish first; the
+installer stops with a message while one runs. Your storms stay where they are. If a File Explorer window that 0.1.0
+opened is still on the screen, close it.
+
+### Known limitations
+
+The known limitations of 0.1.0 all apply to 0.1.1 unchanged; this release fixes none of them. They are listed under
+"0.1.0" below ("Known limitations", "Not in v0.1" and "Further known limits"). In short:
+
+- Morrison (`ptype = 5`) and WSM6 (`ptype = 7`) run. Thompson (`ptype = 3`) runs only after an acknowledgment and its
+  output is unverified on this release's engine. NSSL and every other scheme are refused by name.
+- 21 of CM1's 23 shipped namelists are refused; the supercell and the squall line run.
+- Some guided storms are greyed, each with its reason: the squall-line presets, the 100 m supercell, and any storm
+  that needs more memory than the card has free.
+- GM1 does not check whether another program is already using the GPU.
+- Surface drag runs with `cecd = 1` only.
+- Restarts do not cross GM1 versions: finish a storm with the version that started it.
+- On Windows, closing the GM1 window closes the GUI, never a running storm. Shutting down, restarting or sleeping the
+  computer, or `wsl --shutdown`, stops a storm.
+- Reaching the GUI from Windows is measured in WSL2's default network mode only.
+
 ## 0.1.0
 
 GM1 (the `gpuwm-cm1` package) runs CM1 r21.1's idealized storm cases on one NVIDIA GPU (Linux or WSL2), on uniform

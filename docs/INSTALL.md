@@ -1,6 +1,6 @@
-# Installing gpuwm-cm1 0.1.0
+# Installing gpuwm-cm1 0.1.1
 
-This is the first release, an alpha. Read `docs/RELEASE-NOTES.md` for what it runs, how closely it
+This is an alpha release. Read `docs/RELEASE-NOTES.md` for what it runs, how closely it
 matches CM1 and what it does not do yet. The first storm is in `docs/QUICKSTART.md`; CM1 users with their own
 namelist should read `docs/CM1-USERS.md`. When something does not work, `docs/TROUBLESHOOTING.md` has the common
 problems with their fixes.
@@ -33,9 +33,10 @@ missing (Windows asks for permission). When WSL itself was missing, restart, let
 password, and paste the same line again; when only Ubuntu was missing, Ubuntu asks for its user name and password in
 the same window and the install goes on. It installs GM1 inside Ubuntu with the Linux installer below, and adds a
 **GM1** shortcut to the Start menu and the desktop, and **GM1 check** to the Start menu. The GM1 shortcut starts GM1
-in a window and opens the GUI in your Windows browser. Closing that window closes the GUI, never a running storm: open
-GM1 again to see it. Shutting down or restarting Windows stops a storm. GM1 check checks the computer and saves
-`gm1-report.txt` on your desktop for a help request.
+in a window and opens the GUI in your Windows default browser. Closing that window closes the GUI, never a running
+storm: open GM1 again and the page shows it. Shutting down or restarting Windows stops a storm. GM1 check checks the
+computer and saves `gm1-report.txt` on your desktop for a help request. The installer ends by saying where your storms
+will be in File Explorer (`\\wsl.localhost\Ubuntu-24.04\home\YOUR-NAME\gm1-runs`).
 
 Settings are environment variables, set in the same PowerShell window before the line. `GM1_DESKTOP_SHORTCUT=0`
 leaves the desktop alone; `GM1_DISTRO` picks another WSL distribution than Ubuntu (`wsl --list` shows yours):
@@ -55,7 +56,7 @@ It checks the computer (x86-64, glibc, the NVIDIA driver), installs [uv](https:/
 (`uv tool install`, never the system's Python), with the exact versions of the release's `constraints-gpu-cu13.txt`
 when it can download them (it says so when it cannot), adds the film add-on for MP4 films, puts `~/.local/bin` on
 `PATH` for new terminals, and runs `gpuwm-cm1 doctor --plain`. Nothing needs sudo. Open a new terminal afterwards, so
-it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.0` (a given release),
+it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.1` (a given release),
 `GM1_WHEEL=FILE.whl` (a wheel file), `GM1_FIND_LINKS=FOLDER`, `GM1_CONSTRAINTS=FILE`, `GM1_REINSTALL=1` (repairs a
 damaged install), `GM1_NO_MODIFY_PATH=1` and `GM1_SKIP_DOCTOR=1`.
 
@@ -90,7 +91,7 @@ user-space versions every GM1 check ran with (CuPy 14.2.0, NVRTC 13.3.33 and the
 `constraints-gpu-cu13.txt` from the GitHub release and pass it:
 
 ```sh install
-pip install "gpuwm-cm1==0.1.0" -c constraints-gpu-cu13.txt
+pip install "gpuwm-cm1==0.1.1" -c constraints-gpu-cu13.txt
 ```
 
 The Linux installer does this by itself.
@@ -102,7 +103,7 @@ The Linux installer does this by itself.
 ```sh install
 uv venv -p 3.12 ~/gm1
 . ~/gm1/bin/activate
-uv pip install "gpuwm-cm1==0.1.0" -c constraints-gpu-cu13.txt
+uv pip install "gpuwm-cm1==0.1.1" -c constraints-gpu-cu13.txt
 gpuwm-cm1 doctor --plain
 ```
 
@@ -115,7 +116,7 @@ then install the wheel file. Each file you downloaded must say OK:
 
 ```sh install
 sha256sum -c --ignore-missing SHA256SUMS
-pip install "./gpuwm_cm1-0.1.0-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
+pip install "./gpuwm_cm1-0.1.1-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
 ```
 
 ## Check the computer and start
@@ -132,14 +133,17 @@ It opens the GUI in your browser (on Windows, the Windows browser) and prints th
 stops a run, and neither does closing the terminal or, on Windows, the GM1 window: that closes the GUI, and the storm
 keeps going until it finishes. Shutting down or restarting the computer (on Windows also `wsl --shutdown`) stops a
 running storm; Run it longer or Resume continues it later from its last saved point. Opening GM1 again while it is
-open shows the same page. `gpuwm-cm1 gui --no-browser` only prints the
-link.
+open brings that page up in the browser again. `gpuwm-cm1 gui --no-browser` only prints the
+link. The link is kept with the runs folder (in `.gm1-gui/token`, readable only by you), so it is the same at every
+start and an old tab or bookmark keeps working; `gpuwm-cm1 gui --new-token` makes a new one.
 
 ### Windows 10 or 11 with WSL2, by hand
 
-Everything above for Linux also works inside your own WSL2 Ubuntu. `gpuwm-cm1 gui` opens the Windows browser on
-`http://127.0.0.1:8765/?token=...` (both `127.0.0.1` and `localhost` reach WSL2 in its default network mode). The GPU
-panel shows the memory in use but cannot name Windows programs holding it.
+Everything above for Linux also works inside your own WSL2 Ubuntu. `gpuwm-cm1 gui` opens the Windows default browser
+on `http://127.0.0.1:8765/?token=...` (both `127.0.0.1` and `localhost` reach WSL2 in its default network mode) and
+says "Opened the link in your browser" only when Windows took the link; otherwise it prints the link to open
+yourself. It also prints the runs folder as File Explorer names it. The GPU panel shows the memory in use but cannot
+name Windows programs holding it.
 
 ### A GPU computer you reach over ssh
 

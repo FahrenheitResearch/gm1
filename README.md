@@ -126,7 +126,7 @@ it is at 250 m and finer. No comparison with CM1 on a cluster is made.
 ## Known limitations
 
 The release notes list them in full ([`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTES.md), "Known limitations"). In
-short: some guided presets are greyed with their measured reason (the squall lines, and in 0.1.0 the 100 m
+short: some guided presets are greyed with their measured reason (the squall lines, and in 0.1.1 the 100 m
 supercell, which stops early on a domain-position check); `gpuwm-cm1 run` and the GUI do not check whether another
 program is already using the GPU, so run on a card with enough free memory; the first run on a machine compiles GPU
 kernels (about 10 s) without a notice; surface drag runs with `cecd = 1` only; NSSL and other unported microphysics

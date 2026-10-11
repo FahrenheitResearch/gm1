@@ -28,6 +28,18 @@ The setup screens' endpoints (examples, setup, namelist, edit, recommended,
 acknowledge, sounding, jobscript, measure) are :mod:`.setup`'s; advanced
 mode's (restarts, commands, words, presets/new) are :mod:`.advanced`'s.
 
+Two housekeeping POSTs run no ``gpuwm-cm1`` command, so the API table (which lists those) does not have them;
+each still needs the token header, and its reply's ``command`` is the shell line that does the same:
+
+POST /api/runs/RUN/delete          {"keep_pictures"?: bool} removes the run folder (``rm -r``), or with
+                                   keep_pictures only its big files (cm1out, each segment's frames and restarts);
+                                   refused while the run is going or GM1 is still working on it
+POST /api/open-folder              {"run"?: RUN} shows the runs folder, or one run's, in the file manager
+                                   (File Explorer under WSL2, xdg-open on a Linux desktop)
+
+Under WSL2 ``/api/session``, ``/api/runs`` and ``/api/runs/RUN/results`` also name each folder as Windows
+sees it (``root_windows``, ``folder_windows``, ``cm1out_folder_windows``).
+
 Every POST takes ``"dry_run": true``: the request is checked and its exact
 command returned (``"dry_run": true`` in the reply), with nothing run and no
 file changed; that is what "Show command" shows before a button is pressed.
@@ -42,8 +54,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 import json
+import os
 from pathlib import Path
 import re
+import shlex
+import shutil
 import threading
 import time
 from typing import Any, Callable, Iterator
@@ -54,7 +69,7 @@ from . import control
 from . import storm
 from .files import (
     PathRefused, Root, is_run_dir, is_view_only, listing, read_json, require_name, safe_file,
-    stage_upload, tree_bytes,
+    stage_upload, tree_bytes, within, write_json_atomic,
 )
 from .guided import Guided
 from .jobs import COMMANDS_LOG, DryRun, Jobs, Unavailable
@@ -68,6 +83,40 @@ SOUNDING_LIMIT = 16 * 1024 * 1024
 #: The guided Results screen opens on these looks, in this order.
 GUIDED_LOOKS = ("reflectivity", "spin-near-ground", "updraft-5km", "swath")
 ESCALATE_AFTER_S = 30.0
+#: In a run folder whose big files were deleted to free the disk (the pictures kept): what was removed.
+TRIMMED_FILE = "trimmed.json"
+#: Said after a delete under Windows (WSL2), where the Windows drive does not show the space at once.
+WSL_FREED_NOTE = ("The space is free for new storms now. The Windows drive shows it only after the Linux disk "
+                  "file is made smaller (it does not shrink by itself).")
+#: The locks a run folder's own processes hold while they work (cm1run.rundir, cm1out.follow_lock), and what
+#: each one is doing.  They are held by whichever process started them: a run and its picture workers started
+#: before this GUI was opened are not this server's processes, and only their locks say they are still going.
+WORK_LOCKS = ((".run.lock", "the storm is still running"),
+              (".cm1out-follow.lock", "its files are still being written"),
+              (".quicklook-follow.lock", "its pictures are still being drawn"))
+
+
+def work_in_progress(rundir: Path) -> list[str]:
+    """What is still working in ``rundir``, by the locks held there (empty: nothing is)."""
+
+    try:
+        import fcntl
+    except ImportError:  # no flock on this system: the status and this server's own processes are the guard
+        return []
+    busy = []
+    for name, what in WORK_LOCKS:
+        try:
+            descriptor = os.open(rundir / name, os.O_RDONLY)
+        except OSError:
+            continue  # never made: nothing ever held it
+        try:
+            fcntl.flock(descriptor, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fcntl.flock(descriptor, fcntl.LOCK_UN)
+        except OSError:
+            busy.append(what)
+        finally:
+            os.close(descriptor)
+    return busy
 FORCE_OFFER_AFTER_S = 60.0
 #: How often a resume's sidecars look for the engine's new segment before they start.
 SIDECAR_WAIT_POLL_S = 0.2
@@ -165,6 +214,7 @@ class Api:
         self.bind = bind
         self._stops: dict[str, _StopRequest] = {}
         self._lock = threading.Lock()
+        self._place: dict[str, Any] | None = None
         self._closing = threading.Event()
         from .advanced import AdvancedApi
         from .setup import SetupApi
@@ -312,6 +362,10 @@ class Api:
     def _post(self, parts: list[str], payload: dict[str, Any]) -> Reply:
         if parts == ["mode"]:
             return Reply(body=self.set_mode(payload))
+        if parts == ["open-folder"]:
+            return self.open_folder(payload)
+        if len(parts) == 3 and parts[0] == "runs" and parts[2] == "delete":
+            return self.delete_run(parts[1], self.root.existing_run(parts[1]), payload)
         if parts == ["import"]:
             return self.import_namelist(payload)
         if parts == ["fit"]:
@@ -376,7 +430,40 @@ class Api:
             "port": self.port,
             "commands_available": sorted(self.jobs.runner.available()),
             "endpoints": C.api_table(),
+            **self.place(),
         }
+
+    # ------------------------------------------------------------ where the runs are, as Windows sees it
+
+    def place(self) -> dict[str, Any]:
+        """``wsl``, ``root_windows`` (the runs folder's Windows name under WSL2, else None) and
+        ``can_open_folder`` (this computer has a file manager to show a folder in).  Worked out once."""
+
+        with self._lock:
+            place = self._place
+        if place is None:
+            from ..cm1run.gpuinfo import is_wsl2
+            from ..cm1run.wslpaths import windows_path
+            from .browser import folder_opener
+
+            wsl = is_wsl2()
+            place = {"wsl": wsl, "root_windows": windows_path(self.root.path, wsl=wsl) if wsl else None,
+                     "can_open_folder": folder_opener(wsl=wsl) is not None}
+            with self._lock:
+                self._place = place
+        return dict(place)
+
+    def windows_name(self, path: Path) -> str | None:
+        """What Windows calls ``path`` (a folder under the runs folder), or None when not under WSL2."""
+
+        base = self.place()["root_windows"]
+        if not base:
+            return None
+        try:
+            parts = Path(path).resolve().relative_to(self.root.path).parts
+        except (ValueError, OSError):
+            return None
+        return "\\".join([base.rstrip("\\"), *parts])
 
     def mode(self) -> dict[str, Any]:
         mode, source = self.prefs.mode(self.root.has_runs())
@@ -400,11 +487,19 @@ class Api:
             row = summarize(path, status, run_id)
             row["url"] = run_url(run_id)
             row.update(self.views.row_extra(path, row))
+            row["trimmed"] = (path / TRIMMED_FILE).is_file()
             rows.append(row)
-        return {"root": str(self.root.path), "runs": rows, "host": host}
+        place = self.place()
+        return {"root": str(self.root.path), "runs": rows, "host": host,
+                "total_bytes": sum(int(row.get("disk_bytes") or 0) for row in rows),
+                "root_windows": place["root_windows"], "can_open_folder": place["can_open_folder"]}
 
     def status(self, run_id: str, rundir: Path) -> dict[str, Any]:
         status = read_status(rundir, launched_alive=self.jobs.engine_alive(run_id)).as_dict()
+        if (rundir / TRIMMED_FILE).is_file():
+            # Its restarts were deleted to free the disk: there is nothing to continue from.
+            status["trimmed"] = True
+            status["actions"] = [action for action in status.get("actions") or [] if action != "resume"]
         with self._lock:
             request = self._stops.get(run_id)
         if request is not None and status["state"] in ("running", "waiting") and request.aimed_at(status):
@@ -490,6 +585,11 @@ class Api:
             "status": status,
             "cm1out": files,
             "cm1out_folder": str(cm1out),
+            "cm1out_folder_windows": self.windows_name(cm1out),
+            "folder": str(rundir),
+            "folder_windows": self.windows_name(rundir),
+            "can_open_folder": self.place()["can_open_folder"],
+            "trimmed": read_json(rundir / TRIMMED_FILE, default=None),
             "looks": looks,
             "series": series,
             "quicklook_run": index.get("run") if isinstance(index, dict) else None,
@@ -506,6 +606,111 @@ class Api:
             body["guided"] = self.guided.results_extra(rundir, index if isinstance(index, dict) else None, status,
                                                        looks)
         return self.views.results_extra(run_id, rundir, body)
+
+    # ------------------------------------------------------------ housekeeping: delete, open the folder
+
+    def delete_run(self, run_id: str, rundir: Path, payload: dict[str, Any]) -> Reply:  # noqa: C901
+        """Delete a run's folder, or (``keep_pictures``) only its big files.  Never while it is going."""
+
+        keep = payload.get("keep_pictures", False)
+        if not isinstance(keep, bool):
+            raise ApiError(400, "keep_pictures must be true or false.", "Leave it out to delete the whole run.")
+        segments = segment_dirs(rundir)
+        big = [rundir / "cm1out", *[segment / name for segment in segments for name in ("frames", "restarts")]]
+        # A big folder that is a link, or sits behind one, keeps its files somewhere else (another disk):
+        # GM1 deletes nothing through a link, so "pictures only" could not be true of this run.
+        linked = [path for path in big if path.is_symlink() or (path.exists() and not within(rundir, path))]
+        targets = [rundir] if not keep else [path for path in big if path.is_dir() and path not in linked]
+        line = "rm -r -- " + " ".join(shlex.quote(str(path)) for path in targets) if targets else ""
+        # A refusal carries no command: nothing was run, and the page lists the commands it ran.
+        extra = {"action": "delete"}
+        if is_view_only(rundir):
+            raise ApiError(409, "This folder was not made by a GM1 run command, so GM1 does not delete it.",
+                           f"Delete it yourself: {rundir}", **extra)
+        if rundir.is_symlink() or rundir.resolve() == self.root.path:
+            raise ApiError(409, "This run folder is a link, so GM1 does not delete it.",
+                           f"Delete it yourself: {rundir}", **extra)
+        state = self.status(run_id, rundir).get("state")
+        if state in ("running", "waiting"):
+            raise ApiError(409, "This storm is still running.", "Stop it first, then delete it.", **extra)
+        if state == "stale":
+            raise ApiError(409, "This run may still be going on another computer.",
+                           "Delete it once it has ended.", **extra)
+        if self.jobs.launched(run_id):
+            raise ApiError(409, "GM1 is still working on this run (drawing its pictures or converting its files).",
+                           "Wait a moment and try again.", **extra)
+        busy = work_in_progress(rundir)
+        if busy:
+            # Deleting the files under a worker would lose the pictures it has not drawn yet.
+            raise ApiError(409, f"GM1 is still working on this run: {', '.join(busy)}.",
+                           "Wait until it is done (Watching says when the pictures are ready), then try again.",
+                           **extra)
+        if keep and linked:
+            name = str(linked[0].relative_to(rundir))
+            raise ApiError(409, f"{name} in this run is a link to another place, so GM1 does not delete it, and "
+                                "nothing was deleted.",
+                           f"Delete what it points to yourself, or delete the whole run. The link is {linked[0]}",
+                           **extra)
+        if keep and not targets:
+            raise ApiError(409, "This run has no big files left to delete.", "", **extra)
+        self.jobs.stop_if_dry(line, action="delete", run=run_id)
+        size = sum(tree_bytes(path) for path in targets)
+        with self.jobs.run_lock(run_id):
+            if self.jobs.launched(run_id) or work_in_progress(rundir):
+                raise ApiError(409, "GM1 has just started working on this run.", "Wait a moment and try again.",
+                               **extra)
+            failed = []
+            for path in targets:
+                if path.is_symlink() or (path != rundir and not within(rundir, path)):
+                    continue  # became a link since it was looked at: left alone, and reported below
+                shutil.rmtree(path, onerror=lambda _call, name, _error: failed.append(str(name)))
+            left = rundir.exists() if not keep else any(path.exists() or path.is_symlink() for path in targets)
+            if keep and not left:
+                # The run is marked "pictures only" (no Continue, no new pictures) only when that is true of it.
+                try:
+                    write_json_atomic(rundir / TRIMMED_FILE, {
+                        "schema": "gm1.gui-trimmed/v1", "freed_bytes": size,
+                        "removed": [str(path.relative_to(rundir)) for path in targets]})
+                except OSError:
+                    pass
+            if keep:
+                self._log(rundir, "delete", line, "the big files; the pictures are kept" if not left
+                          else "the big files; some could not be deleted")
+        self.views.forget_disk(rundir)
+        if left:
+            raise ApiError(500, "Some of it could not be deleted.",
+                           f"Delete it yourself: {failed[0] if failed else rundir}", **extra)
+        name = rundir.name
+        message = (f"Deleted the big files of {name}; its pictures are kept." if keep else f"Deleted {name}.")
+        # Under Windows the Linux disk is one file on a Windows drive, and that file does not shrink by itself.
+        note = WSL_FREED_NOTE if self.place()["wsl"] else ""
+        return Reply(200, {"ok": True, "action": "delete", "run": run_id, "command": line, "freed_bytes": size,
+                           "kept_pictures": keep, "message": message, "note": note, "fix": ""})
+
+    def open_folder(self, payload: dict[str, Any]) -> Reply:
+        """Show the runs folder, or one run's folder, in this computer's file manager."""
+
+        from . import browser
+
+        run_id = payload.get("run")
+        if run_id is not None and not isinstance(run_id, str):
+            raise ApiError(400, "run must be a run's name.", "Leave it out for the runs folder.")
+        folder = self.root.existing_run(run_id) if run_id else self.root.path
+        place = self.place()
+        windows = self.windows_name(folder) if place["wsl"] else None
+        found = browser.folder_opener(wsl=place["wsl"])
+        shown = windows or str(folder)
+        line = "" if found is None else shlex.join([Path(found[1]).name, shown])
+        extra = {"action": "open-folder", "path": str(folder), "windows_path": windows}
+        if found is None:
+            raise ApiError(409, "This computer has no screen of its own to show a folder on.",
+                           f"The folder is {shown}", **extra)
+        self.jobs.stop_if_dry(line, run=run_id, **extra)
+        started, how = browser.open_folder(folder, windows=windows, wsl=place["wsl"])
+        if not started:
+            raise ApiError(500, f"The folder was not opened ({how}).", f"Open it yourself: {shown}", **extra)
+        return Reply(200, {"ok": True, "run": run_id, "command": line, "message": f"Opened {shown}", "fix": "",
+                           **extra})
 
     # ------------------------------------------------------------ actions
 

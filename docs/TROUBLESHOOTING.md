@@ -94,9 +94,26 @@ curl -LsSf https://raw.githubusercontent.com/FahrenheitResearch/gm1/main/install
 
 ## Starting the GUI
 
-**The browser does not open.** Open the link GM1 prints, like `http://127.0.0.1:8765/?token=...`, exactly as printed:
-the part after `token=` is the key to the page. Over ssh GM1 never opens a browser; see `INSTALL.md` for the ssh
-line that brings the page to your own computer.
+**The browser did not open.** The GM1 window says which happened. "Opened the link in your browser" means Windows
+(or your Linux desktop) took the link; look for a new tab in your default browser, which may be behind other windows.
+"The browser was not opened" is followed by "Open this link in your browser:" and the link, like
+`http://127.0.0.1:8765/?token=...`: copy it into your browser exactly as printed (in Windows Terminal, hold Ctrl and
+click it). The part after `token=` is the key to the page. Over ssh GM1 never opens a browser; see `INSTALL.md` for
+the ssh line that brings the page to your own computer.
+
+On Windows GM1 asks Windows to open the link in your default browser (`rundll32.exe url.dll,FileProtocolHandler`,
+then `cmd.exe /c start`, then PowerShell's `Start-Process`). If no browser comes up at all, set a default browser in
+Windows Settings, Apps, Default apps. GM1 0.1.0 used `explorer.exe`, which on some computers opened a File Explorer
+window showing Documents instead of the browser: update GM1 (paste the installer line again) and close that window.
+
+**"This link is out of date."** The page was opened without its key or with an old one: a link typed without the
+`?token=` part, a new browser profile, or a link from before `gpuwm-cm1 gui --new-token`. Start GM1 again (Start
+menu: GM1) and use the page it opens. The link is kept with your runs folder, so it stays the same from one start to
+the next; `gpuwm-cm1 gui --new-token` makes a new one, after which every earlier link and tab stops working.
+
+**I opened GM1 again and my storm is not there.** It is: with one storm running the page opens on Watching, and
+otherwise the first screen leads with "A storm is running" and a **Watch it** button. **Runs** on the left lists
+every storm, running or finished.
 
 **"Port 8765 is in use".** Another program uses that port. Opening GM1 again while it is already open shows the
 page that is open (with its link), and GM1 tries the next nine ports by itself when another program has 8765. When
@@ -117,7 +134,7 @@ yours has right now: close other programs that use the graphics card (games, vid
 time, which makes the storm smaller. On Windows the desktop itself keeps 4-5 GB of the card. `gpuwm-cm1 doctor
 --plain` lists, under Presets, every storm that does not fit this computer and why.
 
-**"Supercell, 100 m" is greyed.** In 0.1.0 that storm stops early on a check of where the storm is in its area, on
+**"Supercell, 100 m" is greyed.** In 0.1.1 that storm stops early on a check of where the storm is in its area, on
 every computer, so it is not offered yet. "Supercell, 250 m" shows the same storm in fine detail.
 
 **The squall lines are greyed.** They are not offered yet on any computer: how they treat the sides of their area
@@ -147,9 +164,17 @@ With pip: `pip install "gpuwm-cm1[film]"`. The animated picture works without it
 ## Where things are
 
 **Your storms** are in the folder `gm1-runs` in your home folder (`~/gm1-runs`), unless you started the GUI with
-`gpuwm-cm1 gui --root FOLDER`. On Windows they are inside Ubuntu: in File Explorer, under **Linux** in the left
-column, open Ubuntu, then `home`, your user name and `gm1-runs`. Or in Ubuntu type `cd ~/gm1-runs` and then
-`explorer.exe .` to open that folder in File Explorer.
+`gpuwm-cm1 gui --root FOLDER`. **Runs** in GM1 says where that is and has an **Open folder** button; a storm's
+Results page has one for that storm. On Windows they are inside Ubuntu, and GM1 names the folder as File Explorer
+does, `\\wsl.localhost\Ubuntu-24.04\home\YOUR-NAME\gm1-runs`: paste that into File Explorer's address bar, or
+under **Linux** in its left column open Ubuntu, then `home`, your user name and `gm1-runs`. The GM1 window prints the
+same name when it starts, and so does `gpuwm-cm1 doctor --plain`.
+
+**The disk is filling up.** **Runs** lists each storm's size and the total. **Delete** removes a storm; **Keep
+pictures only** removes its big files and keeps the pictures. On Windows the storms are on Ubuntu's own disk, a file
+on a Windows drive: the Disk line of `gpuwm-cm1 doctor --plain` (and **System** in GM1) gives the free space of both,
+and count on the smaller. Windows does not hand space back to that drive by itself when storms are
+deleted; the space is free for new storms at once.
 
 **GM1 itself** is in `~/.local/share/uv/tools/gpuwm-cm1` (installer) or in the environment you made (pip). Its
 downloaded packages are in `~/.cache/uv` (installer) or `~/.cache/pip` (pip).

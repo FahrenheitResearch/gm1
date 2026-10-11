@@ -260,52 +260,91 @@ function Invoke-GM1Installer {
 
     # ------------------------------------------------------------ the shortcuts
 
-    # GM1's icon (a storm on a weather radar), drawn here so that no picture file has to be downloaded.
+    # GM1's icon (a storm on a weather radar), drawn here so that no picture file has to be downloaded. One .ico
+    # with the picture at 16, 24, 32, 48, 64 and 256 pixels, so it is sharp as a small Start-menu entry and as a
+    # large desktop icon alike (Windows picks the nearest size and scales only when none fits).
     function Write-GM1Icon([string]$Path) {
         Add-Type -AssemblyName System.Drawing
-        $size = 48
-        $bitmap = New-Object System.Drawing.Bitmap $size, $size
-        $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
-        try {
-            $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-            $graphics.Clear([System.Drawing.Color]::Transparent)
-            $shape = New-Object System.Drawing.Drawing2D.GraphicsPath
-            $r = 18
-            $shape.AddArc(1, 1, $r, $r, 180, 90); $shape.AddArc(47 - $r, 1, $r, $r, 270, 90)
-            $shape.AddArc(47 - $r, 47 - $r, $r, $r, 0, 90); $shape.AddArc(1, 47 - $r, $r, $r, 90, 90)
-            $shape.CloseFigure()
-            $graphics.FillPath((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 18, 32, 58))), $shape)
-            foreach ($blob in @(
-                    @(46, 160, 67, 9, 14, 29, 24), @(46, 160, 67, 23, 11, 17, 17), @(240, 200, 40, 14, 18, 21, 17),
-                    @(240, 200, 40, 25, 15, 12, 11), @(220, 50, 40, 20, 21, 11, 10), @(220, 50, 40, 28, 18, 7, 6),
-                    @(46, 160, 67, 9, 31, 11, 10), @(18, 32, 58, 13, 33, 6, 6))) {
-                $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, $blob[0], $blob[1], $blob[2]))
-                $graphics.FillEllipse($brush, $blob[3], $blob[4], $blob[5], $blob[6])
+        $images = @()
+        foreach ($size in @(16, 24, 32, 48, 64, 256)) {
+            $bitmap = New-Object System.Drawing.Bitmap $size, $size
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            try {
+                $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+                $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+                $graphics.Clear([System.Drawing.Color]::Transparent)
+                # The picture is laid out on a 48-unit square and scaled to each size.
+                $scale = [single]($size / 48.0)
+                $graphics.ScaleTransform($scale, $scale)
+                $shape = New-Object System.Drawing.Drawing2D.GraphicsPath
+                $r = 18
+                $shape.AddArc(1, 1, $r, $r, 180, 90); $shape.AddArc(47 - $r, 1, $r, $r, 270, 90)
+                $shape.AddArc(47 - $r, 47 - $r, $r, $r, 0, 90); $shape.AddArc(1, 47 - $r, $r, $r, 90, 90)
+                $shape.CloseFigure()
+                $graphics.FillPath((New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, 18, 32, 58))), $shape)
+                foreach ($blob in @(
+                        @(46, 160, 67, 9, 14, 29, 24), @(46, 160, 67, 23, 11, 17, 17), @(240, 200, 40, 14, 18, 21, 17),
+                        @(240, 200, 40, 25, 15, 12, 11), @(220, 50, 40, 20, 21, 11, 10), @(220, 50, 40, 28, 18, 7, 6),
+                        @(46, 160, 67, 9, 31, 11, 10), @(18, 32, 58, 13, 33, 6, 6))) {
+                    $brush = New-Object System.Drawing.SolidBrush ([System.Drawing.Color]::FromArgb(255, $blob[0], $blob[1], $blob[2]))
+                    $graphics.FillEllipse($brush, $blob[3], $blob[4], $blob[5], $blob[6])
+                }
+            } finally { $graphics.Dispose() }
+            $image = New-Object IO.MemoryStream
+            if ($size -ge 256) {
+                # The 256-pixel image is stored as a PNG, as Windows expects of an icon that large.
+                $bitmap.Save($image, [System.Drawing.Imaging.ImageFormat]::Png)
+                $bitmap.Dispose()
+            } else {
+                # Smaller images: 32-bit BGRA rows from the bottom up, then an empty mask (rows padded to 4 bytes).
+                $rect = New-Object System.Drawing.Rectangle 0, 0, $size, $size
+                $data = $bitmap.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly,
+                    [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+                $raw = New-Object byte[] ($data.Stride * $size)
+                [Runtime.InteropServices.Marshal]::Copy($data.Scan0, $raw, 0, $raw.Length)
+                $stride = $data.Stride
+                $bitmap.UnlockBits($data)
+                $bitmap.Dispose()
+                $pixels = $size * $size * 4
+                $mask = [int]([math]::Floor(($size + 31) / 32)) * 4 * $size
+                $writer = New-Object IO.BinaryWriter $image
+                $writer.Write([UInt32]40); $writer.Write([Int32]$size); $writer.Write([Int32](2 * $size))
+                $writer.Write([UInt16]1); $writer.Write([UInt16]32); $writer.Write([UInt32]0); $writer.Write([UInt32]$pixels)
+                $writer.Write([Int32]0); $writer.Write([Int32]0); $writer.Write([UInt32]0); $writer.Write([UInt32]0)
+                for ($row = $size - 1; $row -ge 0; $row--) { $writer.Write($raw, $row * $stride, $size * 4) }
+                $writer.Write((New-Object byte[] $mask))
+                $writer.Flush()
             }
-        } finally { $graphics.Dispose() }
-        # An .ico with one 48-pixel, 32-bit image (BGRA rows from the bottom up, then an empty mask).
-        $rect = New-Object System.Drawing.Rectangle 0, 0, $size, $size
-        $data = $bitmap.LockBits($rect, [System.Drawing.Imaging.ImageLockMode]::ReadOnly,
-            [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
-        $raw = New-Object byte[] ($data.Stride * $size)
-        [Runtime.InteropServices.Marshal]::Copy($data.Scan0, $raw, 0, $raw.Length)
-        $stride = $data.Stride
-        $bitmap.UnlockBits($data)
-        $bitmap.Dispose()
-        $pixels = $size * $size * 4
-        $mask = $size * 8
+            $images += , @($size, $image.ToArray())
+        }
+        # The .ico: a count, one 16-byte entry per image (a width and height of 0 mean 256), then the images.
         $out = New-Object IO.MemoryStream
-        $writer = New-Object IO.BinaryWriter $out
-        $writer.Write([UInt16]0); $writer.Write([UInt16]1); $writer.Write([UInt16]1)
-        $writer.Write([Byte]$size); $writer.Write([Byte]$size); $writer.Write([Byte]0); $writer.Write([Byte]0)
-        $writer.Write([UInt16]1); $writer.Write([UInt16]32); $writer.Write([UInt32](40 + $pixels + $mask)); $writer.Write([UInt32]22)
-        $writer.Write([UInt32]40); $writer.Write([Int32]$size); $writer.Write([Int32](2 * $size))
-        $writer.Write([UInt16]1); $writer.Write([UInt16]32); $writer.Write([UInt32]0); $writer.Write([UInt32]$pixels)
-        $writer.Write([Int32]0); $writer.Write([Int32]0); $writer.Write([UInt32]0); $writer.Write([UInt32]0)
-        for ($row = $size - 1; $row -ge 0; $row--) { $writer.Write($raw, $row * $stride, $size * 4) }
-        $writer.Write((New-Object byte[] $mask))
-        $writer.Flush()
+        $icon = New-Object IO.BinaryWriter $out
+        $icon.Write([UInt16]0); $icon.Write([UInt16]1); $icon.Write([UInt16]$images.Count)
+        $offset = 6 + 16 * $images.Count
+        foreach ($entry in $images) {
+            $side = [int]$entry[0]; $bytes = [byte[]]$entry[1]
+            $edge = if ($side -ge 256) { 0 } else { $side }
+            $icon.Write([Byte]$edge); $icon.Write([Byte]$edge); $icon.Write([Byte]0); $icon.Write([Byte]0)
+            $icon.Write([UInt16]1); $icon.Write([UInt16]32); $icon.Write([UInt32]$bytes.Length); $icon.Write([UInt32]$offset)
+            $offset += $bytes.Length
+        }
+        foreach ($entry in $images) { $icon.Write([byte[]]$entry[1]) }
+        $icon.Flush()
         [IO.File]::WriteAllBytes($Path, $out.ToArray())
+    }
+
+    # Where the storms are kept, as File Explorer names it: \\wsl.localhost\NAME\home\USER\gm1-runs. Asked of
+    # the distribution itself (wslpath), so a home folder in another place is named right; $null when it does not
+    # answer.
+    function Get-RunsFolder([string]$Name) {
+        try {
+            $found = Invoke-Wsl @('-d', $Name, '--cd', '~', '--exec', 'wslpath', '-w', '.')
+            if ($found.Code -eq 0 -and $found.Lines.Count -ge 1 -and $found.Lines[0] -like '\\*') {
+                return ($found.Lines[0].TrimEnd('\') + '\gm1-runs')
+            }
+        } catch { }
+        return $null
     }
 
     # The icon both shortcuts use: GM1's own, or WSL's when it could not be drawn.
@@ -528,6 +567,22 @@ function Invoke-GM1Installer {
     }
     Say 'Closing that window never stops a running storm: open GM1 again to see it. Shutting down or restarting'
     Say 'Windows stops a storm; for long storms, set Windows not to sleep.'
+    $runs = Get-RunsFolder $name
+    if ($runs) {
+        Say 'Your storms are kept inside Ubuntu, in ~/gm1-runs. In File Explorer that folder is:'
+        Say "  $runs"
+        # An update finds the folder already there: "appears with your first storm" is said only before it is.
+        $there = $false
+        try { $there = Test-Path -LiteralPath $runs } catch { }
+        if ($there) {
+            Say 'The Runs page in GM1 has an Open folder button for it.'
+        } else {
+            Say 'It appears with your first storm. The Runs page in GM1 has an Open folder button for it.'
+        }
+    } else {
+        Say 'Your storms are kept inside Ubuntu, in ~/gm1-runs. The Runs page in GM1 says where that is in File'
+        Say 'Explorer and has an Open folder button for it.'
+    }
     Say 'Something wrong? Start menu, GM1 check: it checks this computer and saves gm1-report.txt on your desktop'
     Say 'to attach when you ask for help.'
 }

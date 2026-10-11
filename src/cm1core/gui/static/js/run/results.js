@@ -17,6 +17,7 @@ import { h, num, clock, parseClock, bytes, button, copyline, panel, table } from
 import * as api from "../api.js";
 import { register, go, notice, runRoute } from "../router.js";
 import { showCommand } from "../command.js";
+import { folderLine } from "../folder.js";
 import { ready as copyReady, t, looks as favouriteCopy } from "../../guided/copy.js";
 import {
   FAVOURITES, LIVE_STATES, actionButton, continueClock, runExists, runNotFound, untilProblem, diskPanel, filesPanel, filmBar, filmLook,
@@ -108,11 +109,16 @@ async function guidedResults(body, id, page) {
   function paintLower() {
     const g = data.guided || {};
     const files = data.copy || [];
+    // The run's folder as this computer's file manager names it (under Windows, the \\wsl.localhost name), with
+    // Open folder; then the lines that open the files with a program.
+    const folder = folderLine({ label: t("results.folder"), path: data.folder, windows: data.folder_windows,
+      canOpen: data.can_open_folder, run: id });
+    const trimmed = data.trimmed ? h("p", { class: "note" }, t("results.trimmed")) : null;
     const filesBody = files.length
-      ? [h("p", { class: "note haspath" }, t(perTimeNetcdf(data.cm1out) ? "results.files_where" : "results.files_where_other",
+      ? [folder, h("p", { class: "note haspath" }, t(perTimeNetcdf(data.cm1out) ? "results.files_where" : "results.files_where_other",
         { folder: data.cm1out_folder || "cm1out" })),
         files.map((c) => h("div", {}, h("div", { class: "muted" }, c.label), copyline(c.text, c.label)))]
-      : [h("p", { class: "muted" }, t({ ended: "results.no_files_ended", not_started: "results.no_files_not_started" }[
+      : [folder, trimmed || h("p", { class: "muted" }, t({ ended: "results.no_files_ended", not_started: "results.no_files_not_started" }[
         noFrames(data)] || "results.no_files"))];
     const longer = g.run_longer;
     const longerButton = button(t("results.run_longer"), {});
@@ -123,7 +129,8 @@ async function guidedResults(body, id, page) {
     // saved point to go on from (its one restart is written at the end).
     let longerWhy = null;
     if (longer && longerButton.disabled) {
-      if ([...LIVE_STATES, "stale"].includes(st.state)) longerWhy = t("results.run_longer_later");
+      if (data.trimmed) longerWhy = t("results.run_longer_trimmed");
+      else if ([...LIVE_STATES, "stale"].includes(st.state)) longerWhy = t("results.run_longer_later");
       else if (["stopped", "failed"].includes(st.state)) longerWhy = t("results.run_longer_none");
     }
     longerButton.addEventListener("click", async () => {
@@ -465,7 +472,11 @@ async function advancedResults(body, id, page) {
     put(seriesBox, seriesPanel(data.series_doc, { now: shownTime, tmax: st.duration_s,
       empty: "The charts appear once the quick-look worker has drawn a frame." }));
     put(filesBox, h("h2", { class: "cap" }, "cm1out", h("span", { class: "n" }, formatWords(data.cm1out))),
-      ...filesPanel(data, { open: true }));
+      data.trimmed ? h("p", { class: "note" }, "This run's big files (cm1out, the saved frames and the restarts) were " +
+        "deleted to free disk space; its quick-looks are kept. It cannot be continued.") : null,
+      ...filesPanel(data, { open: true }),
+      folderLine({ label: "The run's folder", path: data.folder, windows: data.folder_windows,
+        canOpen: data.can_open_folder, run: id }));
     put(receiptBox, h("h2", { class: "cap" }, "Receipt"), receiptPanel(data.receipt_summary),
       h("h3", { class: "cap section" }, "Disk"), diskPanel(data.disk),
       (data.segments || []).length ? [h("h3", { class: "cap section" }, "Segments"), segmentsTable(data.segments)] : null,
