@@ -69,7 +69,7 @@ INSTALLER_REINSTALL_LINE = f"curl -LsSf {INSTALLER_URL} | GM1_REINSTALL=1 sh"
 GPU_REQUIREMENTS = ("cupy-cuda13x[ctk]>=14.2,<15", "nvidia-cuda-nvrtc>=13.3,<13.4",
                     "nvidia-nvjitlink>=13.3,<13.4")
 #: ArWen and its data, as gpuwm-cm1 requires them (engine_pin).
-ARWEN_REQUIREMENTS = ("gpuwm>=2.8.0,<2.8.1", "gpuwm-data>=2.8.0,<2.8.1")
+ARWEN_REQUIREMENTS = ("gpuwm>=2.8.9,<2.8.10", "gpuwm-data>=2.8.9,<2.8.10")
 #: Under WSL2, after the Windows driver changes.
 WSL_RESTART = "then in Windows PowerShell run wsl --update and then wsl --shutdown, and open Ubuntu again"
 WSL_NO_LINUX_DRIVER = "Never install an NVIDIA driver inside WSL."

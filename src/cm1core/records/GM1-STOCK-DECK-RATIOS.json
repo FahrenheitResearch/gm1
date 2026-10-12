@@ -2,8 +2,10 @@
  "schema": "gm1.stock-deck-ratios/v1",
  "deck": "CM1 r21.1 run/config_files/supercell/namelist.input (120 x 120 x 40, 1 km, 2 h)",
  "window": "mature-phase means over 3600-7200 s (5 frames)",
- "measured": "2026-09-23: GM1 on an RTX 3080; CM1 r21.1 built unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU; each CM1 twin adds 1e-4 K to th0 at the lowest level",
- "evidence": "the supercell-fidelity comparison of the development repository (not distributed); the rows here are its numbers",
+ "engine": "ArWen (gpuwm) 2.8.9",
+ "measured": "CM1 r21.1 built unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU, 2026-09-23; each CM1 twin adds 1e-4 K to th0 at the lowest level",
+ "evidence": "the supercell-fidelity comparison and the GPU revalidation of the engine pin, both of the development repository (not distributed); the rows here are their numbers",
+ "not_measured": "On ArWen (gpuwm) 2.8.9 this comparison has been made on an RTX 4090 and an RTX 3080, which give the same output word for word. No RTX 50-series card has run it on ArWen (gpuwm) 2.8.9; on RTX 50-series cards ArWen's notes expect WSM6 and Morrison words to differ in the last place from those two cards'",
  "target": "within 5 % on every statistic (about 3 x CM1's twin spread): printed, not a gate",
  "families": {
   "updraft": "updraft family",
@@ -14,6 +16,28 @@
    "ptype": 5,
    "reference": "CM1 r21.1 ptype = 5 (morrison.F), eqtset = 2",
    "gates_release": true,
+   "measured": "GM1 on ArWen (gpuwm) 2.8.9 on an RTX 4090 and an RTX 3080, 2026-10-11, one run on each; the two cards give the same output word for word",
+   "previous": {
+    "release": "0.1.0",
+    "engine": "gpuwm 2.8.0",
+    "card": "RTX 4090",
+    "ratio_range": [
+     0.985811,
+     1.045923
+    ],
+    "words": "differ from this engine's after the first 15 to 25 minutes of storm time, starting as one unit in the last place of one number concentration"
+   },
+   "second_card": {
+    "card": "RTX 3080",
+    "date": "2026-10-11",
+    "frames_word_identical_to_the_first_card": {
+     "Morrison, GM1 0.1.0 on gpuwm 2.8.0": 9,
+     "Morrison, GM1 on ArWen (gpuwm) 2.8.9": 9,
+     "WSM6, GM1 0.1.0 on gpuwm 2.8.0": 9,
+     "WSM6, GM1 on ArWen (gpuwm) 2.8.9": 9
+    },
+    "wsm6_frames_word_identical_to_gm1_0_1_0": 9
+   },
    "rows": [
     {
      "key": "wmax",
@@ -22,8 +46,8 @@
      "family": "updraft",
      "band": 0.1,
      "cm1": 57.670428,
-     "gm1": 57.93818,
-     "ratio": 1.004643,
+     "gm1": 57.866655,
+     "ratio": 1.003403,
      "twin": 1.003204,
      "ramp0": 1.003513,
      "inside_band": true,
@@ -36,8 +60,8 @@
      "family": "updraft",
      "band": 0.1,
      "cm1": 675.279199,
-     "gm1": 680.01344,
-     "ratio": 1.007011,
+     "gm1": 679.303003,
+     "ratio": 1.005959,
      "twin": 0.993476,
      "ramp0": 1.048282,
      "inside_band": true,
@@ -50,8 +74,8 @@
      "family": "updraft",
      "band": 0.1,
      "cm1": 151.8,
-     "gm1": 155.4,
-     "ratio": 1.023715,
+     "gm1": 154.0,
+     "ratio": 1.014493,
      "twin": 1.001318,
      "ramp0": 0.969697,
      "inside_band": true,
@@ -64,12 +88,12 @@
      "family": "updraft",
      "band": 0.1,
      "cm1": 0.027879,
-     "gm1": 0.029159,
-     "ratio": 1.045923,
+     "gm1": 0.029282,
+     "ratio": 1.050328,
      "twin": 0.984124,
      "ramp0": 1.054874,
      "inside_band": true,
-     "inside_target": true
+     "inside_target": false
     },
     {
      "key": "wmin",
@@ -78,8 +102,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": -33.298403,
-     "gm1": -33.201034,
-     "ratio": 0.997076,
+     "gm1": -33.649139,
+     "ratio": 1.010533,
      "twin": 1.001116,
      "ramp0": 1.031607,
      "inside_band": true,
@@ -92,8 +116,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": -6.691174,
-     "gm1": -6.608569,
-     "ratio": 0.987655,
+     "gm1": -6.607593,
+     "ratio": 0.987509,
      "twin": 1.001525,
      "ramp0": 1.023333,
      "inside_band": true,
@@ -106,8 +130,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": 1860.6,
-     "gm1": 1834.2,
-     "ratio": 0.985811,
+     "gm1": 1833.2,
+     "ratio": 0.985274,
      "twin": 0.997958,
      "ramp0": 0.965602,
      "inside_band": true,
@@ -120,8 +144,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": 1263.2,
-     "gm1": 1275.2,
-     "ratio": 1.0095,
+     "gm1": 1276.6,
+     "ratio": 1.010608,
      "twin": 1.0,
      "ramp0": 0.965643,
      "inside_band": true,
@@ -134,8 +158,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": 6.781575,
-     "gm1": 6.850197,
-     "ratio": 1.010119,
+     "gm1": 6.855953,
+     "ratio": 1.010968,
      "twin": 0.998907,
      "ramp0": 0.889972,
      "inside_band": true,
@@ -148,8 +172,8 @@
      "family": "downdraft",
      "band": 0.15,
      "cm1": 13.347839,
-     "gm1": 13.438733,
-     "ratio": 1.00681,
+     "gm1": 13.489201,
+     "ratio": 1.010591,
      "twin": 0.997781,
      "ramp0": 1.002307,
      "inside_band": true,
@@ -157,15 +181,15 @@
     }
    ],
    "ratio_range": [
-    0.985811,
-    1.045923
+    0.985274,
+    1.050328
    ],
    "twin_range": [
     0.984124,
     1.003204
    ],
    "all_inside_band": true,
-   "all_inside_target": true,
+   "all_inside_target": false,
    "location": {
     "rule": "max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s",
     "frames": [
@@ -214,6 +238,30 @@
    "ptype": 7,
    "reference": "CM1 r21.1 ptype = 7, which CM1 runs at eqtset = 1 (param.F:936-948); GM1 runs eqtset = 2 with WSM6's heating converted to constant volume",
    "gates_release": false,
+   "measured": "GM1 on an RTX 3080, 2026-09-23. On an RTX 4090 and an RTX 3080 (2026-10-11) GM1 on ArWen (gpuwm) 2.8.9 gives GM1 0.1.0's words at every output of this run, so these rows were not measured again",
+   "revalidation": {
+    "engine": "ArWen (gpuwm) 2.8.9",
+    "card": "RTX 4090",
+    "date": "2026-10-11",
+    "frames_compared": 9,
+    "frames_word_identical_to_gm1_0_1_0": 9,
+    "statistics_equal_to_the_rows_at_every_frame": [
+     "wmax",
+     "uh_max",
+     "zvort_max",
+     "wmin",
+     "thpert_sfc_min",
+     "coldpool_area_km2_lt_minus1K",
+     "rain_area_gt_1mm_km2",
+     "rain_max_cm",
+     "qg_max_gkg"
+    ],
+    "second_card": {
+     "card": "RTX 3080",
+     "date": "2026-10-11",
+     "wsm6_frames_word_identical_to_gm1_0_1_0": 9
+    }
+   },
    "rows": [
     {
      "key": "wmax",

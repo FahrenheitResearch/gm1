@@ -89,7 +89,7 @@ first launch; each other group shows one row of cards and a **Show all** button 
 
 | Group | Cards |
 |---|---|
-| Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight (greyed in 0.1.1) |
+| Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight (greyed in this version) |
 | Explore | Make your own environment; storms that split in two; clusters of short-lived storms; a storm in almost calm air |
 | Other storm types | A line of storms; cold air spreading out as a gust front; a warm bubble growing into a cloud; the two squall lines |
 | Famous environments | The air measured by weather balloons on well-known days (Norman, Oklahoma; Birmingham, Alabama; Denver, Colorado; Wilmington, Ohio; Tallahassee, Florida; Jackson, Mississippi), each named by its station and date |

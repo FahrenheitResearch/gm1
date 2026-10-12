@@ -37,7 +37,8 @@ Not needed on one GPU (21)
       state
 Same as CM1 (286)
   ptype = 5: ArWen's WRF-lineage Morrison, not CM1's morrison.F. On CM1's stock supercell, GM1/CM1
-      mature-phase ratios are 0.99-1.05 (CM1 against itself: 0.98-1.00)
+      mature-phase ratios are 0.985-1.050 (CM1 against itself: 0.984-1.003); past the 5 % target:
+      max vertical vorticity 1.0503
   Grid (15)    records/CM1-SUPPORT-MATRIX.csv
   Run length, time step, output and restart times (4)    records/CM1-CADENCE-MAP.md
   Advection, diffusion, sound waves and Coriolis (20)    records/CM1-DYNAMICS-BRANCH-MATRIX.json
@@ -56,21 +57,26 @@ Same as CM1 (286)
 Output: GrADS (output_format = 1), every time in one file (output_filetype = 1), as the namelist asks.   [Also write netCDF]
 
 GM1 against CM1 r21.1 on CM1's stock supercell namelist (CM1 r21.1 ptype = 5 (morrison.F), eqtset = 2)
-mature-phase means over 3600-7200 s (5 frames); 2026-09-23: GM1 on an RTX 3080; CM1 r21.1 built
-unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU; each CM1 twin adds
-1e-4 K to th0 at the lowest level
+mature-phase means over 3600-7200 s (5 frames); GM1 on ArWen (gpuwm) 2.8.9 on an RTX 4090 and an RTX
+3080, 2026-10-11, one run on each; the two cards give the same output word for word; CM1 r21.1 built
+unchanged from the release (gfortran -O2 -fopenmp, 8 threads) on a Linux CPU, 2026-09-23; each CM1
+twin adds 1e-4 K to th0 at the lowest level
   statistic                                        CM1       GM1  GM1/CM1   twin   band
-  max w                                          57.67     57.94    1.005  1.003   ±10%
-  max 2-5 km updraft helicity                      675       680    1.007  0.993   ±10%
-  updraft area, w > 10 m/s at 5 km                 152       155    1.024  1.001   ±10%
-  max vertical vorticity                        0.0279    0.0292    1.046  0.984   ±10%
-  min w                                         -33.30    -33.20    0.997  1.001   ±15%
+  max w                                          57.67     57.87    1.003  1.003   ±10%
+  max 2-5 km updraft helicity                      675       679    1.006  0.993   ±10%
+  updraft area, w > 10 m/s at 5 km                 152       154    1.014  1.001   ±10%
+  max vertical vorticity                        0.0279    0.0293    1.050  0.984   ±10%
+  min w                                         -33.30    -33.65    1.011  1.001   ±15%
   lowest-level theta' min                        -6.69     -6.61    0.988  1.002   ±15%
-  cold-pool area, theta' < -1 K                  1,861     1,834    0.986  0.998   ±15%
-  rain area > 1 mm                               1,263     1,275    1.010  1.000   ±15%
-  max rain                                        6.78      6.85    1.010  0.999   ±15%
-  max graupel/hail mixing ratio                  13.35     13.44    1.007  0.998   ±15%
+  cold-pool area, theta' < -1 K                  1,861     1,833    0.985  0.998   ±15%
+  rain area > 1 mm                               1,263     1,277    1.011  1.000   ±15%
+  max rain                                        6.78      6.86    1.011  0.999   ±15%
+  max graupel/hail mixing ratio                  13.35     13.49    1.011  0.998   ±15%
   max-w column at 5 km within 2 cells of CM1's at every 900-s frame from 1800 s: worst 1 cells
   max w at 1800 s within 15 % of CM1's: 29.273 against 29.348 m/s (ratio 0.997)
   Target: within 5 % on every statistic (about 3 x CM1's twin spread): printed, not a gate.
-  Evidence: the supercell-fidelity comparison of the development repository (not distributed); the rows here are its numbers
+  Not measured: On ArWen (gpuwm) 2.8.9 this comparison has been made on an RTX 4090 and an RTX 3080,
+    which give the same output word for word. No RTX 50-series card has run it on ArWen (gpuwm)
+    2.8.9; on RTX 50-series cards ArWen's notes expect WSM6 and Morrison words to differ in the last
+    place from those two cards'.
+  Evidence: the supercell-fidelity comparison and the GPU revalidation of the engine pin, both of the development repository (not distributed); the rows here are their numbers

@@ -151,7 +151,7 @@ while [ $# -gt 0 ]; do
 done
 case "$url" in
   *pypi.org*) body='{"info":{"author":"","name":"gpuwm-cm1","summary":"a, b","version":"0.1.0","yanked":false},"urls":[{"python_version":"py3"}]}' ;;
-  *gpu-cu13-validated.txt) body='gpuwm==2.8.0
+  *gpu-cu13-validated.txt) body='gpuwm==2.8.9
 cupy-cuda13x==14.2.0' ;;
   *) exit 22 ;;
 esac
@@ -603,7 +603,7 @@ def test_repairs_name_the_command_for_the_way_gm1_was_installed(monkeypatch) -> 
     venv = {"kind": "venv", "installer": "pip", "words": "pip in a virtual environment"}
     assert system.reinstall_fix("package", venv).endswith("-m pip install --force-reinstall --no-deps gpuwm-cm1")
     assert '"cupy-cuda13x[ctk]>=14.2,<15" "nvidia-cuda-nvrtc>=13.3,<13.4"' in system.reinstall_fix("gpu", venv)
-    assert '"gpuwm>=2.8.0,<2.8.1"' in system.reinstall_fix("arwen", venv)
+    assert '"gpuwm>=2.8.9,<2.8.10"' in system.reinstall_fix("arwen", venv)
     uv_venv = {"kind": "venv", "installer": "uv", "words": "uv pip in a virtual environment"}
     assert system.reinstall_fix("package", uv_venv).startswith("uv pip install --python ")
     source = {"kind": "source", "installer": "pip", "words": "a source checkout"}

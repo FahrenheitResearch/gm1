@@ -323,7 +323,8 @@ class CoverageReport:
         refusal, nothing to acknowledge, nothing not yet checked against CM1,
         and no microphysics that measurably runs differently from CM1's (the
         "Runs differently" row that carries the stock-deck ratios: WSM6, or
-        Morrison should its ratios leave the 5 % target).  The other "Runs
+        Morrison should a ratio leave its release band; the 5 % target is
+        printed, not a gate).  The other "Runs
         differently" rows (output words, statistics cadence, the random
         stream) do not change the storm a beginner sees and do not block.
         ``why_not`` holds the plain sentences, most important first; the
@@ -948,7 +949,7 @@ class _Builder:
             keys=keys,
             value=self.values(keys),
             text=(f"cecd = {cecd} selects one of CM1's wind-dependent drag coefficients (sfcphys.F:138-194); "
-                  "only cecd = 1 (constant drag coefficient) is implemented in 0.1.1"),
+                  "only cecd = 1 (constant drag coefficient) is implemented"),
             fix="set cecd = 1",
             code="CM1-IMPORT-CECD-UNSUPPORTED",
             stage="value-rule",
@@ -1481,9 +1482,10 @@ def comparison_block(component: str) -> dict[str, Any] | None:
         "title": "GM1 against CM1 r21.1 on CM1's stock supercell namelist",
         "scheme": component,
         "reference": scheme["reference"],
-        "basis": f"{record['window']}; {record['measured']}",
+        "basis": "; ".join(part for part in (record["window"], scheme.get("measured"), record["measured"]) if part),
         "deck": record["deck"],
         "evidence": record["evidence"],
+        "not_measured": record.get("not_measured"),
         "rows": scheme["rows"],
         "ratio_range": scheme["ratio_range"],
         "twin_range": scheme["twin_range"],
@@ -1755,6 +1757,8 @@ def render_text(report: CoverageReport) -> str:
         lines.append(f"  {location['rule']}: worst {location['worst_cells']:g} cells")
         lines.append(f"  {onset['rule']}: {onset['gm1']:g} against {onset['cm1']:g} m/s (ratio {onset['ratio']:.3f})")
         lines.append(f"  Target: {comparison['target']}.")
+        if comparison.get("not_measured"):
+            lines.extend(_wrap(f"  Not measured: {comparison['not_measured']}.", width, "    "))
         lines.append(f"  Evidence: {comparison['evidence']}")
     if report.notes:
         lines.append("")

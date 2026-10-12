@@ -70,7 +70,7 @@ def assignments(text: str) -> dict[str, str]:
 
 
 def _offered_copy(tmp_path: Path, preset_id: str) -> Path:
-    """The shipped presets with ``preset_id`` offered again, for the fit tests of a preset 0.1.1 withholds."""
+    """The shipped presets with ``preset_id`` offered again, for the fit tests of a preset this version withholds."""
 
     import shutil
 
@@ -166,7 +166,7 @@ def test_supercell_250m_in_10_minutes_takes_the_500m_rung_on_the_desktop():
 
 
 def test_supercell_100m_overnight(tmp_path, monkeypatch):
-    assert not fitted("supercell-100m", "overnight", "32GB").offered      # 0.1.1 withholds it
+    assert not fitted("supercell-100m", "overnight", "32GB").offered      # this version withholds it
     monkeypatch.setenv(P.PRESETS_ENV, str(_offered_copy(tmp_path, "supercell-100m")))
     desktop = fitted("supercell-100m", "overnight", "3080-WSL2")
     assert not desktop.offered

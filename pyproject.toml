@@ -18,8 +18,8 @@ license-files = ["LICENSE", "NOTICE", "src/cm1core/quicklook/fonts/LICENSE-DejaV
 # to the same 13.3 line for the same reason. constraints/gpu-cu13-validated.txt
 # pins the whole validated stack exactly.
 dependencies = [
-    "gpuwm>=2.8.0,<2.8.1",
-    "gpuwm-data>=2.8.0,<2.8.1",
+    "gpuwm>=2.8.9,<2.8.10",
+    "gpuwm-data>=2.8.9,<2.8.10",
     "cupy-cuda13x[ctk]>=14.2,<15",
     "nvidia-cuda-nvrtc>=13.3,<13.4",
     "nvidia-nvjitlink>=13.3,<13.4",

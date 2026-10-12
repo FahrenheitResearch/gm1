@@ -13,24 +13,26 @@ from cm1core import engine_pin
 
 ROOT = Path(__file__).resolve().parents[1]
 #: The record that admitted the move to the currently pinned estate.
-AUDIT = ROOT / "evidence" / "validation" / "arwen-wsm6-estate-delta-audit-2.8.0.json"
+AUDIT = ROOT / "evidence" / "validation" / "arwen-wsm6-estate-delta-audit-2.8.9.json"
 #: The records that admitted the previous estates.  History, not authority.
 SUPERSEDED_AUDIT = ROOT / "evidence" / "validation" / "arwen-wsm6-estate-delta-audit.json"
 SUPERSEDED_2_7_4_AUDIT = (
     ROOT / "evidence" / "validation" / "arwen-wsm6-estate-delta-audit-2.7.4.json")
+SUPERSEDED_2_8_0_AUDIT = (
+    ROOT / "evidence" / "validation" / "arwen-wsm6-estate-delta-audit-2.8.0.json")
 #: The WRF v4.6.1 grading receipt.  It names the assembled NVRTC source it
-#: graded, which is how a version bump can be shown not to invalidate it.
+#: graded, which is how a version bump can be priced against it.
 ADAPTER_ORACLE = ROOT / "evidence" / "validation" / "arwen-wsm6-adapter-oracle-v1.json"
 
 #: The estates the delta audit compares, preserved outside the distribution:
 #: each is a published wheel extracted as is.
-BASE_ESTATE = ROOT / "tmp" / "arwen-estate-gpuwm-2.7.4"
+BASE_ESTATE = ROOT / "tmp" / "arwen-estate-gpuwm-2.8.0"
 ADMITTED_ESTATE = ROOT / f"tmp/arwen-estate-gpuwm-{engine_pin.GPUWM_MEASURED_VERSION}"
 
 #: The WSM6 files whose bytes decide a WSM6 answer.  The moves to 2.7.4 and
-#: 2.8.0 were taken because every one of them is byte-identical to what the
-#: WRF v4.6.1 adapter oracle graded; if that ever stops being true the seam needs a new
-#: oracle before it needs a new pin.
+#: 2.8.0 were taken because every one of them was byte-identical to what the
+#: WRF v4.6.1 adapter oracle graded.  At 2.8.9 that stopped being true for
+#: the first two: the tests below assert exactly how far it stopped.
 WSM6_NUMERICAL_PATHS = (
     "gpuwm/core/kernels/wsm6.cu",
     "gpuwm/core/kernels/refl.cu",
@@ -48,15 +50,15 @@ def _audit() -> dict:
 
 def test_delta_audit_admits_exactly_the_estate_engine_pin_admits() -> None:
     audit = _audit()
-    assert audit["schema"] == "gpuwm-cm1.arwen-wsm6-estate-delta-audit/v2"
+    assert audit["schema"] == "gpuwm-cm1.arwen-wsm6-estate-delta-audit/v3"
     admitted = audit["admitted"]
     assert admitted["distribution_version"] == engine_pin.GPUWM_MEASURED_VERSION
     assert admitted["source_identity"] == engine_pin.GPUWM_AUDITED_SOURCE_IDENTITY
     assert admitted["distribution_sha256"] == engine_pin.GPUWM_AUDITED_DISTRIBUTION_SHA256
     assert admitted["requirement"] == engine_pin.GPUWM_REQUIREMENT
-    assert audit["base"]["distribution_version"] == "2.7.4"
+    assert audit["base"]["distribution_version"] == "2.8.0"
     assert audit["base"]["source_identity"] == (
-        engine_pin.GPUWM_SUPERSEDED_2_7_4_SOURCE_IDENTITY)
+        engine_pin.GPUWM_SUPERSEDED_2_8_0_SOURCE_IDENTITY)
 
     paths = audit["candidate_surface_delta"]["paths"]
     assert set(paths) == set(engine_pin.AUDITED_WSM6_SURFACE)
@@ -64,62 +66,136 @@ def test_delta_audit_admits_exactly_the_estate_engine_pin_admits() -> None:
         assert paths[relative]["admitted_sha256"] == expected
 
 
-def test_the_version_bump_did_not_move_wsm6() -> None:
-    """The finding the whole byte pin exists to produce.
+#: The four surface files 2.8.9 adds (absent from 2.8.0).
+NEW_IN_2_8_9 = (
+    "gpuwm/core/device_cache.py",
+    "gpuwm/microphysics_schemes.py",
+    "gpuwm/physics_params.py",
+    "gpuwm/wrf_exact.py",
+)
 
-    Seven of the seventeen admitted paths differ between 2.7.4 and 2.8.0 (six
-    changed, one is new), so the move is not inert by inspection.  It is inert because every file that
-    decides a WSM6 answer is byte-identical, the assembled NVRTC source is
-    identical at every capacity tier the seam can select, and every mechanical
-    executed-path check passes.  Assert all three: any one of them alone would
-    let a real change through.
+#: The mechanical checks that come back false between 2.8.0 and 2.8.9, and
+#: whether the reviewed finding says a GM1 run reaches the change.
+FAILED_CHECKS_2_8_9 = {
+    "heating_finish_body_identical": True,
+    "public_apply_body_identical": False,
+    "runconfig_changed_no_existing_default": False,
+    "wsm6_reflectivity_launcher_identical": False,
+}
+
+
+def test_the_version_bump_moved_the_wsm6_kernel_by_division_spelling_only() -> None:
+    """The finding the whole byte pin exists to produce, and this time it is yes.
+
+    2.8.9 is the first move in which a file that decides a WSM6 answer
+    changed.  What keeps the move reviewable is how little: the kernel text is
+    the 2.8.0 text with seven constant divisions respelled, which the audit
+    proves by writing them back, and every other change is a named finding.
+    Assert the record says the answers CAN move and says exactly where.
     """
     audit = _audit()
+    delta = audit["candidate_surface_delta"]
 
-    for relative in WSM6_NUMERICAL_PATHS:
-        row = audit["candidate_surface_delta"]["paths"][relative]
+    assert delta["changed_numerical_or_kernel_source_paths"] == [
+        "gpuwm/core/kernels/refl.cu", "gpuwm/core/kernels/wsm6.cu"]
+    for relative in WSM6_NUMERICAL_PATHS[2:]:
+        row = delta["paths"][relative]
         assert row["changed"] is False, relative
         assert row["base_sha256"] == row["admitted_sha256"]
-    assert not audit["candidate_surface_delta"]["changed_numerical_or_kernel_source_paths"]
+    for relative in NEW_IN_2_8_9:
+        assert delta["paths"][relative]["base_sha256"] is None, relative
+    assert delta["surface_file_count"] == 21
+    assert len(delta["changed_paths"]) == 15
+    assert len(delta["unchanged_paths"]) == 6
 
     kernel_source = audit["executed_kernel_source"]
-    assert kernel_source["default_module_source"]["identical"] is True
+    assert kernel_source["default_module_source"]["identical"] is False
     assert kernel_source["default_module_source"]["admitted_sha256"] == (
         engine_pin.AUDITED_WSM6_NVRTC_SOURCE_SHA256
     )
     assert set(kernel_source["capacity_tiers"]) == {"64", "80", "128", "256"}
-    assert all(row["identical"] for row in kernel_source["capacity_tiers"].values())
+    assert not any(row["identical"] for row in kernel_source["capacity_tiers"].values())
 
-    assert audit["semantic_audit"]["failed_checks"] == []
-    assert audit["verdict"] == {
-        "every_wsm6_kernel_byte_identical": True,
-        "every_executed_path_check_passed": True,
-        "wsm6_answers_can_move": False,
-        # The wsm6-mp6 registry object is byte-identical between 2.7.4 and
-        # 2.8.0.  It changed at the 2.5.8 -> 2.7.4 move, which the superseded
-        # audit records.
-        "wsm6_registry_object_identical": True,
-    }
-    # The whole dispatch body did change (the NSSL2 fallthrough only); the
-    # check that decides is the WSM6 path through it, and Morrison's path is
-    # recorded beside it.
-    dispatch = audit["semantic_audit"]["scheme_dispatch"]
+    text = audit["kernel_text_delta"]
+    wsm6 = text["gpuwm/core/kernels/wsm6.cu"]
+    assert wsm6["fdiv_rn_calls"] == {"base": 0, "admitted": 7}
+    assert wsm6["reverting_fdiv_rn_reproduces_base"] is True
+    refl = text["gpuwm/core/kernels/refl.cu"]
+    assert refl["fdiv_rn_calls"] == {"base": 0, "admitted": 1}
+    assert refl["reverting_fdiv_rn_reproduces_base"] is True
+
+    semantic = audit["semantic_audit"]
+    assert semantic["failed_checks"] == sorted(FAILED_CHECKS_2_8_9)
+    assert set(semantic["named_findings"]) == set(FAILED_CHECKS_2_8_9)
+    for name, reaches in FAILED_CHECKS_2_8_9.items():
+        assert semantic["named_findings"][name]["reaches_a_gm1_run"] is reaches, name
+    assert semantic["failed_checks_that_reach_a_gm1_run"] == [
+        "heating_finish_body_identical"]
+    # The one default that changed is read by no executed microphysics module.
+    assert semantic["runconfig"]["fields_with_changed_annotation_or_default"] == ["moist_cq"]
+    assert semantic["redefaulted_fields_read_by_executed_python"] == {"moist_cq": []}
+    assert semantic["runconfig"]["dropped_fields"] == []
+    assert semantic["runconfig"]["mp_zero_out_default"] == "0"
+
+    verdict = audit["verdict"]
+    assert verdict["every_wsm6_kernel_byte_identical"] is False
+    assert verdict["wsm6_kernel_change_is_only_division_spelling"] is True
+    assert verdict["every_executed_path_check_passed"] is False
+    assert verdict["every_failed_check_has_a_named_finding"] is True
+    assert verdict["wsm6_answers_can_move"] is True
+    assert verdict["wsm6_registry_object_identical"] is False
+    assert len(verdict["where_wsm6_answers_can_move"]) == 2
+
+    # The WSM6 and Morrison paths through the dispatch did not change.
+    dispatch = semantic["scheme_dispatch"]
     assert dispatch["whole_body_identical"] is False
     assert dispatch["morrison_arm_identical"] is True
-    assert audit["semantic_audit"]["checks"]["scheme_dispatch_wsm6_arm_identical"] is True
-    morrison = audit["morrison_surface_delta"]
-    assert morrison["changed_paths"] == []
-    assert morrison["module_source"]["identical"] is True
-    assert morrison["answers_can_move"] is False
+    assert semantic["checks"]["scheme_dispatch_wsm6_arm_identical"] is True
 
 
-def test_the_one_registry_refusal_2_7_4_added_cannot_reach_the_cm1_seam() -> None:
+def test_the_version_bump_moved_morrison_and_the_record_does_not_call_it_inert() -> None:
+    """Morrison's kernel was restructured; a text comparison cannot price that.
+
+    GM1's Morrison comparisons against CM1 were measured on the base estate,
+    so the record has to say the answers can move and name what changed.
+    """
+    morrison = _audit()["morrison_surface_delta"]
+    assert morrison["changed_paths"] == [
+        "gpuwm/core/kernels/morrison.cu", "gpuwm/core/morrison.py"]
+    assert morrison["module_source"]["identical"] is False
+    assert morrison["answers_can_move"] is True
+    assert morrison["kernel_text_delta"]["reverting_fdiv_rn_reproduces_base"] is False
+    assert "why_that_is_not_a_regression" not in morrison
+    assert "GPU" in morrison["what_the_move_means"]
+    assert len(morrison["named_hunks"]) == 4
+    assert morrison["rimed_ice_constants"]["base"] == (
+        morrison["rimed_ice_constants"]["admitted"])
+    for relative, digest in engine_pin.AUDITED_MORRISON_EXTRA_SURFACE.items():
+        assert morrison["paths"][relative]["admitted_sha256"] == digest
+
+
+def test_gm1_state_classes_do_not_define_the_optional_attributes_2_8_9_reads() -> None:
+    """Two named findings rest on GM1's state not carrying an attribute.
+
+    ArWen 2.8.9 reads ``radar_tten_forcing`` (microphysics.apply) and
+    ``refl10cm_from_melting`` (refl.refl_melting_for) from the state it is
+    handed, and GM1 never sets ``mp_zero_out``.  If GM1 ever grows one of
+    these names, the findings stop being true and have to be re-read.
+    """
+    for path in sorted((ROOT / "src" / "cm1core").rglob("*.py")):
+        text = path.read_text(encoding="utf-8")
+        for name in ("radar_tten_forcing", "refl10cm_from_melting", "mp_zero_out"):
+            assert name not in text, (path.name, name)
+
+
+def test_the_registry_refusals_on_wsm6_cannot_reach_the_cm1_seam() -> None:
     constraints = _audit()["semantic_audit"]["registry_constraints"]
     assert constraints["unmet_required_settings"] == []
-    assert constraints["forbidden_setting_values"], (
-        "2.7.4 added a forbidden-value row to wsm6-mp6; if it ever disappears "
-        "this assertion is what says the audit stopped pricing one"
-    )
+    # 2.7.4 added mp28_aerosol_source; 2.8.9 added a third value to it and a
+    # second row, use_rap_aero_icbc.  If a row ever disappears this assertion
+    # is what says the audit stopped pricing one.
+    assert set(constraints["forbidden_setting_values"]) == {
+        "mp28_aerosol_source", "use_rap_aero_icbc"}
     for field, row in constraints["forbidden_setting_values"].items():
         assert row["reachable_by_default"] is False, field
         assert row["cm1_adapter_sets_it"] is False, field
@@ -139,6 +215,16 @@ def test_the_superseded_2_7_4_audit_is_kept_but_admits_nothing() -> None:
     assert superseded["admitted"]["distribution_version"] == "2.7.4"
     assert superseded["admitted"]["source_identity"] == (
         engine_pin.GPUWM_SUPERSEDED_2_7_4_SOURCE_IDENTITY)
+    assert superseded["admitted"]["distribution_version"] != (
+        engine_pin.GPUWM_MEASURED_VERSION
+    )
+
+
+def test_the_superseded_2_8_0_audit_is_kept_but_admits_nothing() -> None:
+    superseded = json.loads(SUPERSEDED_2_8_0_AUDIT.read_text(encoding="utf-8"))
+    assert superseded["admitted"]["distribution_version"] == "2.8.0"
+    assert superseded["admitted"]["source_identity"] == (
+        engine_pin.GPUWM_SUPERSEDED_2_8_0_SOURCE_IDENTITY)
     assert superseded["admitted"]["distribution_version"] != (
         engine_pin.GPUWM_MEASURED_VERSION
     )
@@ -213,7 +299,7 @@ SUPERSEDED_MENTION_INVENTORY: dict[str, str] = {
         "the physics estate",
     "src/cm1core/arwen_physics_component.py":
         "the uncoupled PBL/radiation/cumulus component surface records that it "
-        "was first measured on the 2.5.8 estate before the 2.8.0 re-measure",
+        "was first measured on the 2.5.8 estate before the later re-measures",
     "src/cm1core/engine_capacity.py":
         "explains why the patched digests did and did not move across the bump",
     "src/cm1core/engine_pin.py":
@@ -283,8 +369,8 @@ def _scanned_paths() -> list[Path]:
 def test_every_live_pin_site_names_the_admitted_estate() -> None:
     """The re-pin reached every place a version can be spelled.
 
-    A missed site does not fail loudly: it installs a 2.8.0 wheel against a
-    2.7.4 requirement, or documents a ceiling the packaging does not enforce.
+    A missed site does not fail loudly: it installs a 2.8.9 wheel against a
+    2.8.0 requirement, or documents a ceiling the packaging does not enforce.
     """
     for relative in _LIVE_PIN_SITES:
         text = (ROOT / relative).read_text(encoding="utf-8")
@@ -353,8 +439,10 @@ def test_the_seam_record_states_the_delta_audit_it_cites() -> None:
     seam = (ROOT / "src/cm1core/records/CM1-ARWEN-SEAM.md").read_text(encoding="utf-8")
 
     checks = audit["semantic_audit"]["checks"]
-    assert len(checks) == 13
-    assert "thirteen mechanical executed-path checks" in seam
+    assert len(checks) == 14
+    assert "fourteen mechanical executed-path checks" in seam
+    for name in audit["semantic_audit"]["failed_checks"]:
+        assert f"`{name}`" in seam, name
 
     assert audit["executed_kernel_source"]["default_module_source"]["admitted_sha256"] in seam
     for row in audit["executed_kernel_source"]["capacity_tiers"].values():
@@ -365,28 +453,55 @@ def test_the_seam_record_states_the_delta_audit_it_cites() -> None:
     assert engine_pin.GPUWM_REQUIREMENT in seam
 
     changed = audit["candidate_surface_delta"]["changed_paths"]
-    assert len(changed) == 7
+    assert len(changed) == 15
     for relative in changed:
         assert relative in seam, relative
+    assert audit["morrison_surface_delta"]["module_source"]["admitted_sha256"] in seam
 
 
-def test_2_8_0_compiles_the_exact_source_the_wrf_oracle_graded() -> None:
-    """Why the existing WSM6 evidence survives the bump.
+def test_2_8_9_compiles_the_source_the_wrf_oracle_graded_apart_from_division_spelling() -> None:
+    """How far the existing WSM6 grading describes the 2.8.9 kernel.
 
     The adapter oracle graded ONE assembled NVRTC source string and wrote its
-    digest into its own receipt.  If 2.8.0 hands NVRTC that same string, the
-    grading still describes the bytes that run; if it does not, every WSM6
-    claim in this repository needs a new oracle before it needs a new pin.
-    Three independent records have to agree on one number, and this asserts it
-    rather than trusting any of them alone.
+    digest into its own receipt.  2.5.8, 2.7.4 and 2.8.0 handed NVRTC that
+    string; 2.8.9 does not.  The grading still describes the bytes that run
+    only as far as the audit can show the two strings are the same program,
+    so three records have to agree: the oracle's digest is the audit's base,
+    the pin's digest is the audit's admitted source, and the difference
+    between them is the respelled divisions and nothing else.
     """
     oracle = json.loads(ADAPTER_ORACLE.read_text(encoding="utf-8"))
     graded = oracle["authority"]["assembled_nvrtc_source_sha256"]
-    assert graded == engine_pin.AUDITED_WSM6_NVRTC_SOURCE_SHA256
-    kernel_source = _audit()["executed_kernel_source"]["default_module_source"]
-    assert kernel_source["admitted_sha256"] == graded
+    assert graded == engine_pin.WSM6_ORACLE_GRADED_NVRTC_SOURCE_SHA256
+    assert graded != engine_pin.AUDITED_WSM6_NVRTC_SOURCE_SHA256
+    audit = _audit()
+    kernel_source = audit["executed_kernel_source"]["default_module_source"]
     assert kernel_source["base_sha256"] == graded
-    assert kernel_source["identical"] is True
+    assert kernel_source["admitted_sha256"] == engine_pin.AUDITED_WSM6_NVRTC_SOURCE_SHA256
+    assert kernel_source["identical"] is False
+    # common.cuh and constants.py, the rest of the assembled string, did not move.
+    paths = audit["candidate_surface_delta"]["paths"]
+    for relative in ("gpuwm/core/kernels/common.cuh", "gpuwm/core/constants.py"):
+        assert paths[relative]["changed"] is False
+    assert audit["kernel_text_delta"]["gpuwm/core/kernels/wsm6.cu"][
+        "reverting_fdiv_rn_reproduces_base"] is True
+
+
+def test_the_division_respelling_check_refuses_a_real_kernel_change() -> None:
+    """The reverter must not be able to call a different program the same one."""
+    from tools.audit_arwen_wsm6_estate_delta import _revert_fdiv_rn, _squeeze
+
+    base = "float a = x * y / 3.0f;\nfloat b = (p + q) / r;\n"
+    spelled = ("static inline float __fdiv_rn(float a, float b) { return a / b; }\n"
+               "float a = __fdiv_rn(x * y, 3.0f);\nfloat b = __fdiv_rn(p + q, r);\n")
+    assert _squeeze(_revert_fdiv_rn(spelled)) == _squeeze(base)
+    nested = "float f = __fdiv_rn(__fdiv_rn(a * b, 1000.0f), 3.0e8f) * c;"
+    assert _squeeze(_revert_fdiv_rn(nested)) == _squeeze("float f = a * b / 1000.0f / 3.0e8f * c;")
+    # A changed constant, a changed operand or a regrouped product is refused.
+    for other in ("float a = __fdiv_rn(x * y, 3.5f);\nfloat b = __fdiv_rn(p + q, r);\n",
+                  "float a = __fdiv_rn(x, 3.0f) * y;\nfloat b = __fdiv_rn(p + q, r);\n",
+                  "float a = __fdiv_rn(x * y, 3.0f);\nfloat b = p + __fdiv_rn(q, r);\n"):
+        assert _squeeze(_revert_fdiv_rn(other)) != _squeeze(base), other
 
 
 def test_the_audit_prices_the_configuration_the_adapter_actually_passes() -> None:

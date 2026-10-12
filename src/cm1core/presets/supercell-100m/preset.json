@@ -74,7 +74,7 @@
   "min_duration_s": 3600,
   "shrink": "both",
   "offered": false,
-  "not_offered_reason": "Not offered in 0.1.1: this preset stops early on a domain-position check; being fixed.",
+  "not_offered_reason": "Not offered in this version: this preset stops early on a domain-position check; being fixed.",
   "picture_from": "supercell-250m",
   "gm1_settings": {
     "initialization.bubble_center_x_m": 11000.0,

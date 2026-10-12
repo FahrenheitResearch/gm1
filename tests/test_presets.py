@@ -70,7 +70,7 @@ def fixture_env(name: str, wsl2: bool = False) -> dict:
 
 
 def _offered_copy(tmp_path: Path, preset_id: str) -> Path:
-    """The shipped presets with ``preset_id`` offered again, for the fit tests of a preset 0.1.1 withholds."""
+    """The shipped presets with ``preset_id`` offered again, for the fit tests of a preset this version withholds."""
 
     import shutil
 
@@ -165,7 +165,7 @@ def test_every_preset_imports_as_a_run_gm1_runs_as_cm1_does(preset_id, tmp_path)
         assert not_checked == [], not_checked
         assert payload["guided"]["offered"] is True
     elif preset.record.get("offered") is False:
-        # Withheld by its own preset.json (0.1.1 withholds the 100 m supercell), though its namelist imports as a
+        # Withheld by its own preset.json (this version withholds the 100 m supercell), though its namelist imports as a
         # run GM1 runs as CM1 does.
         assert not_checked == [], not_checked
         assert payload["guided"]["offered"] is True
@@ -181,9 +181,9 @@ def test_every_preset_imports_as_a_run_gm1_runs_as_cm1_does(preset_id, tmp_path)
 def test_the_supercell_presets_are_offered_and_the_squall_lines_wait_for_the_repeating_sides():
     offered = {preset.id: P.examine(preset)["offered"] for preset in P.load_all()}
     assert offered["supercell-1km"] and offered["supercell-250m"]
-    # 0.1.1 withholds the 100 m supercell with its own reason (its preset.json).
+    # This version withholds the 100 m supercell with its own reason (its preset.json).
     assert not offered["supercell-100m"]
-    assert P.examine(P.load("supercell-100m"))["why_not"].startswith("Not offered in 0.1.1: ")
+    assert P.examine(P.load("supercell-100m"))["why_not"].startswith("Not offered in this version: ")
     from cm1core.boundary_validation_register import register as boundary_register
 
     caveat = boundary_register()["wbc/ebc/sbc/nbc=1 (periodic)"].get("caveat") or ""
@@ -245,7 +245,7 @@ def test_preset_fit_on_a_fixture_gpu_says_what_it_changed(tmp_path):
     assert refused.returncode == 1
     assert "of free GPU memory even at its smallest size" in refused.stdout
     withheld = cli("preset", "fit", "supercell-100m", "--budget", "overnight", env=fixture_env("rtx5090-32gb"))
-    assert withheld.returncode == 1 and "Not offered in 0.1.1: " in withheld.stdout
+    assert withheld.returncode == 1 and "Not offered in this version: " in withheld.stdout
     squall = cli("preset", "fit", "squall-line-1km", "--budget", "10m", "--json",
                  env=fixture_env("rtx5090-32gb"))
     body = json.loads(squall.stdout)

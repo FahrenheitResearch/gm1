@@ -603,7 +603,7 @@ BY_CODE: Mapping[str, Entry] = {
         "Give a profile that reaches at least 6 km.",
     ),
     "CM1-IMPORT-CECD-UNSUPPORTED": _fixed(
-        "Only cecd = 1 (constant drag coefficient) is implemented in 0.1.1; cecd = {value} is not.",
+        "Only cecd = 1 (constant drag coefficient) is implemented; cecd = {value} is not.",
         "Set cecd = 1.",
         "Only a constant ground-drag coefficient is available in this version.",
         "Use the constant drag coefficient.",

@@ -53,7 +53,7 @@ requires_audited_estate = pytest.mark.skipif(
 #: contract at all.
 BASE_COPY_EXTRA = (
     "gpuwm/__init__.py",
-    # gpuwm 2.8.0's package __init__ imports it before anything else.
+    # The package __init__ imports it before anything else (since gpuwm 2.8.0).
     "gpuwm/cupy_windows_warning.py",
     "gpuwm/core/__init__.py",
     "gpuwm/core/wdm6_constants.py",
@@ -104,8 +104,13 @@ def test_capacity_metadata_is_explicit_and_the_default_is_byte_unchanged() -> No
     # gpuwm/kernel_compile_notice.py, and so audited_surface_sha256.  The
     # 2.7.4 document hashed to
     # c84914d44291994efb15c8e54f7aa636d6859a9ae684f8980d1d6c65f92292e2.
+    # The 2.8.9 re-pin moved the "engine" block again and nothing else:
+    # measured_version/requirement 2.8.0 -> 2.8.9, audited_source_identity ->
+    # the 2.8.9 wheel, eleven re-pinned surface digests plus the four files
+    # that joined the surface.  The 2.8.0 document hashed to
+    # c3830541de52263e8d3f80faabad5d940b1efc8dccbe6799890987c7cad2418a.
     assert component_metadata_sha256() == (
-        "c3830541de52263e8d3f80faabad5d940b1efc8dccbe6799890987c7cad2418a"
+        "ea15edb667b6c4d67a522a42a4ae09db32cb09de6a4a91c90bf350597dcbaed4"
     )
     default = component_metadata()
     assert default["execution"]["mp_physics"] == 6
@@ -404,8 +409,12 @@ def test_config_text_chooses_the_admitted_surface_and_the_default_is_unmoved() -
 
 
 @requires_audited_estate
-def test_the_default_lane_compiles_the_bytes_the_wrf_oracle_graded() -> None:
-    """The one number that says the version bump did not move microphysics.
+def test_the_default_lane_compiles_the_pinned_kernel_source() -> None:
+    """The one number that names the WSM6 kernel a default run compiles.
+
+    Through 2.8.0 it was also the digest the WRF v4.6.1 adapter oracle graded;
+    2.8.9 respelled seven constant divisions in the kernel, so the two differ
+    (tests/test_engine_pin.py prices the difference).
 
     Assembled here from the pinned estate's own bytes rather than read out of a
     record, so this is a measurement and not a restatement.  The default lane
@@ -419,8 +428,8 @@ def test_the_default_lane_compiles_the_bytes_the_wrf_oracle_graded() -> None:
         engine_pin.AUDITED_WSM6_NVRTC_SOURCE_SHA256
     )
 
-    # The default 40-level example column lands on the 64 tier under stock
-    # 2.7.4, and the capacity build must not move it: a config that does not
+    # The default 40-level example column lands on the 64 tier under the stock
+    # estate, and the capacity build must not move it: a config that does not
     # ask for the profile compiles the same source it always did.
     assert _wsm6_level_tier(stock, 40) == 64
     assert _wsm6_level_tier(stock, 80) == 80
@@ -430,7 +439,7 @@ def test_the_default_lane_compiles_the_bytes_the_wrf_oracle_graded() -> None:
     for tier in (64, 80):
         assert _wsm6_nvrtc_source(stock, tier) == _wsm6_nvrtc_source(patched, tier)
 
-    # A 237-level column has no tier at all under stock 2.7.4 -- which is the
+    # A 237-level column has no tier at all under the stock estate -- which is the
     # defect the overlay exists for -- and lands on 256 under the capacity
     # build, compiling the same kernel text with one different define.
     with pytest.raises(ValueError):
@@ -473,9 +482,9 @@ def test_the_capacity_authority_digests_are_reproducible_from_the_pinned_estate(
         assert hashlib.sha256(patch_capacity_source(name, raw)).hexdigest() == patched
 
 
-#: The overlay tree built on the 2.8.0 base, as the authority record
+#: The overlay tree built on the 2.8.9 base, as the authority record
 #: names it.  Not distributed, so this skips rather than fails.
-BUILT_OVERLAY = ROOT / "work/arwen-wsm6-capacity-256-v3/overlay"
+BUILT_OVERLAY = ROOT / "work/arwen-wsm6-capacity-256-v4/overlay"
 
 
 @pytest.mark.skipif(not BUILT_OVERLAY.is_dir(),

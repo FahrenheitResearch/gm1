@@ -1920,11 +1920,13 @@ Four cuts leave every published history word and restart carrier as they were
   uninitialized allocation with NaN or -3.0e38, and the published words match
   the unpoisoned run (`tests/test_step_speed_identity.py`). ArWen's column call
   is a host double in that run, so allocations made inside ArWen are not
-  covered. (A reading of the gpuwm 2.7.4 wheel, whose Morrison files are
-  byte-identical in the pinned 2.8.0 wheel, finds none in the WSM6
+  covered. (A reading of the gpuwm 2.7.4 wheel, repeated on the pinned 2.8.9
+  wheel after its Morrison files changed, finds none in the WSM6
   and Morrison paths: `morrison.py`'s three `cp.empty_like` calls run only when
   a caller omits the scratch and effective-radius arrays, and its `apply`
-  passes all of them. That is a reading, not a proof.) **Gate:** `keep` stays
+  passes all of them; the fused preparation kernel 2.8.9 adds writes every
+  element of theta, the Exner function and the layer depths. That is a
+  reading, not a proof.) **Gate:** `keep` stays
   the default only if the poisoned device runs read PASS on the 4090: the
   shipped defaults with NaN and with large-value poison at 512x512x75 and at
   256x256x75, and both poisons on the mature-stage resume. The report

@@ -55,6 +55,7 @@ function comparison(c) {
       ["Onset", onset.rule ? `${onset.rule}: CM1 ${num(onset.cm1, 1)} m/s, GM1 ${num(onset.gm1, 1)} m/s (${(onset.ratio || 0).toFixed(2)})` : ""],
       ["Target", c.target || ""],
       ["Basis", c.basis || ""],
+      ["Not measured", c.not_measured || ""],
       ["Namelist", c.deck || ""],
       ["Evidence", c.evidence || ""],
     ])));

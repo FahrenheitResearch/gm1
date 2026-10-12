@@ -24,7 +24,7 @@ and this module declares both as extensions rather than attributing them:
    was written against, and checked against by hand, is the staged ArWen
    2.7.4 tree: ``gpuwm/core/kernels/spec_bdy.cu`` and the float64 mirror
    ``gpuwm/verify/npref.py:4047-4060`` (weights) and ``:4062-4139``
-   (application).  ``engine_pin.py`` pins ``gpuwm>=2.8.0,<2.8.1``, but its
+   (application).  ``engine_pin.py`` pins ``gpuwm>=2.8.9,<2.8.10``, but its
    byte-admitted surface is the column microphysics only -- no ``nest.cu``,
    ``spec_bdy.cu`` or lateral-boundary kernel -- so nothing here imports
    ``gpuwm`` and nothing here depends on the ArWen pin.  GM1 carries its own

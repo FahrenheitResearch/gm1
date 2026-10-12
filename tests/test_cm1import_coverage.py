@@ -275,14 +275,26 @@ def test_the_stock_deck_carries_its_ratios_and_no_ramp_row() -> None:
     from cm1core.cm1import.coverage import stock_deck_ratios
 
     report = _report(SUPERCELL)
+    # Re-measured on ArWen 2.8.9 (an RTX 4090; an RTX 3080 gives the same words): every statistic inside its release band, so "Same as CM1";
+    # max vertical vorticity is 5.03 % high, just past the printed 5 % target, and the row names it.
+    assert _row(report, "differs", "ptype") is None
     ptype = _row(report, "same", "ptype")
-    assert ptype is not None and "0.99-1.05" in ptype.text and ptype.expand == "ratios"
+    assert ptype is not None and "0.985-1.050" in ptype.text and ptype.expand == "ratios"
+    assert ptype.text.endswith("; past the 5 % target: max vertical vorticity 1.0503")
+    assert ptype.plain == "Rain and hail: Morrison. On CM1's own storm it matches CM1 within 5.1 % (measured)."
     record = stock_deck_ratios()["schemes"]["morrison-mp10"]
     assert report.comparison["rows"] == record["rows"]
     ratios = {row["key"]: row["ratio"] for row in report.comparison["rows"]}
-    assert ratios["wmax"] == pytest.approx(1.005, abs=5e-4)
-    assert ratios["zvort_max"] == pytest.approx(1.046, abs=5e-4)
-    assert report.comparison["all_inside_band"] and report.comparison["all_inside_target"]
+    assert ratios["wmax"] == pytest.approx(1.003, abs=5e-4)
+    assert ratios["zvort_max"] == pytest.approx(1.050, abs=5e-4)
+    assert report.comparison["all_inside_band"] and not report.comparison["all_inside_target"]
+    assert [row["key"] for row in report.comparison["rows"] if not row["inside_target"]] == ["zvort_max"]
+    assert "ArWen (gpuwm) 2.8.9 on an RTX 4090 and an RTX 3080" in report.comparison["basis"]
+    assert "same output word for word" in report.comparison["basis"]
+    assert "No RTX 50-series card" in report.comparison["not_measured"]
+    assert "30-series" not in report.comparison["not_measured"]
+    assert record["second_card"]["card"] == "RTX 3080"
+    assert set(record["second_card"]["frames_word_identical_to_the_first_card"].values()) == {9}
     # GM1 binds CM1's SGS ramp: ramp_sgs runs as CM1 does.
     for category in ("refused", "not_read", "differs", "not_checked"):
         assert _row(report, category, "ramp_sgs") is None
@@ -307,6 +319,32 @@ def test_squall_line_shows_the_periodic_row_while_the_closure_caveat_stands() ->
     else:
         assert row is None
     assert report.exit_code == 0
+
+
+def test_the_cm1_users_table_is_the_record() -> None:
+    """docs/CM1-USERS.md's "How close GM1 is to CM1" rows are the packaged record's, to three decimals."""
+    from cm1core.cm1import.coverage import stock_deck_ratios
+
+    from cm1import_support import ROOT
+
+    guide = ROOT / "docs" / "CM1-USERS.md"
+    if not guide.is_file():
+        pytest.skip("docs/CM1-USERS.md is not in this tree")
+    lines = guide.read_text(encoding="utf-8").splitlines()
+    start = lines.index("| Statistic | GM1 / CM1 | Twin / CM1 |") + 2
+    shown = []
+    for line in lines[start:]:
+        if not line.startswith("|"):
+            break
+        shown.append(line)
+    record = stock_deck_ratios()
+    expected = [f"| {row['label'].replace(chr(39), '′').replace('theta′', 'θ′')} | {row['ratio']:.3f} | {row['twin']:.3f} |"
+                for row in record["schemes"]["morrison-mp10"]["rows"]]
+    assert shown == expected
+    low, high = (f"{value:.3f}" for value in record["schemes"]["morrison-mp10"]["ratio_range"])
+    for path in (ROOT / "README.md", ROOT / "docs" / "RELEASE-NOTES.md"):
+        if path.is_file():
+            assert f"{low} to {high}" in path.read_text(encoding="utf-8"), path.name
 
 
 def test_the_comparison_record_is_the_evidence() -> None:
@@ -528,7 +566,7 @@ def test_the_text_report_lists_every_setting_not_in_r21() -> None:
 
 @pytest.mark.parametrize("cecd", ["2", "3"])
 def test_a_wind_dependent_drag_coefficient_is_refused_up_front(cecd: str, tmp_path: Path) -> None:
-    """With the surface layer on (bbc = 3, sfcmodel = 1), only CM1's constant drag coefficient runs in 0.1.1.
+    """With the surface layer on (bbc = 3, sfcmodel = 1), only CM1's constant drag coefficient runs.
 
     The run itself would otherwise stop before its first step, after an import that reported it runnable."""
 
@@ -538,7 +576,7 @@ def test_a_wind_dependent_drag_coefficient_is_refused_up_front(cecd: str, tmp_pa
     assert len(rows) == 1, [row.as_dict() for row in report.category("refused")]
     row = rows[0]
     assert row.code == "CM1-IMPORT-CECD-UNSUPPORTED" and row.value == cecd
-    assert row.text == f"Only cecd = 1 (constant drag coefficient) is implemented in 0.1.1; cecd = {cecd} is not."
+    assert row.text == f"Only cecd = 1 (constant drag coefficient) is implemented; cecd = {cecd} is not."
     assert row.fix == "Set cecd = 1."
     assert row.plain and row.plain_fix
     assert report.guided()["offered"] is False

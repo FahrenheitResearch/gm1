@@ -154,7 +154,7 @@ def write_wrfout(path: Path, *, fmt: str = "CDF-2", producer: str = "ArWen", nx:
             "SIMULATION_START_DATE": start, "START_DATE": start, "HYBRID_OPT": np.int32(2),
         }
         if producer == "ArWen":
-            attrs["GPUWM_VERSION"] = "2.8.0"
+            attrs["GPUWM_VERSION"] = "2.8.9"
         if use_theta_m is not None:
             attrs["USE_THETA_M"] = np.int32(use_theta_m)
         if grid_id is not None:

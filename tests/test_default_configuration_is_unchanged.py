@@ -109,18 +109,24 @@ SEALED_CONFIG_SHA256 = {
 #: The digests below cover the decisions as GM1 spells them now (gate composed-trajectory, code
 #: CM1-INSTRUMENTS-MISSING, "every time-dependent operator deck"); every other byte of every decision is the
 #: one the earlier digests sealed, checked by applying the same rename to the old decisions.
+# Re-digested at the 2.8.0 -> 2.8.9 re-pin, again only because the drift
+# message names the version and the requirement, and with the same codes;
+# under 2.8.0 the four Cartesian documents hashed to
+# ca6857bf6d6bf302c51b88f87f0f84fb8e7aaaaf7a12363d4e1aa0d4797ead08 and
+# official-supercell-product.toml to
+# a73f526431f2d4ec0cdbb372451edbebb6f5bffb305a5687c0cb175389bfe09c.
 SEALED_BLOCKER_SHA256 = {
     "cartesian-supercell-attempt.toml": (
-        "ca6857bf6d6bf302c51b88f87f0f84fb8e7aaaaf7a12363d4e1aa0d4797ead08"
+        "b6da94954d688fa357a5d96512cb3130680f84e4e74ad4922ec89c4a2c3fd8ae"
     ),
     "cartesian-supercell-translating-frame.toml": (
-        "ca6857bf6d6bf302c51b88f87f0f84fb8e7aaaaf7a12363d4e1aa0d4797ead08"
+        "b6da94954d688fa357a5d96512cb3130680f84e4e74ad4922ec89c4a2c3fd8ae"
     ),
     "cartesian-uniform-grid.toml": (
-        "ca6857bf6d6bf302c51b88f87f0f84fb8e7aaaaf7a12363d4e1aa0d4797ead08"
+        "b6da94954d688fa357a5d96512cb3130680f84e4e74ad4922ec89c4a2c3fd8ae"
     ),
     "cartesian-wk-analytic-sounding-shear.toml": (
-        "ca6857bf6d6bf302c51b88f87f0f84fb8e7aaaaf7a12363d4e1aa0d4797ead08"
+        "b6da94954d688fa357a5d96512cb3130680f84e4e74ad4922ec89c4a2c3fd8ae"
     ),
     "dry-psolver2-bootstrap.toml": (
         "fcccab04639cef332305f01d8d8d12d7e7528f9dde1619b2f893ae7b1a7e6a75"
@@ -129,7 +135,7 @@ SEALED_BLOCKER_SHA256 = {
         "3518414d160292e39dfe6e7afc0b02613d60b1f3e7397b54b42cccd916ceb653"
     ),
     "official-supercell-product.toml": (
-        "a73f526431f2d4ec0cdbb372451edbebb6f5bffb305a5687c0cb175389bfe09c"
+        "60270d88cec7471933c6ea1ba84ea37fc62a533ae069616b1edbd7cd3fbd91d9"
     ),
 }
 
@@ -173,7 +179,7 @@ def absent_estate(monkeypatch: pytest.MonkeyPatch) -> None:
     (preflight.py asks ``engine_pin.inspect``), and its reason text names what
     was found.  The seals below were taken with no gpuwm installed, so every
     decision test pins that estate explicitly: otherwise the same tree reports
-    one blocker list where gpuwm 2.8.0 is installed and another where it is
+    one blocker list where gpuwm 2.8.9 is installed and another where it is
     not, and the seal would describe the machine rather than the document.
     """
 

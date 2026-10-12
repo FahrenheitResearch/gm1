@@ -75,7 +75,7 @@ def blockers(config: CM1Config, *, device_physics: bool = True) -> tuple[Blocker
                 Blocker(
                     "CM1-ARWEN-ESTATE-DRIFT",
                     "engine-pin",
-                    "the audited ArWen 2.8.0 WSM6 candidate surface is not byte-admitted: "
+                    "the audited ArWen 2.8.9 WSM6 candidate surface is not byte-admitted: "
                     + detail,
                     f"install {GPUWM_REQUIREMENT} and re-pin only from a measured {GPUWM_MEASURED_VERSION} tree",
                 )

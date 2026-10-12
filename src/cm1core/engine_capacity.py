@@ -1,6 +1,6 @@
 """Reproducible, explicitly selected ArWen WSM6 column-capacity builds.
 
-The default 2.8.0 estate remains separately byte-admitted.  This module
+The default 2.8.9 estate remains separately byte-admitted.  This module
 changes two capacity declarations in a new directory, never an installed
 dependency or an imported module.  WSM6 equations, coefficients, public
 dispatch and CUDA source bytes are unchanged.
@@ -30,19 +30,25 @@ WSM6_CAPACITY_TIERS = (64, 80, 128, 256)
 WSM6_CAPACITY_LEVEL_BOUNDS = (2, 256)
 CAPACITY_RECEIPT_NAME = "gm1-wsm6-capacity-overlay.json"
 
-#: The two-file delta applied to the 2.8.0 base.  ``wsm6_constants.py`` is
-#: byte-identical in 2.5.8, 2.7.4 and 2.8.0, so its patched digest is unchanged
-#: from the 2.5.8 profile; ``physics_vertical_contract.py`` gained rows for
-#: Milbrandt-Yau, WDM6, P3 and New Tiedtke between 2.5.8 and 2.7.4, so both
-#: its base and its patched digest moved then, and it is byte-identical
-#: between 2.7.4 and 2.8.0.  WSM6's own row in that file is still ``(2, 80)``
-#: in stock 2.8.0 -- the ceiling this profile lifts is not fixed upstream, so
-#: the profile is not retired.
+#: The two-file delta applied to the 2.8.9 base.  ``wsm6_constants.py`` is
+#: byte-identical in 2.5.8, 2.7.4, 2.8.0 and 2.8.9, so its patched digest is
+#: unchanged from the 2.5.8 profile; ``physics_vertical_contract.py`` gained
+#: rows for Milbrandt-Yau, WDM6, P3 and New Tiedtke between 2.5.8 and 2.7.4,
+#: was byte-identical between 2.7.4 and 2.8.0, and gained four more rows
+#: (FAST_SBM, UW PBL, TEMPO and the original Tiedtke) in 2.8.9, so both its
+#: base and its patched digest moved at the 2.7.4 and 2.8.9 pins (the 2.8.0
+#: patched digest was
+#: 3fcf990ed68c09a3b594e2ee35393f2992a2b73ec97c0f6fafbdfa9f7aa72a8c).  WSM6's
+#: own row in that file is still ``(2, 80)`` in stock 2.8.9 -- the ceiling
+#: this profile lifts is not fixed upstream, so the profile is not retired.
+#: The kernel the deeper tiers compile is 2.8.9's wsm6.cu, whose constant
+#: divisions changed spelling (see :mod:`cm1core.engine_pin`); the overlay
+#: itself still changes no CUDA source byte.
 CAPACITY_PATCHED_SURFACE: Mapping[str, str] = MappingProxyType({
     "gpuwm/core/wsm6_constants.py":
         "a1bf764f2a7553bdb148524463ada69e26c855482c7db76cbc2f6374ac08aa2a",
     "gpuwm/physics_vertical_contract.py":
-        "3fcf990ed68c09a3b594e2ee35393f2992a2b73ec97c0f6fafbdfa9f7aa72a8c",
+        "ec10320c5a7053994cd3ec6733f2b8c78ff1d4c62af7122ed0c90d911d8fe58c",
 })
 
 _PATCHES: Mapping[str, tuple[tuple[bytes, bytes], ...]] = MappingProxyType({
@@ -177,7 +183,7 @@ def build_wsm6_capacity_overlay(
 ) -> dict[str, object]:
     """Atomically create a fresh capacity overlay without importing ArWen/CUDA.
 
-    ``source_root`` is the separately preserved audited 2.8.0 archive/copy.
+    ``source_root`` is the separately preserved audited 2.8.9 archive/copy.
     The complete package and its version metadata are copied, excluding stale
     Python bytecode.  Existing destinations, missing files and source drift
     refuse; the source tree is never written.

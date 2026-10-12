@@ -87,22 +87,27 @@ TILESTREAM_NATIVE_ORACLE_RECEIPT_SHA256: Mapping[str, str | None] = MappingProxy
     "thompson-aerosol-mp28": None,
 })
 #: The estate-delta audit that admitted the estate this record's bytes come
-#: from: the 2.7.4 -> 2.8.0 audit that tools/audit_arwen_wsm6_estate_delta.py
+#: from: the 2.8.0 -> 2.8.9 audit that tools/audit_arwen_wsm6_estate_delta.py
 #: regenerates.  It named the 2.5.8 document
 #: (`cd3bf5048a9922f3a2b7507c7453c0d676159866df13274621427c8f03bf1603`) until
-#: the 2.7.4 re-pin, and the 2.7.4 document
+#: the 2.7.4 re-pin, the 2.7.4 document
 #: (`55dd76687aef8aaf9f37909248d342d2176020f46369eee6dc804e5765a59c6d`) until
-#: the 2.8.0 re-pin; a receipt that cites a superseded audit tells an operator
+#: the 2.8.0 re-pin, and the 2.8.0 document
+#: (`b92c2f6308f188a229016295ba77dd40fb423fbe2fdabb8dd0704da256ab812e`) until
+#: the 2.8.9 re-pin; a receipt that cites a superseded audit tells an operator
 #: the running bytes were admitted by a document that never saw them.
 ARWEN_WSM6_ESTATE_AUDIT_SHA256 = (
-    "b92c2f6308f188a229016295ba77dd40fb423fbe2fdabb8dd0704da256ab812e"
+    "1e6d920912d8460297c135421c8f51a759d145f989fc31cd31daa3610c424060"
 )
 
 #: The GPU-free dense-ice fall-speed oracle a Morrison execution can cite.
 #: WSM6 has a measured component oracle and Morrison does not (R-019), so the
 #: two are separate fields and neither borrows the other's.
+#: Re-run on the 2.8.9 kernel text at the 2.8.9 re-pin; the receipt for the
+#: 2.8.0 text was
+#: `5c20d1848bc880ca80a810c2c97df324c01b160d8e79123c9b468e65311002eb`.
 MORRISON_DENSE_ICE_ORACLE_RECEIPT_SHA256 = (
-    "5c20d1848bc880ca80a810c2c97df324c01b160d8e79123c9b468e65311002eb"
+    "306fcb657ff483e8833fac259791f875e943df571cff89d1bac1af7306ac8c89"
 )
 
 

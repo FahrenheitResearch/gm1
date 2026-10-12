@@ -275,8 +275,8 @@ def content_problems(contents: dict[str, bytes]) -> list[dict[str, str]]:
 #: `pip install gpuwm-cm1` alone is a working install. The ranges hold the
 #: validated versions (constraints/gpu-cu13-validated.txt).
 EXPECTED_BASE_REQUIREMENTS = (
-    ("gpuwm", frozenset({">=2.8.0", "<2.8.1"})),
-    ("gpuwm-data", frozenset({">=2.8.0", "<2.8.1"})),
+    ("gpuwm", frozenset({">=2.8.9", "<2.8.10"})),
+    ("gpuwm-data", frozenset({">=2.8.9", "<2.8.10"})),
     ("cupy-cuda13x[ctk]", frozenset({">=14.2", "<15"})),
     ("nvidia-cuda-nvrtc", frozenset({">=13.3", "<13.4"})),
     ("nvidia-nvjitlink", frozenset({">=13.3", "<13.4"})),
@@ -560,8 +560,8 @@ def inspect_wheel(path: Path, checks: list[dict[str, object]]) -> dict[str, obje
         # The engine and its data distribution, one bounded patch window each,
         # in either specifier order the build backend may write.
         allowed_requirements = (
-            {"gpuwm<2.8.1,>=2.8.0", "gpuwm>=2.8.0,<2.8.1"},
-            {"gpuwm-data<2.8.1,>=2.8.0", "gpuwm-data>=2.8.0,<2.8.1"},
+            {"gpuwm<2.8.10,>=2.8.9", "gpuwm>=2.8.9,<2.8.10"},
+            {"gpuwm-data<2.8.10,>=2.8.9", "gpuwm-data>=2.8.9,<2.8.10"},
         )
         arwen_requirements = [
             requirement for requirement in base_requirements

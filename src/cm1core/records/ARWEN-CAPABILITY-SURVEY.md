@@ -6,8 +6,8 @@ the authority. Regenerate it, do not hand-edit it:
 
 ```text
 python3 tools/survey_arwen_capabilities.py \
-    --estate-root tmp/arwen-estate-gpuwm-2.8.0 \
-    --baseline-root tmp/arwen-estate-gpuwm-2.7.4 \
+    --estate-root tmp/arwen-estate-gpuwm-2.8.9 \
+    --baseline-root tmp/arwen-estate-gpuwm-2.8.0 \
     --output src/cm1core/records/ARWEN-CAPABILITY-SURVEY.json
 ```
 
@@ -38,53 +38,66 @@ gap.
 
 | Quantity | Count |
 |---|---:|
-| CUDA translation units (`gpuwm/core/kernels/*.cu`) | 94 |
-| `__global__` entry points across them | 611 |
-| Physics-registry options | 40 |
-| Options marked `implemented` | 39 |
-| Shared device headers (`*.cuh`) | 4 |
-| `DomainState` carriers the state module binds | 125 |
-| Byte-admitted files on GM1's WSM6 seam | 17 |
+| CUDA translation units (`gpuwm/core/kernels/*.cu`) | 166 |
+| `__global__` entry points across them | 951 |
+| Physics-registry options | 48 |
+| Options marked `implemented` | 47 |
+| Shared device headers (`*.cuh`) | 47 |
+| `DomainState` carriers the state module binds | 126 |
+| Byte-admitted files on GM1's WSM6 seam | 21 |
 
-## What the 2.7.4 -> 2.8.0 bump made newly available
+## What the 2.8.0 -> 2.8.9 bump made newly available
 
 `newly_available_since_the_superseded_estate` is a mechanical two-estate diff,
 not a changelog reading. A row means the bytes arrived; it says nothing about
 whether the kernel is correct, whether ArWen validated it, or whether GM1 can
 call it.
 
-| Measure | 2.7.4 | 2.8.0 |
+| Measure | 2.8.0 | 2.8.9 |
 |---|---:|---:|
-| CUDA translation units | 94 | 94 |
-| `__global__` entry points | 599 | 611 |
-| Physics-registry options | 41 | 40 |
-| Package files under `gpuwm/` | 1,294 | 1,429 |
+| CUDA translation units | 94 | 166 |
+| `__global__` entry points | 611 | 951 |
+| Physics-registry options | 40 | 48 |
+| Shared device headers | 4 | 47 |
+| Package files under `gpuwm/` | 1,429 | 2,197 |
 
-No translation unit was added or removed. Two existing units gained entry
-points: `thompson` gained ten (`thompson_microphysics_columns`, the
-`_with_presence` saturation adjustment, rain evaporation and sedimentation
-variants, and the `_with_rain_profile` snow sedimentation variants), and
-`thompson_aerosol_state` gained two (`thompson_aa_micro_columns`,
-`thompson_aa_state_finalize_with_columns`). These carry classic and
-aerosol-aware Thompson's WRF entry zeroing, column exit and L_qc/L_qr presence
-handling. Neither unit is on the WSM6 or Morrison path.
+Seventy-two translation units were added and none was removed. They include
+the original Tiedtke cumulus scheme (`tiedtke`), the UW moist-turbulence PBL
+(`uwpbl`), the FAST_SBM bin microphysics (`fast_sbm`), a generated classic
+Thompson column unit (`thompson_column`), the CLM lake model (`lake`), the
+urban canopy models (`urban_ucm`, `urban_bep`, `urban_bep_bem`), a Noah mosaic
+unit, terrain drag, the chemistry and fire-spread families (`chem_*`,
+`sfire_*`) and further RRTMG units.
 
-One registry option was removed, `radiation/rte-rrtmgp-legacy-aggregate`, and
-none was added. Eleven existing options changed at least one field, almost all
-of them `consumers` or `warnings`; `microphysics/morrison-mp10` changed only
-its `consumers` (it now names the state carriers of its number species).
-`microphysics/wsm6-mp6` did **not** change. **No vertical bound changed
-value**, which the survey test asserts: a moved bound would silently re-admit
-or re-refuse a geometry that a recorded GM1 run already depends on.
+Twenty-five existing units changed their entry points. Three of them lost
+one or more, which is what can strand a caller: `acoustic` lost
+`advance_mu_th_msf` and `advance_w_phi_msf`, `gf` lost `gf_gfdrv_stage`, and
+`thompson` lost `thompson_frozen_vapor_cloud_network` while gaining nine. The
+units GM1 launches (`wsm6`, `morrison` and `refl`) kept theirs.
 
-The WSM6 executed surface is priced separately, field by field, by the
-estate-delta audit that `tools/audit_arwen_wsm6_estate_delta.py` regenerates
-for 2.8.0 (`CM1-ARWEN-SEAM.md` quotes its numbers). Read that record, not this
-one, before trusting the WSM6 seam across the bump.
+Eight registry options were added and none was removed: `cumulus/tiedtke`,
+`microphysics/fast-sbm-mp30`, `microphysics/tempo`, `pbl/uw` and four
+`urban/*` rows. Twenty-six existing options changed at least one field, and
+this time `microphysics/wsm6-mp6` and `microphysics/morrison-mp10` are both
+among them (constraints, consumers and, for WSM6, parameters). Four vertical
+bounds were added (FAST_SBM, TEMPO, the original Tiedtke and the UW PBL).
+**No existing vertical bound changed value**, which the survey test asserts: a
+moved bound would silently re-admit or re-refuse a geometry that a recorded
+GM1 run already depends on.
 
-The earlier 2.5.8 -> 2.7.4 bump is where `ntiedtke` (New Tiedtke,
-`cu_physics = 16`), `milbrandt2_zet` and `lbc_time` arrived, and where the
-Milbrandt-Yau, WDM6, P3 and New Tiedtke vertical bounds were first declared.
+This record counts bytes; it does not say whether a kernel's arithmetic
+changed. For the units GM1 executes it did: `wsm6.cu` and `refl.cu` respell
+constant divisions, and `morrison.cu` was restructured. The WSM6 and Morrison
+executed surfaces are priced separately, field by field, by the estate-delta
+audit that `tools/audit_arwen_wsm6_estate_delta.py` regenerates for 2.8.9
+(`CM1-ARWEN-SEAM.md` quotes its numbers). Read that record, not this one,
+before trusting either seam across the bump.
+
+The 2.7.4 -> 2.8.0 bump added no translation unit and twelve Thompson entry
+points, and removed one radiation option. The earlier 2.5.8 -> 2.7.4 bump is
+where `ntiedtke` (New Tiedtke, `cu_physics = 16`), `milbrandt2_zet` and
+`lbc_time` arrived, and where the Milbrandt-Yau, WDM6, P3 and New Tiedtke
+vertical bounds were first declared.
 
 ## The four questions a wiring lane has to answer
 
@@ -123,7 +136,7 @@ rediscover them:
    answer, not a gap: `ysu`, `noah` and `mynn_pbl` take explicit device arrays
    and never see the state object, so their binding lives in their caller,
    `gpuwm.core.physics`, whose own attribute set is in the same survey. Three
-   vocabularies let a reader interpret a row: `domain_state_fields` (the 125
+   vocabularies let a reader interpret a row: `domain_state_fields` (the 126
    carriers `gpuwm/core/state.py` binds, including the scheme-conditional
    moisture set it allocates through `setattr` loops), `domain_state_methods`
    (so `state.scratch(...)` is not mistaken for a carrier), and
@@ -135,7 +148,7 @@ rediscover them:
    and the registry answers it: `consumers.ring_guard.state_fields`.
    `local_frame_bytes` gives the measured per-thread local frame per compile
    platform, which is the number ArWen's own launch-time VRAM reservation is
-   computed from: WSM6 reads 7,216 bytes at its 64-level tier on all three
+   computed from: WSM6 reads 7,216 bytes at its 64-level tier on all six
    recorded platforms, the same number `ARWEN-WSM6-CAPACITY-256-AUTHORITY.md`
    measured offline.
 5. **What geometry will it refuse?** `vertical_level_bounds` is
@@ -188,7 +201,8 @@ candidate component, because several are far shallower than the grid:
 | `SASE_VERTICAL_LEVEL_BOUNDS` | `(2, 128)` | refuses a 237-level column outright |
 | `MORRISON`/`THOMPSON`/`THOMPSON_AEROSOL` | `(2, 256)` | admits 237 natively |
 | `NSSL2`/`MILBRANDT2` | `(3, 256)` | admits 237 natively |
-| `MYNN`/`GF`/`NEW_TIEDTKE`/`P3` | floor only | no declared ceiling |
+| `MYNN`/`GF`/`NEW_TIEDTKE`/`TIEDTKE`/`UWPBL`/`FAST_SBM`/`P3` | floor only | no declared ceiling |
+| `TEMPO_VERTICAL_LEVEL_BOUNDS` | `(3, 256)` | admits 237 natively |
 | `ACOUSTIC_VERTICAL_LEVEL_BOUNDS` | `(1, 256)` | ArWen's own dycore bound, not a physics one |
 
 A 128-level ceiling is a compile-time per-thread column tier, the same kind of

@@ -134,7 +134,7 @@ yours has right now: close other programs that use the graphics card (games, vid
 time, which makes the storm smaller. On Windows the desktop itself keeps 4-5 GB of the card. `gpuwm-cm1 doctor
 --plain` lists, under Presets, every storm that does not fit this computer and why.
 
-**"Supercell, 100 m" is greyed.** In 0.1.1 that storm stops early on a check of where the storm is in its area, on
+**"Supercell, 100 m" is greyed.** In this version that storm stops early on a check of where the storm is in its area, on
 every computer, so it is not offered yet. "Supercell, 250 m" shows the same storm in fine detail.
 
 **The squall lines are greyed.** They are not offered yet on any computer: how they treat the sides of their area

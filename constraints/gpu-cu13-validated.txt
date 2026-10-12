@@ -1,6 +1,6 @@
 # The CUDA user-space stack every GPU-verified gpuwm-cm1 run used (released as constraints-gpu-cu13.txt).
 #
-#   pip install "gpuwm-cm1==0.1.1" -c constraints-gpu-cu13.txt
+#   pip install "gpuwm-cm1==0.1.2" -c constraints-gpu-cu13.txt
 #
 # Optional: `pip install gpuwm-cm1` alone already installs CuPy for CUDA 13 and
 # holds NVRTC to 13.3.x (the kernels are compiled at run time by NVRTC, and
@@ -10,11 +10,11 @@
 # Requires an NVIDIA driver from branch R580 or newer (CUDA 13 user-space
 # libraries).
 #
-# ArWen: the engine GM1 byte-admits (gpuwm 2.8.0 requires gpuwm-data 2.8.0;
+# ArWen: the engine GM1 byte-admits (gpuwm 2.8.9 requires gpuwm-data 2.8.9;
 # CuPy for CUDA 13 comes from gpuwm-cm1's own requirements, which
 # cupy-cuda13x 14.2.0 below satisfies).
-gpuwm==2.8.0
-gpuwm-data==2.8.0
+gpuwm==2.8.9
+gpuwm-data==2.8.9
 cupy-cuda13x==14.2.0
 cuda-pathfinder==1.8.1
 cuda-toolkit==13.3.1

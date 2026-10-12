@@ -15,9 +15,9 @@ before the release, and with a stand-in for the GPU in the CPU test suite.
 |---|---|
 | Uniform grids, 100 m to 2 km; `stretch_z` | Runs. `stretch_z` with cloud is "Not yet checked against CM1". |
 | `stretch_x`, `stretch_y` | Refused (every horizontal operator assumes uniform spacing); v0.2. |
-| `ptype = 5` (Morrison) | ArWen's WRF-lineage Morrison, not CM1's `morrison.F`. Matches CM1 on its supercell namelist (below). |
+| `ptype = 5` (Morrison) | ArWen's WRF-lineage Morrison, not CM1's `morrison.F`. Matches CM1 on its supercell namelist within 5.1 % (below); the report names the one statistic past GM1's 5 % target. |
 | `ptype = 7` (WSM6) | Runs with `eqtset = 2`; CM1 forces `eqtset = 1` for WSM6, so the report says "Runs differently". |
-| `ptype = 3` (Thompson) | Runs after `--acknowledge-thompson`: checked only in a 120-s column. |
+| `ptype = 3` (Thompson) | Runs after `--acknowledge-thompson`: checked only in a 120-s column, on an earlier ArWen. ArWen 2.8.9 corrected a table read in Thompson, so its storm differs from GM1 0.1.0's; it has not been compared with CM1 on this engine. |
 | Other `ptype` (NSSL, P3, Kessler, ...) | Refused by name. |
 | `iinit` 0, 1, 2, 3, 5, 7, 8, 11, 13 (bubbles, cold pool, tropical-cyclone vortex, line thermal, the gravity-wave and near-surface waves) | Runs as CM1 does; the initial state is CM1's word for word. The vortex needs `iorigin = 2` and `ibalance = 0`, as CM1's own arm does. The bubble, cold pool, line thermal and parcel seed box CM1 sets in Fortran are settings (`gpuwm-cm1 edit --setting`). The random noise of `iinit = 8` and `irandp = 1` is CM1's own, number for number (the same random numbers gfortran's `random_number` gives CM1); import with `--seed N` for GM1's stream and another realization. |
 | `iinit` 12 (updraft nudging), 9 (forced convergence), 10 (momentum forcing) | Runs as CM1 does: the push is applied where CM1 applies it (inside the acoustic steps for 12 and 9, in the held wind tendency for 10), with CM1's own strength, size and timing from `init3d.F`, which are settings here (`initialization.xc_wnudge`, `wmax_wnudge`, `t2_wnudge`, ...). As in CM1, a restart turns the push off. Checked against CM1 r21.1 on its supercell namelist ("The initiation options", below). |
@@ -59,7 +59,7 @@ Result: Runs, with the differences below
 
 Refused (0)
 Not read (0)
-Runs differently from CM1 (39)
+Runs differently from CM1 (37)
   output_km, output_kh = 1: Not saved: eddy viscosity (kmh, kmv) and eddy diffusivity (khh, khv).
       GM1's turbulence closure does not keep them between steps
   output_dbz = 1: GM1 has no reflectivity operator inside the Morrison step, so frames carry no dbz.
@@ -74,9 +74,10 @@ Not yet checked against CM1 (0)
 Not needed on one GPU (21)
   ppnode = 128: MPI layout
   ...
-Same as CM1 (284)
+Same as CM1 (286)
   ptype = 5: ArWen's WRF-lineage Morrison, not CM1's morrison.F. On CM1's stock supercell, GM1/CM1
-      mature-phase ratios are 0.99-1.05 (CM1 against itself: 0.98-1.00)
+      mature-phase ratios are 0.985-1.050 (CM1 against itself: 0.984-1.003); past the 5 % target:
+      max vertical vorticity 1.0503
   Grid (15)    records/CM1-SUPPORT-MATRIX.csv
   ...
 Output: GrADS (output_format = 1), every time in one file (output_filetype = 1), as the namelist asks.
@@ -285,32 +286,39 @@ with their limits and what has been checked, in `docs/WRF-DOWNSCALING.md`.
 
 ## How close GM1 is to CM1
 
-CM1 r21.1's supercell namelist (1 km, 2 h, Morrison), GM1 on an RTX 3080 against CM1 r21.1 built from the release
-tarball (gfortran -O2, OpenMP), mature-phase means over 3600-7200 s. "Twin" is CM1 against itself with 0.0001 K
-added at the lowest level.
+CM1 r21.1's supercell namelist (1 km, 2 h, Morrison), GM1 on ArWen 2.8.9 on an RTX 4090 and an RTX 3080 (the two
+cards give the same output word for word) against CM1 r21.1 built from the release tarball (gfortran -O2, OpenMP),
+mature-phase means over 3600-7200 s. "Twin" is CM1 against
+itself with 0.0001 K added at the lowest level. The rows are `records/GM1-STOCK-DECK-RATIOS.json`'s.
 
 | Statistic | GM1 / CM1 | Twin / CM1 |
 |---|---|---|
-| max w | 1.005 | 1.003 |
-| max 2-5 km updraft helicity | 1.007 | 0.993 |
-| updraft area, w > 10 m/s at 5 km | 1.024 | 1.001 |
-| max vertical vorticity | 1.046 | 0.984 |
-| min w | 0.997 | 1.001 |
+| max w | 1.003 | 1.003 |
+| max 2-5 km updraft helicity | 1.006 | 0.993 |
+| updraft area, w > 10 m/s at 5 km | 1.014 | 1.001 |
+| max vertical vorticity | 1.050 | 0.984 |
+| min w | 1.011 | 1.001 |
 | lowest-level θ′ min | 0.988 | 1.002 |
-| cold-pool area, θ′ < -1 K | 0.986 | 0.998 |
-| rain area > 1 mm | 1.010 | 1.000 |
-| max rain | 1.010 | 0.999 |
-| max graupel/hail mixing ratio | 1.007 | 0.998 |
+| cold-pool area, θ′ < -1 K | 0.985 | 0.998 |
+| rain area > 1 mm | 1.011 | 1.000 |
+| max rain | 1.011 | 0.999 |
+| max graupel/hail mixing ratio | 1.011 | 0.998 |
 
 The strongest updraft's column at 5 km is within one cell of CM1's at every 15-minute output from 1800 s, and max w
-at 1800 s is 29.273 against CM1's 29.348 m/s. Pointwise, w departs from CM1 after the first rain beyond the twin
+at 1800 s is 29.273 against CM1's 29.348 m/s. Every statistic is inside its band (10 % for the updraft statistics,
+15 % for the rest), which is what the report's "Same as CM1" asks of Morrison; max vertical vorticity, at 1.0503,
+is just past GM1's 5 % target, and the report says so. GM1 0.1.0, on ArWen 2.8.0, gave 0.986 to 1.046: ArWen 2.8.9 rebuilt its
+Morrison kernel, and GM1's output now differs from 0.1.0's by one unit in the last place from about 25 minutes of
+storm time, a difference the storm then grows. No RTX 50-series card has run this comparison on ArWen 2.8.9.
+Pointwise, w departs from CM1 after the first rain beyond the twin
 (nrmsd 0.029 at 1800 s against 0.0005): ArWen's Morrison is WRF's, not CM1's `morrison.F`. The same namelist with
 WSM6 is 9-21% stronger than CM1's `ptype = 7`, which runs `eqtset = 1`. Other namelists have not been compared
 with CM1 as whole storms; the coverage report says which settings have been checked and where.
 
 ### The initiation options
 
-The same namelist with each other `iinit`, GM1 on an RTX 3080 against CM1 r21.1. The
+The same namelist with each other `iinit`, GM1 on an RTX 3080 against CM1 r21.1, measured before the move to ArWen
+2.8.9 and not repeated on it (on the stock namelist above, the move shifted the ten ratios by at most 0.0135). The
 three forcings (updraft nudging 12, forced convergence 9, momentum forcing 10) are CM1's statements word for word
 (every word of `get_wnudge`, `convinitu`/`convinitv` and `solve1.F`'s u forcing compiled from CM1's source under
 gfortran, host and GPU; for 10, `cosh` is the correctly rounded one of glibc 2.41 and later, which the reference CM1
@@ -340,7 +348,8 @@ between near-equal cells in CM1's own twin too.
 
 All measured. CM1 ran on a Core Ultra 7 270K Plus, gfortran -O2, OpenMP; a pinned, MPI or
 `-O3 -march=native` build may be faster. The GM1 times are from before the
-latent-heating fix, which added about 7% per step. No comparison with CM1 on a cluster is made.
+latent-heating fix, which added about 7% per step, and on an earlier ArWen (a step on ArWen 2.8.9 takes 1 to 4 %
+less time than on GM1 0.1.0's ArWen 2.8.0 on an RTX 4090, and about 3 to 6 % less on an RTX 3080). No comparison with CM1 on a cluster is made.
 
 NCAR's OpenACC work on CM1 (Dennis et al. 2024; NHUG 2025) reports its GPU speed for a dry boundary-layer case with
 the fluid solver only; its physics are not yet on the GPU, and CM1 r22.0 contains no OpenACC directives. Official

@@ -99,7 +99,7 @@ is the ArWen 2.7.4 tree (staged at the time; since pinned for the column physics
 `gpuwm/verify/npref.py:4047-4060` (weights) and `:4062-4139` (application).
 
 **Nothing here depends on the ArWen pin.**
-`src/cm1core/engine_pin.py` pins `gpuwm>=2.8.0,<2.8.1`, but its byte-admitted
+`src/cm1core/engine_pin.py` pins `gpuwm>=2.8.9,<2.8.10`, but its byte-admitted
 surface is the column microphysics files only and contains no `nest.cu`,
 `spec_bdy.cu` or LBC kernel. GM1 therefore carries its own kernel text
 (`nest_boundary.NEST_RELAXATION_KERNEL_SOURCE`, pinned by sha256) and its own

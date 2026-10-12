@@ -99,7 +99,7 @@ def card(name: str, total_mib: int, used_bytes: float, *, wsl2: bool = False) ->
 def test_every_sentence_the_fit_writes_passes_the_lint(tmp_path, monkeypatch):
     import shutil
 
-    # A preset 0.1.1 withholds (its preset.json) says only why; its fit's words are linted with it offered again.
+    # A preset this version withholds (its preset.json) says only why; its fit's words are linted with it offered again.
     withheld = {preset.id: P.examine(preset)["why_not"] for preset in P.load_all() if preset.record.get("offered") is False}
     for preset_id, why in withheld.items():
         assert L.lint_text(why, where=preset_id) == [], why

@@ -101,27 +101,33 @@ def _audited(entries: Mapping[str, str]) -> Mapping[str, str]:
     return MappingProxyType(dict(sorted(entries.items())))
 
 
-#: Measured on the published gpuwm 2.8.0 wheel, the estate
+#: Measured on the published gpuwm 2.8.9 wheel, the estate
 #: :mod:`cm1core.engine_pin` admits.  These components were first measured on
 #: ArWen 2.5.8 (audited commit f47f177d4b2e0da95568d70230f5ce9785e632c7) and
-#: were not re-measured at the 2.7.4 pin; the 2.8.0 re-pin brings every entry
-#: onto the admitted estate.  The digests are byte admission only: no
+#: were not re-measured at the 2.7.4 pin; the 2.8.0 re-pin brought every entry
+#: onto the admitted estate and the 2.8.9 re-pin re-measured them (19 of the
+#: 28 files changed: YSU, Shin-Hong, MYNN, New Tiedtke and the RRTMG drivers
+#: and kernels; MYJ, the RRTMG longwave chain and the lookup tables did not).
+#: The New Tiedtke unit and, from 2.8.9, the YSU and Shin-Hong units compile
+#: with device headers this table does not list (glibc_flt32.cuh, and
+#: ysu_topo.cuh for YSU); they join the table before any stage couples one of
+#: these schemes.  The digests are byte admission only: no
 #: Cartesian stage couples these components, and none has a GPU validation on
-#: 2.8.0.  Every file an admitted component executes is listed with the bytes
+#: 2.8.9.  Every file an admitted component executes is listed with the bytes
 #: GM1 measured, so a drifting estate refuses instead of running unknown
 #: physics.
 ARWEN_COMPONENT_SURFACE: Mapping[str, Mapping[str, str]] = MappingProxyType(
     {
         "ysu-pbl1": _audited(
             {
-                "gpuwm/core/ysu.py": "6e140d641c62d5a0cd82b2998020ef135eb7c93bcc73d75bf75ab3efd6a53f95",
-                "gpuwm/core/kernels/ysu.cu": "251dc8469b13a18a86f8a4a6546ceb9bb7680407a3f4afa03290d1140a48964b",
+                "gpuwm/core/ysu.py": "bde629698c989bae0571dec6e1623b430200c62c6cf92e6b51c2d7bc42d75f57",
+                "gpuwm/core/kernels/ysu.cu": "46f4642c73cdc00ad08822bb89788d576fc4bc6ca7a9d8a68aa2272d66c7a669",
             }
         ),
         "shinhong-pbl11": _audited(
             {
-                "gpuwm/core/shinhong.py": "18856af5583a999a37a9d3c5658ab174f852f141177159470751e32f34dd5e3e",
-                "gpuwm/core/kernels/shinhong.cu": "342e8c86f16262bf54137569b31e6637d4f8589281e304a76ec0a68a487286c6",
+                "gpuwm/core/shinhong.py": "3d5c1758e8e789c4b9c23ace408f18b7af0fce5b6b9eadff6068f8ab238540fd",
+                "gpuwm/core/kernels/shinhong.cu": "26a78c8f8b24a2c783f6780db4b6b4a8fc52eb30a1e51bc71a7919a33ee8f6ed",
             }
         ),
         "myj-pbl2": _audited(
@@ -132,27 +138,27 @@ ARWEN_COMPONENT_SURFACE: Mapping[str, Mapping[str, str]] = MappingProxyType(
         ),
         "mynn-pbl5": _audited(
             {
-                "gpuwm/core/mynn_pbl.py": "8f20cbaa659e9ba6e925453faa85ab43332217ed459111f7c130effaccab4e8b",
-                "gpuwm/core/mynn_pbl_gpu.py": "edb34576ad8dd2c9614fa3d6d2615464544b481334623e7a687c1cab2a33f30e",
-                "gpuwm/core/mynn_pbl_runtime.py": "67a15ddf0cd6c885c23d97a695918e8fab6fb0b5b1fd6998ac084eb6499cf1ea",
-                "gpuwm/core/kernels/mynn_pbl.cu": "ef5ad38bdddaaf1cc465290e22f5b6ee176e8f19e33354c939d18b37f906c5da",
+                "gpuwm/core/mynn_pbl.py": "631f32c9c8f71581f2941c26e08f5f112b78b63cfb9693e988f211dad0a42ffe",
+                "gpuwm/core/mynn_pbl_gpu.py": "f1a97ec8c787b2247368c996e3fb7dca233e3a9ab7ccb9d44541861eb312a35c",
+                "gpuwm/core/mynn_pbl_runtime.py": "69362728ef2ee0a33669cfa1928532a1f0693ff35e1e43f32e7da5d7f3c513ab",
+                "gpuwm/core/kernels/mynn_pbl.cu": "176d00a656786395753cd254921fe74968448c8daafc7c7f254b97c484338cda",
             }
         ),
         "rrtmg-legacy-ra4": _audited(
             {
-                "gpuwm/core/rrtmg_legacy.py": "8d2c083609bf9167584b85e6302ffbbd624193301b056e044921cb9eef9fa7e4",
-                "gpuwm/core/rrtmg_legacy_prep.py": "7a96fbba87424b47622909343a6b6cc35897fe2df1dc6d1dc3583b9b1a76c8cb",
-                "gpuwm/core/rrtmg_mcica.py": "12748fd78001aefb3cfc9f32cf8099709913ff0340348d5a814067b7287ff91f",
-                "gpuwm/core/rrtmg_lw.py": "72e60ad81d51b0f0c5591c4348f68a691a13653b315fb4ad6aa0237de0e20c5a",
-                "gpuwm/core/rrtmg_sw.py": "0af10fd7b459f10364df475c7bf130e17889a8c489e8f704a7573502eb9188c4",
-                "gpuwm/core/kernels/rrtmg_lw.cu": "391e459a9c174e07fc0fddba6de6e59ea836f04edccd00b7e0ae6c0d41ae2555",
+                "gpuwm/core/rrtmg_legacy.py": "ea3adcfdc84b2df75fc4c952cdb3ae0b103ce8d4cc4ded3dda221de23cc8f6c9",
+                "gpuwm/core/rrtmg_legacy_prep.py": "93f230eff3d226539656dd32f955ab077cb17f8ff3ff57dddbc97bb63bd2828e",
+                "gpuwm/core/rrtmg_mcica.py": "3947f739003363e0902d1c058e80ca0111545c4e0b2acc0548891041fa0be7de",
+                "gpuwm/core/rrtmg_lw.py": "e899ce92bb2e09ed8d70a5368795fed21eb1bbd0c4faf8d3cd0195d3182bc6cd",
+                "gpuwm/core/rrtmg_sw.py": "349c9d0d0d6380ae1951aa4ee5c8ecee29831cf8ab8dcede54ca5c5ad28dad8a",
+                "gpuwm/core/kernels/rrtmg_lw.cu": "241382acf34bc312e6361822acc057ec3fedf2f31514b477ff939ef723632592",
                 "gpuwm/core/kernels/rrtmg_lw_chain.cu": "a71a779ea3a733e422414ee5d5d885cb904972fe32ac2bfe6438d6c5214c1252",
                 "gpuwm/core/kernels/rrtmg_lw_taugb02_10_11_12.cu": "fe5d57d1eb2649005d2748ae40f849c340b03a5f3d3a61c7fb506d0c69792485",
                 "gpuwm/core/kernels/rrtmg_lw_taugb03_05.cu": "5de3f0c7c700cff993d5d5a3caa868bbd68d810ea30a902e6e92d652e5612cf7",
                 "gpuwm/core/kernels/rrtmg_lw_taugb06_09.cu": "ab677eb0de0faeb2b7a3f4a5923c6777e11128ab7950d9b63abc9cdb61125157",
                 "gpuwm/core/kernels/rrtmg_lw_taugb13_16.cu": "104c3157451dc878e3f9d751db1cf01a4368b1a2892825678370c5159a787ff6",
-                "gpuwm/core/kernels/rrtmg_sw.cu": "0301818b55046062ef0b89edc1c2ddc85adb361a4bfd03bc278f56c5fb139aef",
-                "gpuwm/core/kernels/rrtmg_mcica_wrf.cu": "edb6bcb71a9d0763d3576b602db0afa05ec5eddc9bc63548f4991f34bd6d718c",
+                "gpuwm/core/kernels/rrtmg_sw.cu": "43134d6d6d2be4b3e668c7ab92d5850f1f992a09812dd09c9536fce5d9ab791e",
+                "gpuwm/core/kernels/rrtmg_mcica_wrf.cu": "80cd32a2feee70f1d0fe2db3eaf02386de4d970bfc9dc8e22d71fafbab5564b6",
                 # The AER lookup tables themselves, as WRF distributes them.
                 "gpuwm/data/wrf_radiation/RRTMG_LW_DATA": "bcfdee24b63a4c909522a329b8e16c539f0173c7e5aea2caf933ab4fe28c5c97",
                 "gpuwm/data/wrf_radiation/RRTMG_SW_DATA": "a7d25f5b4d33be8629cbef7ecacc1ff413bf398a021297793e843ba1cc627baf",
@@ -164,8 +170,8 @@ ARWEN_COMPONENT_SURFACE: Mapping[str, Mapping[str, str]] = MappingProxyType(
         # configuration one.
         "ntiedtke-cu16": _audited(
             {
-                "gpuwm/core/ntiedtke.py": "34e03bca7f1d4a99d68378b9334d2d96c0c331f44a8ddf179e02200015b60bb9",
-                "gpuwm/core/kernels/ntiedtke.cu": "06daa934a71a02797fbaaaef243b83d4c43382e2dcd1cbd83505393d9373af7a",
+                "gpuwm/core/ntiedtke.py": "ad24fc80bce9998e84e73d5cc87c8241831a11e8fc67cc21d2b37505bc4b1fcf",
+                "gpuwm/core/kernels/ntiedtke.cu": "17fe4aac03ed6b5191bda49db9eebe6c51c29d0e542bafc8ea33989f363caa42",
             }
         ),
     }

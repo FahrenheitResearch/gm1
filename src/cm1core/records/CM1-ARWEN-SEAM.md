@@ -9,34 +9,35 @@ ArWen `mp_physics=6` (WSM6) and CM1 `ptype=5` through ArWen `mp_physics=10`
 
 ## Admitted estate
 
-The dependency window is `gpuwm>=2.8.0,<2.8.1`, with `gpuwm-data>=2.8.0,<2.8.1`
-beside it (gpuwm 2.8.0 itself requires `gpuwm-data==2.8.0`). The
+The dependency window is `gpuwm>=2.8.9,<2.8.10`, with `gpuwm-data>=2.8.9,<2.8.10`
+beside it (gpuwm 2.8.9 itself requires `gpuwm-data==2.8.9`). The
 byte-admitted estate is the published
-`gpuwm-2.8.0-py3-none-manylinux_2_28_x86_64.whl`, SHA-256
-`6a8749c8acc8050de25857fb698ed5070fafeac49a002e127dfc664b14ff3577`. The
-pure-Python `gpuwm-2.8.0-py3-none-any.whl` carries the same bytes for every
-admitted file.
+`gpuwm-2.8.9-py3-none-manylinux_2_28_x86_64.whl`, SHA-256
+`0ece5eca8d08d693012027f812d541b42e097f396264c63c587ed73bf5250d50`.
 
 Source identity is recorded as the distribution artifact rather than a git
 commit on purpose. 2.5.8 was admitted from a tracked gpuwm checkout, so its
-identity was commit `f47f177d4b2e0da95568d70230f5ce9785e632c7`; the 2.7.4 and
-2.8.0 wheels record no upstream commit anywhere in their metadata, and writing
-one down anyway would be a fabricated provenance claim. What was actually
-hashed is the wheel, so the wheel is what the pin names. The superseded 2.7.4
-pin was `gpuwm-2.7.4-py3-none-manylinux_2_28_x86_64.whl`, SHA-256
-`defe2d64ad97a95f3578c1d5145c4b36ed68f08b00c77218d644cc1a824f3afd`.
+identity was commit `f47f177d4b2e0da95568d70230f5ce9785e632c7`; the 2.7.4,
+2.8.0 and 2.8.9 wheels record no upstream commit anywhere in their metadata,
+and writing one down anyway would be a fabricated provenance claim. What was
+actually hashed is the wheel, so the wheel is what the pin names. The
+superseded pins were `gpuwm-2.7.4-py3-none-manylinux_2_28_x86_64.whl`, SHA-256
+`defe2d64ad97a95f3578c1d5145c4b36ed68f08b00c77218d644cc1a824f3afd`, and
+`gpuwm-2.8.0-py3-none-manylinux_2_28_x86_64.whl`, SHA-256
+`6a8749c8acc8050de25857fb698ed5070fafeac49a002e127dfc664b14ff3577` (the pin
+of GM1 0.1.0).
 
-Runtime admission checks the 17 exact SHA-256 values in `cm1core.engine_pin`
+Runtime admission checks the 21 exact SHA-256 values in `cm1core.engine_pin`
 without importing CuPy or opening a CUDA context. Any missing or changed byte
 returns `CM1-ARWEN-ESTATE-DRIFT`.
 
-Morrison reaches two further files of the same pinned 2.8.0 estate, lazily
+Morrison reaches two further files of the same pinned 2.8.9 estate, lazily
 imported by `gpuwm.core.microphysics.apply` at `mp_physics=10`:
 
 | Path | SHA-256 |
 |---|---|
-| `gpuwm/core/kernels/morrison.cu` | `a563005eb0992bc925d1c80f58d173dad1bfb385824be1bae5f9f90cc6ecb829` |
-| `gpuwm/core/morrison.py` | `e01202401d8a14db6c52206ad56deeafd106a4acf8cc0794e1f68fbe06c49177` |
+| `gpuwm/core/kernels/morrison.cu` | `9d4aad5a012cf2751f3515d96dae48adc1765f65aaa934486e0a025bf8dca229` |
+| `gpuwm/core/morrison.py` | `0902cff1b045ee0101effbf586498be21b31a0c7b965b56cdcbe593bfbf4a8ca` |
 
 `gpuwm/core/morrison_constants.py` was already inside the WSM6 surface because
 `gpuwm/core/microphysics.py` imports it at module scope. The two files above
@@ -47,20 +48,183 @@ not depend on Morrison. A component with no entry in
 `engine_pin.COMPONENT_EXTRA_SURFACE` raises rather than executing unaudited
 bytes.
 
-### What the 2.7.4 to 2.8.0 move did to the executed WSM6 and Morrison surfaces
+### What the 2.8.0 to 2.8.9 move did to the executed WSM6 and Morrison surfaces
 
-The answer is recorded in full in the estate-delta audit for 2.8.0, which
+The answer is recorded in full in the estate-delta audit for 2.8.9, which
 `tools/audit_arwen_wsm6_estate_delta.py` regenerates on any host with no GPU
-from the two published wheels (`--base-root` the extracted 2.7.4 wheel,
-`--admitted-root` the extracted 2.8.0 wheel). The audit record itself is
+from the two published wheels (`--base-root` the extracted 2.8.0 wheel,
+`--admitted-root` the extracted 2.8.9 wheel). The audit record itself is
 project evidence and is not part of the distribution.
+
+**This is the first move in which bytes that decide a WSM6 answer changed,
+and Morrison's kernel was restructured.** The record's
+`verdict.wsm6_answers_can_move` is `true`. The first GPU measurement of 2.8.9
+was made on one RTX 4090 (compute capability 8.9) on 2026-10-11, beside GM1
+0.1.0 on 2.8.0 on the same card: WSM6 gives 0.1.0's words at every output of
+CM1's stock supercell, Morrison does not (below), and the Morrison comparison
+with CM1 r21.1 was re-measured on 2.8.9 (0.985 to 1.050;
+`records/GM1-STOCK-DECK-RATIOS.json`). The same day an RTX 3080 (compute
+capability 8.6) ran CM1's stock supercell with Morrison and with WSM6, the
+1 km supercell preset and a stopped and resumed run, with both engines: every
+saved field of every frame is word-identical to the RTX 4090's, so the
+comparison above holds on that card too. Every other comparison GM1 has made
+against CM1 r21.1 or WRF v4.6.1 was made on 2.8.0 or earlier bytes and is not
+claimed for 2.8.9 until it is repeated on a GPU; the release notes list them.
+
+What changed in the WSM6 kernel, and what the audit can and cannot say:
+
+- `gpuwm/core/kernels/wsm6.cu` writes seven divisions by a constant as
+  `__fdiv_rn(a, b)` instead of `a / b`: the loop count (`delt / 120`), the
+  snow and graupel melting terms (two divisions by `3.5e5`), cloud-water
+  freezing (divisions by `1000` and `3.0e8`) and the two enhanced-melting
+  terms (two divisions by `3.5e5`). It also adds a host definition of the
+  same name. `__fdiv_rn` is the IEEE round-to-nearest quotient.
+- The audit proves the text claim mechanically: writing every
+  `__fdiv_rn(a, b)` in the 2.8.9 kernel back as `a / b` and dropping the host
+  definition reproduces the 2.8.0 kernel token for token
+  (`kernel_text_delta`, `reverting_fdiv_rn_reproduces_base: true`). The two
+  kernels are the same program except for how those seven divisions are
+  spelled.
+- What a compiler does with either spelling is outside the audit. ArWen's
+  release notes say the device compiler replaced a division by a constant
+  with a multiplication by its reciprocal on RTX 50-series cards (compute
+  capability 10.0 and 12.0) and kept the true division on older cards. If
+  that holds, an RTX 30- or 40-series card gives the same WSM6 words on 2.8.9
+  as on 2.8.0, and an RTX 50-series card gives words that differ by up to one
+  unit in the last place at each of the seven sites. GM1 has measured the
+  first on an RTX 4090 and an RTX 3080: on both, every output of CM1's stock
+  supercell with WSM6 is word-identical to 0.1.0's. No RTX 50-series card has
+  run on 2.8.9.
+- `gpuwm/core/kernels/refl.cu` has the same respelling at one site, in the
+  Thompson snow reflectivity line. The WSM6 and Morrison reflectivity kernels
+  are unchanged text.
+- The assembled NVRTC source therefore has a new digest at every tier:
+
+| WSM6 tier | Assembled source SHA-256 on 2.8.9 |
+|---|---|
+| default (`get_kernel`, no define) | `d6798c079bbf2c6343d6d6575be2cd5fd67a128612c401b36e8ebfc3f1c10451` |
+| `WSM6_KMAX` 64 | `94c5f77cd10d49f84fc1f676c565a14c8d81a60b1964367aeb1659e35b1e6323` |
+| `WSM6_KMAX` 80 | `cac5c0d1b0d4bf518d160295248c2c6bf88e45b0d0dc9698645cd10c6260d068` |
+| `WSM6_KMAX` 128 | `abaea9977cb67d6196f7e13d922a034843e7d944c7f2384d0e09bf0c921ccbae` |
+| `WSM6_KMAX` 256 | `16f2277594f11142c46a98612d7c646b26125e20c291a1c482576efc23d06d4d` |
+
+  The WRF v4.6.1 adapter oracle graded the string every earlier pin compiled
+  (`1a6d20da0d450f235227fe609bdb12b368d96aec5ac231752074ff4dd9cc50e6`,
+  `engine_pin.WSM6_ORACLE_GRADED_NVRTC_SOURCE_SHA256`). It has not been re-run
+  on 2.8.9. The oracle runs the kernel on a GPU (its driver,
+  `development-repository:tools/run_arwen_wsm6_oracle.py`, launches it through
+  CuPy and compares the device's columns with the frozen WRF output), so no
+  CPU-only check can repeat it. On 2.8.9 the claim rests on the token-for-token
+  audit above and on the RTX 4090 and RTX 3080 storms, which give 0.1.0's WSM6
+  words at every output; the oracle itself is owed on a GPU.
+
+Fifteen paths of the 21-file 2.8.9 WSM6 surface differ from 2.8.0 (eleven
+changed, four are new to the surface); six are byte-identical
+(`gpuwm/core/constants.py`, `gpuwm/core/kernels/common.cuh`,
+`gpuwm/core/morrison_constants.py`, `gpuwm/core/wsm6.py`,
+`gpuwm/core/wsm6_constants.py` and `gpuwm/kernel_compile_notice.py`):
+
+| Changed path | What changed | Does it reach a WSM6 or Morrison call |
+|---|---|---|
+| `gpuwm/core/kernels/wsm6.cu` | seven constant divisions respelled, as above | yes, on any card where the compiler did not already divide |
+| `gpuwm/core/kernels/refl.cu` | one constant division respelled in the Thompson snow line | not WSM6 or Morrison; Thompson reflectivity only |
+| `gpuwm/core/microphysics.py` | `apply` reads an optional `radar_tten_forcing` from the state and hands the rest to a new `_apply_scheme`, which adds named-scheme admission and an `mp_zero_out` step; `moist_physics_finish` clamps heating at `float32(mp_tend_lim) * float32(dt)`; the specified-zone ring is copied by one kernel; the Thompson adapter is fused | the clamp does: a clamped increment can move by one float32 unit (GM1 passes the default 10 K/s, so only a cell heated at that rate is clamped). The rest does not: GM1's state carries no forcing, `mp_zero_out` defaults to 0, the `mp_physics == 6` and `== 10` dispatch paths are textually identical, and GM1's open or periodic columns have no specified-zone ring |
+| `gpuwm/core/kernels/__init__.py` | compiled modules are cached per device (`cuda_cache`); every kernel source passes through `physics_params.edit_kernel_source`; new compile routes for other modules | the WSM6, Morrison and reflectivity modules still compile through the same route with the same single option; the source edit returns its input unless a parameter set was declared, and GM1 declares none |
+| `gpuwm/core/device_cache.py` | new to the surface: the per-device cache every compiled module and uploaded table now lives in | it holds what the loader built; it changes no source and no array |
+| `gpuwm/physics_params.py` | new to the surface: the kernel-source edit above | identity for GM1 (no parameter set) |
+| `gpuwm/wrf_exact.py` | new to the surface: read while a kernel source is assembled | it adds a header to ArWen's `diagnostics` unit only, and only under an environment switch |
+| `gpuwm/microphysics_schemes.py` | new to the surface: the table of named schemes the dispatch consults | consulted only for an `mp_physics` outside the built-in list |
+| `gpuwm/core/refl.py` | `launch_refl10cm_wsm6` and the Thompson launcher gained a `melting` keyword; the table cache is per device | `compute_refl_10cm` passes `melting=True` for any state that is not ArWen's own MPAS column state and does not set `refl10cm_from_melting`; `consume_refl_10cm` is textually identical and the mp=6 presence check still resolves to `qr`/`qs`/`qg` |
+| `gpuwm/config.py` | `RunConfig` grew from 175 to 431 fields; none dropped; one default changed, `moist_cq` False to True | `moist_cq` is read by ArWen's own dynamical core; no executed microphysics module names it |
+| `gpuwm/core/physics.py` | ArWen's physics driver, for schemes GM1 does not run | the column call the CM1 seam makes goes through `gpuwm.core.microphysics.apply`, not the driver |
+| `gpuwm/core/state.py` | ArWen's own state class gained keywords on two base-state methods | GM1 hands the engine its own state object |
+| `gpuwm/physics_registry.py` | new schemes and rows | read at import for the tables it publishes; the WSM6 row is priced below |
+| `gpuwm/physics_registry_v2.json` | new options; the `wsm6-mp6` object changed (below) | no new refusal reaches the CM1 configuration |
+| `gpuwm/physics_vertical_contract.py` | four new bounds rows (FAST_SBM, UW PBL, TEMPO, original Tiedtke) | `WSM6_VERTICAL_LEVEL_BOUNDS` is still `(2, 80)` |
+
+The `wsm6-mp6` registry object changed
+(`85a0e92dd2f278e9adb27cd55728c3ca6eb26513f45589b88743cf6f54ef9579` to
+`bd0934796e4110ce50a81d13825e72eb888b94e851ca49354f74f06ceea7e982`): its
+restart identity is now
+`wsm6-single-moment-six-class-wrf-v4.6.1-v2-real-clamp-product` (the heating
+clamp above), its recorded `moist_cq` parameter is true, and its forbidden
+settings gained a third `mp28_aerosol_source` value and `use_rap_aero_icbc`.
+Neither forbidden setting is one the CM1 adapter passes or a `RunConfig`
+default.
+
+The delta audit makes fourteen mechanical executed-path checks (the `apply`
+body, the WSM6 dispatch path, the WSM6 launcher module, the reflectivity
+launcher and consumer, the mp=6 species list, the heating finish, the
+`RunConfig` field table, the ring-guard family, the two registry-constraint
+checks and the WSM6 vertical bounds). Ten pass. Four come back false, and the
+audit refuses to write a record unless each false check carries a reviewed
+finding:
+
+| Check | Finding | Reaches a GM1 run |
+|---|---|---|
+| `heating_finish_body_identical` | the float32 heating clamp | yes, for a clamped cell |
+| `public_apply_body_identical` | the optional radar forcing read and the `_apply_scheme` split | no |
+| `runconfig_changed_no_existing_default` | `moist_cq` defaults to True | no |
+| `wsm6_reflectivity_launcher_identical` | the `melting` keyword | no |
+
+`tests/test_engine_pin.py` holds the three "no" rows to GM1's source: it
+fails if any module of `cm1core` names `radar_tten_forcing`,
+`refl10cm_from_melting` or `mp_zero_out`.
+
+For Morrison, `gpuwm/core/morrison_constants.py` is byte-identical and the
+`mp_physics == 10` dispatch path is textually identical, but
+`gpuwm/core/kernels/morrison.cu` and `gpuwm/core/morrison.py` both changed and
+the assembled Morrison NVRTC source moved from
+`9038bbbdfc9f0f03c57ab3c6e81c93618cdee2be9f258bfb2df1a497ac29e3d9` to
+`96bf1249e66ec76fccaf269b55f71f3a078910ef4a9db3ba6596a13d7a5bc536`. The
+changes, read from the two wheels:
+
+- twenty more divisions, most of them by a constant, go through `__fdiv_rn` (24, up from 4; the RTX
+  50-series change described for WSM6);
+- sedimentation runs one warp per hydrometeor category in a 160-thread block:
+  each thread finds its category's largest Courant number, the five are
+  combined with `fmaxf` through shared memory into the shared substep count,
+  and the fall speeds are computed once instead of twice;
+- the finalize kernel returns early for a cell that holds vapour and no
+  hydrometeor at all;
+- `morrison.py` forms theta, the Exner function and the layer depths in one
+  fused kernel, drops the interface-sized scratch volume, and launches
+  sedimentation with the 160-thread block.
+
+Reverting the division spelling does **not** reproduce the 2.8.0 Morrison
+kernel, so the audit records `answers_can_move: true` and makes no claim of
+identity. ArWen's release notes state the restructured kernel gives identical
+output. GM1 measured it on an RTX 4090 on 2026-10-11, and it does not: in the
+250 m supercell preset all 41 fields are word-identical through 1200 s, at
+1500 s one word of the 73,728,000 in a number-concentration array differs by
+one unit in the last place, and by 1800 s the difference has reached the
+dynamics. CM1's stock supercell matches through 900 s and differs from 1800 s.
+An RTX 3080 parts at the same outputs and gives the RTX 4090's words with
+both engines. The comparison with CM1 r21.1 was therefore re-measured on
+2.8.9: the ten mature-phase ratios are 0.985 to 1.050 on both cards (0.986 to
+1.046 on 2.8.0; `records/GM1-STOCK-DECK-RATIOS.json`). The GPU-free dense-ice fall-speed oracle was
+re-run on the 2.8.9 kernel text (the two functions it lifts differ from 2.8.0
+only in division spelling) and its receipt names the 2.8.9 kernel.
+
+The release notes (`docs/RELEASE-NOTES.md`, "Engine update: ArWen (gpuwm)
+2.8.9") give each scheme's revalidation status on 2.8.9 and what was not run.
+
+### History: what the 2.7.4 to 2.8.0 move did to the executed WSM6 and Morrison surfaces
+
+This section records the earlier move, when 2.8.0 superseded 2.7.4 (GM1
+0.1.0). Its audit record is project evidence and is not part of the
+distribution. At that pin the WSM6 surface was 17 files.
+
+The answer was recorded in the estate-delta audit for 2.8.0, generated from
+the two published wheels (the extracted 2.7.4 wheel as base, the extracted
+2.8.0 wheel as admitted).
 
 **Nothing that decides a WSM6 answer moved.** The seven files that carry the
 WSM6 physics (the table below) are byte-identical between 2.7.4 and 2.8.0,
 and so are `gpuwm/core/state.py`, `gpuwm/physics_registry.py` and
 `gpuwm/physics_vertical_contract.py`. The assembled NVRTC source is identical
-at the default tier and at every capacity tier (the digests in the table
-below are the 2.8.0 digests as well). The `wsm6-mp6` registry object is
+at the default tier and at every capacity tier (the digests in the 2.5.8
+table below are the 2.8.0 digests as well). The `wsm6-mp6` registry object is
 byte-identical too (`85a0e92dd2f278e9adb27cd55728c3ca6eb26513f45589b88743cf6f54ef9579`
 in both).
 
@@ -77,11 +241,11 @@ WSM6 executed path:
 | `gpuwm/core/physics.py` | driver-side changes, including a refactor of the WSM6 loop count that computes the same count | the WSM6 column call the CM1 seam makes goes through `gpuwm.core.microphysics.apply`, not the driver |
 | `gpuwm/physics_registry_v2.json` | Morrison's number-species `state_name` fields, other schemes' consumers and warnings, one radiation option removed | the `wsm6-mp6` object is byte-identical |
 
-The delta audit verifies thirteen mechanical executed-path checks (the
+The 2.8.0 delta audit verified thirteen mechanical executed-path checks (the
 `apply` body, the WSM6 dispatch path, the WSM6 launcher module, the
 reflectivity launcher and consumer, the mp=6 species list, the `RunConfig`
 field table, the ring-guard family, the two registry-constraint checks and the
-WSM6 vertical bounds). All thirteen pass, so the record's
+WSM6 vertical bounds). All thirteen passed, so that record's
 `verdict.wsm6_answers_can_move` is `false`.
 
 For Morrison, `gpuwm/core/kernels/morrison.cu`, `gpuwm/core/morrison.py` and
@@ -91,9 +255,8 @@ dispatch path is textually identical. The Morrison registry row changed only
 its `consumers` metadata.
 
 The admission gate, the compile path and the dispatch module did change bytes,
-so the shipped presets (all Morrison) and the WSM6 lane are re-run on a GPU
-before any 2.8.0 result is claimed; the release notes (`docs/RELEASE-NOTES.md`,
-"Engine pin") give each scheme's revalidation status on 2.8.0.
+so the shipped presets (all Morrison) and the WSM6 lane were re-run on an RTX
+4090 on 2.8.0 and gave the same words as on 2.7.4.
 
 ### History: what the 2.5.8 to 2.7.4 move did to the executed WSM6 surface
 
@@ -778,7 +941,7 @@ forecast or tornado simulation.
 
 ## The ArWen estate does not supply nesting
 
-GM1 pins `gpuwm>=2.8.0,<2.8.1` (`engine_pin.GPUWM_REQUIREMENT`) and the
+GM1 pins `gpuwm>=2.8.9,<2.8.10` (`engine_pin.GPUWM_REQUIREMENT`) and the
 byte-admitted surface is the column microphysics, reflectivity, constants and
 registry files only. It contains no `nest.cu`, no `spec_bdy.cu` and no
 lateral-boundary kernel: **the pinned estate supplies no nesting to this port,
@@ -792,7 +955,7 @@ drivers `nest.py`, `nest_interp.py`, `nest_lifecycle.py`, `nest_relocation.py`
 and `nest_spawn.py`) implementing one-way forcing and an experimental
 two-way feedback at odd refinement ratios, measured at 3:1. When this section
 was written the 2.7.4 tree was a staged, unpinned reference; the seam has since
-moved to 2.7.4 and then to 2.8.0 for the column physics, and none of these
+moved to 2.7.4, 2.8.0 and then 2.8.9 for the column physics, and none of these
 nesting files was added to the admitted surface.
 
 GM1's nesting therefore takes **nothing at runtime** from ArWen. It carries its

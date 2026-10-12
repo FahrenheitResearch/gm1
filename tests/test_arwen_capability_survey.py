@@ -22,7 +22,7 @@ SURVEY = ROOT / "src/cm1core/records/ARWEN-CAPABILITY-SURVEY.json"
 RECORD = ROOT / "src/cm1core/records/ARWEN-CAPABILITY-SURVEY.md"
 ESTATE = ROOT / f"tmp/arwen-estate-gpuwm-{engine_pin.GPUWM_MEASURED_VERSION}"
 #: The superseded estate, so the record can say what the bump made NEW.
-BASELINE = ROOT / "tmp" / "arwen-estate-gpuwm-2.7.4"
+BASELINE = ROOT / "tmp" / "arwen-estate-gpuwm-2.8.0"
 
 
 @pytest.fixture(scope="module")
@@ -80,7 +80,7 @@ def test_wsm6_row_agrees_with_the_seam_and_the_capacity_overlay(survey: dict) ->
     option = survey["registry_options"]["microphysics/wsm6-mp6"]
     assert option["selectors"] == {"mp_physics": 6}
     assert option["implemented"] is True
-    # Stock 2.8.0 still caps WSM6 at 80 levels.  That is exactly why the
+    # Stock 2.8.9 still caps WSM6 at 80 levels.  That is exactly why the
     # capacity-256 overlay is not retired, and this assertion is what will
     # fail the day a future ArWen fixes it upstream.
     assert survey["vertical_level_bounds"]["WSM6_VERTICAL_LEVEL_BOUNDS"] == [2, 80]
@@ -110,7 +110,7 @@ def test_survey_regenerates_byte_identically_from_the_pinned_estate() -> None:
     assert _canonical(generate(ESTATE, BASELINE)) == SURVEY.read_bytes()
 
 
-def test_the_record_says_what_2_8_0_made_newly_available(survey: dict) -> None:
+def test_the_record_says_what_2_8_9_made_newly_available(survey: dict) -> None:
     """The half of the record a version bump is actually FOR.
 
     A bump that ships new kernels and says nothing is how a capability sits
@@ -118,36 +118,53 @@ def test_the_record_says_what_2_8_0_made_newly_available(survey: dict) -> None:
     measuring them is worse.  These assertions hold the delta to the bytes.
     """
     delta = survey["newly_available_since_the_superseded_estate"]
-    assert delta["baseline_distribution_version"] == "2.7.4"
+    assert delta["baseline_distribution_version"] == "2.8.0"
 
     units = delta["translation_units"]
     assert units["base_count"] == 94
-    assert units["admitted_count"] == survey["totals"]["translation_units"] == 94
+    assert units["admitted_count"] == survey["totals"]["translation_units"] == 166
     assert units["removed"] == [], "a removed translation unit would strand any lane using it"
-    assert units["added"] == []
+    assert len(units["added"]) == 72
+    added = {row["unit"] for row in units["added"]}
+    assert {"tiedtke", "uwpbl", "fast_sbm", "thompson_column", "lake", "urban_ucm"} <= added
 
-    # The entry points 2.8.0 adds are all Thompson's: classic and aerosol-aware
-    # Thompson's entry zeroing, column exit and presence handling.
+    # Twenty-five existing units changed their entry points.  None of them is a
+    # unit GM1 launches: WSM6, Morrison and the reflectivity unit keep theirs.
     changed = delta["entry_points_changed_in_existing_units"]
-    assert set(changed) == {"thompson", "thompson_aerosol_state"}
-    assert all(row["removed"] == [] for row in changed.values())
-    assert len(changed["thompson"]["added"]) == 10
-    assert len(changed["thompson_aerosol_state"]["added"]) == 2
+    assert len(changed) == 25
+    for unit in ("wsm6", "morrison", "refl"):
+        assert unit not in changed, unit
+    # Three units LOST entry points, which is what strands a caller.
+    assert {unit: row["removed"] for unit, row in changed.items() if row["removed"]} == {
+        "acoustic": ["advance_mu_th_msf", "advance_w_phi_msf"],
+        "gf": ["gf_gfdrv_stage"],
+        "thompson": ["thompson_frozen_vapor_cloud_network"],
+    }
+    assert len(changed["thompson"]["added"]) == 9
 
-    # One option removed, none added; no GM1 component is among them.
-    assert delta["registry_options"]["added"] == []
-    assert delta["registry_options"]["removed"] == ["radiation/rte-rrtmgp-legacy-aggregate"]
-    assert survey["vertical_level_bounds"]["NEW_TIEDTKE_VERTICAL_LEVEL_BOUNDS"] == [4, None]
+    # Eight options added, none removed.
+    assert [row["option"] for row in delta["registry_options"]["added"]] == [
+        "cumulus/tiedtke", "microphysics/fast-sbm-mp30", "microphysics/tempo",
+        "pbl/uw", "urban/bep", "urban/bep-bem", "urban/none", "urban/slucm",
+    ]
+    assert delta["registry_options"]["removed"] == []
 
-    # WSM6's own option row did NOT move in 2.8.0; Morrison's changed only its
-    # consumers.  The delta audit prices the WSM6 surface; this record is only
-    # allowed to agree with it.
+    # The WSM6 and Morrison option rows both moved in 2.8.9.  The delta audit
+    # prices the WSM6 row; this record is only allowed to agree with it.
     fields = delta["registry_options"]["changed_fields"]
-    assert "microphysics/wsm6-mp6" not in fields
-    assert list(fields["microphysics/morrison-mp10"]) == ["consumers"]
+    assert len(fields) == 26
+    assert list(fields["microphysics/wsm6-mp6"]) == [
+        "compatible_previous_forbidden_settings", "constraints", "consumers", "parameters"]
+    assert list(fields["microphysics/morrison-mp10"]) == [
+        "compatible_previous_forbidden_settings", "constraints", "consumers"]
     assert delta["vertical_level_bounds"]["changed"] == {}, (
         "a changed vertical bound silently re-admits or re-refuses a geometry"
     )
+    assert sorted(delta["vertical_level_bounds"]["added"]) == [
+        "FAST_SBM_VERTICAL_LEVEL_BOUNDS", "TEMPO_VERTICAL_LEVEL_BOUNDS",
+        "TIEDTKE_VERTICAL_LEVEL_BOUNDS", "UWPBL_VERTICAL_LEVEL_BOUNDS",
+    ]
+    assert delta["vertical_level_bounds"]["removed"] == []
 
 
 def test_every_kernel_row_answers_what_state_it_needs(survey: dict) -> None:

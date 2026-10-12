@@ -1,4 +1,4 @@
-"""GM1's runtime GPU guard stays exclusive across the gpuwm 2.8.0 move.
+"""GM1's runtime GPU guard stays exclusive since the gpuwm 2.8.0 move.
 
 gpuwm 2.8.0's ``preflight_exclusive_gpu`` no longer raises on a CUDA
 co-tenant; it returns an admission receipt.  These tests stand a fake

@@ -1,5 +1,96 @@
 # gpuwm-cm1 release notes
 
+## 0.1.2
+
+An engine update. GM1 now runs on ArWen 2.8.9 (gpuwm 2.8.9 and gpuwm-data 2.8.9) instead of 2.8.0, for
+correctness. Everything 0.1.1 fixed on Windows is kept, and the GUI, the presets and the commands work as in 0.1.1.
+WSM6 storms give 0.1.0's output word for word; Morrison storms now match CM1 r21.1 at 0.985 to 1.050 of CM1's (0.1.0:
+0.986 to 1.046); Thompson's storm changed with an engine fix and has not yet been compared. Checked on an RTX 4090
+and an RTX 3080, which give the same output as each other.
+
+### Engine update: ArWen (gpuwm) 2.8.9
+
+GM1 now requires ArWen 2.8.9: gpuwm 2.8.9 and gpuwm-data 2.8.9 (`>=2.8.9,<2.8.10`). 0.1.0 and 0.1.1 required
+2.8.0. The move is for correctness: on RTX 50-series cards ArWen 2.8.9 makes the compiler divide where it had been
+multiplying by a reciprocal, and Thompson's rain collecting graupel now reads the table WRF builds instead of
+reading past its end. Before a run, GM1 checks that the installed ArWen files for the selected scheme match the
+SHA-256 digests recorded for gpuwm 2.8.9, and refuses the scheme if they differ.
+
+Measured on an RTX 4090 and an RTX 3080, each run made once with this release and once with GM1 0.1.0 on gpuwm
+2.8.0 on the same card. The two cards give the same output as each other, word for word, with both engines, in
+every run made on both (the 1 km supercell preset, CM1's supercell namelist with Morrison and with WSM6, and a
+stopped and resumed storm), so the WSM6 and Morrison results below hold for both cards:
+
+- **WSM6 (`ptype = 7`)**: CM1's supercell namelist gives GM1 0.1.0's output word for word at every output of its
+  2 hours, on both cards, so WSM6's comparison with CM1 is unchanged from 0.1.0.
+- **Morrison (`ptype = 5`)**: no longer word for word. ArWen rebuilt its Morrison kernel for speed. In the 250 m
+  supercell on the RTX 4090, one number in 74 million first differs, by one unit in the last place, after 25 minutes
+  of storm time, and the storm then grows that difference as it grows any other; both cards part from 0.1.0 at the
+  same output. The storm's mature-phase means stay within 1.4 % of 0.1.0's. Against CM1 r21.1 on CM1's supercell namelist
+  the ten mature-phase statistics are 0.985 to 1.050 of CM1's on an RTX 4090 and an RTX 3080 (re-measured on ArWen
+  2.8.9; 0.1.0 published 0.986 to 1.046). Every statistic stays inside its release band (10 % for the updraft statistics, 15 %
+  for the rest), so the coverage report still says "Same as CM1"; max vertical vorticity, at 1.0503, is just past
+  GM1's 5 % target, and the report's Morrison row now names it. Max w at 900 s and 1800 s (4.100 and 29.273 m/s) and
+  the strongest updraft's column at 5 km (within one cell of CM1's at every 15-minute output) are as in 0.1.0. With
+  ground friction (`cecd = 1`, RTX 4090 only), nine statistics are 0.986 to 1.018 of CM1's and max vertical
+  vorticity is 1.072 (0.1.0: 0.987 to 1.013, and 1.091).
+- **Thompson (`ptype = 3`)**: its storm differs from 0.1.0's, because ArWen corrected a table read (rain collecting
+  graupel). On CM1's supercell namelist on the RTX 4090, over the mature phase, max rain is 8 % higher and the cold
+  pool 4 % smaller; the timing is unchanged. It has not yet been compared with CM1 or WRF on this engine. It still
+  runs only after an acknowledgment, and its output is still unverified.
+- **Speed and memory**: a step takes 1 to 4 % less time on the RTX 4090 and about 3 to 6 % less on the RTX 3080
+  (single runs; the RTX 3080 also drove a desktop, and its two GM1 0.1.0 runs of the same preset differ by 7 %).
+  Peak card memory is unchanged for Morrison and WSM6 on both cards, and about 340 MiB lower for Thompson on the
+  RTX 4090. The first run compiles its kernels about 1 s faster on the RTX 4090.
+- **Restarts**: a storm stopped at 30 minutes and resumed to 2 hours gives the uninterrupted storm's frames word
+  for word after the resume, as in 0.1.0, on both cards. Finish a storm with the GM1 version that started it.
+
+| Scheme | Pinned to gpuwm 2.8.9 bytes | GPU revalidation on 2.8.9 (RTX 4090 and RTX 3080) |
+|---|---|---|
+| Morrison (`ptype = 5`) | yes | re-measured: 0.985 to 1.050 of CM1 r21.1 on its supercell namelist, the same on both cards. Output differs from 0.1.0's in the last place from about 25 minutes of storm time. |
+| WSM6 (`ptype = 7`) | yes, including the 256-level capacity tier | passed on both cards: CM1's supercell namelist gives 0.1.0's output word for word for 2 hours. The 256-level capacity tier was not run on 2.8.9. |
+| Thompson (`ptype = 3`) | yes | RTX 4090 only: runs and stays finite for 2 hours; its storm differs from 0.1.0's (the corrected table read). Not compared with CM1 or WRF on this engine. |
+| WDM6, aerosol-aware Thompson | yes | none planned; not offered. |
+| YSU, MYNN, RRTMG, New Tiedtke | yes | none planned; no GM1 run couples them. |
+
+The tables under "0.1.0" below are 0.1.0's own measurements, on gpuwm 2.8.0 or earlier. For this release the
+Morrison numbers above replace 0.1.0's, WSM6's stand, and the speed tables were measured on an earlier ArWen.
+
+**Not run on ArWen 2.8.9.** These stand as measured on 2.8.0 or earlier, or not at all:
+
+- **RTX 50-series cards.** An RTX 4090 and an RTX 3080 have run on 2.8.9; no RTX 50-series card has. On RTX
+  50-series cards ArWen's notes expect WSM6 and Morrison output to differ in the last place from the other two
+  cards' (the division fix above), so GM1's comparison with CM1 on those cards is unmeasured.
+- **On the RTX 3080:** Thompson, ground friction and the 250 m supercell preset (it needs about 16 GB; the card
+  has 10 GB). These were run on the RTX 4090 only.
+- **The 256-level capacity profile.** A 237-level column with the profile was admitted on 2.8.0; the admission run
+  has not been repeated on 2.8.9, and the profile's memory and register measurements were taken on the 2.8.0
+  kernel.
+- **WSM6's column check against WRF v4.6.1.** It graded the kernel text of gpuwm 2.8.0 and earlier. The 2.8.9
+  text differs only in how seven divisions by a constant are written; the check runs on a GPU and has not been
+  repeated.
+- **Thompson's 120-s column against WRF v4.6.1**, and any Thompson storm against CM1.
+- **The GUI** with a stop and a continue; **the nine dynamics cases** held against CM1; **every preset to its first
+  picture**; **the famous-storm and `iinit = 12` runs**; **the low-level path's refusal of a card another
+  program holds**; **WSM6 on a tiled grid** and **Morrison at 512 x 512 x 75** for speed.
+- **The `iinit` comparisons** in `docs/CM1-USERS.md` and **the speed tables** were measured before the move to
+  2.8.9.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"). It moves gpuwm and gpuwm-data to 2.8.9 along with GM1. With pip: `pip install --upgrade
+gpuwm-cm1`, which does the same. Close GM1 and let a running storm finish first; the installer stops with a message
+while one runs. Your storms stay where they are. A storm started with an earlier GM1 cannot be continued by 0.1.2.
+
+### Known limitations
+
+- `gpuwm-cm1 doctor --science` still quotes the 0.1.0 measurements; the release notes give the 2.8.9 ones.
+- No RTX 50-series card has run GM1 on ArWen 2.8.9, and Thompson's storm has not been compared with CM1 or WRF on
+  this engine ("Not run on ArWen 2.8.9", above).
+- The known limitations of 0.1.1 and 0.1.0 still apply ("Known limitations" under "0.1.1", and "Known
+  limitations", "Not in v0.1" and "Further known limits" under "0.1.0", below).
+
 ## 0.1.1
 
 A release of fixes for Windows. The model, the engine pin (gpuwm 2.8.0 and gpuwm-data 2.8.0) and every number in

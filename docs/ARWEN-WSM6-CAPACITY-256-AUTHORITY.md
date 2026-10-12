@@ -6,10 +6,40 @@ ArWen checkout or the preserved audited overlay.
 
 The profile is `gm1.arwen-wsm6-column-capacity-256/v1`. Its base is the byte-
 audited ArWen estate named by `cm1core.engine_pin.GPUWM_AUDITED_SOURCE_IDENTITY`.
-The existing default admission, 80-level ceiling, 17-file source pins and
+The existing default admission, 80-level ceiling, 21-file source pins and
 canonical component metadata remain unchanged. Selecting the new profile
 requires its exact modified source bytes; a base tree cannot satisfy the
 extended profile, and an extended tree cannot satisfy default admission.
+
+## Rebased on ArWen 2.8.9
+
+**The profile is not retired, because 2.8.9 does not fix the defect it
+exists for either.** `gpuwm/core/wsm6_constants.py` is byte-identical between
+2.8.0 and 2.8.9, so stock 2.8.9 still compiles `WSM6_DEEP_KMAX = 80`, and
+`gpuwm/physics_vertical_contract.py` still declares
+`WSM6_VERTICAL_LEVEL_BOUNDS = (2, 80)`. All four patch anchors occur exactly
+once in the 2.8.9 tree.
+
+Two things did change, and both are recorded in the table below:
+
+- `gpuwm/physics_vertical_contract.py` gained four rows (FAST_SBM, UW PBL,
+  TEMPO and the original Tiedtke scheme), so both its baseline digest and its
+  capacity-build digest moved. None of those rows is WSM6's.
+- The kernel the tiers compile is 2.8.9's `wsm6.cu`, in which seven divisions
+  by a constant are written `__fdiv_rn(a, b)` (`CM1-ARWEN-SEAM.md`). The
+  assembled WSM6 NVRTC source therefore has a new digest at every tier:
+  `WSM6_KMAX=128` is
+  `abaea9977cb67d6196f7e13d922a034843e7d944c7f2384d0e09bf0c921ccbae` and
+  `WSM6_KMAX=256` is
+  `16f2277594f11142c46a98612d7c646b26125e20c291a1c482576efc23d06d4d`.
+  The offline frame and register measurements below were taken against the
+  2.8.0 strings. They have not been repeated on the 2.8.9 strings, and the
+  237-level admission run has not been repeated either.
+
+The base the profile names moves too: its `base_source_identity` and
+`base_version` now name the 2.8.9 wheel, and the unchanged part of the surface
+is the 2.8.9 digests plus the four files that joined the surface. The
+canonical profile document, and so its SHA-256, moves with them.
 
 ## Rebased on ArWen 2.8.0
 
@@ -76,17 +106,21 @@ selection function body remain byte/AST unchanged.
 admission agree with the kernel launcher. The WSM6 registry entry contains no
 independent vertical ceiling and remains unchanged.
 
-| File | Baseline SHA-256 (2.7.4 and 2.8.0) | Capacity-build SHA-256 | Moved from 2.5.8 |
+| File | Baseline SHA-256 (2.8.9) | Capacity-build SHA-256 | Moved from 2.8.0 |
 |---|---|---|---|
-| `gpuwm/core/wsm6_constants.py` | `4d110ed7f5a792f48d925fd0ff8e974305d870a11ebb31437ff4e6fce6d3c62d` | `a1bf764f2a7553bdb148524463ada69e26c855482c7db76cbc2f6374ac08aa2a` | no, both identical |
-| `gpuwm/physics_vertical_contract.py` | `e18e7756b77be3170de1f34f49dbf7e489afb78995be072d251d1b36b5aeb1d4` | `3fcf990ed68c09a3b594e2ee35393f2992a2b73ec97c0f6fafbdfa9f7aa72a8c` | yes, both |
+| `gpuwm/core/wsm6_constants.py` | `4d110ed7f5a792f48d925fd0ff8e974305d870a11ebb31437ff4e6fce6d3c62d` | `a1bf764f2a7553bdb148524463ada69e26c855482c7db76cbc2f6374ac08aa2a` | no, both identical since 2.5.8 |
+| `gpuwm/physics_vertical_contract.py` | `c5cfb5210ddd6efc2ca55b6214d56e70b5e3e28427f5bd07e9ce777289f18ff1` | `ec10320c5a7053994cd3ec6733f2b8c78ff1d4c62af7122ed0c90d911d8fe58c` | yes, both |
+
+The superseded 2.7.4 and 2.8.0 pair for `gpuwm/physics_vertical_contract.py` was baseline
+`e18e7756b77be3170de1f34f49dbf7e489afb78995be072d251d1b36b5aeb1d4` and capacity-build
+`3fcf990ed68c09a3b594e2ee35393f2992a2b73ec97c0f6fafbdfa9f7aa72a8c`.
 
 The superseded 2.5.8 pair was baseline
 `866c9a70e886e72b4a8d88435a9c62279de25a64eb25e66f4fccd361a8f84fb4` and
 capacity-build `602e28a4264a7acdcec58d4486932775af9babfb34c031bdc303f47284ad8038`
 for `gpuwm/physics_vertical_contract.py`. Nothing admits against those any more.
 
-The other 15 source pins remain exact, including the WSM6 CUDA source,
+The other 19 source pins remain exact, including the WSM6 CUDA source,
 thermodynamic constants, public microphysics dispatch, WSM6 launcher,
 reflectivity source, state and registry. No vertical partitioning, extra
 sedimentation boundary, numerical approximation, coefficient substitution or
@@ -101,7 +135,7 @@ one thread. Grids with at most 64 or 80 levels select their original tiers.
 ## Reproducible build and source admission
 
 `cm1core.engine_capacity.build_wsm6_capacity_overlay(source_root, destination)`
-verifies all 17 baseline source pins, copies the package and its pinned
+verifies all 21 baseline source pins, copies the package and its pinned
 version metadata into a fresh directory, applies the closed two-file delta, verifies
 the result, and atomically publishes the directory. It excludes stale Python
 bytecode, refuses existing destinations, and records both complete file-
@@ -110,15 +144,15 @@ manifest hashes. It never writes the source tree.
 The CPU-only command is:
 
 ```text
-python3 tools/build_arwen_wsm6_capacity_overlay.py --source-root tmp/arwen-estate-gpuwm-2.8.0 --destination work/arwen-wsm6-capacity-256-v3/overlay
+python3 tools/build_arwen_wsm6_capacity_overlay.py --source-root tmp/arwen-estate-gpuwm-2.8.9 --destination work/arwen-wsm6-capacity-256-v4/overlay
 ```
 
-`work/arwen-wsm6-capacity-256-v3/overlay` is the tree built on the 2.8.0
+`work/arwen-wsm6-capacity-256-v4/overlay` is the tree built on the 2.8.9
 base, and its `gm1-wsm6-capacity-overlay.json` receipt records `base_version`
-2.8.0, `gpu_used: false`, `runtime_monkeypatch: false`,
+2.8.9, `gpu_used: false`, `runtime_monkeypatch: false`,
 `source_tree_modified: false` and exactly the two changed files. The
-superseded `...-v2` tree (2.7.4 base) and `...-v1` tree (2.5.8 base) admit
-nothing now.
+superseded `...-v3` tree (2.8.0 base), `...-v2` tree (2.7.4 base) and
+`...-v1` tree (2.5.8 base) admit nothing now.
 
 Start a fresh process with that overlay on `PYTHONPATH`, ahead of any other
 ArWen installation. Pass `capacity_profile=WSM6_256_CAPACITY_PROFILE` to the

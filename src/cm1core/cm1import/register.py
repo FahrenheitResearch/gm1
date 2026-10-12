@@ -118,8 +118,10 @@ def microphysics_rows(builder: "_Builder", component: str) -> list[Row]:
             value=builder.written("ptype"),
             text=(
                 "ArWen's Thompson (mp_physics = 8), not CM1's thompson.F. It has run only a 120-s "
-                "column; no storm has been compared with CM1 ptype = 3. The run waits until you "
-                "acknowledge this"
+                "column, on an earlier ArWen; no storm has been compared with CM1 ptype = 3. ArWen "
+                "2.8.9 corrected a table read in Thompson (rain collecting graupel), so a Thompson storm "
+                "differs from GM1 0.1.0's, and it has not been compared with CM1 or WRF on this engine. "
+                "The run waits until you acknowledge this"
             ),
             code="CM1-IMPORT-THOMPSON",
             fix="import again with --acknowledge-thompson, or tick 'Run with Thompson' on Check",
@@ -153,23 +155,32 @@ def microphysics_rows(builder: "_Builder", component: str) -> list[Row]:
             stage="register",
         ))
         return rows
-    same = scheme["all_inside_target"]
+    # The category follows the release bands (the record's gate). The 5 % target is printed, not a gate: a
+    # statistic past it is named in the row and in the plain sentence.
+    same = scheme["all_inside_band"]
+    past_target = [row for row in scheme["rows"] if not row["inside_target"]]
+    worst = max(abs(row["ratio"] - 1.0) for row in scheme["rows"]) * 100.0
     rows.append(Row(
         category="same" if same else "differs",
         keys=("ptype",),
         value=builder.written("ptype"),
         text=(
             "ArWen's WRF-lineage Morrison, not CM1's morrison.F. On CM1's stock supercell, GM1/CM1 "
-            f"mature-phase ratios are {low:.2f}-{high:.2f} (CM1 against itself: {twin_low:.2f}-"
-            f"{twin_high:.2f})"
-            + ("" if same else "; outside the 5 % target on at least one statistic")
+            f"mature-phase ratios are {low:.3f}-{high:.3f} (CM1 against itself: {twin_low:.3f}-"
+            f"{twin_high:.3f})"
+            + ("" if same else "; outside the release band on at least one statistic")
+            + ("" if not past_target else "; past the 5 % target: " + ", ".join(
+                f"{row['label']} {row['ratio']:.4f}" for row in past_target))
         ),
         evidence="records/GM1-STOCK-DECK-RATIOS.json",
         expand="ratios",
         stage="register",
         family="physics",
-        plain=("Rain and hail: Morrison. On CM1's own storm it matches CM1 within 5 % (measured)." if same else
-               "Rain and hail: Morrison. On CM1's own storm it differs from CM1 by more than 5 % on at least one measure (measured)."),
+        plain=("Rain and hail: Morrison. On CM1's own storm it differs from CM1 by more than its release band on "
+               "at least one measure (measured)." if not same else
+               "Rain and hail: Morrison. On CM1's own storm it matches CM1 within 5 % (measured)." if not past_target else
+               f"Rain and hail: Morrison. On CM1's own storm it matches CM1 within {int(worst * 10.0 + 0.999) / 10.0:.1f} % "
+               "(measured)."),
     ))
     return rows
 

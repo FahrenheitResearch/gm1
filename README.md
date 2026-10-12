@@ -90,15 +90,18 @@ after an acknowledgment. What is refused and why is in the release notes.
 
 ## How close to CM1 (measured)
 
-CM1 r21.1's own supercell namelist (1 km, 2 h, Morrison), GM1 against CM1 r21.1 built from the release tarball:
+CM1 r21.1's own supercell namelist (1 km, 2 h, Morrison), GM1 on ArWen 2.8.9 on an RTX 4090 and an RTX 3080 (the
+two cards give the same output word for word) against CM1 r21.1 built from the release tarball:
 
 | | GM1 | CM1 r21.1 |
 |---|---|---|
-| Ten mature-phase statistics (3600-7200 s means) | 0.986-1.046 of CM1's | CM1 with a 0.0001 K nudge against CM1: 0.984-1.003 |
+| Ten mature-phase statistics (3600-7200 s means) | 0.985 to 1.050 of CM1's on an RTX 4090 and an RTX 3080 (re-measured on ArWen 2.8.9) | CM1 with a 0.0001 K nudge against CM1: 0.984-1.003 |
 | Maximum updraft at 900 s / 1800 s | 4.100 / 29.273 m/s | 4.102 / 29.348 m/s |
 | Column of the strongest updraft at 5 km | within one grid cell of CM1's at every 15-min output | |
 
-That is one deck. Every other deck's coverage report says what has and has not been checked against CM1.
+That is one deck, on two cards that give the same numbers. Max vertical vorticity (1.0503) is just past GM1's 5 %
+target; every statistic is inside its release band (10 % for the updraft statistics, 15 % for the rest). No RTX
+50-series card has run this comparison on ArWen 2.8.9. Every other deck's coverage report says what has and has not been checked against CM1.
 
 ## Speed on the same case (measured)
 
@@ -109,7 +112,8 @@ That is one deck. Every other deck's coverage report says what has and has not b
 | 100 m case, 128 × 128 × 80 stretched, 900 s | RTX 3080: 138.2 s | 12 threads: 1,558.8 s | 11.3× |
 
 CM1 ran on a Core Ultra 7 270K Plus, gfortran -O2, OpenMP; the
-GM1 times are before a later latent-heating fix, which added about 7% per step. Speed is not the point at 1 km;
+GM1 times are before a later latent-heating fix, which added about 7% per step, and on an earlier ArWen (a step on ArWen 2.8.9 takes
+1 to 4 % less time than on GM1 0.1.0's ArWen 2.8.0 on an RTX 4090, and about 3 to 6 % less on an RTX 3080). Speed is not the point at 1 km;
 it is at 250 m and finer. No comparison with CM1 on a cluster is made.
 
 ## Design commitments
@@ -126,13 +130,14 @@ it is at 250 m and finer. No comparison with CM1 on a cluster is made.
 ## Known limitations
 
 The release notes list them in full ([`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTES.md), "Known limitations"). In
-short: some guided presets are greyed with their measured reason (the squall lines, and in 0.1.1 the 100 m
+short: some guided presets are greyed with their measured reason (the squall lines, and for now the 100 m
 supercell, which stops early on a domain-position check); `gpuwm-cm1 run` and the GUI do not check whether another
 program is already using the GPU, so run on a card with enough free memory; the first run on a machine compiles GPU
 kernels (about 10 s) without a notice; surface drag runs with `cecd = 1` only; NSSL and other unported microphysics
 schemes are refused by name; 21 of CM1's 23 shipped namelists are refused (the supercell and squall line run); job
 scripts for Slurm and PBS have not yet run on a real cluster; and the GPU path has been tested on RTX-class cards
-only.
+only. On ArWen 2.8.9, GM1 has run on an RTX 4090 and an RTX 3080 (no RTX 50-series card), and Thompson's
+storm, which changed with the engine's corrected table read, has not been compared with CM1.
 
 ## Citing
 
