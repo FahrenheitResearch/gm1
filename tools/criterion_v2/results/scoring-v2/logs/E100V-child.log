@@ -1,0 +1,13 @@
+$ nice -n 19 ionice -c3 /usr/bin/python3 CHECKOUT/tools/criterion_v2/score.py RUNS/E100V/frames/nest-child --out runs/E100V-child --label E100V-child --workers 1 --kind child --nest-start-s 4200 --parent-dx 100
+{
+ "outcome": "INSUFFICIENT_CADENCE",
+ "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+ "reason": "qualifying vortices were present in consecutive samples for 840 s, but between samples the centre moved more than the two core radii in the storm-following frame: the output interval cannot show that one vortex persisted",
+ "samples": 15,
+ "median_interval_s": 60.0,
+ "longest_qualifying_run_s": 60.0,
+ "class_counts": {
+  "U": 4,
+  "Q": 11
+ }
+}

@@ -1,12 +1,14 @@
 """The guides are doc-tested.
 
-1. Every command block of docs/QUICKSTART.md and docs/CM1-USERS.md runs, in order, on CM1's stock supercell
-   namelist (tools/release/doc_commands.py --mode fake: the real host commands, the GUI's fake runner for the GPU
+1. Every command block of docs/QUICKSTART.md, docs/CM1-USERS.md and docs/GM1-DECKS.md runs, in order, on CM1's
+   stock supercell namelist (tools/release/doc_commands.py --mode fake: the real host commands, the GUI's fake runner for the GPU
    work, the WSL2 RTX 3080 fixture as nvidia-smi); and `gpuwm-cm1 preset fit` runs for every preset and budget on
    fake-GPU fixtures. The release is checked with the same guides in --mode real on the RTX 3080.
 2. No sentence claims cluster-core equivalence.
 3. docs/QUICKSTART.md passes guided mode's copy lint, and docs/COMMANDS.md lists every command the API table can
    return (it is generated from that table).
+4. docs/GM1-DECKS.md: its GPU blocks name only options the commands have, its table has a row for every example
+   deck, and the README's "Beyond the GUI" commands exist.
 """
 
 from __future__ import annotations
@@ -29,8 +31,10 @@ ROOT = Path(__file__).resolve().parents[1]
 QUICKSTART = ROOT / "docs" / "QUICKSTART.md"
 CM1_USERS = ROOT / "docs" / "CM1-USERS.md"
 COMMANDS = ROOT / "docs" / "COMMANDS.md"
-RELEASE_DOCS = (QUICKSTART, CM1_USERS, COMMANDS, ROOT / "docs" / "INSTALL.md", ROOT / "docs" / "RELEASE-NOTES.md",
-                ROOT / "docs" / "TROUBLESHOOTING.md", ROOT / "README.md")
+DECKS = ROOT / "docs" / "GM1-DECKS.md"
+README = ROOT / "README.md"
+RELEASE_DOCS = (QUICKSTART, CM1_USERS, COMMANDS, DECKS, ROOT / "docs" / "INSTALL.md",
+                ROOT / "docs" / "RELEASE-NOTES.md", ROOT / "docs" / "TROUBLESHOOTING.md", README)
 DOC_COMMANDS = runpy.run_path(str(ROOT / "tools" / "release" / "doc_commands.py"))
 GPUINFO = ROOT / "tests" / "data" / "gpuinfo"
 
@@ -48,12 +52,17 @@ needs_parser = pytest.mark.skipif(not _parser_available(),
 
 
 @needs_parser
-@pytest.mark.parametrize("guide", [QUICKSTART, CM1_USERS], ids=lambda path: path.name)
+@pytest.mark.parametrize("guide", [QUICKSTART, CM1_USERS, DECKS], ids=lambda path: path.name)
 def test_every_command_block_runs_in_order(guide: Path, tmp_path: Path) -> None:
     record = DOC_COMMANDS["run_guide"](guide, tmp_path / guide.stem, "fake", timeout_s=600)
     assert record["passed"], "\n".join(record["problems"])
     ran = [row for row in record["commands"] if "command" in row]
     assert len(ran) >= (6 if guide == QUICKSTART else 20)
+    if guide == DECKS:
+        # The GPU blocks are not run here; every one of their lines was checked against the commands' --help.
+        checked = [row for row in record["commands"] if "checked" in row]
+        assert len(checked) >= 6 and not any(row["unknown_options"] for row in checked)
+        assert any("--integrate" in row["checked"] for row in checked)
     kinds = {block["kind"] for block in record["blocks"]}
     assert kinds <= set(DOC_COMMANDS["KINDS"])
 
@@ -161,6 +170,44 @@ def test_install_lines_name_this_version_and_the_release_files() -> None:
     # (it makes an MP4 film).
     assert '"$WHEEL[film]" -c "$CONSTRAINTS"' in smoke
     assert 'pip install "gpuwm-cm1[film]"' in (ROOT / "docs" / "QUICKSTART.md").read_text(encoding="utf-8")
+
+
+def test_a_gpu_block_is_checked_against_the_commands_help_without_a_gpu(tmp_path: Path) -> None:
+    guide = tmp_path / "g.md"
+    guide.write_text("```sh gpu\ngpuwm-cm1 cartesian d.toml --integrate --output r.json --history-dir f\n"
+                     "gpuwm-cm1 cartesian d.toml --integrate --output r.json --no-such-option\n"
+                     "gpuwm-cm1 nosuchcommand x\ntouch control/stop\n```\n", encoding="utf-8")
+    record = DOC_COMMANDS["run_guide"](guide, tmp_path / "work", "fake", timeout_s=120)
+    rows = [row for row in record["commands"] if "checked" in row]
+    assert [row["unknown_options"] for row in rows] == [[], ["--no-such-option"], ["no command `gpuwm-cm1 nosuchcommand`"], []]
+    assert len(record["problems"]) == 2 and not record["passed"]
+    assert not (tmp_path / "work" / "r.json").exists()  # nothing was run
+
+
+def test_the_decks_page_has_a_row_for_every_example_deck() -> None:
+    text = DECKS.read_text(encoding="utf-8")
+    rows = set(re.findall(r"^\| `([a-z0-9-]+)` \|", text, re.M))
+    decks = {path.stem for path in (ROOT / "examples").glob("*.toml")}
+    assert rows == decks, (sorted(decks - rows), sorted(rows - decks))
+    # The page says how many `gpuwm-cm1 examples` lists and how many the repository holds.
+    unshipped = DOC_COMMANDS["unshipped_examples"]()
+    assert f"`gpuwm-cm1 examples` lists {len(decks) - len(unshipped)} decks" in text
+    assert f"all {len(decks)} example decks" in (ROOT / "docs" / "RELEASE-NOTES.md").read_text(encoding="utf-8")
+    # The decks the page's own commands use are shipped ones.
+    for name in re.findall(r"decks/([a-z0-9-]+)\.toml", text):
+        assert name in decks, name
+
+
+def test_the_readme_names_the_deck_door_and_only_commands_that_exist() -> None:
+    from cm1core.cli import build_parser
+
+    text = README.read_text(encoding="utf-8")
+    for needle in ("## What GM1 has done", "## Beyond the GUI", "docs/GM1-DECKS.md", "gpuwm-cm1 examples",
+                   "gpuwm-cm1 cartesian", "gpuwm-cm1 chain", "gpuwm-cm1 reproduce", "gpuwm-cm1 doctor --report"):
+        assert needle in text, needle
+    help_text = build_parser().format_help()
+    for command in set(re.findall(r"`gpuwm-cm1 ([a-z0-9]+)", text + DECKS.read_text(encoding="utf-8"))):
+        assert re.search(rf"^\s+{command}\s", help_text, re.M), command
 
 
 def test_the_doc_runner_reads_blocks_and_lines() -> None:

@@ -141,7 +141,9 @@ the result, and atomically publishes the directory. It excludes stale Python
 bytecode, refuses existing destinations, and records both complete file-
 manifest hashes. It never writes the source tree.
 
-The CPU-only command is:
+The builder is a development tool: it is not in the public repository or the
+wheel, so an installed GM1 cannot build the overlay yet. In the development
+repository the CPU-only command is:
 
 ```text
 python3 tools/build_arwen_wsm6_capacity_overlay.py --source-root tmp/arwen-estate-gpuwm-2.8.9 --destination work/arwen-wsm6-capacity-256-v4/overlay

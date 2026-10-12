@@ -1,0 +1,159 @@
+{
+ "receipt": {
+  "child": {
+   "dx_m": 4.0,
+   "dy_m": 4.0,
+   "nx": 500,
+   "ny": 500,
+   "nz": 103,
+   "spec_zone": 1,
+   "relax_zone": 4,
+   "u_move_m_s": 16.5,
+   "v_move_m_s": 16.5
+  },
+  "window": {
+   "nx": 227,
+   "ny": 227,
+   "nz": 45
+  },
+  "record_bytes": 137575536
+ },
+ "zh_first": [
+  -2.0,
+  2.0,
+  6.0,
+  10.0,
+  14.0
+ ],
+ "segments": [
+  {
+   "k": 0,
+   "stream": "RUN/S3/frames/nest-child-window",
+   "rows": 12160,
+   "t": [
+    2160.09375,
+    3300.0
+   ],
+   "index_offset": 0
+  },
+  {
+   "k": 1,
+   "stream": "RUN/S3/L0-window-tail-3300.09375-3452.4375",
+   "rows": 1626,
+   "t": [
+    3300.09375,
+    3452.4375
+   ],
+   "index_offset": 12160
+  }
+ ],
+ "reference_check": {
+  "reference": "RUN/admit-scratch/nestdt-checks-kept/chk-a-ctl",
+  "fields_agree": true,
+  "records_at_shared_times": 32,
+  "records_byte_identical": 32
+ },
+ "sha_checks": [
+  {
+   "segment": 0,
+   "index": "0",
+   "model_time_s": 2160.09375,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "1737",
+   "model_time_s": 2322.9375,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "3474",
+   "model_time_s": 2485.78125,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "5211",
+   "model_time_s": 2648.625,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "6948",
+   "model_time_s": 2811.46875,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "8685",
+   "model_time_s": 2974.3125,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "10422",
+   "model_time_s": 3137.15625,
+   "ok": true
+  },
+  {
+   "segment": 0,
+   "index": "12159",
+   "model_time_s": 3300.0,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "0",
+   "model_time_s": 3300.09375,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "232",
+   "model_time_s": 3321.84375,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "464",
+   "model_time_s": 3343.59375,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "696",
+   "model_time_s": 3365.34375,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "929",
+   "model_time_s": 3387.1875,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "1161",
+   "model_time_s": 3408.9375,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "1393",
+   "model_time_s": 3430.6875,
+   "ok": true
+  },
+  {
+   "segment": 1,
+   "index": "1625",
+   "model_time_s": 3452.4375,
+   "ok": true
+  }
+ ],
+ "spans": {
+  "E100R2-PF-4m-window": 13786,
+  "E100R2-PF-4m-window-pre3312": 12287,
+  "E100R2-PF-4m-window-3312on": 1499
+ }
+}

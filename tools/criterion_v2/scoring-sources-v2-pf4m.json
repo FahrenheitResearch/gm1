@@ -1,0 +1,72 @@
+{
+ "schema": "gm1.criterion-v2-scoring-sources/v1",
+ "about": "E100R2-PF-4m (POST-HOC run, not in the pre-registered table): idealized supercell in the 24 May 2011 El Reno environment, post latent-heating fix, 4 m moving nest spawned at 2160 s from a 100 m parent, vortex-following 227x227x45 window every 0.09375 s. The window stream has no receipt (leg L0 ended with rc=2 at 3452.8 s) and is split over two arenas (L0's stream up to 3300.0 s and L0's kept tail 3300.09375-3452.4375 s), so it is read through tools/criterion_v2/window_segments.py; the child frames are read by score.py directly. Clean records end at 3452.4375 s (records 13786-13789 were the CFL runaway and are deleted). Never S3/frames-L1 (leg L1, stopped).",
+ "roots": {
+  "run": "RUN",
+  "s3": "RUN/S3"
+ },
+ "window_segments": {
+  "deck": "s3:deck.toml",
+  "reference_stream": "run:admit-scratch/nestdt-checks-kept/chk-a-ctl",
+  "reference_note": "check (a) of the nest-dt audit: the unchanged S3 deck and frozen tree resumed from restart 12 (3300 s); its receipt is a real schema-v3 receipt of this geometry, and its 32 records (3300.09375-3303.0 s) are byte-identical to L0's tail (STATUS.md 2026-09-24).",
+  "nest_start_s": 2160.0,
+  "nest_start_source": "S3/deck.toml [run] rstnum = 8 (P-chain restart 8, t = 2160 s); S3/run.log 'resumed 5760 completed large steps (t=2160.0s)'",
+  "parent_dx_m": 100.0,
+  "clean_t_max": 3452.4375,
+  "segments": [
+   {"stream": "s3:frames/nest-child-window", "t_max": 3300.0, "index_offset": 0},
+   {"stream": "s3:L0-window-tail-3300.09375-3452.4375", "t_min": 3300.09375,
+    "index_offset_from": "README.json", "index_offset_key": "l0_index_first"}
+  ],
+  "spans": [
+   {"label": "E100R2-PF-4m-window", "t_min": null, "t_max": 3452.4375,
+    "why": "the whole clean L0 window, 2160.09375-3452.4375 s"},
+   {"label": "E100R2-PF-4m-window-pre3312", "t_min": null, "t_max": 3312.0, "t_max_exclusive": true,
+    "why": "before 3312.0 s (T+55:12), the first time CM1's Courant number (calccflquick, misclibs.F:2726-2814) exceeded 1 in L0's window records (STATUS.md 2026-09-24T11:10Z courant-correction); the headline span"},
+   {"label": "E100R2-PF-4m-window-3312on", "t_min": 3312.0, "t_max": 3452.4375,
+    "why": "3312.0-3452.4375 s: Courant number above 1 at times from 3312 s and most of the time from 3405 s (peak 1.28 at 3426 s); leg L0 failed at 3453 s"}
+  ]
+ },
+ "headline": {
+  "source": "E100R2-PF-4m-window-pre3312",
+  "why": "the window span before 3312.0 s (T+55:12), where CM1's Courant number stayed at or below 1; after it the numerics were running away (leg L0 failed at T+57:33), so the later span is reported but is not the run's headline"
+ },
+ "v1_from": "E100R2-PF-4m-child",
+ "sources": [
+  {
+   "label": "E100R2-PF-4m-window-pre3312",
+   "run": "E100R2-PF-4m",
+   "kind": "window",
+   "path": "runs:views/E100R2-PF-4m-window-pre3312/seg-0",
+   "grid": "4 m",
+   "note": "0.09375 s window stream before 3312.0 s (Courant number <= 1), via window_segments.py; post-hoc run"
+  },
+  {
+   "label": "E100R2-PF-4m-window-3312on",
+   "run": "E100R2-PF-4m",
+   "kind": "window",
+   "path": "runs:views/E100R2-PF-4m-window-3312on/seg-1",
+   "grid": "4 m",
+   "note": "0.09375 s window stream 3312.0-3452.4375 s (Courant number above 1 at times, peak 1.28), via window_segments.py"
+  },
+  {
+   "label": "E100R2-PF-4m-window",
+   "run": "E100R2-PF-4m",
+   "kind": "window",
+   "path": "runs:views/E100R2-PF-4m-window/seg-0",
+   "grid": "4 m",
+   "note": "the whole clean 0.09375 s window stream 2160.09375-3452.4375 s, via window_segments.py"
+  },
+  {
+   "label": "E100R2-PF-4m-child",
+   "run": "E100R2-PF-4m",
+   "kind": "child",
+   "path": "s3:frames/nest-child",
+   "grid": "4 m",
+   "nest_start_s": 2160.0,
+   "spawn_source": "S3/deck.toml [run] rstnum = 8 (t = 2160 s); S3/run.log resumed t=2160.0s",
+   "parent_deck": "s3:deck.toml",
+   "note": "120 s full 4 m nest frames 2280-3360 s (the 3360 s frame is inside the Courant > 1 span)"
+  }
+ ]
+}

@@ -694,6 +694,7 @@ def inspect_sdist(path: Path, checks: list[dict[str, object]]) -> dict[str, obje
         f"{root}/docs/QUICKSTART.md",
         f"{root}/docs/CM1-USERS.md",
         f"{root}/docs/COMMANDS.md",
+        f"{root}/docs/GM1-DECKS.md",
         f"{root}/docs/INSTALL.md",
         f"{root}/docs/TROUBLESHOOTING.md",
         f"{root}/constraints/gpu-cu13-validated.txt",

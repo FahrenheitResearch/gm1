@@ -1,0 +1,30 @@
+{
+ "label": "E100V-window",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "python3",
+  "code/tools/criterion_v2/score.py",
+  "RUNS/E100V/frames/nest-child-window",
+  "--out",
+  "runs/E100V-window",
+  "--label",
+  "E100V window (0.5 s, T+76-82)",
+  "--nest-start-s",
+  "4200",
+  "--parent-dx",
+  "100",
+  "--workers",
+  "1"
+ ],
+ "wall_s": 382.47753286361694,
+ "launched": "directly, before score_runs.py existed; the same arguments score_runs.py gives this source (kind inferred as window)",
+ "nest_start_s": 4200.0,
+ "parent_dx_m": 100.0,
+ "nest_start_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+ "parent_dx_source": "RUNS/E100V.toml [grid] dx_m"
+}

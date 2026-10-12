@@ -1,0 +1,121 @@
+{
+ "schema": "gm1.tornado-criterion/v2",
+ "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+ "outcome": "UNRESOLVED",
+ "reason": "horizontal grid spacing 200 m exceeds 25 m",
+ "caption": "grid too coarse to judge (GM1 criterion v2)",
+ "genesis_model_time_s": null,
+ "episodes": [],
+ "longest_qualifying_run_s": 0.0,
+ "longest_qualifying_or_unresolved_run_s": 0.0,
+ "longest_qualifying_run_plausible_links_s": 0.0,
+ "reported_60s_rule": {
+  "longest_s": 0.0,
+  "would_be_tornado": false
+ },
+ "samples": 20,
+ "record_start_s": 300.0,
+ "record_end_s": 6000.0,
+ "median_interval_s": 300.0,
+ "max_interval_s": 300.0,
+ "grid": {
+  "dx_m": 200.0,
+  "dy_m": 200.0,
+  "lowest_scalar_level_m": 10.0,
+  "resolved_rmw_min_m": 800.0,
+  "notes": []
+ },
+ "class_counts": {
+  "N": 20
+ },
+ "condition_counts": {
+  "E": 20,
+  "R": 0,
+  "C": 14,
+  "A": 4,
+  "Z": 0,
+  "W": 0,
+  "S": 6
+ },
+ "marginal_counts": {
+  "R": 0,
+  "Z": 0,
+  "W": 0
+ },
+ "flag_counts": {
+  "broad": 6,
+  "rmw-at-inner-radius": 10
+ },
+ "label": "T-screen",
+ "source": {
+  "kind": "parent",
+  "path": "RUNS/T/frames",
+  "samples_read": 20,
+  "first_index": 1,
+  "last_index": 20,
+  "every": 1,
+  "start_s": null,
+  "end_s": null,
+  "deck": "RUNS/T-screen.toml",
+  "dx_override": null
+ },
+ "cadence_statement": "judged from parent output at a median 300 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed",
+ "criterion_v2": {
+  "height_agl_m": 10.0,
+  "max_lowest_scalar_level_m": 10.0,
+  "max_grid_spacing_m": 25.0,
+  "resolved_rmw_over_dx": 4.0,
+  "profile_inner_radius_over_dx": 2.0,
+  "discretisation_uncertainty_dx_over_rmw": 0.5,
+  "nest_spinup_s": 300.0,
+  "first_guess_box_half_width_m": 100.0,
+  "first_guess_pool": 64,
+  "first_guess_candidates": 16,
+  "first_guess_separation_m": 200.0,
+  "centre_search_steps_m": [
+   64.0,
+   32.0,
+   16.0,
+   8.0,
+   4.0,
+   2.0,
+   1.0
+  ],
+  "centre_search_moves_per_step": 64,
+  "search_profile_dr_max_m": 4.0,
+  "search_profile_dr_over_dx": 1.0,
+  "search_profile_azimuths": 96,
+  "edge_margin_m": 300.0,
+  "profile_dr_max_m": 2.0,
+  "profile_dr_over_dx": 0.5,
+  "profile_azimuths": 360,
+  "profile_max_radius_m": 1000.0,
+  "mean_tangential_wind_min_m_s": 20.0,
+  "closure_fraction": 0.9,
+  "closure_radius_over_rmw": 3.0,
+  "wavenumber2_max_fraction": 0.5,
+  "mean_core_vorticity_min_s_inv": 0.1,
+  "hazard_radius_over_rmw": 1.5,
+  "ground_relative_wind_min_m_s": 35.0,
+  "ground_relative_wind_reported_m_s": 29.0,
+  "reported_fixed_disk_radius_m": 300.0,
+  "centre_speed_max_m_s": 60.0,
+  "centre_jump_allowance_m": 100.0,
+  "identity_move_max_over_rmw_sum": 1.0,
+  "bridge_gap_s": 3.0,
+  "sustain_s": 120.0,
+  "sustain_reported_s": 60.0,
+  "max_sample_interval_s": 60.0,
+  "clock_tolerance_s": 1e-06
+ },
+ "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+ "scorer_sha256": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+ "files_sha256": {
+  "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+  "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+ },
+ "matches_frozen": true,
+ "protocol_conforming": true,
+ "nest_spinup": null,
+ "wall_s": 72.85339140892029
+}

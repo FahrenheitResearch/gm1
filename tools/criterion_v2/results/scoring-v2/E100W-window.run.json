@@ -1,0 +1,31 @@
+{
+ "label": "E100W-window",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E100W/frames/nest-child-window",
+  "--out",
+  "out/E100W-window",
+  "--label",
+  "E100W-window",
+  "--workers",
+  "1",
+  "--kind",
+  "window",
+  "--nest-start-s",
+  "4200",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 1807.507807970047,
+ "nest_start_source": "as E100W-child",
+ "parent_dx_source": "manifest parent_dx_m",
+ "nest_start_s": 4200.0,
+ "parent_dx_m": 100.0
+}

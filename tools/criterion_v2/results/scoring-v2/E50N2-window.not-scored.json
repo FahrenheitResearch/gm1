@@ -1,0 +1,10 @@
+{
+ "label": "E50N2-window",
+ "run": "E50N2 (2 m)",
+ "kind": "window",
+ "path": "RUNS-2M/E50N2/frames/nest-child-window",
+ "status": "not scored",
+ "reason": "RUNS-2M/E50N2/frames/nest-child-window does not exist on this node",
+ "note": "2 m window stream, 180-720 s",
+ "checked_utc": "2026-09-22T19:43:53Z"
+}

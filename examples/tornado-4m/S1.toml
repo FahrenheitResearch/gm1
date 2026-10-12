@@ -1,0 +1,124 @@
+# Stage 1 of 3: the 100 m parent storm of the 4 m tornado run, run alone.
+# Read README.md in this folder first. docs/NESTING.md explains every step.
+#
+# A 64 x 76.8 km domain at 100 m with 80 levels (20 m layers below 200 m, top at 17.6 km),
+# started from one warm bubble. It writes a frame and a restart every 5 minutes, so a later
+# stage can continue from any of them and add a nest. There is no nest in this deck.
+#
+# THE SOUNDING. isnd = 7 reads the file passed with --sounding. The original run used an
+# inflow sounding for the 24 May 2011 El Reno, Oklahoma storm. That file is not distributed
+# (README.md gives its sha256 and its format). The moving frame and the bubble position
+# below belong to that sounding. With any other profile the run-geometry check refuses the
+# deck by name (CM1-CARTESIAN-RUN-GEOMETRY) and prints the frame and the bubble to use
+# instead. norman/S1.toml is this deck fitted to a sounding that GM1 ships.
+#
+# AS RUN: one RTX 5090 (32 GB), a build that predates GM1 0.1.0, 0 to 6600 s in 9518 s of
+# wall time (0.534 s per step), peak device memory 18,482 MiB.
+[run]
+irst = 0                    # a fresh start
+lane = "cartesian"
+duration_s = 6600.0
+dt_s = 0.375
+history_interval_s = 300.0
+restart_interval_s = 300.0
+restart_reset_frqtim = true
+
+[initialization]
+isnd = 7                    # the profile is the file passed with --sounding
+iwnd = 0
+irandp = 0
+iinit = 1                   # one warm bubble
+bubble_center_x_m = 44000.0
+bubble_center_y_m = 31250.0
+zc_m = 1500.0
+bvrad_m = 1500.0
+bhrad_m = 10000.0
+bptpert_k = 4.0
+maintain_rh = true
+
+[grid]
+nx = 640
+ny = 768
+nz = 80
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1               # 20 m layers below 200 m, stretching to 340 m above 7.4 km
+ztop_m = 17600.0
+str_bot_m = 200.0
+str_top_m = 7400.0
+dz_bot_m = 20.0
+dz_top_m = 340.0
+
+[dynamics]
+coriolis = 1
+fcor_s_inv = 8.47e-5        # 2 Omega sin(35.5 N)
+lspgrad = 1                 # Coriolis acts on the departure from the base-state wind only
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2                    # open on all four sides
+east = 2
+south = 2
+north = 2
+bottom = 3                  # semi-slip ground
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1               # TKE
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.005              # drag coefficient referenced to 10 m; roughness length 0.035 m
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 3000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true         # the grid travels with the storm
+u_move_m_s = 16.5
+v_move_m_s = 16.5
+
+[physics]
+component = "morrison-mp10"
+ihail = 1                   # hail, as CM1's own supercell case
+ndcnst = 250.0
+equation_set = 2
+output_dbz = false
+
+[diagnostics]
+output_uh = 1
+output_vort = 0             # refused on a stretched column (CM1-OUTPUT-STRETCHED-METRIC)
+output_pv = 0
+output_sws = 1              # swaths: strongest surface wind, vorticity and pressure fall
+output_svs = 1
+output_sps = 1
+output_srs = 0
+output_sgs = 0
+output_sus = 0
+output_shs = 0
+tornado_report = true
+
+[runtime]
+tile_nx = 128
+tile_ny = 128
+acoustic_substeps = 6
+warmup_steps = 0
+memory_budget_mib = 22000
+capacity_profile = "default"
+
+[lagrangian]
+iprcl = 0                   # no parcels carried during the run

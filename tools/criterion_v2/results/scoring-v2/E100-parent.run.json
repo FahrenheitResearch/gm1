@@ -1,0 +1,25 @@
+{
+ "label": "E100-parent",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E100/frames",
+  "--out",
+  "runs/E100-parent",
+  "--label",
+  "E100-parent",
+  "--workers",
+  "1",
+  "--kind",
+  "parent",
+  "--deck",
+  "RUNS/E100.toml"
+ ],
+ "wall_s": 79.51841330528259
+}

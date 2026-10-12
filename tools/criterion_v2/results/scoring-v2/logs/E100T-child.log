@@ -1,0 +1,12 @@
+$ nice -n 19 ionice -c3 /usr/bin/python3 CHECKOUT/tools/criterion_v2/score.py RUNS/E100T/frames/nest-child --out runs/E100T-child --label E100T-child --workers 1 --kind child --nest-start-s 4200 --parent-dx 100
+{
+ "outcome": "INSUFFICIENT_CADENCE",
+ "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+ "reason": "1 sample(s) spanning 0 s with intervals [] s: no stretch of the record at <= 60 s spacing lasts 120 s",
+ "samples": 1,
+ "median_interval_s": NaN,
+ "longest_qualifying_run_s": 0.0,
+ "class_counts": {
+  "U": 1
+ }
+}

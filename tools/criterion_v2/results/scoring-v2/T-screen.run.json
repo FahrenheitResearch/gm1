@@ -1,0 +1,25 @@
+{
+ "label": "T-screen",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/T/frames",
+  "--out",
+  "runs/T-screen",
+  "--label",
+  "T-screen",
+  "--workers",
+  "1",
+  "--kind",
+  "parent",
+  "--deck",
+  "RUNS/T-screen.toml"
+ ],
+ "wall_s": 72.96778512001038
+}

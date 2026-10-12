@@ -1,0 +1,88 @@
+{
+ "records": 13786,
+ "t_first": 2160.09375,
+ "t_last": 3452.4375,
+ "strictly_increasing": true,
+ "cadence_unique": [
+  0.09375
+ ],
+ "l0_index_contiguous": true,
+ "l0_index_range": [
+  0,
+  13785
+ ],
+ "after_clean": 0,
+ "t_equals_2160_plus_k_cadence": true,
+ "spans": {
+  "pre3312 (t<3312)": 12287,
+  "3312on (3312<=t<=3452.4375)": 1499,
+  "whole": 13786
+ },
+ "last_pre3312": 3311.90625,
+ "first_3312on": 3312.0,
+ "i0_j0": [
+  [
+   137
+  ],
+  [
+   137
+  ]
+ ],
+ "origin_jumps": 79,
+ "origin_jump_sizes_m": [
+  [
+   -100.0,
+   -100.0
+  ],
+  [
+   -100.0,
+   0.0
+  ],
+  [
+   0.0,
+   -100.0
+  ],
+  [
+   100.0,
+   -100.0
+  ],
+  [
+   100.0,
+   0.0
+  ]
+ ],
+ "centre_minus_origin": [
+  [
+   452.0,
+   452.0
+  ]
+ ],
+ "held_or_clamped": 0,
+ "view_E100R2-PF-4m-window-pre3312": {
+  "records": 12287,
+  "t": [
+   2160.09375,
+   3311.90625
+  ],
+  "identical_to_L0_trajectory_rows": 12287,
+  "max_t": 3311.90625
+ },
+ "view_E100R2-PF-4m-window-3312on": {
+  "records": 1499,
+  "t": [
+   3312.0,
+   3452.4375
+  ],
+  "identical_to_L0_trajectory_rows": 1499,
+  "max_t": 3452.4375
+ },
+ "view_E100R2-PF-4m-window": {
+  "records": 13786,
+  "t": [
+   2160.09375,
+   3452.4375
+  ],
+  "identical_to_L0_trajectory_rows": 13786,
+  "max_t": 3452.4375
+ }
+}

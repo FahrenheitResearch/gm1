@@ -17,7 +17,7 @@ before the release, and with a stand-in for the GPU in the CPU test suite.
 | `stretch_x`, `stretch_y` | Refused (every horizontal operator assumes uniform spacing); v0.2. |
 | `ptype = 5` (Morrison) | ArWen's WRF-lineage Morrison, not CM1's `morrison.F`. Matches CM1 on its supercell namelist within 5.1 % (below); the report names the one statistic past GM1's 5 % target. |
 | `ptype = 7` (WSM6) | Runs with `eqtset = 2`; CM1 forces `eqtset = 1` for WSM6, so the report says "Runs differently". |
-| `ptype = 3` (Thompson) | Runs after `--acknowledge-thompson`: checked only in a 120-s column, on an earlier ArWen. ArWen 2.8.9 corrected a table read in Thompson, so its storm differs from GM1 0.1.0's; it has not been compared with CM1 on this engine. |
+| `ptype = 3` (Thompson) | Runs after `--acknowledge-thompson`, with `nt_c = 100.0` (GM1's Thompson always runs that droplet concentration; CM1's own file has 250, which is refused with that fix line): checked only in a 120-s column, on an earlier ArWen. ArWen 2.8.9 corrected a table read in Thompson, so its storm differs from GM1 0.1.0's; it has not been compared with CM1 on this engine. |
 | Other `ptype` (NSSL, P3, Kessler, ...) | Refused by name. |
 | `iinit` 0, 1, 2, 3, 5, 7, 8, 11, 13 (bubbles, cold pool, tropical-cyclone vortex, line thermal, the gravity-wave and near-surface waves) | Runs as CM1 does; the initial state is CM1's word for word. The vortex needs `iorigin = 2` and `ibalance = 0`, as CM1's own arm does. The bubble, cold pool, line thermal and parcel seed box CM1 sets in Fortran are settings (`gpuwm-cm1 edit --setting`). The random noise of `iinit = 8` and `irandp = 1` is CM1's own, number for number (the same random numbers gfortran's `random_number` gives CM1); import with `--seed N` for GM1's stream and another realization. |
 | `iinit` 12 (updraft nudging), 9 (forced convergence), 10 (momentum forcing) | Runs as CM1 does: the push is applied where CM1 applies it (inside the acoustic steps for 12 and 9, in the held wind tendency for 10), with CM1's own strength, size and timing from `init3d.F`, which are settings here (`initialization.xc_wnudge`, `wmax_wnudge`, `t2_wnudge`, ...). As in CM1, a restart turns the push off. Checked against CM1 r21.1 on its supercell namelist ("The initiation options", below). |
@@ -126,6 +126,13 @@ convention), `zc_m`, `bhrad_m`, `bvrad_m` and `bptpert_k` (bubble and line therm
 `random_line_amplitude_k` and `maintain_rh`; `lagrangian.seed_nx`, `seed_ny`, `seed_nz`, `seed_dx_m`, `seed_dy_m` and
 `seed_dz_m` (the parcel seed box); `output.also_netcdf`; and `gpu.memory_budget_mib`. They start at CM1's own values
 (`init3d.F`), and the GUI's Settings screen shows each beside CM1's name; `--reset-setting` puts one back.
+
+Two of these decide whether a storm forms at all on a real sounding. With `initialization.maintain_rh=true` the
+warm bubble keeps the sounding's relative humidity as it is warmed (CM1's `maintain_rh` in `init3d.F`); with CM1's
+default, false, its relative humidity falls as it is warmed, and on some soundings it never reaches free convection. And
+where a bubble fails either way, CM1's updraft nudging (`iinit = 12`) starts the storm with a sustained push, which
+is how the famous-day presets start theirs. Finer grids, stretched levels and nests are in
+[`GM1-DECKS.md`](GM1-DECKS.md).
 
 ## Check it fits
 

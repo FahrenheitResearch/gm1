@@ -1,0 +1,31 @@
+{
+ "label": "E100N-child",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E100N/frames/nest-child",
+  "--out",
+  "runs/E100N-child",
+  "--label",
+  "E100N-child",
+  "--workers",
+  "1",
+  "--kind",
+  "child",
+  "--nest-start-s",
+  "3600",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 119.11207842826843,
+ "nest_start_source": "RUNS/E100N/receipt.json restart.resumed_model_time_s",
+ "parent_dx_source": "RUNS/E100N.toml [grid] dx_m",
+ "nest_start_s": 3600.0,
+ "parent_dx_m": 100.0
+}

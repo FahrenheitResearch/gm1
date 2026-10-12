@@ -1,0 +1,31 @@
+{
+ "label": "E100R2-PF-4m-child",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUN/S3/frames/nest-child",
+  "--out",
+  "SCORING/E100R2-PF-4m-child",
+  "--label",
+  "E100R2-PF-4m-child",
+  "--workers",
+  "1",
+  "--kind",
+  "child",
+  "--nest-start-s",
+  "2160",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 17.93782353401184,
+ "nest_start_source": "S3/deck.toml [run] rstnum = 8 (t = 2160 s); S3/run.log resumed t=2160.0s",
+ "parent_dx_source": "RUN/S3/deck.toml [grid] dx_m",
+ "nest_start_s": 2160.0,
+ "parent_dx_m": 100.0
+}

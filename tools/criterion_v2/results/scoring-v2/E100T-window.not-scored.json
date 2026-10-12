@@ -1,0 +1,10 @@
+{
+ "label": "E100T-window",
+ "run": "E100T",
+ "kind": "window",
+ "path": "RUNS/E100T/frames/nest-child-window",
+ "status": "not scored",
+ "reason": "RUNS/E100T/frames/nest-child-window: no window-stream.json (the stream has no receipt: empty or unfinished)",
+ "note": "E100T's window stream",
+ "checked_utc": "2026-09-22T19:40:13Z"
+}

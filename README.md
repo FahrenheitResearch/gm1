@@ -8,6 +8,83 @@ storm and an advanced mode with every setting.
 **Status: alpha** (`Development Status :: 3 - Alpha`). Read [`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTES.md) before
 drawing a scientific conclusion from anything it produces.
 
+## What GM1 has done
+
+Each line names the file in this repository that backs it.
+
+- **A tornado on a 4 m grid, on one graphics card.** An idealized supercell on a 100 m grid, with a 4 m two-way
+  nest that follows the storm (500 x 500 x 103 cells, lowest level 2 m), on one RTX 5090 using about 28 GB. A
+  criterion fixed before the run was scored rates it TORNADO: one vortex tracked for 455 s from T+47:36.9, peak 10 m
+  ground-relative wind about 128 m/s (129.0 m/s in the last record before the time step limit was passed), median
+  radius of maximum wind 128 m. Read these with it: it is one run, made on a development build that predates the 0.1.0 release, and
+  scored after the fact; after 3312 s the nest's time step was too long for its winds, and the run stopped at
+  3452.8 s, so nothing after 3312 s is cited; CM1 has no nesting, so there is no CM1 run to compare it with; and
+  the headline (its genesis time, the 455 s, the 129.0 m/s record) cannot yet be re-derived from the public datasets
+  by someone outside the project. What can be: the public one-record-a-second dataset, scored, gives TORNADO for the
+  last 161 s before the limit, and the verdicts page says how to check that.
+  [`docs/NESTING.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/NESTING.md),
+  [`examples/tornado-4m/`](https://github.com/FahrenheitResearch/gm1/blob/main/examples/tornado-4m),
+  [`docs/GM1-TORNADO-VERDICTS-V2.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/GM1-TORNADO-VERDICTS-V2.md).
+- **The same criterion says no when the grid cannot show it.** Earlier 20 m nests reached 117 to 121 m/s near the
+  ground; the criterion rates them "grid too coarse to judge" or "saved too rarely to judge", not tornadoes. An
+  earlier 4 m run, listed before any run was scored, rates TORNADO (360 s, 111.7 m/s). The same verdicts page.
+- **CM1's own supercell, within a few per cent of CM1.** Ten mature-storm statistics at 0.985 to 1.050 of CM1
+  r21.1's on an RTX 4090 and an RTX 3080, where CM1 against a copy of itself gives 0.984 to 1.003. "How close to CM1", below.
+- **2.7 to 11.3 times faster than CM1 on a desktop CPU**, with an RTX 3080: the gap grows as the grid gets finer.
+  "Speed on the same case", below.
+- **A 39 million cell storm on one card.** 640 x 768 x 80 cells at 100 m (64 x 77 km) on an RTX 5090, the largest
+  single domain run so far. `src/cm1core/records/GM1-GPU-RATES.json`.
+- **Real weather, downscaled.** A 1 km box inside an ArWen run of the 25 December 2025 atmospheric river off
+  California: 2 h in 87 s on an RTX 3080, with `gpuwm-cm1 chain`. WRF histories are read too. One flat box over
+  the ocean; not compared with observations. [`docs/WRF-DOWNSCALING.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/WRF-DOWNSCALING.md).
+- **Stop a run and continue it without changing a bit.** A paused and resumed run equals the uninterrupted one in
+  all 37 fields it carries (RTX 3080). [`docs/RELEASE-NOTES.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/RELEASE-NOTES.md), "Running CM1
+  namelists".
+- **Nine famous days.** Nine NOAA balloon soundings each made a storm at 1 km on an RTX 3080 in 80 to 158 s. Two
+  were also run in CM1, which makes the same storms. The release notes, "Starting a storm".
+
+## Beyond the GUI
+
+The GUI is the easy way in. The decks, `gpuwm-cm1 chain` and `gpuwm-cm1 reproduce` are in the package you already
+installed, one command away. The nesting examples, a few small tools and the tornado scorer are in this repository:
+clone it beside your install. Much of this has not been compared with CM1; each page says what was checked. Push it, and when something breaks, paste
+`gpuwm-cm1 doctor --report` into an issue with the command you ran.
+
+- **GM1's own decks.** A deck is a TOML file that reaches everything the engine has. `gpuwm-cm1 examples` lists the
+  39 that ship and `gpuwm-cm1 examples --copy decks` copies them. `gpuwm-cm1 check DECK` reads one strictly,
+  `gpuwm-cm1 cartesian DECK --plan --output plan.json` admits and prices it without opening the GPU, and
+  `gpuwm-cm1 cartesian DECK --integrate --output receipt.json --history-dir frames --restart-dir restarts` runs
+  it. [`docs/GM1-DECKS.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/GM1-DECKS.md) walks through a first deck, lists every example deck with its
+  memory and the card it fits, and has recipes for a 100 m storm, 20 m layers near the ground, the near-ground
+  physics of the tornado runs, a squall line and the moving domain.
+- **Nesting.** A fine grid inside a coarser one, on the same card, following the storm.
+  [`docs/NESTING.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/NESTING.md) and the decks of the 4 m run in
+  [`examples/tornado-4m/`](https://github.com/FahrenheitResearch/gm1/blob/main/examples/tornado-4m). The start of
+  the small example (a 100 m parent, then a 20 m child that moves) has run on GM1 0.1.0 on an RTX
+  4090 (installed by pip), in 16.4 GiB. That run was too short to have a vortex for the child to follow.
+- **A finer box inside a WRF or ArWen run.** `gpuwm-cm1 chain inspect|check|new`, then `gpuwm-cm1 run`.
+  [`docs/WRF-DOWNSCALING.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/WRF-DOWNSCALING.md).
+- **A run someone else can repeat.** `gpuwm-cm1 reproduce RUNDIR` writes the namelist, sounding, deck, receipts
+  and versions of a run, with the commands that run it again, as one folder and a `.tar.gz`.
+- **The 4 m run's data.** Four public datasets (CC-BY-4.0, CM1-format netCDF) of the run named E100R2-PF-4m:
+  [the whole nest every 120 s, 2280 to 3360 s](https://huggingface.co/datasets/deepguess/GM1-E100R2-PF-4m-full-nest) (10 files, 6.8 GB),
+  [ten chosen records](https://huggingface.co/datasets/deepguess/GM1-E100R2-PF-4m-top10-frames) (0.8 GB),
+  [the last five minutes, one record a second](https://huggingface.co/datasets/deepguess/GM1-E100R2-PF-4m-last-5min-every-1s) (24 GB) and
+  [the last two minutes, every record](https://huggingface.co/datasets/deepguess/GM1-E100R2-PF-4m-last-2min-every-record) (1307 files, 104 GB).
+  Three of the four cover the last minutes, after the time step limit was passed at 3312 s: all ten chosen
+  records, all of the last two minutes and 139 of the 301 records of the last five. Their largest winds carry that error and are not
+  the numbers quoted above. Nine of the ten whole-nest files are from before it.
+
+```python
+# pip install huggingface_hub xarray netCDF4
+from huggingface_hub import hf_hub_download
+import xarray as xr
+
+path = hf_hub_download("deepguess/GM1-E100R2-PF-4m-full-nest", "cm1out_000028.nc", repo_type="dataset")
+ds = xr.open_dataset(path)  # the whole 4 m nest at 3240 s (T+54:00), 729 MB, before the limit was passed
+print(ds["sws"].attrs["long_name"], float(ds["sws"].max()), ds["sws"].attrs["units"])
+```
+
 ## Start here
 
 | | |
@@ -17,6 +94,10 @@ drawing a scientific conclusion from anything it produces.
 | [`docs/INSTALL.md`](docs/INSTALL.md) | Requirements, the installers, pip or uv, updating and uninstalling, building the wheel |
 | [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) | Something does not work: the common problems, each with its fix, and how to ask for help |
 | [`docs/COMMANDS.md`](docs/COMMANDS.md) | Every command the GUI's "Show command" can print |
+| [`docs/GM1-DECKS.md`](docs/GM1-DECKS.md) | Beyond the GUI: GM1's own decks, the example decks and what each needs, recipes for finer grids |
+| [`docs/NESTING.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/NESTING.md) | A fine grid inside a coarser one, and the 4 m tornado run |
+| [`docs/GM1-TORNADO-VERDICTS-V2.md`](https://github.com/FahrenheitResearch/gm1/blob/main/docs/GM1-TORNADO-VERDICTS-V2.md) | Which runs rate as tornadoes, by which rule, and what you can check yourself |
+| [`docs/WRF-DOWNSCALING.md`](docs/WRF-DOWNSCALING.md) | A sounding or a finer 3D box from a WRF or ArWen run |
 
 ## Install
 
@@ -79,14 +160,19 @@ uninstalling, the exact tested versions (`constraints-gpu-cu13.txt`), uv, cluste
   descriptors, following the namelist's `output_format` and `output_filetype`, plus `cm1out_stats` and
   `cm1out_pdata`.
 - **Estimate** GPU memory, host memory, disk and wall time against what this computer has free, before a run.
+- **Downscale** a WRF or ArWen run: `chain` makes a finer flat GM1 domain driven on its four sides by the saved
+  history, and `sounding from-wrf` makes a CM1 `input_sounding` from one of its columns.
+- **Reproduce**: `reproduce` writes a run's inputs, receipts, versions and commands as one bundle.
 - **The GUI** (`gpuwm-cm1 gui`, on 127.0.0.1 with a token): guided presets fitted to your GPU and a time budget,
   each one adjustable in guided mode ("Customize this storm": grid spacing, levels, area, storm time, picture
   interval, the air, the starting push, random bumps, Earth's rotation, air parcels; `preset ... --custom KNOB=VALUE`
   from a terminal) with the estimate updating as you change it, the live view and results on four quick-looks; or, in advanced mode, the namelist editor, the coverage report, every
   setting, the estimator's numbers, resume and job scripts, with "Show command" beside every action.
 
-Uniform grids from 100 m to 2 km; Morrison (`ptype = 5`) and WSM6 (`ptype = 7`) microphysics, Thompson (`ptype = 3`)
-after an acknowledgment. What is refused and why is in the release notes.
+Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode offers 250 m to 2 km), and
+through GM1's own decks also stretched near-ground levels and storm-following nests ("Beyond the GUI", above); Morrison (`ptype = 5`) and WSM6 (`ptype = 7`)
+microphysics, Thompson (`ptype = 3`) after an acknowledgment (CM1's own file also needs `nt_c = 100.0` for it). What
+is refused and why is in the release notes.
 
 ## How close to CM1 (measured)
 
@@ -133,7 +219,7 @@ The release notes list them in full ([`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTE
 short: some guided presets are greyed with their measured reason (the squall lines, and for now the 100 m
 supercell, which stops early on a domain-position check); `gpuwm-cm1 run` and the GUI do not check whether another
 program is already using the GPU, so run on a card with enough free memory; the first run on a machine compiles GPU
-kernels (about 10 s) without a notice; surface drag runs with `cecd = 1` only; NSSL and other unported microphysics
+kernels (about 10 s) without a notice; an imported namelist's surface drag runs with `cecd = 1` only; NSSL and other unported microphysics
 schemes are refused by name; 21 of CM1's 23 shipped namelists are refused (the supercell and squall line run); job
 scripts for Slurm and PBS have not yet run on a real cluster; and the GPU path has been tested on RTX-class cards
 only. On ArWen 2.8.9, GM1 has run on an RTX 4090 and an RTX 3080 (no RTX 50-series card), and Thompson's

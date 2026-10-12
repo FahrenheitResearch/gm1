@@ -1,0 +1,31 @@
+{
+ "label": "E100V-child",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E100V/frames/nest-child",
+  "--out",
+  "runs/E100V-child",
+  "--label",
+  "E100V-child",
+  "--workers",
+  "1",
+  "--kind",
+  "child",
+  "--nest-start-s",
+  "4200",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 27.814088582992554,
+ "nest_start_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+ "parent_dx_source": "RUNS/E100V.toml [grid] dx_m",
+ "nest_start_s": 4200.0,
+ "parent_dx_m": 100.0
+}

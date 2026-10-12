@@ -1,4 +1,4 @@
-# Installing gpuwm-cm1 0.1.2
+# Installing gpuwm-cm1 0.1.3
 
 This is an alpha release. Read `docs/RELEASE-NOTES.md` for what it runs, how closely it
 matches CM1 and what it does not do yet. The first storm is in `docs/QUICKSTART.md`; CM1 users with their own
@@ -56,7 +56,7 @@ It checks the computer (x86-64, glibc, the NVIDIA driver), installs [uv](https:/
 (`uv tool install`, never the system's Python), with the exact versions of the release's `constraints-gpu-cu13.txt`
 when it can download them (it says so when it cannot), adds the film add-on for MP4 films, puts `~/.local/bin` on
 `PATH` for new terminals, and runs `gpuwm-cm1 doctor --plain`. Nothing needs sudo. Open a new terminal afterwards, so
-it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.2` (a given release),
+it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.3` (a given release),
 `GM1_WHEEL=FILE.whl` (a wheel file), `GM1_FIND_LINKS=FOLDER`, `GM1_CONSTRAINTS=FILE`, `GM1_REINSTALL=1` (repairs a
 damaged install), `GM1_NO_MODIFY_PATH=1` and `GM1_SKIP_DOCTOR=1`.
 
@@ -91,7 +91,7 @@ user-space versions every GM1 check ran with (CuPy 14.2.0, NVRTC 13.3.33 and the
 `constraints-gpu-cu13.txt` from the GitHub release and pass it:
 
 ```sh install
-pip install "gpuwm-cm1==0.1.2" -c constraints-gpu-cu13.txt
+pip install "gpuwm-cm1==0.1.3" -c constraints-gpu-cu13.txt
 ```
 
 The Linux installer does this by itself.
@@ -103,7 +103,7 @@ The Linux installer does this by itself.
 ```sh install
 uv venv -p 3.12 ~/gm1
 . ~/gm1/bin/activate
-uv pip install "gpuwm-cm1==0.1.2" -c constraints-gpu-cu13.txt
+uv pip install "gpuwm-cm1==0.1.3" -c constraints-gpu-cu13.txt
 gpuwm-cm1 doctor --plain
 ```
 
@@ -116,7 +116,7 @@ then install the wheel file. Each file you downloaded must say OK:
 
 ```sh install
 sha256sum -c --ignore-missing SHA256SUMS
-pip install "./gpuwm_cm1-0.1.2-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
+pip install "./gpuwm_cm1-0.1.3-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
 ```
 
 ## Check the computer and start

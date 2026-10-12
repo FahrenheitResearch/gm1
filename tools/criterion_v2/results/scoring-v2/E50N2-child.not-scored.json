@@ -1,0 +1,10 @@
+{
+ "label": "E50N2-child",
+ "run": "E50N2 (2 m)",
+ "kind": "child",
+ "path": "RUNS-2M/E50N2/frames/nest-child",
+ "status": "not scored",
+ "reason": "RUNS-2M/E50N2/frames/nest-child does not exist on this node",
+ "note": "2 m moving nest, 15 s child frames",
+ "checked_utc": "2026-09-22T19:43:53Z"
+}

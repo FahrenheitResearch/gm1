@@ -1,0 +1,179 @@
+{
+ "roots": {
+  "viz": "RUNS",
+  "screen": "RUNS",
+  "twom": "RUNS-2M"
+ },
+ "scorer": "CHECKOUT/tools/criterion_v2/score.py",
+ "sources": [
+  {
+   "label": "E100V-window",
+   "run": "E100V",
+   "kind": "window",
+   "path": "viz:E100V/frames/nest-child-window",
+   "grid": "4 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+   "parent_deck": "viz:E100V.toml",
+   "note": "0.5 s window stream, T+76-82 (advecting winds uadv/vadv)"
+  },
+  {
+   "label": "E100V-child",
+   "run": "E100V",
+   "kind": "child",
+   "path": "viz:E100V/frames/nest-child",
+   "grid": "4 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+   "parent_deck": "viz:E100V.toml",
+   "note": "60 s child frames T+71-85"
+  },
+  {
+   "label": "E100V-parent",
+   "run": "E100P (E100V parent frames)",
+   "kind": "parent",
+   "path": "viz:E100V/frames",
+   "deck": "viz:E100V.toml",
+   "start_s": 4200.0,
+   "grid": "100 m",
+   "note": "E100V's 100 m parent frames stand in for E100P after T+70 (pre-registered)"
+  },
+  {
+   "label": "E100W-child",
+   "run": "E100W",
+   "kind": "child",
+   "path": "viz:E100W/frames/nest-child",
+   "grid": "20 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "E100W resumed E100P at T+70 (sidecar first sample 4200.375 s = parent step 11201)",
+   "parent_dx_m": 100.0,
+   "note": "75 s child frames: INSUFFICIENT_CADENCE by construction (pre-registered)"
+  },
+  {
+   "label": "E100W-window",
+   "run": "E100W",
+   "kind": "window",
+   "path": "viz:E100W/frames/nest-child-window",
+   "grid": "20 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "as E100W-child",
+   "parent_dx_m": 100.0,
+   "note": "0.5 s window stream, T+72-82; not copied to the scoring node on 2026-09-22 (121 GB)"
+  },
+  {
+   "label": "E100N-child",
+   "run": "E100N",
+   "kind": "child",
+   "path": "screen:E100N/frames/nest-child",
+   "grid": "20 m",
+   "nest_start_s": 3600.0,
+   "receipt": "screen:E100N/receipt.json",
+   "parent_deck": "screen:E100N.toml",
+   "note": "fixed 20 m nest, 30 s child frames T+60-90; no live v1 sidecar"
+  },
+  {
+   "label": "E100N-parent",
+   "run": "E100N parent",
+   "kind": "parent",
+   "path": "screen:E100N/frames",
+   "deck": "screen:E100N.toml",
+   "grid": "100 m",
+   "note": "E100N's 100 m parent frames, 30 s"
+  },
+  {
+   "label": "E100L-500t-child",
+   "run": "E100L-500t",
+   "kind": "child",
+   "path": "screen:E100L-500t/frames/nest-child",
+   "grid": "20 m",
+   "nest_start_s": 3900.0,
+   "receipt": "screen:E100L-500t/receipt.json",
+   "parent_deck": "screen:E100L-500t.toml",
+   "note": "20 m nest, 150 s child frames"
+  },
+  {
+   "label": "E100M-child",
+   "run": "E100M",
+   "kind": "child",
+   "path": "screen:E100M/frames/nest-child",
+   "grid": "20 m",
+   "nest_start_s": 4200.0,
+   "receipt": "screen:E100M/receipt.json",
+   "parent_deck": "screen:E100M.toml",
+   "note": "20 m nest, 120 s child frames"
+  },
+  {
+   "label": "E100T-child",
+   "run": "E100T",
+   "kind": "child",
+   "path": "viz:E100T/frames/nest-child",
+   "grid": "4 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "E100T's deck is not on the scoring node; its live v1 sidecar's first sample is 4200.375 s (parent step 11201), one parent step after the spawn",
+   "parent_dx_m": 100.0,
+   "note": "4 m test, one child frame: INSUFFICIENT_CADENCE by construction"
+  },
+  {
+   "label": "E100T-window",
+   "run": "E100T",
+   "kind": "window",
+   "path": "viz:E100T/frames/nest-child-window",
+   "grid": "4 m",
+   "nest_start_s": 4200.0,
+   "spawn_source": "as E100T-child",
+   "parent_dx_m": 100.0,
+   "note": "E100T's window stream"
+  },
+  {
+   "label": "E100-parent",
+   "run": "E100",
+   "kind": "parent",
+   "path": "screen:E100/frames",
+   "deck": "screen:E100.toml",
+   "grid": "100 m",
+   "note": "100 m storm run, 300 s frames"
+  },
+  {
+   "label": "E-screen",
+   "run": "E (200 m screen)",
+   "kind": "parent",
+   "path": "screen:E/frames",
+   "deck": "screen:E-screen.toml",
+   "grid": "200 m",
+   "note": "200 m screen, 300 s frames"
+  },
+  {
+   "label": "T-screen",
+   "run": "T (200 m screen)",
+   "kind": "parent",
+   "path": "screen:T/frames",
+   "deck": "screen:T-screen.toml",
+   "grid": "200 m",
+   "note": "200 m screen, 300 s frames"
+  },
+  {
+   "label": "E50N2-child",
+   "run": "E50N2 (2 m)",
+   "kind": "child",
+   "path": "twom:E50N2/frames/nest-child",
+   "grid": "2 m",
+   "nest_start_s": 120.0,
+   "receipt": "twom:E50N2/receipt.json",
+   "spawn_source": "E50N2 deck: the 50 m parent resumes from restart 3 at 120 s and places the nest",
+   "parent_deck": "twom:decks/E50N2.toml",
+   "note": "2 m moving nest, 15 s child frames"
+  },
+  {
+   "label": "E50N2-window",
+   "run": "E50N2 (2 m)",
+   "kind": "window",
+   "path": "twom:E50N2/frames/nest-child-window",
+   "grid": "2 m",
+   "nest_start_s": 120.0,
+   "receipt": "twom:E50N2/receipt.json",
+   "spawn_source": "as E50N2-child",
+   "parent_deck": "twom:decks/E50N2.toml",
+   "note": "2 m window stream, 180-720 s"
+  }
+ ]
+}

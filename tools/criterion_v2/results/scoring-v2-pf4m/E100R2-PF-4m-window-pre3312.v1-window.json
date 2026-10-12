@@ -1,0 +1,30 @@
+{
+ "verdict": "NO_TORNADO",
+ "genesis_model_time_s": null,
+ "samples": 12287,
+ "longest_qualifying_run_s": 4.59375,
+ "condition_counts": {
+  "zeta": 3943,
+  "ground_relative_wind": 11865,
+  "core_radius": 12159,
+  "centre_move": 12215,
+  "qualifying": 3687,
+  "no_centre": 0
+ },
+ "first_sample_model_time_s": 2160.09375,
+ "last_sample_model_time_s": 3311.90625,
+ "source": "no live v1 sidecar: v1's host sample (reference_sample, the child-centre corner and its 300 m disk) recomputed on every window record and decided by v1's ledger at window cadence (the live criterion samples every parent step)",
+ "criterion_v1_sha256": "994cf1d0a1af811e13383b48196612931d7156a6e0ae684470ed92304cf11494",
+ "span": {
+  "label": "E100R2-PF-4m-window-pre3312",
+  "t_min": null,
+  "t_max": 3312.0,
+  "t_max_exclusive": true,
+  "why": "before 3312.0 s (T+55:12), the first time CM1's Courant number (calccflquick, misclibs.F:2726-2814) exceeded 1 in L0's window records (STATUS.md 2026-09-24T11:10Z courant-correction); the headline span"
+ },
+ "records": 12287,
+ "record_span_s": [
+  2160.09375,
+  3311.90625
+ ]
+}

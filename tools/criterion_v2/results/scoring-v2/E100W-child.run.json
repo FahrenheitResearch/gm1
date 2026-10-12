@@ -1,0 +1,31 @@
+{
+ "label": "E100W-child",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E100W/frames/nest-child",
+  "--out",
+  "runs/E100W-child",
+  "--label",
+  "E100W-child",
+  "--workers",
+  "1",
+  "--kind",
+  "child",
+  "--nest-start-s",
+  "4200",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 25.063023805618286,
+ "nest_start_source": "E100W resumed E100P at T+70 (sidecar first sample 4200.375 s = parent step 11201)",
+ "parent_dx_source": "manifest: E100P, the 100 m El Reno parent",
+ "nest_start_s": 4200.0,
+ "parent_dx_m": 100.0
+}

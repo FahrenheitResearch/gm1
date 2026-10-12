@@ -62,9 +62,10 @@
 #   a centre that would push the window past the free interior is clamped;
 #   every record says which of those it was and carries its own ground origin.
 #
-# READING IT AFTERWARDS (with nest_window_trajectories.py, a development-repository tool)
+# READING IT AFTERWARDS (with tools/nest_window_trajectories.py, a source tool in the
+# repository, not in the pip package; docs/NESTING.md)
 #
-#   python3 nest_window_trajectories.py \
+#   python3 tools/nest_window_trajectories.py \
 #       --stream <history>/nest-child-window --out <new-dir> \
 #       --target-time-s 4080 --back-to-s 3960 --centre auto \
 #       --radius-m 60 --heights-m 10,60,120,200 --rings 5 --per-ring 24 \

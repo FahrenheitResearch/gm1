@@ -1,0 +1,12 @@
+{
+ "outcome": "TORNADO",
+ "caption": "simulated tornado (GM1 criterion v2, 4 m grid, 0.09375 s output)",
+ "reason": null,
+ "samples": 1499,
+ "median_interval_s": 0.09375,
+ "longest_qualifying_run_s": 140.4375,
+ "class_counts": {
+  "Q": 1499
+ }
+}
+{"label": "E100R2-PF-4m-window-3312on", "status": "scored", "wall_s": 162.2963421344757}

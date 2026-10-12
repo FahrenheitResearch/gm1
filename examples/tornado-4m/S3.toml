@@ -1,0 +1,175 @@
+# Stage 3 of 3: the 4 m storm-following two-way nest, started from stage 2's restart 8
+# (2160 s) and run to 3300 s. Read README.md in this folder first.
+#
+# The parent is S1.toml's, unchanged. The [nest] table adds a 2 x 2 km child at 4 m
+# (ratio 25) with its own 103 levels (4 m layers up to 100 m), centred on the parent's
+# near-ground rotation at 2160 s and following it from then on.
+#
+# THIS IS NOT THE DECK EXACTLY AS IT RAN. Three things were changed so that it ends inside
+# the part of the run that stayed clean and writes an amount of data a person can keep:
+#   duration_s          3300 (ran with 4200; the 4 m child's Courant number passed 1 at
+#                       3312 s and the run stopped at 3452.8 s)
+#   history_interval_s  60 (ran with 120; 3300 s is not a whole number of 120 s frames)
+#   the window          one record every 0.5 s to 3300 s (ran with one every 0.09375 s to
+#                       3960 s, which wrote 1.6 TB before the run stopped)
+# The nest table itself, the placement and the start time are as run.
+#
+# NO LIVE TORNADO VERDICT. There is no [nest.tornado_criterion] table: its search keeps
+# 1000 m clear of every edge, which leaves a single point on a 2 km child.
+#
+# WHAT IT WRITES (measured sizes from the original run): 19 parent frames of 3.4 GB and 19
+# child frames of 2.2 GB with --history-envelope off (twice that with the default), 4
+# restarts of 18.1 GB, and the 313.7 GB window. About 490 GB in all.
+#
+# AS RUN: one RTX 5090 (32 GB), a build that predates GM1 0.1.0, 5.3 s per parent step
+# (3040 steps from 2160 to 3300 s is about 4.5 hours), peak device memory about 28,000 MiB.
+# A re-run on GM1 0.1.x is a different trajectory: the storm will not be in the same cell
+# at the same second, so place the nest again (docs/NESTING.md, "Placing the nest").
+[run]
+irst = 1
+rstnum = 8                  # stage 2's restart-000008, model time 2160 s
+lane = "cartesian"
+duration_s = 3300.0         # ends inside the clean span (see above)
+dt_s = 0.375
+history_interval_s = 60.0
+restart_interval_s = 300.0
+restart_reset_frqtim = false
+
+[initialization]
+isnd = 7                    # the profile is the file passed with --sounding
+iwnd = 0
+irandp = 0
+iinit = 1                   # one warm bubble
+bubble_center_x_m = 44000.0
+bubble_center_y_m = 31250.0
+zc_m = 1500.0
+bvrad_m = 1500.0
+bhrad_m = 10000.0
+bptpert_k = 4.0
+maintain_rh = true
+
+[grid]
+nx = 640
+ny = 768
+nz = 80
+dx_m = 100.0
+dy_m = 100.0
+dz_m = 100.0
+terrain = false
+stretch_x = false
+stretch_y = false
+stretch_z = 1               # 20 m layers below 200 m, stretching to 340 m above 7.4 km
+ztop_m = 17600.0
+str_bot_m = 200.0
+str_top_m = 7400.0
+dz_bot_m = 20.0
+dz_top_m = 340.0
+
+[dynamics]
+coriolis = 1
+fcor_s_inv = 8.47e-5        # 2 Omega sin(35.5 N)
+lspgrad = 1                 # Coriolis acts on the departure from the base-state wind only
+psolver = 3
+adaptive_timestep = false
+scalar_horizontal_order = 5
+scalar_vertical_order = 5
+velocity_horizontal_order = 5
+velocity_vertical_order = 5
+scalar_weno = 2
+velocity_weno = 0
+weno_order = 5
+dry_mass_correction = true
+
+[boundaries]
+west = 2                    # open on all four sides
+east = 2
+south = 2
+north = 2
+bottom = 3                  # semi-slip ground
+top = 1
+radiative_order = 4
+
+[closures]
+sgs_model = 1               # TKE
+bbc = 3
+sfcmodel = 1
+isfcflx = 0
+cecd = 1
+cnstcd = 0.005              # drag coefficient referenced to 10 m; roughness length 0.035 m
+vertical_implicit_diffusion = true
+upper_damping = 1
+upper_damping_depth_m = 3000.0
+upper_damping_rate_s_inv = 0.0033333333333
+moving_frame = true         # the grid travels with the storm
+u_move_m_s = 16.5
+v_move_m_s = 16.5
+
+[physics]
+component = "morrison-mp10"
+ihail = 1                   # hail, as CM1's own supercell case
+ndcnst = 250.0
+equation_set = 2
+output_dbz = false
+
+[diagnostics]
+output_uh = 1
+output_vort = 0             # refused on a stretched column (CM1-OUTPUT-STRETCHED-METRIC)
+output_pv = 0
+output_sws = 1              # swaths: strongest surface wind, vorticity and pressure fall
+output_svs = 1
+output_sps = 1
+output_srs = 0
+output_sgs = 0
+output_sus = 0
+output_shs = 0
+tornado_report = true
+
+[runtime]
+tile_nx = 128
+tile_ny = 128
+acoustic_substeps = 6
+warmup_steps = 0
+memory_budget_mib = 30500
+capacity_profile = "default"
+
+[lagrangian]
+iprcl = 0                   # no parcels carried during the run
+
+[nest]
+refinement_ratio = 25       # 100 m / 25 = 4 m
+time_refinement_ratio = 12  # child step 0.375 / 12 = 0.03125 s; README.md discusses 16
+parent_i0 = 295             # south-west corner of the child, in parent cells from 0
+parent_j0 = 304
+parent_span_x = 20          # 20 x 20 parent cells = a 2 x 2 km child of 500 x 500 cells
+parent_span_y = 20
+spec_zone = 1
+relax_zone = 4
+feedback = 1                # two-way
+acoustic_substeps = 6
+follow_storm = true
+follow_tracker = "wrf-surface-circulation"
+follow_interval_s = 7.5
+follow_max_speed_m_s = 20.0
+child_nz = 103              # the child's own levels: 4 m layers up to 100 m
+child_stretch_z = 4
+child_levels_m = [0.0, 4.0, 8.0, 12.0, 16.0, 20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0, 48.0, 52.0, 56.0, 60.0, 64.0, 68.0, 72.0, 76.0, 80.0, 84.0, 88.0, 92.0, 96.0, 100.0, 106.0, 114.0, 124.0, 136.0, 150.0, 166.0, 184.0, 200.0, 220.0, 248.2051239013672, 284.6153869628906, 329.23077392578125, 382.05126953125, 443.0769348144531, 512.3077392578125, 589.7435913085938, 675.3846435546875, 769.2307739257812, 871.2820434570312, 981.53857421875, 1100.0, 1226.666748046875, 1361.5384521484375, 1504.615478515625, 1655.8975830078125, 1815.384765625, 1983.076904296875, 2158.974609375, 2343.076904296875, 2535.384521484375, 2735.8974609375, 2944.615478515625, 3161.53857421875, 3386.6669921875, 3620.0, 3861.53857421875, 4111.28173828125, 4369.23095703125, 4635.384765625, 4909.74365234375, 5192.3076171875, 5483.0771484375, 5782.05078125, 6089.23095703125, 6404.615234375, 6728.205078125, 7060.00048828125, 7400.00048828125, 7740.00048828125, 8080.00048828125, 8420.0, 8760.0, 9100.0, 9440.0, 9780.0, 10120.0, 10460.0, 10800.0, 11140.0, 11480.0, 11820.0, 12160.0, 12500.0, 12840.0, 13180.0, 13520.0, 13860.0, 14200.0, 14540.0, 14880.0, 15220.0, 15560.0, 15900.0, 16240.0, 16580.0, 16920.0, 17260.0, 17600.0]
+follow_smoothing_radius_m = 250.0   # with 100 m the nest followed gust-front eddies away from the vortex
+follow_on_edge = "hold"
+follow_hold_limit = 4
+follow_relocation_radius_m = 1200.0
+
+# A 900 x 900 m, 1 km deep box of the child around the nest centre, written every 0.5 s
+# (16 child steps): 227 x 227 x 45 cells, 137,575,536 bytes per record, 16.51 GB per model
+# minute. Over 2160 to 3300 s that is 2280 records, 313.7 GB.
+[lagrangian.nest_child_window]
+frame = "parent-grid-origin"
+follow = "nest-centre"
+center_x_m = 0.0
+center_y_m = 0.0
+half_width_x_m = 450.0
+half_width_y_m = 450.0
+top_m = 1000.0
+stride_child_steps = 16
+start_s = 2160.0
+end_s = 3300.0
+budget_bytes_per_model_minute = 17000000000

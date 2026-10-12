@@ -1,0 +1,8 @@
+{
+ "criterion": "gm1.tornado-criterion/v2",
+ "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+ "files": {
+  "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+  "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+ }
+}

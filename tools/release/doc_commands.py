@@ -3,10 +3,13 @@
 
     python tools/release/doc_commands.py GUIDE.md [GUIDE.md ...] --work DIR --mode fake|real [--json OUT]
 
-The guides (docs/QUICKSTART.md, docs/CM1-USERS.md) mark every fenced block with what it is:
+The guides (docs/QUICKSTART.md, docs/CM1-USERS.md, docs/GM1-DECKS.md) mark every fenced block with what it is:
 
   ```sh           typed by the reader: run here, one line at a time, in DIR (HOME is DIR/home, so ~/gm1-runs
                   stays inside DIR). Blocks run in the order they appear, and each guide starts in a new DIR.
+  ```sh gpu       typed by the reader, and needs this computer's GPU or the output of a GPU run (`gpuwm-cm1
+                  cartesian --integrate` and what reads its frames): run like ```sh in --mode real; in --mode fake
+                  checked for form, and every --option of a gpuwm-cm1 line must be one that command's --help lists
   ```sh install   installing: tools/release/smoke_cm1_user.sh runs these against the built wheel, not this tool
   ```powershell install   the Windows installer line (PowerShell): not run here
   ```sh cluster   for another machine (ssh, sbatch, qsub, git archive): checked for form, not run
@@ -26,7 +29,8 @@ that it printed its link and answers with its token, and stops it.
               (examples, import, edit, estimate, preset, jobscript, reproduce, doctor) and sends the GPU and frame
               commands (run, resume, cm1out, quicklook) and the status and control of those runs (status, stop,
               pause) to the GUI's fake runner (cm1core.gui.fake_runner), which writes the same run-folder contract
-              with made-up numbers.
+              with made-up numbers. `gpuwm-cm1 examples` is given the decks the wheel build would install
+              (examples/*.toml less build_rust.py's UNSHIPPED_EXAMPLES): a checkout has none installed.
               nvidia-smi answers as the WSL2 RTX 3080 fixture (tests/data/gpuinfo). The CPU suite's doc-test.
 """
 
@@ -48,7 +52,7 @@ from typing import Any, Iterator
 ROOT = Path(__file__).resolve().parents[2]
 BLOCK = re.compile(r"^```([^\n`]*)\n(.*?)^```[ \t]*$", re.M | re.S)
 RUN_KINDS = ("sh",)
-KINDS = ("sh", "sh install", "sh cluster", "sh example", "powershell install", "python", "text")
+KINDS = ("sh", "sh gpu", "sh install", "sh cluster", "sh example", "powershell install", "python", "text")
 #: gpuwm-cm1 subcommands the fake mode sends to the fake runner: the GPU and frame commands, and the status and
 #: control of the runs it makes (the GUI reads and controls a fake run the same way).
 FAKE_COMMANDS = ("run", "resume", "cm1out", "quicklook", "status", "stop", "pause")
@@ -114,12 +118,68 @@ def gpuwm_words(command: str) -> list[str]:
     return words[1:] if words and words[0] == "gpuwm-cm1" else []
 
 
+_HELP: dict[tuple[str, ...], str] = {}
+
+
+def help_text(words: tuple[str, ...], env: dict[str, str]) -> str:
+    """What `gpuwm-cm1 WORDS --help` prints from this checkout ("" when there is no such command)."""
+
+    if words not in _HELP:
+        done = subprocess.run([sys.executable, "-m", "cm1core", *words, "--help"], capture_output=True, text=True,
+                              env=env, timeout=120)
+        _HELP[words] = done.stdout if done.returncode == 0 else ""
+    return _HELP[words]
+
+
+def unknown_options(command: str, env: dict[str, str]) -> list[str]:
+    """The --options of a gpuwm-cm1 line that its command's --help does not list (a command that does not exist
+    is reported as such). A line of another program has none."""
+
+    words = gpuwm_words(command)
+    if not words:
+        return []
+    text = help_text((words[0],), env)
+    if not text:
+        return [f"no command `gpuwm-cm1 {words[0]}`"]
+    if len(words) > 1 and not words[1].startswith("-"):
+        text += help_text((words[0], words[1]), env)
+    listed = set(re.findall(r"(?<![\w-])--[a-z][a-z0-9-]*", text))
+    return sorted({word.split("=", 1)[0] for word in words[1:] if word.startswith("--")} - listed)
+
+
 SHIM = r'''#!{python}
 """gpuwm-cm1 for tools/release/doc_commands.py --mode fake: real host commands, the fake runner for GPU work."""
 import os, subprocess, sys, time
 from pathlib import Path
 FAKE = {fake!r}
+DECKS = {decks!r}
 args = sys.argv[1:]
+if args and args[0] == "examples" and "--cm1" not in args:
+    # The wheel build copies the example decks into the package; a checkout has none there. Show the real door
+    # the same set from this checkout (every other packaged resource is the checkout's own).
+    import cm1core.doors as doors
+    from cm1core.cli import main
+    real = doors.resources
+
+    class Root:
+        def __init__(self, base):
+            self.base = base
+
+        def __truediv__(self, name):
+            return Path(DECKS) if name == "examples" else self.base / name
+
+        def __getattr__(self, name):
+            return getattr(self.base, name)
+
+    class Resources:
+        def __getattr__(self, name):
+            return getattr(real, name)
+
+        def files(self, package):
+            return Root(real.files(package)) if package == "cm1core" else real.files(package)
+
+    doors.resources = Resources()
+    sys.exit(main(args))
 if args and args[0] in FAKE:
     if args[0] in ("run", "resume") and "--detach" in args:
         # As the real --detach: its own session, a log in RUNDIR/logs, back once the new segment exists.
@@ -165,13 +225,28 @@ os.execv(sys.executable, [sys.executable, "-m", "cm1core", *args])
 '''
 
 
+def unshipped_examples() -> frozenset[str]:
+    """The example decks the wheel build leaves out (build_rust.py's UNSHIPPED_EXAMPLES)."""
+
+    text = (ROOT / "build_rust.py").read_text(encoding="utf-8")
+    match = re.search(r"^UNSHIPPED_EXAMPLES = frozenset\(\{(.*?)\}\)", text, re.M | re.S)
+    if match is None:
+        raise SystemExit("build_rust.py no longer names UNSHIPPED_EXAMPLES")
+    return frozenset(re.findall(r'"([^"]+)"', match.group(1)))
+
+
 def fake_environment(work: Path) -> dict[str, str]:
     """PATH with the shim first, this checkout on PYTHONPATH, and the WSL2 RTX 3080 fixture as nvidia-smi."""
 
     bin_dir = work / ".doc-bin"
     bin_dir.mkdir(parents=True, exist_ok=True)
     shim = bin_dir / "gpuwm-cm1"
-    shim.write_text(SHIM.format(python=sys.executable, fake=set(FAKE_COMMANDS)), encoding="utf-8")
+    decks = work / ".doc-examples"
+    decks.mkdir(exist_ok=True)
+    for deck in sorted((ROOT / "examples").glob("*.toml")):
+        if deck.name not in unshipped_examples():
+            shutil.copyfile(deck, decks / deck.name)
+    shim.write_text(SHIM.format(python=sys.executable, fake=set(FAKE_COMMANDS), decks=str(decks)), encoding="utf-8")
     shim.chmod(0o755)
     gpuinfo = ROOT / "tests" / "data" / "gpuinfo"
     return {
@@ -265,7 +340,20 @@ def run_guide(guide: Path, work: Path, mode: str, *, timeout_s: float = 1800) ->
                 except ValueError as error:
                     record["problems"].append(f"{guide.name}:{line_no}: {command!r} does not parse: {error}")
             continue
-        if kind != "sh":
+        if kind == "sh gpu" and mode != "real":
+            for command in lines(body):
+                try:
+                    shlex.split(command, comments=True)
+                except ValueError as error:
+                    record["problems"].append(f"{guide.name}:{line_no}: {command!r} does not parse: {error}")
+                    continue
+                unknown = unknown_options(command, env)
+                record["commands"].append({"line": line_no, "checked": command, "unknown_options": unknown})
+                if unknown:
+                    record["problems"].append(f"{guide.name}:{line_no}: `{command}`: {', '.join(unknown)} "
+                                              "is not in that command's --help")
+            continue
+        if kind not in ("sh", "sh gpu"):
             continue
         for command in lines(body):
             number += 1

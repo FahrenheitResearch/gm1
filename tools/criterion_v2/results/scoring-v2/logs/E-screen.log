@@ -1,0 +1,13 @@
+$ nice -n 19 ionice -c3 /usr/bin/python3 CHECKOUT/tools/criterion_v2/score.py RUNS/E/frames --out runs/E-screen --label E-screen --workers 1 --kind parent --deck RUNS/E-screen.toml
+{
+ "outcome": "UNRESOLVED",
+ "caption": "grid too coarse to judge (GM1 criterion v2)",
+ "reason": "horizontal grid spacing 200 m exceeds 25 m",
+ "samples": 24,
+ "median_interval_s": 300.0,
+ "longest_qualifying_run_s": 0.0,
+ "class_counts": {
+  "N": 23,
+  "U": 1
+ }
+}

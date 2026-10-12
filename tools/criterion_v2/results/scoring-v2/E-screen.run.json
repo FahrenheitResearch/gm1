@@ -1,0 +1,25 @@
+{
+ "label": "E-screen",
+ "status": "scored",
+ "command": [
+  "nice",
+  "-n",
+  "19",
+  "ionice",
+  "-c3",
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/score.py",
+  "RUNS/E/frames",
+  "--out",
+  "runs/E-screen",
+  "--label",
+  "E-screen",
+  "--workers",
+  "1",
+  "--kind",
+  "parent",
+  "--deck",
+  "RUNS/E-screen.toml"
+ ],
+ "wall_s": 66.78353905677795
+}

@@ -1,0 +1,14 @@
+$ nice -n 19 ionice -c3 /usr/bin/python3 CHECKOUT/tools/criterion_v2/score.py RUNS/E100N/frames/nest-child --out runs/E100N-child --label E100N-child --workers 1 --kind child --nest-start-s 3600 --parent-dx 100
+{
+ "outcome": "UNRESOLVED",
+ "caption": "grid too coarse to judge (GM1 criterion v2)",
+ "reason": "one tracked vortex met every condition for >= 120 s except that its RMW was below 4 dx or a threshold was met only within the discretisation uncertainty (marginal)",
+ "samples": 60,
+ "median_interval_s": 30.0,
+ "longest_qualifying_run_s": 30.0,
+ "class_counts": {
+  "U": 45,
+  "N": 10,
+  "Q": 5
+ }
+}

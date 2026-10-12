@@ -1,9 +1,26 @@
 # Configurable Cartesian GM1 runtime
 
-`tools/run_cartesian_gm1.py` initializes a fresh sounding and warm-bubble state
+This is the reference for GM1's own TOML decks and for `gpuwm-cm1 cartesian`,
+the door that runs them. For the short route (a first deck, the example decks
+and what each needs, recipes for finer grids) read
+[GM1-DECKS.md](GM1-DECKS.md) first; nesting has its own page,
+[NESTING.md](NESTING.md).
+
+**How to read the citations.** This reference was written in the development
+repository. A path under `tools/oracle/` or `evidence/` names one of that
+repository's check programs or measurement records. Neither folder is in the
+public repository (the first holds transcriptions of CM1 source, which is not
+redistributed), so such a path says how a statement was checked; it is not a
+command to run. The same holds wherever a tool is called a development tool,
+and for a test file named here that the public `tests/` folder does not hold:
+the tests of development-only parts stayed behind with those parts.
+Everything a user runs is a `gpuwm-cm1` command, or one of the few source tools
+the public repository carries under `tools/`.
+
+The runtime initializes a fresh sounding and warm-bubble state
 through the Rust CM1 initializer and runs the CUDA operators on an explicit
-Cartesian grid. Horizontal dimensions and all three spacings are arguments.
-The large step is an argument too. `dt=0.5 s`, three RK stages and six
+Cartesian grid. Horizontal dimensions and all three spacings are deck keys.
+The large step is a deck key too. `dt=0.5 s`, three RK stages and six
 acoustic substeps are the defaults; every stage, the final-RK eqtset2
 held-rate removal included, takes the step as a kernel argument, exactly as
 CM1 does (`solve2.F:145` declares `dt` a default-REAL variable, not a
@@ -34,11 +51,11 @@ parameter). Two bounds remain, and both are CM1's own:
 `run.dt_s` must still divide `run.duration_s` and `run.history_interval_s`
 exactly: a fixed-timestep clock cannot place a frame between two steps.
 
-This is an execution and memory baseline under numerical qualification. It
-does not yet establish a native-CM1 trajectory, forecast skill, viewer
-integration, or a released product.
+What has and has not been compared with CM1 is listed per capability by
+`gpuwm-cm1 doctor --science` and in the release notes. A capability described
+here is not thereby validated, and nothing here claims forecast skill.
 
-Restart identity is no longer on that list. The `cartesian` door writes one
+Restart identity is established. The `cartesian` door writes one
 complete `CM1FCP1` restart per `run.restart_interval_s` into `--restart-dir`
 and continues from one with `run.irst`/`run.rstnum` and `--restart-from`;
 `run.iconly = 1` builds the initial condition, writes it and stops
@@ -68,7 +85,7 @@ own CM1 `q3d` scalar axis, persistence inventory and compiled column depth:
 | `physics.component` | CM1 `ptype` | ArWen `mp_physics` | `numq` | levels | measured? |
 |---|---:|---:|---:|---|---|
 | `wsm6-mp6` (default) | 7 | 6 | 6 | 2..80, or 2..256 with the capacity overlay | yes |
-| `morrison-mp10` | 5 | 10 | 10 | 2..256, no overlay (and the overlay is refused) | **no** (GPU-run, not vs CM1) |
+| `morrison-mp10` | 5 | 10 | 10 | 2..256, no overlay (and the overlay is refused) | on CM1's supercell namelist only (release notes) |
 | `thompson-mp8` | 3 | 8 | 8 | 2..256, no overlay | **no** |
 | `thompson-aerosol-mp28` | none | 28 | 11 | 2..256, no overlay | **no, and not against CM1** |
 
@@ -78,7 +95,7 @@ CM1's six mass rows, and all `numq` rows are advected, published to `qa`,
 restarted and injected into a nest by name. Number concentrations never enter
 the EOS, buoyancy loading, pdefq or the dry-mass ledger (the CM1 citations are
 in [the seam record](../src/cm1core/records/CM1-ARWEN-SEAM.md)). This is proven
-on CPU host doubles. Morrison has also run on GPUs, single-domain only:
+on CPU host doubles. Morrison has also run on GPUs. Two early single-domain runs:
 
 * **RTX 5090, 2026-09-16, stability only.** A 512x512x75 stretched
   (`stretch_z = 1`, 20-320 m) 100 m bubble storm with `sgs_model = 4`,
@@ -96,8 +113,14 @@ on CPU host doubles. Morrison has also run on GPUs, single-domain only:
   (8 PASS, 0 FAIL, 1 SKIP; the verification bundle's
   `morrison/morrison.txt`).
 
-No Morrison run inside a live nest has been made on any GPU, and there is no
-differential against native CM1 `ptype=5`.
+Morrison has since run inside a live nest: the 4 m nested run described in
+[NESTING.md](NESTING.md) (an RTX 5090, a development build that predates
+0.1.0). On a release build the only nested Morrison run so far is a short
+one: 240 s of a 20 m child inside a 100 m parent, run on GM1 0.1.0 on an RTX
+4090, which stayed finite and had no vortex in it (NESTING.md, "What has been
+done with it"). CM1 has no nesting to compare a nested run with. Against
+native CM1 `ptype=5`, Morrison is compared on CM1's own supercell namelist only (the release notes, "How close to
+CM1").
 
 An unmeasured component is selectable, not hidden: its run receipt and
 `gpuwm-cm1 doctor` both carry the token `GM1-UNVALIDATED-CAPABILITY` and the
@@ -144,8 +167,8 @@ Shipped documents:
   pool, and cold-pool strength controls tornadogenesis; double-moment is the
   tornado-research standard. WSM6 validation and evidence decks are unchanged,
   and so are the decks that declare `output_dbz` (Morrison has no admitted
-  reflectivity formula here yet). **GPU run of these decks: pending** --
-  Morrison has run single-domain on GPUs (above), never inside a nest.
+  reflectivity formula here yet). **GPU run of these decks as written: none
+  recorded.** Morrison has run inside a nest (above), from other decks.
 * `examples/cartesian-supercell-thompson.toml` -- the same storm on CM1's
   `ptype=3`.
 * `examples/cartesian-supercell-thompson-aerosol.toml` -- the same storm on a
@@ -157,18 +180,19 @@ Use the versioned capacity overlay on `PYTHONPATH` and the built Rust library
 with the grid and Rayleigh-profile entry points. The selected GPU is checked
 under both its UUID lock and the existing GM1 directory mutex.
 
+The timing harness is the `cartesian` door without `--integrate`:
+
 ```sh
-CUDA_VISIBLE_DEVICES="$GPU_UUID" \
-PYTHONPATH="$CAPACITY_OVERLAY:$GM1_ROOT/src" \
-python tools/run_cartesian_gm1.py \
-  --nx 400 --ny 400 --nz 237 --dx 125 --dy 125 --dz 125 \
-  --dt 0.5 --nsound 6 --tile-size 64 \
-  --warmup-steps 1 --steps 3 \
-  --library "$CM1_LIBRARY" --sounding "$SOUNDING_40KM" \
+gpuwm-cm1 cartesian DECK.toml --sounding "$SOUNDING_40KM" \
   --gpu-uuid "$GPU_UUID" --lock "$GM1_DIRECTORY_LOCK" \
-  --capacity-profile gm1.arwen-wsm6-column-capacity-256/v1 \
   --output "$NEW_RECEIPT"
 ```
+
+The measurements this section quotes were taken with a development driver that
+built the same configuration from command-line flags (400 x 400 x 237 cells at
+125 m, a 0.5 s step, six acoustic substeps, 64-cell tiles, one warm-up step and
+three measured ones); a deck's `[grid]`, `[run]` and `[runtime]` tables carry
+the same values.
 
 The output must be a new path. `--plan` prints the CPU-side allocation plan.
 Initialization and the component's real driver backing precede the measured
@@ -376,8 +400,9 @@ closure unchanged and add a near-wall piece that is confined to
 hard-coded constants), i.e. roughly the lowest 250 m. CM1 ramps them in
 linearly between model times 1800 s and 3600 s (`src/turb.F:264-270`).
 
-- `sgs_model = 4`, Bryan (2020), is the one to use for tornado LES on a
-  semi-slip bottom. `t2pcode` (`src/turb.F:6078-6267`) sets a horizontally
+- `sgs_model = 4`, Bryan (2020), is CM1's model for tornado LES on a
+  semi-slip bottom. The project's own tornado runs did not use it: they ran
+  `sgs_model = 1`, and model 4 has no storm comparison with CM1 here. `t2pcode` (`src/turb.F:6078-6267`) sets a horizontally
   uniform mean-shear eddy viscosity. At each wall-layer level, that
   viscosity's flux divergence balances the domain-mean tendency of all other
   terms, divided by the log-law shear of the domain-mean `ust` and `znt`.
@@ -502,14 +527,14 @@ alive. A run's zeros can come and go between output times only because its
 **Diagnostics.** CM1 publishes `t2pm1 = -d2pm1*tem` and `t2pm3 = d2pm3*tem`
 (`src/turb.F:6250-6251`, `src/domaindiag.F:4493-4531`). GM1 publishes neither
 and keeps no `d2pm1`, `d2pm3` or `tem`; a B20 restart carries no two-part word,
-and `output_km` is refused. Two CPU tools, both outside the runtime package
+and `output_km` is refused. Two CPU tools of the development repository, both outside the runtime package
 (so neither enters the runtime source identity a restart is checked against),
 fill that gap:
 
-- `tools/capture_two_part_reductions.py --at T ... --out DIR -- cartesian
-  DECK.toml ...` runs the door in-process and, on the first step at or after
+- a capture tool (`capture_two_part_reductions.py`, not in the public tree)
+  runs the door in-process and, on the first step at or after
   each time `T`, saves the words `cm1_t2p_b20_profile_v1` read and wrote;
-- `python3 tools/oracle/two_part_kmw_terms.py DIR/*.npz` replays them,
+- a replay tool (`tools/oracle/two_part_kmw_terms.py`, likewise) replays them,
   prints `d2pm1`, `d2pm3`, `tem` and the branch of the rule above that decided
   each face, and says whether the replay reproduced the run's words. `d2pm1`
   does not depend on `logf`. A live face's value does, through `tem`, so a
@@ -601,7 +626,8 @@ published beside this step's winds.
 
 **Reading it.** `storm_diagnostics` adds the column-maximum and chosen-level
 maxima and the ground area above 20/40/50 dBZ to every diagnostic row, and
-`tools/analyze_storm_run.py` reports peak composite reflectivity, when the
+a development tool (`analyze_storm_run.py`, not in the public tree) reports
+peak composite reflectivity, when the
 echo first reached the reporting threshold, and the largest convective-core
 area. `cm1-render --product reflectivity` draws the composite and
 `--product reflectivity-level --level K` one level, both on the standard NWS
@@ -714,8 +740,8 @@ column loop does. Declared-tile documents keep computing exactly what they
 computed; a cecd=2/3 document that drops its tile keys computes the CM1-ordered
 words instead.
 
-Benchmarking on a device: `tools/benchmark_cartesian_untiled.py DOCUMENT
---workdir DIR --steps N` runs the document tiled and untiled through the timing
+Benchmarking on a device: a development tool (`benchmark_cartesian_untiled.py`,
+not in the public tree) runs the document tiled and untiled through the timing
 harness, one after the other, reports seconds per step and compares every
 carrier of the published history arena word for word.
 
@@ -887,7 +913,10 @@ CM1 r21.1 has no grid nesting: no namelist word, no README section, no
 `CHANGES` entry and no parent/child code in `src`; its only moving-mesh
 capability is the whole-domain adaptive move of `src/azimavg.F:4376-4528`.
 GM1's nest is a **declared extension**, recorded in full in
-`src/cm1core/records/CM1-NEST-SEAM.md`.
+`src/cm1core/records/CM1-NEST-SEAM.md`. [NESTING.md](NESTING.md) is the
+practical guide: a worked recipe, every `[nest]` key with the child's own
+levels (the `child_*` keys, which this section does not list), and the decks
+of the 4 m run.
 
 A document declares one refined child grid by adding one table. Absent, the
 run is exactly the single-domain run it was: the table is not projected into
@@ -1360,7 +1389,7 @@ handles are extension types whose `__call__` cannot be patched either. So:
   steady cost is one callback per launch plus a one-time cost per site; on a
   call-dense pure-Python loop it is within timing noise, and the number that
   matters -- the profiled step wall against `--profile off` on the device --
-  is what `tools/profile_cartesian_run.py --identity` reports as
+  is what the development profiling driver's `--identity` run reports as
   `profiling_overhead` (section below). The price is a known undercount: a
   site whose first callable is
   not a kernel and that launches one later is not counted, and the receipt
@@ -1483,7 +1512,7 @@ declared exception).
 
 ### Where a restart's minutes went, and what was removed
 
-`tools/benchmark_publication_io.py` times the host half of a checkpoint on
+A development tool (`benchmark_publication_io.py`, not in the public tree) times the host half of a checkpoint on
 synthetic host carriers (no device): the shipped arena writer, then the
 shipped `cm1-forecast-publish`, with the publisher's peak resident set. On an
 8.21 GB payload -- the size of a 512x512x75 WSM6 restart -- the release head's
@@ -1637,8 +1666,8 @@ receipt never describes a later step than its carriers.
   with the same bytes. It still copies each event into the reserved host
   arenas. The one-call publications that commit at once on the calling
   thread (`publish_history`, `publish_restart`/`write_cartesian_restart`,
-  `initial_condition`, `benchmark`, `NestDriver.publish_child_frame`,
-  `tools/run_cartesian_storm.py`) reserve no host arena: their words stay on
+  `initial_condition`, `benchmark`, `NestDriver.publish_child_frame`
+  and the development storm driver) reserve no host arena: their words stay on
   the device until the arena writer streams them in 8 MiB page-locked windows,
   as they always were, so host memory never holds a full copy of the payload
   beside the publisher's own.
@@ -1651,15 +1680,15 @@ per-array SHA-256 equals every carrier digest the arena writer took (and the
 contract, the payload size and the envelope's length agree). Otherwise the
 restart is refused and no receipt is written: `integrate` discards its staging
 directory and renames nothing into place, and a restart written straight into
-its final directory (`publish_restart`, as `tools/run_cartesian_storm.py`
+its final directory (`publish_restart`, as the development storm driver
 writes them) is left there with its raw arena, tables and envelope but no
 receipt, so no resume admits it. A resume reads only the envelope
 (`read_cartesian_restart` runs `cm1-forecast-publish restore`), and so does
-`tools/nest_downscale_init.py`. History frames are unchanged and keep
+the development nest-initialization tool. History frames are unchanged and keep
 `history-carriers.f32`, synced: the frame's field table and location record
-name it, and `nest_parcel_backward`, `tools/nest_window_preview.py`,
-`tools/nest_downscale_init.py` (the parent frame) and
-`tools/benchmark_cartesian_untiled.py` read it directly.
+name it, and `nest_parcel_backward`, `tools/nest_window_preview.py` and two
+development tools (the nest initialization, for the parent frame, and the
+untiled benchmark) read it directly.
 
 This is a format change, not a correctness fix, and these are exactly the
 restart files it changes against the release head:
@@ -1674,7 +1703,7 @@ restart files it changes against the release head:
 `require_restart_receipt` admits both v1 and v2, so restarts written before
 this change still resume. A reader that followed `arena.path` or
 `arena_filename` to the raw arena has to check the schema (v2 always carries
-`arena.retained`). `tools/nest_downscale_init.py` writes a directory that does
+`arena.retained`). The development nest-initialization tool writes a directory that does
 keep the arena, and its receipt says so: schema v2, `arena.retained` `true`,
 `arena_filename` and `arena.path` set.
 
@@ -1717,7 +1746,7 @@ still writing or already waiting to rename), a later part's failure spares
 the earlier part, cancelling kills both publishers, and a join is not
 counted twice in `blocking_seconds`.
 
-`tools/benchmark_publication_io.py --mode background` times one event the way
+The same development tool, in its background mode, times one event the way
 `integrate` publishes it: the snapshot on the calling thread (a host copy
 standing in for the device copy), the commit on the shipped worker, while the
 calling thread keeps taking synthetic GIL-holding steps. Same machine and
@@ -1772,7 +1801,7 @@ earlier set of three runs per tree on the same virtual disk had one
 `beside` run whose join wait was 12.0 s against the head's 6.6-7.3 s, the
 restart alone taking 24 s through it, and on this disk the two writes can
 contend for the device. The deciding measurement is the node's own
-`join_wait` comparison (`docs/GM1-GPU-VERIFY-FIXES.md`, section 7b); until
+`join_wait` comparison (a development runbook's measurement); until
 it is recorded the blocked-time claim carries NEEDS-LONG-VALIDATION. The
 stepping thread's synthetic step, a GIL-holding host loop, is within the
 idle spread in every column: two publishers hashing at once (up to 16
@@ -1788,22 +1817,26 @@ the page-locked device copy the section above describes, not measured here.
 
 ### Profiling a document on a GPU
 
-`tools/profile_cartesian_run.py` runs a document through the door with
-`--profile detailed` for `--steps` measured steps, optionally (`--io`) writes
-one frame and one complete restart, optionally (`--identity`) repeats the run
-with `--profile off` and compares both published frames word for word, and
-runs the same steps at half the horizontal grid. It prints each run's `gpuwm-cm1 perf` summary, the verdicts,
-and the scaling ratio of the measured step, split into a fixed per-step cost
-and a per-point cost: a ratio near the fourfold point ratio means the device or
-its memory bandwidth sets the pace, a ratio near one means the host does.
+`--profile detailed` records per-phase device time, kernel launches, copies and
+I/O stages in the receipt, and `gpuwm-cm1 perf` prints the summary:
 
-```
-python3 tools/profile_cartesian_run.py storm.toml --steps 20 --warmup 3 --io --identity \
-    --workdir /scratch/gm1-profile --sounding input_sounding \
-    --gpu-uuid "$GPU_UUID" --lock "$GM1_DIRECTORY_LOCK"
+```sh
+gpuwm-cm1 cartesian storm.toml --profile detailed --sounding input_sounding --output receipt.json
+gpuwm-cm1 perf receipt.json
 ```
 
-With `--identity` the summary also carries `profiling_overhead`: the profiled
+The development repository drives this with a script (`profile_cartesian_run.py`,
+not in the public tree). It runs a document through the door with
+`--profile detailed` for a number of measured steps, optionally writes one
+frame and one complete restart, optionally repeats the run with `--profile off`
+and compares both published frames word for word (its identity run), and runs
+the same steps at half the horizontal grid. It prints each run's
+`gpuwm-cm1 perf` summary, the verdicts, and the scaling ratio of the measured
+step, split into a fixed per-step cost and a per-point cost: a ratio near the
+fourfold point ratio means the device or its memory bandwidth sets the pace, a
+ratio near one means the host does.
+
+The identity run's summary also carries `profiling_overhead`: the profiled
 run's mean step against the `--profile off` run's, both from the timing
 harness's own `runtime_benchmark.mean_step_wall_seconds` (timed around
 `step()` with `time.perf_counter` at every level, so it does not depend on the
@@ -1812,92 +1845,14 @@ level costs a production run.
 
 ### Verifying the profiler on a device
 
-Three checks, each under the GPU mutex and each well under 15 minutes,
-then one that rides along with the next long run. They were written for the
-RTX 4090 host that found the CuPy 14 failure; the first lines are the only
-node-specific ones, and they stop rather than run with an empty `$GPU`, a
-lock that is not this node's, an interpreter without `sys.monitoring` (the
-device test would be skipped, not run, and no kernel launch counted) or a
-CuPy that is not the 14 series the failure was seen on. `$PY` is the node's
-interpreter (a venv's `bin/python`, as `docs/GM1-GPU-VERIFY-FIXES.md` section
-2 sets it), `$TREE` a checkout of this source, `$LIB`/`$PUB` the Rust
-artifacts built as in that runbook's section 3, `$DECK` a document that
-integrates from its own initial condition, and `$SND` its sounding.
-
-```sh
-GPU=$(nvidia-smi --query-gpu=uuid,name --format=csv,noheader | awk -F', ' '/4090/ {print $1}')
-test -n "$GPU" && echo "GPU=$GPU" || echo "STOP: no RTX 4090 on this node"
-export CUDA_VISIBLE_DEVICES=$GPU
-LOCK=   # this computer's GM1 GPU lock directory; never another computer's
-test -n "$LOCK" && test ! -e "$LOCK" && echo "lock free" || echo "STOP: LOCK is unset or held"
-$PY -c 'import sys; assert sys.version_info >= (3, 12), sys.version'
-$PY -c 'import cupy; assert cupy.__version__.startswith("14."), cupy.__version__; print("cupy", cupy.__version__)'
-P=~/gm1-profiler-check && test ! -e $P && mkdir -p $P
-```
-
-1. The device test (~1 min): CuPy builds its own kernels under the hooks
-   (`cupy.full`, the TypeError site), GM1's three launch shapes each count
-   exactly once, every hook installs, nothing is turned off.
-
-   ```sh
-   CM1_CUDA_TESTS=1 PYTHONPATH=$TREE/src $PY $TREE/tools/perf_probe/with_gpu_mutex.py $GPU $LOCK -- \
-     $PY -m pytest -p no:cacheprovider -rfEs -v \
-     "$TREE/tests/test_runtime_profiler_failsafe.py::test_device_cupy_builds_its_own_kernels_under_the_hooks_and_gm1_kernels_count" \
-     2>&1 | tee $P/device-test.log
-   ```
-
-   Expect `1 passed`. `1 skipped` means `CM1_CUDA_TESTS`, CuPy or the device
-   was not seen and nothing was verified.
-
-2. The door at both levels, integrating with a frame and a restart (~2 x the
-   deck's duration; keep `run.duration_s` to a few minutes of steps):
-
-   ```sh
-   for L in summary detailed; do
-     mkdir -p $P/$L
-     PYTHONPATH=$TREE/src $PY -m cm1core cartesian $DECK --sounding $SND \
-       --library $LIB --history-publisher $PUB --integrate \
-       --history-dir $P/$L/history --restart-dir $P/$L/restarts \
-       --profile $L --progress-interval 10 --output $P/$L/receipt.json \
-       --gpu-uuid "$GPU" --lock "$LOCK" 2>&1 | tee $P/$L.log
-   done
-   $PY $TREE/tools/perf_probe/check_profiled_runs.py door $P
-   ```
-
-   Expect two `PASS` lines (steps, more than 100 launches per step, NVRTC
-   programs, the verdict) and exit 0. A `FAIL` line names the defect:
-   `instrumentation {...}` with a non-empty `disabled` names the instrument
-   that turned itself off and the error, and `fail-safe lines in the log`
-   quotes the stderr line the run printed when it did.
-
-3. Overhead and identity (~2 x (`--warmup` + `--steps`) steps, plus the
-   half-grid run):
-
-   ```sh
-   PYTHONPATH=$TREE/src $PY $TREE/tools/profile_cartesian_run.py $DECK \
-     --steps 20 --warmup 3 --identity --profile summary --workdir $P/profile \
-     --sounding $SND --library $LIB --history-publisher $PUB \
-     --gpu-uuid "$GPU" --lock "$LOCK" 2>&1 | tee $P/profile.log
-   $PY $TREE/tools/perf_probe/check_profiled_runs.py profile $P/profile
-   ```
-
-   Expect `PASS` for `full`, `off`, `half` and `identity`, and an `overhead:`
-   line: the `--profile summary` step wall against `--profile off`. That ratio
-   is what the default level costs a run on this device; a ratio above about
-   1.02 on a 512x512x75 deck is worth reporting with the receipts.
-
-4. The long run. Nothing above runs for hours; the claim that every
-   instrument stays on for a two-hour nested run is validated by the next
-   such run, which profiles at the default `summary` level. When it ends
-   (or dies):
-
-   ```sh
-   $PY $TREE/tools/perf_probe/check_profiled_runs.py receipt RUN/receipt.json RUN/stderr.log
-   ```
-
-   `PASS` means `instrumentation.disabled == {}` and no `gm1 profiler:` line
-   for the whole run; `FAIL` names the instrument and its error, which is
-   then the bug to file.
+The development repository holds a four-step device runbook for the profiler:
+a device test under the hooks, the door at both levels with a frame and a
+restart, overhead and identity, and a check of a long run's receipt. Its helper
+scripts are not in the public tree. The check a user can make is the last one,
+on any run's own receipt and log: `instrumentation.disabled` in the receipt's
+performance section must be empty, and the log must hold no line that starts
+with `gm1 profiler:`. If either fails, the line names the instrument that
+turned itself off and its error, and that is the bug to report.
 
 ### Where a step's time went, and what was removed
 
@@ -1954,17 +1909,12 @@ Four cuts leave every published history word and restart carrier as they were
   binding's `sigmaf(nk+1)` is also read back once per binding, not once per
   launch.
 
-`tools/perf_probe/run_m0_m4.sh` measures these cuts on a GPU:
-`tools/perf_probe/sitecustomize.py` (`GM1_PROBE=off|time|keep|poison-nan|poison-big`)
-times, suppresses or poisons from outside the tree, and the script prints the
-pass/fail table. Its header holds the runbook: four commands of at most 15
-minutes of GPU each, which `BUDGET_S` enforces. On an untiled 512x512x75 or
-256x256x75 device run, the table judges the step-time targets it records as
-PASS or FAIL. Every other timing row is information, including every
-comparison across two trees. A probe that never reached CuPy, a run that
-stopped early and a selected run that never started are all FAIL. With
-`DOOR_PYTHON=tools/oracle/host_door_python.sh` and `GPU_UUID=none`, the kit also
-runs on a CPU.
+The development repository's probe kit (not in the public tree) measures these
+cuts on a GPU: it times, suppresses or poisons from outside the tree
+(`GM1_PROBE=off|time|keep|poison-nan|poison-big`) and prints a pass/fail table.
+On an untiled 512x512x75 or 256x256x75 device run, the table judges the
+step-time targets it records as PASS or FAIL. Every other timing row is
+information, including every comparison across two trees.
 
 ### CUDA graphs: capture a step once, replay it (`--cuda-graphs`)
 
@@ -2177,9 +2127,8 @@ left to the reader: the 0-1 km and 0-6 km bulk wind difference, the Bunkers et
 al. (2000) internal-dynamics right and left movers, and the 0-1 km and 0-3 km
 storm-relative helicity taken against the declared one. The receipt carries the
 citation. `tools/report_sounding_parameters.py` prints the same block for a
-configuration and a sounding without running anything, and
-`tools/analyze_storm_run.py --receipt` prints it beside a run's storm summary,
-so a report on a storm that did not form can say what the air was.
+configuration and a sounding without running anything, so a report on a storm
+that did not form can say what the air was.
 
 CIN follows `src/getcape.F:475`: it is the **positive magnitude** of the
 negative area, not a negative number.
@@ -2209,13 +2158,8 @@ the same 23,808,000-byte payload, and the canonical configuration hash of every
 shipped deck is unchanged. `examples/cartesian-environment-fields.toml` is the
 deck with all four on.
 
-`tools/run_cartesian_storm.py`, the driver the long integrations actually run
-under, builds its own document from flags rather than a deck, so it carries the
-same switches: `--output-cape`, `--output-cin`, `--output-lcl`, `--output-lfc`,
-`--parcel-source`, `--adiabat`, `--mixed-layer-depth`, `--pressure-increment`
-and `--storm-motion`. An invocation that passes none of them projects no
-`[diagnostics]` table and produces exactly the configuration hash it always
-did.
+The development storm driver, which builds its document from flags and is not
+in the public tree, carries the same switches.
 
 The renderer draws them: `--product cape|cin|lcl|lfc --nz 1 --level 0` against
 the carrier of the same name, on fixed physical scales rather than a per-frame

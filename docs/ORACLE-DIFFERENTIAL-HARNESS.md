@@ -4,7 +4,15 @@ The real CM1 r21.1 binary is the oracle. This harness configures CM1 and
 gpuwm-cm1 from **one** physical description, runs both, and reports where and
 when they part.
 
-Everything below runs from a source checkout with `PYTHONPATH=src`.
+**Where the harness is.** `tools/oracle/` holds transcriptions of CM1 source and
+needs a built CM1 r21.1, so it stays in the development repository: it is not in
+the public repository or the wheel, and the commands on this page cannot be run
+from either. This page is published so that a reader can see exactly how the
+comparisons quoted in the release notes were made. The case descriptions the
+harness reads are public, under `examples/oracle/`.
+
+In the development repository, everything below runs from a source checkout
+with `PYTHONPATH=src`.
 
 ```
 PYTHONPATH=src python3 tools/oracle/differential.py <subcommand>
@@ -459,7 +467,8 @@ nine CM1 runs and nine GM1 runs, one of each per case above, compared in every
 CM1 x GM1 pairing a table names.  `capture-rtx4090.json` records, for each
 GM1 run, the device, the digest of every Python source the run executed, and
 the digests of the emitted configuration.
-`docs/GM1-GPU-VERIFY-DYNAMICS-RECEIPT.md` is the runbook: the nine runs, the
+The development repository holds the runbook (`GM1-GPU-VERIFY-DYNAMICS-RECEIPT.md`,
+not in the public tree): the nine runs, the
 commands, the cost, and what the sealed receipt must say afterwards.
 
 `beta-wide-512` needs `--base-deck examples/oracle/supercell-with-betaplane.namelist.input`:

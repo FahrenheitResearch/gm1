@@ -1,0 +1,5 @@
+.....................................................................sss [ 75%]
+sssssssssssssssssssssss                                                  [100%]
+=========================== short test summary info ============================
+SKIPPED [26] tests/test_criterion_v2_window_segments_catalogue.py:80: the synthetic catalogue through the adapter: set GM1_CRITERION_CATALOGUE=1
+69 passed, 26 skipped in 333.22s (0:05:33)

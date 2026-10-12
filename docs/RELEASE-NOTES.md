@@ -1,5 +1,120 @@
 # gpuwm-cm1 release notes
 
+## 0.1.3
+
+A documentation release: the pages that lead beyond the GUI, each saying exactly how far it has been checked.
+Nothing in the model changed. The package's code is 0.1.2's, on the same engine (ArWen 2.8.9), so every storm runs
+as in 0.1.2 and every number under "0.1.2" below stands.
+
+### What is new
+
+- **The README** now says what GM1 has done, each line with the file in this repository that backs it, and has a
+  section "Beyond the GUI" that lists the ways past the GUI: decks, nesting, `gpuwm-cm1 chain`,
+  `gpuwm-cm1 reproduce` and the public datasets of the 4 m tornado run.
+- **`docs/GM1-DECKS.md`**: GM1's own TOML decks, start to finish (`gpuwm-cm1 examples --copy`, `check`,
+  `cartesian --plan`, `cartesian --integrate`, then `quicklook` and `cm1out` on the frames); what a deck run does
+  not get (GUI progress, `status`, `stop`) and how to stop one; a table of all 40 example decks with the grid, the
+  estimated GPU memory, the smallest card and what `check` and `cartesian --plan` say on a CPU (the 0.1.0 and 0.1.3
+  wheels say the same); and recipes for a 100 m supercell, 20 m layers near the ground, the near-ground physics of
+  the tornado runs, a squall line with repeating sides and the moving domain. Every command on the page runs in the
+  test suite, or, where it needs a GPU, is checked option by option against the program.
+- **`docs/NESTING.md` and `examples/tornado-4m/`**: what a nest is, a three-stage recipe (parent, continuation,
+  nest), every `[nest]` key, memory, disk and run times, and the decks of the 4 m run, edited to end before its time
+  step failed. Two variants need no file from outside: `norman/`, the same grids on the shipped 24 May 2011 Norman
+  sounding, and `small/`, a 20 m nest for a 16 GB card. The start of `small/` was run on GM1 0.1.0 on an RTX 4090
+  (installed by pip): the 448 x 448 x 80 parent at 100 m from 0 to 1440 s (0.40 s a step, 8.3 GiB on the card
+  against 5.78 GiB in the plan), then a 500 x 500 x 80 child at 20 m inside it from 1260 to 1500 s (2.0 s a step,
+  16.4 GiB against 12.97 GiB). Every stage ended with status 0 and the child stayed finite. What that run did not
+  show is under "Known limitations".
+- **The tornado verdict and its scorer**: `docs/GM1-TORNADO-CRITERION-V2.md` (the criterion as it was fixed before
+  scoring), `docs/GM1-TORNADO-VERDICTS-V2.md` (the verdict table, and what a reader can check) and
+  `tools/criterion_v2/` (the scorer, the recorded per-sample tables of every scored run, and `check_recorded.py`,
+  which decides all 17 recorded verdicts again in a few seconds). The 4 m run rates TORNADO before 3312 s: one
+  vortex tracked for 455 s from T+47:36.9, peak 10 m ground-relative wind about 128 m/s (129.0 m/s in the last
+  record before the time step limit was passed), median radius of maximum wind 128 m. It is one run, made on a
+  development build that predates 0.1.0 and scored after the fact; CM1 has no nesting, so there is no CM1 run to
+  compare it with. The live criterion in the wheel (`[nest.tornado_criterion]`) is the older rule, and it did not
+  call this run a tornado.
+- **Eight small source tools** under `tools/` that the nesting pages use: place a nest (`nest_place.py`), read a
+  plan (`plan_summary.py`), preview a window, backward trajectories through the window or through the child's
+  frames, check the nest's path, replay the live check and report a sounding. They are unsupported, are not in the
+  pip package, and run from a clone with the Python GM1 is installed in.
+- **In the package** the code is 0.1.2's. Only the version and text changed: the README and the documents the
+  sdist carries (the decks page is new among them), and the comments of one example deck
+  (`cartesian-nested-tornado-window`, which now names `tools/nest_window_trajectories.py`).
+
+### Corrections to the earlier notes
+
+The sections below are left as they were published; this list corrects them.
+
+- **`cecd = 2` and `3`** were described as not implemented. The drag itself is there: a GM1 deck may declare them
+  and the plan admits it (`examples/cartesian-surface-enthalpy-flux-over-water.toml` uses `cecd = 3`), though no run
+  with them has been made on a GPU. The import refuses them when the semi-slip ground is on (`bbc = 3`,
+  `sfcmodel = 1`), because every imported run also writes the 10 m wind swath, which is written for constant drag,
+  and such a run would stop before its first step. The import's message still says "only cecd = 1 (constant drag
+  coefficient) is implemented".
+- **The moving domain's time step.** A moving domain with a time step such as 0.6 s stops after a few steps with a
+  domain-position message whose remedy (reduce the grid or the device budget) is wrong: the cause is the time step.
+  `docs/GM1-DECKS.md`, "The moving domain", has the rule.
+- **Initialization selectors**: 55 of 57 selector values are checked against CM1 at time zero
+  (`gpuwm-cm1 doctor --science`), not 30 of 32.
+- **Thompson (`ptype = 3`)** needs `nt_c = 100.0` as well as `--acknowledge-thompson`: GM1's Thompson always runs
+  100 droplets per cubic centimetre, and CM1's own file has 250, which is refused with that fix line.
+- **Nests, the two-part turbulence models and the Lagrangian extras** were listed as "not part of the GUI release".
+  They are in the wheel and run from decks; they are not in the GUI.
+- **Which turbulence model the tornado runs used.** `docs/GM1-CARTESIAN-RUNTIME.md` recommends the two-part model
+  `sgs_model = 4` for tornado work on a semi-slip ground. The project's own tornado runs, the 4 m run included, used
+  CM1's TKE scheme (`sgs_model = 1`); the two-part models have no storm comparison with CM1.
+- **A Morrison run inside a live nest.** `docs/GM1-CARTESIAN-RUNTIME.md` said none had been made. The 4 m run was
+  one, on a development build; on a release build the only one is the short RTX 4090 run above (240 s of nested
+  time, finite, no vortex). No comparison is possible, since CM1 has no nesting. `gpuwm-cm1 doctor --science` and
+  every Morrison run's receipt still print the old sentence ("any Morrison run inside a live nest on a GPU" under
+  "not checked"): that text is part of a sealed record of every Morrison run and changes only together with it.
+- **`nz > 80` with WSM6** needs a capacity overlay, and the tool that builds one is a development tool, not in the
+  public repository: on an installed GM1 keep `nz` at 80 or below with WSM6, or use Morrison, which runs up to 256
+  levels without an overlay.
+- **Tools named in the documents.** Some documents told readers to run development tools that are not in the public
+  repository. Those references are reworded: each now says the tool is a development tool, or gives the
+  `gpuwm-cm1` command that does the same job.
+
+### How to update
+
+Nothing in the model changed, so 0.1.2 runs every storm as 0.1.3 does. To update anyway, run the install line
+again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update and uninstall"); with
+pip, `pip install --upgrade gpuwm-cm1`. Close GM1 and let a running storm finish first; the installer stops with a
+message while one runs. Your storms stay where they are. Finish a storm with the GM1 version that started it.
+
+The nesting examples, the small tools and the scorer are not in the package. Clone the repository beside your
+install (`git clone https://github.com/FahrenheitResearch/gm1`) and run them with the Python GM1 is installed in;
+`docs/NESTING.md` says which Python that is for the installer and for pip.
+
+### Known limitations
+
+- **The small example's nest did not stay on the storm** in its one test (run on GM1 0.1.0 on an RTX 4090).
+  Twenty-five minutes of storm time was too early for a vortex: the child was started by hand on rotation of 0.003
+  per second, where `tools/nest_place.py` proposed no start, followed a weak eddy on the outflow and moved 2.3 km in
+  four minutes, away from the storm, and the live check said NO_TORNADO. `small/` has not been run past 24 minutes
+  of storm time, so whether it ever makes tight rotation with the Norman sounding is not known; its 300 x 300 child
+  and `norman/` have not been run at all. The guide says not to start a nest before the placement tool proposes a
+  start.
+- **A nest following a real vortex has not been shown on a released build.** The 4 m run did it on a development
+  build that predates 0.1.0, and no 0.1.x build has repeated it. After 3312 s that run's time step was too long for
+  its winds, and nothing after 3312 s is cited. No nested run on a card smaller than 32 GB has made a tornado.
+- **Outsiders cannot yet re-derive the verdict from the public datasets.** The headline cannot yet be re-derived
+  from them: its genesis time, its 455 s and its 129.0 m/s record rest on window records that are not public, and
+  three of the four datasets cover the last minutes, after the limit was passed. What can be re-derived is
+  narrower: the 162 public one-a-second records from before 3312 s, converted and scored, give TORNADO for the last
+  161 s before the limit (peak 126.7 m/s). The verdicts page has the commands.
+- **The decks and recipes are checked on a CPU only.** None of the 40 example decks as written, and none of the
+  recipes, has been run on a GPU for these pages; the decks that have run are the first stages of `small/`, above.
+- **Unchanged since 0.1.0:** `gpuwm-cm1 quicklook FRAMES` and `gpuwm-cm1 cm1out FRAMES` write to `quicklook/` and
+  `cm1out/` beside the frames folder, not inside it, although their help says "default: TARGET/quicklook" (the
+  guides give every run a folder of its own; `--out DIR` chooses the place). A refused `gpuwm-cm1 edit` exits with
+  status 2 but leaves the refused value in the run folder's namelist, so later edits of that folder fail until the
+  key is set back.
+- The known limitations of 0.1.2, 0.1.1 and 0.1.0 still apply ("Known limitations" under each, and "Not in v0.1"
+  and "Further known limits" under "0.1.0", below).
+
 ## 0.1.2
 
 An engine update. GM1 now runs on ArWen 2.8.9 (gpuwm 2.8.9 and gpuwm-data 2.8.9) instead of 2.8.0, for

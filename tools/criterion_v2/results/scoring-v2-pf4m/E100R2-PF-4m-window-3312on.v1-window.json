@@ -1,0 +1,29 @@
+{
+ "verdict": "NO_TORNADO",
+ "genesis_model_time_s": null,
+ "samples": 1499,
+ "longest_qualifying_run_s": 6.09375,
+ "condition_counts": {
+  "zeta": 955,
+  "ground_relative_wind": 1499,
+  "core_radius": 1467,
+  "centre_move": 1492,
+  "qualifying": 918,
+  "no_centre": 0
+ },
+ "first_sample_model_time_s": 3312.0,
+ "last_sample_model_time_s": 3452.4375,
+ "source": "no live v1 sidecar: v1's host sample (reference_sample, the child-centre corner and its 300 m disk) recomputed on every window record and decided by v1's ledger at window cadence (the live criterion samples every parent step)",
+ "criterion_v1_sha256": "994cf1d0a1af811e13383b48196612931d7156a6e0ae684470ed92304cf11494",
+ "span": {
+  "label": "E100R2-PF-4m-window-3312on",
+  "t_min": 3312.0,
+  "t_max": 3452.4375,
+  "why": "3312.0-3452.4375 s: Courant number above 1 at times from 3312 s and most of the time from 3405 s (peak 1.28 at 3426 s); leg L0 failed at 3453 s"
+ },
+ "records": 1499,
+ "record_span_s": [
+  3312.0,
+  3452.4375
+ ]
+}

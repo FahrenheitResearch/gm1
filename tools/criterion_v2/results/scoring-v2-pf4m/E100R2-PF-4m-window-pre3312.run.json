@@ -1,0 +1,66 @@
+{
+ "label": "E100R2-PF-4m-window-pre3312",
+ "status": "scored",
+ "command": [
+  "/usr/bin/python3",
+  "CHECKOUT/tools/criterion_v2/window_segments.py",
+  "score",
+  "--span",
+  "E100R2-PF-4m-window-pre3312"
+ ],
+ "scorer_argv": [
+  "SCORING/views/E100R2-PF-4m-window-pre3312/seg-0",
+  "--out",
+  "SCORING/E100R2-PF-4m-window-pre3312",
+  "--kind",
+  "window",
+  "--label",
+  "E100R2-PF-4m-window-pre3312",
+  "--workers",
+  "5",
+  "--nest-start-s",
+  "2160",
+  "--parent-dx",
+  "100"
+ ],
+ "wall_s": 1455.956167936325,
+ "workers": 5,
+ "nest_start_s": 2160.0,
+ "nest_start_source": "S3/deck.toml [run] rstnum = 8 (P-chain restart 8, t = 2160 s); S3/run.log 'resumed 5760 completed large steps (t=2160.0s)'",
+ "parent_dx_m": 100.0,
+ "parent_dx_source": "deck [grid] dx_m",
+ "adapter": {
+  "views": [
+   "SCORING/views/E100R2-PF-4m-window-pre3312/seg-0",
+   "SCORING/views/E100R2-PF-4m-window-pre3312/seg-1"
+  ],
+  "span": {
+   "label": "E100R2-PF-4m-window-pre3312",
+   "t_min": null,
+   "t_max": 3312.0,
+   "t_max_exclusive": true,
+   "why": "before 3312.0 s (T+55:12), the first time CM1's Courant number (calccflquick, misclibs.F:2726-2814) exceeded 1 in L0's window records (STATUS.md 2026-09-24T11:10Z courant-correction); the headline span"
+  },
+  "reference_check": {
+   "reference": "RUN/admit-scratch/nestdt-checks-kept/chk-a-ctl",
+   "fields_agree": true,
+   "records_at_shared_times": 32,
+   "records_byte_identical": 32
+  },
+  "records": 12287,
+  "segments": [
+   {
+    "k": 0,
+    "stream": "RUN/S3/frames/nest-child-window",
+    "index_offset": 0,
+    "rows_in_segment": 12160
+   },
+   {
+    "k": 1,
+    "stream": "RUN/S3/L0-window-tail-3300.09375-3452.4375",
+    "index_offset": 12160,
+    "rows_in_segment": 1626
+   }
+  ]
+ }
+}

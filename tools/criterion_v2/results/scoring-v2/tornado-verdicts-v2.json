@@ -1,0 +1,3648 @@
+{
+ "schema": "gm1.tornado-verdicts/v2",
+ "generated_utc": "2026-09-22T19:52:24Z",
+ "updates": [
+  {
+   "utc": "2026-09-22T20:31:20Z",
+   "what": "E100W-window scored (UNRESOLVED) on the machine where its 121 GB stream lives, with the frozen scorer from a clean checkout of 0223670 (FROZEN.json hashes verified); its source record and E100W's run_verdict were collected there with verdict_table.py over the E100W sources and replaced here. No other run changed."
+  }
+ ],
+ "criterion": {
+  "name": "GM1 tornado criterion v2 (pre-registered)",
+  "doc": "docs/GM1-TORNADO-CRITERION-V2.md",
+  "freeze_commit": "198de287e3e304e32172003ad699c1d27e4211b3",
+  "frozen_utc": "2026-09-22T19:27:37Z",
+  "frozen": {
+   "criterion": "gm1.tornado-criterion/v2",
+   "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+   "files": {
+    "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+    "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+   }
+  }
+ },
+ "caption_wording": {
+  "TORNADO": "simulated tornado (GM1 criterion v2, {grid} grid, {cadence} output)",
+  "NO_TORNADO": "vortex did not meet GM1's tornado criterion (v2)",
+  "UNRESOLVED": "grid too coarse to judge (GM1 criterion v2)",
+  "INSUFFICIENT_CADENCE": "output too sparse or too short to judge duration (GM1 criterion v2)"
+ },
+ "time_convention": "T+m:ss is model time / 60 (T+70 = 4200 s)",
+ "runs": {
+  "E100V": {
+   "run_verdict": {
+    "outcome": "TORNADO",
+    "caption": "simulated tornado (GM1 criterion v2, 4 m grid, 0.5 s output)",
+    "source": "E100V-window",
+    "span": [
+     "T+76:00",
+     "T+82:00"
+    ],
+    "genesis": "T+76:00 (first sample: at or before)",
+    "basis": "E100V-window (window stream, 0.5 s, T+76:00-T+82:00)",
+    "other_sources": {
+     "E100V-child": "INSUFFICIENT_CADENCE"
+    },
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100V-window",
+     "run": "E100V",
+     "kind": "window",
+     "grid": "4 m",
+     "note": "0.5 s window stream, T+76-82 (advecting winds uadv/vadv)",
+     "status": "scored",
+     "source_path": "RUNS/E100V/frames/nest-child-window",
+     "samples": 721,
+     "record": [
+      4560.0,
+      4920.0
+     ],
+     "record_T": [
+      "T+76:00",
+      "T+82:00"
+     ],
+     "cadence_s": 0.5,
+     "intervals_s": [
+      0.5
+     ],
+     "max_interval_s": 0.5,
+     "dx_m": 4.0,
+     "lowest_scalar_level_m": 2.0,
+     "v2": {
+      "outcome": "TORNADO",
+      "caption": "simulated tornado (GM1 criterion v2, 4 m grid, 0.5 s output)",
+      "reason": null,
+      "genesis_model_time_s": 4560.0,
+      "episodes": [
+       {
+        "start_s": 4560.0,
+        "end_s": 4920.0,
+        "span_s": 360.0,
+        "samples": 715,
+        "vmax_peak_m_s": 82.01024933977054,
+        "ground_wind_peak_m_s": 111.65663258125679,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4890.5,
+        "span_s": 330.5,
+        "samples": 656,
+        "vmax_peak_m_s": 67.64112436012452,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4858.0,
+        "span_s": 298.0,
+        "samples": 591,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4857.5,
+        "span_s": 297.5,
+        "samples": 590,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4857.0,
+        "span_s": 297.0,
+        "samples": 589,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4856.0,
+        "span_s": 296.0,
+        "samples": 587,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4855.5,
+        "span_s": 295.5,
+        "samples": 586,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4854.5,
+        "span_s": 294.5,
+        "samples": 584,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4854.5,
+        "span_s": 294.5,
+        "samples": 584,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4853.5,
+        "span_s": 293.5,
+        "samples": 582,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4853.5,
+        "span_s": 293.5,
+        "samples": 582,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4853.0,
+        "span_s": 293.0,
+        "samples": 581,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4852.5,
+        "span_s": 292.5,
+        "samples": 580,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4852.0,
+        "span_s": 292.0,
+        "samples": 579,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4851.5,
+        "span_s": 291.5,
+        "samples": 578,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4851.0,
+        "span_s": 291.0,
+        "samples": 577,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4850.5,
+        "span_s": 290.5,
+        "samples": 576,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4850.0,
+        "span_s": 290.0,
+        "samples": 575,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4850.0,
+        "span_s": 290.0,
+        "samples": 575,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4849.0,
+        "span_s": 289.0,
+        "samples": 572,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4848.0,
+        "span_s": 288.0,
+        "samples": 571,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4847.5,
+        "span_s": 287.5,
+        "samples": 570,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4846.5,
+        "span_s": 286.5,
+        "samples": 568,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4846.0,
+        "span_s": 286.0,
+        "samples": 567,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4846.0,
+        "span_s": 286.0,
+        "samples": 567,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4846.0,
+        "span_s": 286.0,
+        "samples": 567,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4845.5,
+        "span_s": 285.5,
+        "samples": 566,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4845.5,
+        "span_s": 285.5,
+        "samples": 566,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4845.0,
+        "span_s": 285.0,
+        "samples": 565,
+        "vmax_peak_m_s": 65.73218823731469,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4844.5,
+        "span_s": 284.5,
+        "samples": 567,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4841.5,
+        "span_s": 281.5,
+        "samples": 562,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 103.2407895699097,
+        "rmw_range_m": [
+         16.0,
+         178.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4841.0,
+        "span_s": 281.0,
+        "samples": 561,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 100.73648014234645,
+        "rmw_range_m": [
+         16.0,
+         180.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4840.5,
+        "span_s": 280.5,
+        "samples": 560,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 101.76271082105991,
+        "rmw_range_m": [
+         16.0,
+         180.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4835.0,
+        "span_s": 275.0,
+        "samples": 548,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 108.72907693102144,
+        "rmw_range_m": [
+         16.0,
+         212.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4833.0,
+        "span_s": 273.0,
+        "samples": 544,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 104.28669377256668,
+        "rmw_range_m": [
+         16.0,
+         228.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4830.5,
+        "span_s": 270.5,
+        "samples": 538,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 100.59269655716453,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4744.0,
+        "span_s": 184.0,
+        "samples": 367,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4690.0,
+        "span_s": 130.0,
+        "samples": 259,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4689.0,
+        "span_s": 129.0,
+        "samples": 257,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4688.5,
+        "span_s": 128.5,
+        "samples": 256,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4688.0,
+        "span_s": 128.0,
+        "samples": 255,
+        "vmax_peak_m_s": 40.844394241799286,
+        "ground_wind_peak_m_s": 71.60488910530509,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       },
+       {
+        "start_s": 4560.0,
+        "end_s": 4685.5,
+        "span_s": 125.5,
+        "samples": 251,
+        "vmax_peak_m_s": 40.0128952036326,
+        "ground_wind_peak_m_s": 70.92217178499044,
+        "rmw_range_m": [
+         16.0,
+         160.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ]
+       }
+      ],
+      "longest_qualifying_run_s": 360.0,
+      "longest_qualifying_or_unresolved_run_s": 360.0,
+      "longest_qualifying_run_plausible_links_s": 360.0,
+      "reported_60s_rule": {
+       "longest_s": 360.0,
+       "would_be_tornado": true
+      },
+      "class_counts": {
+       "Q": 719,
+       "U": 2
+      },
+      "condition_counts": {
+       "E": 721,
+       "R": 721,
+       "C": 721,
+       "A": 721,
+       "Z": 721,
+       "W": 721,
+       "S": 719
+      },
+      "marginal_counts": {
+       "R": 0,
+       "Z": 0,
+       "W": 0
+      },
+      "flag_counts": {},
+      "cadence_statement": "judged from window output at a median 0.5 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "T+76:00",
+     "v1": null,
+     "tornado_events": [
+      {
+       "start_s": 4560.0,
+       "end_s": 4920.0,
+       "chains": 42,
+       "primary": {
+        "start_s": 4560.0,
+        "end_s": 4920.0,
+        "span_s": 360.0,
+        "samples": 715,
+        "vmax_peak_m_s": 82.0102,
+        "ground_wind_peak_m_s": 111.6566,
+        "rmw_range_m": [
+         16.0,
+         246.0
+        ],
+        "centre_ground_start_m": [
+         102113.0,
+         86841.0
+        ],
+        "recovered": true,
+        "circulation_median_m2_s": 13714.63780889098,
+        "circulation_peak_m2_s": 37224.8343966245,
+        "circulation_peak_time_s": 4830.0,
+        "circulation_range_m2_s": [
+         3159.276050318319,
+         37224.8343966245
+        ],
+        "ground_wind_peak_time_s": 4900.0,
+        "rmw_median_m": 58.0,
+        "matches_verdict": true
+       }
+      }
+     ],
+     "episodes_recovered": true,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 721,
+      "class_counts": {
+       "Q": 719,
+       "U": 2
+      },
+      "ground_wind_peak_m_s": 111.6566,
+      "ground_wind_peak_time_s": 4900.0,
+      "rmw_at_peak_m": 70.0,
+      "circulation_at_peak_m2_s": 33650.3231,
+      "vmax_peak_m_s": 82.0102
+     },
+     "class_segments": [
+      {
+       "class": "Q",
+       "start_s": 4560.0,
+       "end_s": 4684.0,
+       "samples": 249,
+       "start": "T+76:00",
+       "end": "T+78:04"
+      },
+      {
+       "class": "U",
+       "start_s": 4684.5,
+       "end_s": 4684.5,
+       "samples": 1,
+       "start": "T+78:04.5",
+       "end": "T+78:04.5"
+      },
+      {
+       "class": "Q",
+       "start_s": 4685.0,
+       "end_s": 4686.0,
+       "samples": 3,
+       "start": "T+78:05",
+       "end": "T+78:06"
+      },
+      {
+       "class": "U",
+       "start_s": 4686.5,
+       "end_s": 4686.5,
+       "samples": 1,
+       "start": "T+78:06.5",
+       "end": "T+78:06.5"
+      },
+      {
+       "class": "Q",
+       "start_s": 4687.0,
+       "end_s": 4920.0,
+       "samples": 467,
+       "start": "T+78:07",
+       "end": "T+82:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4560.0,
+       "end_s": 4920.0,
+       "start": "T+76:00",
+       "end": "T+82:00",
+       "state": "tornado 1",
+       "caption": "simulated tornado (GM1 criterion v2, 4 m grid, 0.5 s output)",
+       "numbers": {
+        "samples": 721,
+        "class_counts": {
+         "Q": 719,
+         "U": 2
+        },
+        "ground_wind_peak_m_s": 111.6566,
+        "ground_wind_peak_time_s": 4900.0,
+        "rmw_at_peak_m": 70.0,
+        "circulation_at_peak_m2_s": 33650.3231,
+        "vmax_peak_m_s": 82.0102
+       },
+       "tornado": {
+        "start_s": 4560.0,
+        "end_s": 4920.0,
+        "chains": 42,
+        "primary": {
+         "start_s": 4560.0,
+         "end_s": 4920.0,
+         "span_s": 360.0,
+         "samples": 715,
+         "vmax_peak_m_s": 82.0102,
+         "ground_wind_peak_m_s": 111.6566,
+         "rmw_range_m": [
+          16.0,
+          246.0
+         ],
+         "centre_ground_start_m": [
+          102113.0,
+          86841.0
+         ],
+         "recovered": true,
+         "circulation_median_m2_s": 13714.63780889098,
+         "circulation_peak_m2_s": 37224.8343966245,
+         "circulation_peak_time_s": 4830.0,
+         "circulation_range_m2_s": [
+          3159.276050318319,
+          37224.8343966245
+         ],
+         "ground_wind_peak_time_s": 4900.0,
+         "rmw_median_m": 58.0,
+         "matches_verdict": true
+        }
+       },
+       "genesis_note": "the record opens with this vortex already qualifying: genesis is at or before the first sample"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 0
+      },
+      "source": {
+       "kind": "window",
+       "path": "RUNS/E100V/frames/nest-child-window",
+       "samples_read": 721,
+       "first_index": 0,
+       "last_index": 720,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100V-window",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "python3",
+        "code/tools/criterion_v2/score.py",
+        "RUNS/E100V/frames/nest-child-window",
+        "--out",
+        "runs/E100V-window",
+        "--label",
+        "E100V window (0.5 s, T+76-82)",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100",
+        "--workers",
+        "1"
+       ],
+       "wall_s": 382.47753286361694,
+       "launched": "directly, before score_runs.py existed; the same arguments score_runs.py gives this source (kind inferred as window)",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "nest_start_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+       "parent_dx_source": "RUNS/E100V.toml [grid] dx_m"
+      }
+     }
+    },
+    {
+     "label": "E100V-child",
+     "run": "E100V",
+     "kind": "child",
+     "grid": "4 m",
+     "note": "60 s child frames T+71-85",
+     "status": "scored",
+     "source_path": "RUNS/E100V/frames/nest-child",
+     "samples": 15,
+     "record": [
+      4260.0,
+      5100.0
+     ],
+     "record_T": [
+      "T+71:00",
+      "T+85:00"
+     ],
+     "cadence_s": 60.0,
+     "intervals_s": [
+      60.0
+     ],
+     "max_interval_s": 60.0,
+     "dx_m": 4.0,
+     "lowest_scalar_level_m": 2.0,
+     "v2": {
+      "outcome": "INSUFFICIENT_CADENCE",
+      "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+      "reason": "qualifying vortices were present in consecutive samples for 840 s, but between samples the centre moved more than the two core radii in the storm-following frame: the output interval cannot show that one vortex persisted",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 60.0,
+      "longest_qualifying_or_unresolved_run_s": 60.0,
+      "longest_qualifying_run_plausible_links_s": 600.0,
+      "reported_60s_rule": {
+       "longest_s": 60.0,
+       "would_be_tornado": true
+      },
+      "class_counts": {
+       "U": 4,
+       "Q": 11
+      },
+      "condition_counts": {
+       "E": 15,
+       "R": 14,
+       "C": 15,
+       "A": 15,
+       "Z": 15,
+       "W": 15,
+       "S": 11
+      },
+      "marginal_counts": {
+       "R": 1,
+       "Z": 0,
+       "W": 0
+      },
+      "flag_counts": {},
+      "cadence_statement": "judged from child output at a median 60 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "NO_TORNADO",
+      "genesis_model_time_s": null,
+      "samples": 2400,
+      "longest_qualifying_run_s": 35.625,
+      "condition_counts": {
+       "zeta": 954,
+       "ground_relative_wind": 2217,
+       "core_radius": 2379,
+       "centre_move": 2349,
+       "qualifying": 889,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 4200.375,
+      "last_sample_model_time_s": 5100.0,
+      "source": "live v1 sidecar replayed (v1 samples every parent step)"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 15,
+      "class_counts": {
+       "U": 4,
+       "Q": 11
+      },
+      "ground_wind_peak_m_s": 106.0405,
+      "ground_wind_peak_time_s": 4920.0,
+      "rmw_at_peak_m": 68.0,
+      "circulation_at_peak_m2_s": 33194.7281,
+      "vmax_peak_m_s": 77.6927
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4260.0,
+       "end_s": 4440.0,
+       "samples": 4,
+       "start": "T+71:00",
+       "end": "T+74:00"
+      },
+      {
+       "class": "Q",
+       "start_s": 4500.0,
+       "end_s": 5100.0,
+       "samples": 11,
+       "start": "T+75:00",
+       "end": "T+85:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4260.0,
+       "end_s": 5100.0,
+       "start": "T+71:00",
+       "end": "T+85:00",
+       "state": "whole record",
+       "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+       "numbers": {
+        "samples": 15,
+        "class_counts": {
+         "U": 4,
+         "Q": 11
+        },
+        "ground_wind_peak_m_s": 106.0405,
+        "ground_wind_peak_time_s": 4920.0,
+        "rmw_at_peak_m": 68.0,
+        "circulation_at_peak_m2_s": 33194.7281,
+        "vmax_peak_m_s": 77.6927
+       },
+       "spinup_note": "samples before T+75:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 4
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100V/frames/nest-child",
+       "samples_read": 15,
+       "first_index": 8,
+       "last_index": 22,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100V-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100V/frames/nest-child",
+        "--out",
+        "runs/E100V-child",
+        "--label",
+        "E100V-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 27.814088582992554,
+       "nest_start_source": "E100V deck: E100P resumed at T+70 (restart 2)",
+       "parent_dx_source": "RUNS/E100V.toml [grid] dx_m",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    }
+   ]
+  },
+  "E100P": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E100V-parent",
+    "span": [
+     "T+71:00",
+     "T+85:00"
+    ],
+    "genesis": "-",
+    "basis": "E100V-parent (parent frames, 60 s, T+71:00-T+85:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100V-parent",
+     "run": "E100P",
+     "kind": "parent",
+     "grid": "100 m",
+     "note": "E100V's 100 m parent frames stand in for E100P after T+70 (pre-registered)",
+     "status": "scored",
+     "source_path": "RUNS/E100V/frames",
+     "samples": 15,
+     "record": [
+      4260.0,
+      5100.0
+     ],
+     "record_T": [
+      "T+71:00",
+      "T+85:00"
+     ],
+     "cadence_s": 60.0,
+     "intervals_s": [
+      60.0
+     ],
+     "max_interval_s": 60.0,
+     "dx_m": 100.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "horizontal grid spacing 100 m exceeds 25 m",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 240.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 11,
+       "N": 4
+      },
+      "condition_counts": {
+       "E": 15,
+       "R": 6,
+       "C": 15,
+       "A": 15,
+       "Z": 15,
+       "W": 14,
+       "S": 0
+      },
+      "marginal_counts": {
+       "R": 5,
+       "Z": 0,
+       "W": 1
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 15
+      },
+      "cadence_statement": "judged from parent output at a median 60 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 15,
+      "class_counts": {
+       "U": 11,
+       "N": 4
+      },
+      "ground_wind_peak_m_s": 72.6678,
+      "ground_wind_peak_time_s": 4980.0,
+      "rmw_at_peak_m": 200.0,
+      "circulation_at_peak_m2_s": 31787.8943,
+      "vmax_peak_m_s": 29.889
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4260.0,
+       "end_s": 4320.0,
+       "samples": 2,
+       "start": "T+71:00",
+       "end": "T+72:00"
+      },
+      {
+       "class": "N",
+       "start_s": 4380.0,
+       "end_s": 4440.0,
+       "samples": 2,
+       "start": "T+73:00",
+       "end": "T+74:00"
+      },
+      {
+       "class": "U",
+       "start_s": 4500.0,
+       "end_s": 4620.0,
+       "samples": 3,
+       "start": "T+75:00",
+       "end": "T+77:00"
+      },
+      {
+       "class": "N",
+       "start_s": 4680.0,
+       "end_s": 4740.0,
+       "samples": 2,
+       "start": "T+78:00",
+       "end": "T+79:00"
+      },
+      {
+       "class": "U",
+       "start_s": 4800.0,
+       "end_s": 5100.0,
+       "samples": 6,
+       "start": "T+80:00",
+       "end": "T+85:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4260.0,
+       "end_s": 5100.0,
+       "start": "T+71:00",
+       "end": "T+85:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 15,
+        "class_counts": {
+         "U": 11,
+         "N": 4
+        },
+        "ground_wind_peak_m_s": 72.6678,
+        "ground_wind_peak_time_s": 4980.0,
+        "rmw_at_peak_m": 200.0,
+        "circulation_at_peak_m2_s": 31787.8943,
+        "vmax_peak_m_s": 29.889
+       }
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": null,
+      "source": {
+       "kind": "parent",
+       "path": "RUNS/E100V/frames",
+       "samples_read": 15,
+       "first_index": 8,
+       "last_index": 22,
+       "every": 1,
+       "start_s": 4200.0,
+       "end_s": null,
+       "deck": "RUNS/E100V.toml",
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100V-parent",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100V/frames",
+        "--out",
+        "runs/E100V-parent",
+        "--label",
+        "E100V-parent",
+        "--workers",
+        "1",
+        "--kind",
+        "parent",
+        "--deck",
+        "RUNS/E100V.toml",
+        "--start",
+        "4200"
+       ],
+       "wall_s": 25.747565746307373
+      }
+     }
+    }
+   ]
+  },
+  "E100W": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E100W-window",
+    "span": [
+     "T+72:00",
+     "T+82:00"
+    ],
+    "genesis": "-",
+    "basis": "E100W-window (window stream, 0.5 s, T+72:00-T+82:00)",
+    "other_sources": {
+     "E100W-child": "INSUFFICIENT_CADENCE"
+    },
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100W-child",
+     "run": "E100W",
+     "kind": "child",
+     "grid": "20 m",
+     "note": "75 s child frames: INSUFFICIENT_CADENCE by construction (pre-registered)",
+     "status": "scored",
+     "source_path": "RUNS/E100W/frames/nest-child",
+     "samples": 12,
+     "record": [
+      4275.0,
+      5100.0
+     ],
+     "record_T": [
+      "T+71:15",
+      "T+85:00"
+     ],
+     "cadence_s": 75.0,
+     "intervals_s": [
+      75.0
+     ],
+     "max_interval_s": 75.0,
+     "dx_m": 20.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "INSUFFICIENT_CADENCE",
+      "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+      "reason": "12 sample(s) spanning 825 s with intervals [75.0] s: no stretch of the record at <= 60 s spacing lasts 120 s",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 12
+      },
+      "condition_counts": {
+       "E": 12,
+       "R": 11,
+       "C": 12,
+       "A": 12,
+       "Z": 12,
+       "W": 12,
+       "S": 0
+      },
+      "marginal_counts": {
+       "R": 1,
+       "Z": 0,
+       "W": 0
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 2
+      },
+      "cadence_statement": "judged from child output at a median 75 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "NO_TORNADO",
+      "genesis_model_time_s": null,
+      "samples": 2400,
+      "longest_qualifying_run_s": 46.125,
+      "condition_counts": {
+       "zeta": 2400,
+       "ground_relative_wind": 2379,
+       "core_radius": 565,
+       "centre_move": 2283,
+       "qualifying": 546,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 4200.375,
+      "last_sample_model_time_s": 5100.0,
+      "source": "live v1 sidecar replayed (v1 samples every parent step)"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 12,
+      "class_counts": {
+       "U": 12
+      },
+      "ground_wind_peak_m_s": 88.9498,
+      "ground_wind_peak_time_s": 4800.0,
+      "rmw_at_peak_m": 40.0,
+      "circulation_at_peak_m2_s": 13912.8107,
+      "vmax_peak_m_s": 55.3573
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4275.0,
+       "end_s": 5100.0,
+       "samples": 12,
+       "start": "T+71:15",
+       "end": "T+85:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4275.0,
+       "end_s": 5100.0,
+       "start": "T+71:15",
+       "end": "T+85:00",
+       "state": "whole record",
+       "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+       "numbers": {
+        "samples": 12,
+        "class_counts": {
+         "U": 12
+        },
+        "ground_wind_peak_m_s": 88.9498,
+        "ground_wind_peak_time_s": 4800.0,
+        "rmw_at_peak_m": 40.0,
+        "circulation_at_peak_m2_s": 13912.8107,
+        "vmax_peak_m_s": 55.3573
+       },
+       "spinup_note": "samples before T+75:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 3
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100W/frames/nest-child",
+       "samples_read": 12,
+       "first_index": 8,
+       "last_index": 19,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100W-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100W/frames/nest-child",
+        "--out",
+        "runs/E100W-child",
+        "--label",
+        "E100W-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 25.063023805618286,
+       "nest_start_source": "E100W resumed E100P at T+70 (sidecar first sample 4200.375 s = parent step 11201)",
+       "parent_dx_source": "manifest: E100P, the 100 m El Reno parent",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    },
+    {
+     "label": "E100W-window",
+     "run": "E100W",
+     "kind": "window",
+     "grid": "20 m",
+     "note": "0.5 s window stream, T+72-82; 121 GB, so scored on the machine that holds it (--root viz=RUNS)",
+     "status": "scored",
+     "source_path": "RUNS/E100W/frames/nest-child-window",
+     "samples": 1201,
+     "record": [
+      4320.0,
+      4920.0
+     ],
+     "record_T": [
+      "T+72:00",
+      "T+82:00"
+     ],
+     "cadence_s": 0.5,
+     "intervals_s": [
+      0.5
+     ],
+     "max_interval_s": 0.5,
+     "dx_m": 20.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "one tracked vortex met every condition for >= 120 s except that its RMW was below 4 dx or a threshold was met only within the discretisation uncertainty (marginal)",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 512.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 1200,
+       "Q": 1
+      },
+      "condition_counts": {
+       "E": 1201,
+       "R": 1139,
+       "C": 1201,
+       "A": 1201,
+       "Z": 1201,
+       "W": 1180,
+       "S": 1
+      },
+      "marginal_counts": {
+       "R": 62,
+       "Z": 0,
+       "W": 21
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 264
+      },
+      "cadence_statement": "judged from window output at a median 0.5 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 1201,
+      "class_counts": {
+       "U": 1200,
+       "Q": 1
+      },
+      "ground_wind_peak_m_s": 92.0916,
+      "ground_wind_peak_time_s": 4593.5,
+      "rmw_at_peak_m": 44.0,
+      "circulation_at_peak_m2_s": 14245.9661,
+      "vmax_peak_m_s": 57.9971
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4320.0,
+       "end_s": 4572.0,
+       "samples": 505,
+       "start": "T+72:00",
+       "end": "T+76:12"
+      },
+      {
+       "class": "Q",
+       "start_s": 4572.5,
+       "end_s": 4572.5,
+       "samples": 1,
+       "start": "T+76:12.5",
+       "end": "T+76:12.5"
+      },
+      {
+       "class": "U",
+       "start_s": 4573.0,
+       "end_s": 4920.0,
+       "samples": 695,
+       "start": "T+76:13",
+       "end": "T+82:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4320.0,
+       "end_s": 4920.0,
+       "start": "T+72:00",
+       "end": "T+82:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 1201,
+        "class_counts": {
+         "U": 1200,
+         "Q": 1
+        },
+        "ground_wind_peak_m_s": 92.0916,
+        "ground_wind_peak_time_s": 4593.5,
+        "rmw_at_peak_m": 44.0,
+        "circulation_at_peak_m2_s": 14245.9661,
+        "vmax_peak_m_s": 57.9971
+       },
+       "spinup_note": "samples before T+75:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 360
+      },
+      "source": {
+       "kind": "window",
+       "path": "RUNS/E100W/frames/nest-child-window",
+       "samples_read": 1201,
+       "first_index": 0,
+       "last_index": 1200,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100W-window",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100W/frames/nest-child-window",
+        "--out",
+        "out/E100W-window",
+        "--label",
+        "E100W-window",
+        "--workers",
+        "1",
+        "--kind",
+        "window",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 1807.507807970047,
+       "nest_start_source": "as E100W-child",
+       "parent_dx_source": "manifest parent_dx_m",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    }
+   ]
+  },
+  "E100N": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E100N-child",
+    "span": [
+     "T+60:30",
+     "T+90:00"
+    ],
+    "genesis": "-",
+    "basis": "E100N-child (child frames, 30 s, T+60:30-T+90:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100N-child",
+     "run": "E100N",
+     "kind": "child",
+     "grid": "20 m",
+     "note": "fixed 20 m nest, 30 s child frames T+60-90; no live v1 sidecar",
+     "status": "scored",
+     "source_path": "RUNS/E100N/frames/nest-child",
+     "samples": 60,
+     "record": [
+      3630.0,
+      5400.0
+     ],
+     "record_T": [
+      "T+60:30",
+      "T+90:00"
+     ],
+     "cadence_s": 30.0,
+     "intervals_s": [
+      30.0
+     ],
+     "max_interval_s": 30.0,
+     "dx_m": 20.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "one tracked vortex met every condition for >= 120 s except that its RMW was below 4 dx or a threshold was met only within the discretisation uncertainty (marginal)",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 30.0,
+      "longest_qualifying_or_unresolved_run_s": 210.0,
+      "longest_qualifying_run_plausible_links_s": 30.0,
+      "reported_60s_rule": {
+       "longest_s": 30.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 45,
+       "N": 10,
+       "Q": 5
+      },
+      "condition_counts": {
+       "E": 59,
+       "R": 38,
+       "C": 60,
+       "A": 60,
+       "Z": 60,
+       "W": 54,
+       "S": 6
+      },
+      "marginal_counts": {
+       "R": 13,
+       "Z": 0,
+       "W": 6
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 16
+      },
+      "cadence_statement": "judged from child output at a median 30 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "TORNADO",
+      "genesis_model_time_s": 4470.0,
+      "samples": 60,
+      "longest_qualifying_run_s": 330.0,
+      "condition_counts": {
+       "zeta": 58,
+       "ground_relative_wind": 50,
+       "core_radius": 23,
+       "centre_move": 46,
+       "qualifying": 17,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 3630.0,
+      "last_sample_model_time_s": 5400.0,
+      "source": "no live v1 sidecar: v1's host sample recomputed on every child frame and decided by v1's ledger at frame cadence (the live criterion samples every parent step)",
+      "criterion_v1_sha256": "994cf1d0a1af811e13383b48196612931d7156a6e0ae684470ed92304cf11494"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 60,
+      "class_counts": {
+       "U": 45,
+       "N": 10,
+       "Q": 5
+      },
+      "ground_wind_peak_m_s": 117.1298,
+      "ground_wind_peak_time_s": 4680.0,
+      "rmw_at_peak_m": 56.0,
+      "circulation_at_peak_m2_s": 31968.4695,
+      "vmax_peak_m_s": 90.8561
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 3630.0,
+       "end_s": 3900.0,
+       "samples": 10,
+       "start": "T+60:30",
+       "end": "T+65:00"
+      },
+      {
+       "class": "N",
+       "start_s": 3930.0,
+       "end_s": 3960.0,
+       "samples": 2,
+       "start": "T+65:30",
+       "end": "T+66:00"
+      },
+      {
+       "class": "U",
+       "start_s": 3990.0,
+       "end_s": 3990.0,
+       "samples": 1,
+       "start": "T+66:30",
+       "end": "T+66:30"
+      },
+      {
+       "class": "N",
+       "start_s": 4020.0,
+       "end_s": 4050.0,
+       "samples": 2,
+       "start": "T+67:00",
+       "end": "T+67:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4080.0,
+       "end_s": 4170.0,
+       "samples": 4,
+       "start": "T+68:00",
+       "end": "T+69:30"
+      },
+      {
+       "class": "N",
+       "start_s": 4200.0,
+       "end_s": 4290.0,
+       "samples": 4,
+       "start": "T+70:00",
+       "end": "T+71:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4320.0,
+       "end_s": 4440.0,
+       "samples": 5,
+       "start": "T+72:00",
+       "end": "T+74:00"
+      },
+      {
+       "class": "Q",
+       "start_s": 4470.0,
+       "end_s": 4470.0,
+       "samples": 1,
+       "start": "T+74:30",
+       "end": "T+74:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4500.0,
+       "end_s": 4530.0,
+       "samples": 2,
+       "start": "T+75:00",
+       "end": "T+75:30"
+      },
+      {
+       "class": "Q",
+       "start_s": 4560.0,
+       "end_s": 4590.0,
+       "samples": 2,
+       "start": "T+76:00",
+       "end": "T+76:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4620.0,
+       "end_s": 4830.0,
+       "samples": 8,
+       "start": "T+77:00",
+       "end": "T+80:30"
+      },
+      {
+       "class": "Q",
+       "start_s": 4860.0,
+       "end_s": 4890.0,
+       "samples": 2,
+       "start": "T+81:00",
+       "end": "T+81:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4920.0,
+       "end_s": 5280.0,
+       "samples": 13,
+       "start": "T+82:00",
+       "end": "T+88:00"
+      },
+      {
+       "class": "N",
+       "start_s": 5310.0,
+       "end_s": 5310.0,
+       "samples": 1,
+       "start": "T+88:30",
+       "end": "T+88:30"
+      },
+      {
+       "class": "U",
+       "start_s": 5340.0,
+       "end_s": 5370.0,
+       "samples": 2,
+       "start": "T+89:00",
+       "end": "T+89:30"
+      },
+      {
+       "class": "N",
+       "start_s": 5400.0,
+       "end_s": 5400.0,
+       "samples": 1,
+       "start": "T+90:00",
+       "end": "T+90:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 3630.0,
+       "end_s": 5400.0,
+       "start": "T+60:30",
+       "end": "T+90:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 60,
+        "class_counts": {
+         "U": 45,
+         "N": 10,
+         "Q": 5
+        },
+        "ground_wind_peak_m_s": 117.1298,
+        "ground_wind_peak_time_s": 4680.0,
+        "rmw_at_peak_m": 56.0,
+        "circulation_at_peak_m2_s": 31968.4695,
+        "vmax_peak_m_s": 90.8561
+       },
+       "spinup_note": "samples before T+65:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 3600.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 3900.0,
+       "samples_judged_at_parent_dx": 9
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100N/frames/nest-child",
+       "samples_read": 60,
+       "first_index": 7,
+       "last_index": 66,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100N-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100N/frames/nest-child",
+        "--out",
+        "runs/E100N-child",
+        "--label",
+        "E100N-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "3600",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 119.11207842826843,
+       "nest_start_source": "RUNS/E100N/receipt.json restart.resumed_model_time_s",
+       "parent_dx_source": "RUNS/E100N.toml [grid] dx_m",
+       "nest_start_s": 3600.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    }
+   ]
+  },
+  "E100N parent": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E100N-parent",
+    "span": [
+     "T+60:30",
+     "T+90:00"
+    ],
+    "genesis": "-",
+    "basis": "E100N-parent (parent frames, 30 s, T+60:30-T+90:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100N-parent",
+     "run": "E100N parent",
+     "kind": "parent",
+     "grid": "100 m",
+     "note": "E100N's 100 m parent frames, 30 s",
+     "status": "scored",
+     "source_path": "RUNS/E100N/frames",
+     "samples": 60,
+     "record": [
+      3630.0,
+      5400.0
+     ],
+     "record_T": [
+      "T+60:30",
+      "T+90:00"
+     ],
+     "cadence_s": 30.0,
+     "intervals_s": [
+      30.0
+     ],
+     "max_interval_s": 30.0,
+     "dx_m": 100.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "horizontal grid spacing 100 m exceeds 25 m",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 300.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "N": 40,
+       "U": 20
+      },
+      "condition_counts": {
+       "E": 60,
+       "R": 17,
+       "C": 60,
+       "A": 41,
+       "Z": 42,
+       "W": 42,
+       "S": 0
+      },
+      "marginal_counts": {
+       "R": 4,
+       "Z": 7,
+       "W": 11
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 56
+      },
+      "cadence_statement": "judged from parent output at a median 30 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 60,
+      "class_counts": {
+       "N": 40,
+       "U": 20
+      },
+      "ground_wind_peak_m_s": 86.0543,
+      "ground_wind_peak_time_s": 4800.0,
+      "rmw_at_peak_m": 200.0,
+      "circulation_at_peak_m2_s": 30471.8476,
+      "vmax_peak_m_s": 39.8867
+     },
+     "class_segments": [
+      {
+       "class": "N",
+       "start_s": 3630.0,
+       "end_s": 4350.0,
+       "samples": 25,
+       "start": "T+60:30",
+       "end": "T+72:30"
+      },
+      {
+       "class": "U",
+       "start_s": 4380.0,
+       "end_s": 4410.0,
+       "samples": 2,
+       "start": "T+73:00",
+       "end": "T+73:30"
+      },
+      {
+       "class": "N",
+       "start_s": 4440.0,
+       "end_s": 4440.0,
+       "samples": 1,
+       "start": "T+74:00",
+       "end": "T+74:00"
+      },
+      {
+       "class": "U",
+       "start_s": 4470.0,
+       "end_s": 4950.0,
+       "samples": 17,
+       "start": "T+74:30",
+       "end": "T+82:30"
+      },
+      {
+       "class": "N",
+       "start_s": 4980.0,
+       "end_s": 5130.0,
+       "samples": 6,
+       "start": "T+83:00",
+       "end": "T+85:30"
+      },
+      {
+       "class": "U",
+       "start_s": 5160.0,
+       "end_s": 5160.0,
+       "samples": 1,
+       "start": "T+86:00",
+       "end": "T+86:00"
+      },
+      {
+       "class": "N",
+       "start_s": 5190.0,
+       "end_s": 5400.0,
+       "samples": 8,
+       "start": "T+86:30",
+       "end": "T+90:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 3630.0,
+       "end_s": 5400.0,
+       "start": "T+60:30",
+       "end": "T+90:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 60,
+        "class_counts": {
+         "N": 40,
+         "U": 20
+        },
+        "ground_wind_peak_m_s": 86.0543,
+        "ground_wind_peak_time_s": 4800.0,
+        "rmw_at_peak_m": 200.0,
+        "circulation_at_peak_m2_s": 30471.8476,
+        "vmax_peak_m_s": 39.8867
+       }
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": null,
+      "source": {
+       "kind": "parent",
+       "path": "RUNS/E100N/frames",
+       "samples_read": 60,
+       "first_index": 7,
+       "last_index": 66,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": "RUNS/E100N.toml",
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100N-parent",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100N/frames",
+        "--out",
+        "runs/E100N-parent",
+        "--label",
+        "E100N-parent",
+        "--workers",
+        "1",
+        "--kind",
+        "parent",
+        "--deck",
+        "RUNS/E100N.toml"
+       ],
+       "wall_s": 83.34210276603699
+      }
+     }
+    }
+   ]
+  },
+  "E100L-500t": {
+   "run_verdict": {
+    "outcome": "INSUFFICIENT_CADENCE",
+    "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+    "source": "E100L-500t-child",
+    "span": [
+     "T+67:30",
+     "T+90:00"
+    ],
+    "genesis": "-",
+    "basis": "E100L-500t-child (child frames, 150 s, T+67:30-T+90:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100L-500t-child",
+     "run": "E100L-500t",
+     "kind": "child",
+     "grid": "20 m",
+     "note": "20 m nest, 150 s child frames",
+     "status": "scored",
+     "source_path": "RUNS/E100L-500t/frames/nest-child",
+     "samples": 10,
+     "record": [
+      4050.0,
+      5400.0
+     ],
+     "record_T": [
+      "T+67:30",
+      "T+90:00"
+     ],
+     "cadence_s": 150.0,
+     "intervals_s": [
+      150.0
+     ],
+     "max_interval_s": 150.0,
+     "dx_m": 20.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "INSUFFICIENT_CADENCE",
+      "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+      "reason": "10 sample(s) spanning 1350 s with intervals [150.0] s: no stretch of the record at <= 60 s spacing lasts 120 s",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 7,
+       "N": 1,
+       "Q": 2
+      },
+      "condition_counts": {
+       "E": 10,
+       "R": 8,
+       "C": 10,
+       "A": 10,
+       "Z": 10,
+       "W": 10,
+       "S": 3
+      },
+      "marginal_counts": {
+       "R": 1,
+       "Z": 0,
+       "W": 0
+      },
+      "flag_counts": {},
+      "cadence_statement": "judged from child output at a median 150 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "TORNADO",
+      "genesis_model_time_s": 4800.0,
+      "samples": 10,
+      "longest_qualifying_run_s": 450.0,
+      "condition_counts": {
+       "zeta": 10,
+       "ground_relative_wind": 10,
+       "core_radius": 5,
+       "centre_move": 10,
+       "qualifying": 5,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 4050.0,
+      "last_sample_model_time_s": 5400.0,
+      "source": "no live v1 sidecar: v1's host sample recomputed on every child frame and decided by v1's ledger at frame cadence (the live criterion samples every parent step)",
+      "criterion_v1_sha256": "994cf1d0a1af811e13383b48196612931d7156a6e0ae684470ed92304cf11494"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 10,
+      "class_counts": {
+       "U": 7,
+       "N": 1,
+       "Q": 2
+      },
+      "ground_wind_peak_m_s": 116.5771,
+      "ground_wind_peak_time_s": 4800.0,
+      "rmw_at_peak_m": 56.0,
+      "circulation_at_peak_m2_s": 32120.5015,
+      "vmax_peak_m_s": 91.2882
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4050.0,
+       "end_s": 4050.0,
+       "samples": 1,
+       "start": "T+67:30",
+       "end": "T+67:30"
+      },
+      {
+       "class": "N",
+       "start_s": 4200.0,
+       "end_s": 4200.0,
+       "samples": 1,
+       "start": "T+70:00",
+       "end": "T+70:00"
+      },
+      {
+       "class": "U",
+       "start_s": 4350.0,
+       "end_s": 4800.0,
+       "samples": 4,
+       "start": "T+72:30",
+       "end": "T+80:00"
+      },
+      {
+       "class": "Q",
+       "start_s": 4950.0,
+       "end_s": 4950.0,
+       "samples": 1,
+       "start": "T+82:30",
+       "end": "T+82:30"
+      },
+      {
+       "class": "U",
+       "start_s": 5100.0,
+       "end_s": 5100.0,
+       "samples": 1,
+       "start": "T+85:00",
+       "end": "T+85:00"
+      },
+      {
+       "class": "Q",
+       "start_s": 5250.0,
+       "end_s": 5250.0,
+       "samples": 1,
+       "start": "T+87:30",
+       "end": "T+87:30"
+      },
+      {
+       "class": "U",
+       "start_s": 5400.0,
+       "end_s": 5400.0,
+       "samples": 1,
+       "start": "T+90:00",
+       "end": "T+90:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4050.0,
+       "end_s": 5400.0,
+       "start": "T+67:30",
+       "end": "T+90:00",
+       "state": "whole record",
+       "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+       "numbers": {
+        "samples": 10,
+        "class_counts": {
+         "U": 7,
+         "N": 1,
+         "Q": 2
+        },
+        "ground_wind_peak_m_s": 116.5771,
+        "ground_wind_peak_time_s": 4800.0,
+        "rmw_at_peak_m": 56.0,
+        "circulation_at_peak_m2_s": 32120.5015,
+        "vmax_peak_m_s": 91.2882
+       },
+       "spinup_note": "samples before T+70:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 3900.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4200.0,
+       "samples_judged_at_parent_dx": 1
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100L-500t/frames/nest-child",
+       "samples_read": 10,
+       "first_index": 8,
+       "last_index": 17,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100L-500t-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100L-500t/frames/nest-child",
+        "--out",
+        "runs/E100L-500t-child",
+        "--label",
+        "E100L-500t-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "3900",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 18.482354640960693,
+       "nest_start_source": "RUNS/E100L-500t/receipt.json restart.resumed_model_time_s",
+       "parent_dx_source": "RUNS/E100L-500t.toml [grid] dx_m",
+       "nest_start_s": 3900.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    }
+   ]
+  },
+  "E100M": {
+   "run_verdict": {
+    "outcome": "INSUFFICIENT_CADENCE",
+    "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+    "source": "E100M-child",
+    "span": [
+     "T+72:00",
+     "T+90:00"
+    ],
+    "genesis": "-",
+    "basis": "E100M-child (child frames, 120 s, T+72:00-T+90:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100M-child",
+     "run": "E100M",
+     "kind": "child",
+     "grid": "20 m",
+     "note": "20 m nest, 120 s child frames",
+     "status": "scored",
+     "source_path": "RUNS/E100M/frames/nest-child",
+     "samples": 10,
+     "record": [
+      4320.0,
+      5400.0
+     ],
+     "record_T": [
+      "T+72:00",
+      "T+90:00"
+     ],
+     "cadence_s": 120.0,
+     "intervals_s": [
+      120.0
+     ],
+     "max_interval_s": 120.0,
+     "dx_m": 20.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "INSUFFICIENT_CADENCE",
+      "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+      "reason": "10 sample(s) spanning 1080 s with intervals [120.0] s: no stretch of the record at <= 60 s spacing lasts 120 s",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 8,
+       "Q": 1,
+       "N": 1
+      },
+      "condition_counts": {
+       "E": 10,
+       "R": 9,
+       "C": 10,
+       "A": 10,
+       "Z": 10,
+       "W": 9,
+       "S": 1
+      },
+      "marginal_counts": {
+       "R": 0,
+       "Z": 0,
+       "W": 1
+      },
+      "flag_counts": {
+       "rmw-at-inner-radius": 2
+      },
+      "cadence_statement": "judged from child output at a median 120 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "TORNADO",
+      "genesis_model_time_s": 4560.0,
+      "samples": 10,
+      "longest_qualifying_run_s": 240.0,
+      "condition_counts": {
+       "zeta": 10,
+       "ground_relative_wind": 9,
+       "core_radius": 5,
+       "centre_move": 9,
+       "qualifying": 5,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 4320.0,
+      "last_sample_model_time_s": 5400.0,
+      "source": "no live v1 sidecar: v1's host sample recomputed on every child frame and decided by v1's ledger at frame cadence (the live criterion samples every parent step)",
+      "criterion_v1_sha256": "994cf1d0a1af811e13383b48196612931d7156a6e0ae684470ed92304cf11494"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 10,
+      "class_counts": {
+       "U": 8,
+       "Q": 1,
+       "N": 1
+      },
+      "ground_wind_peak_m_s": 121.0253,
+      "ground_wind_peak_time_s": 4680.0,
+      "rmw_at_peak_m": 44.0,
+      "circulation_at_peak_m2_s": 24426.9687,
+      "vmax_peak_m_s": 91.2502
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4320.0,
+       "end_s": 4800.0,
+       "samples": 5,
+       "start": "T+72:00",
+       "end": "T+80:00"
+      },
+      {
+       "class": "Q",
+       "start_s": 4920.0,
+       "end_s": 4920.0,
+       "samples": 1,
+       "start": "T+82:00",
+       "end": "T+82:00"
+      },
+      {
+       "class": "U",
+       "start_s": 5040.0,
+       "end_s": 5280.0,
+       "samples": 3,
+       "start": "T+84:00",
+       "end": "T+88:00"
+      },
+      {
+       "class": "N",
+       "start_s": 5400.0,
+       "end_s": 5400.0,
+       "samples": 1,
+       "start": "T+90:00",
+       "end": "T+90:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4320.0,
+       "end_s": 5400.0,
+       "start": "T+72:00",
+       "end": "T+90:00",
+       "state": "whole record",
+       "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+       "numbers": {
+        "samples": 10,
+        "class_counts": {
+         "U": 8,
+         "Q": 1,
+         "N": 1
+        },
+        "ground_wind_peak_m_s": 121.0253,
+        "ground_wind_peak_time_s": 4680.0,
+        "rmw_at_peak_m": 44.0,
+        "circulation_at_peak_m2_s": 24426.9687,
+        "vmax_peak_m_s": 91.2502
+       },
+       "spinup_note": "samples before T+75:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 2
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100M/frames/nest-child",
+       "samples_read": 10,
+       "first_index": 9,
+       "last_index": 18,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100M-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100M/frames/nest-child",
+        "--out",
+        "runs/E100M-child",
+        "--label",
+        "E100M-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 20.723093271255493,
+       "nest_start_source": "RUNS/E100M/receipt.json restart.resumed_model_time_s",
+       "parent_dx_source": "RUNS/E100M.toml [grid] dx_m",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    }
+   ]
+  },
+  "E100T": {
+   "run_verdict": {
+    "outcome": "INSUFFICIENT_CADENCE",
+    "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+    "source": "E100T-child",
+    "span": [
+     "T+71:00",
+     "T+71:00"
+    ],
+    "genesis": "-",
+    "basis": "E100T-child (one sample)",
+    "other_sources": {
+     "E100T-window": "not scored"
+    },
+    "pending": [
+     "E100T-window"
+    ]
+   },
+   "sources": [
+    {
+     "label": "E100T-child",
+     "run": "E100T",
+     "kind": "child",
+     "grid": "4 m",
+     "note": "4 m test, one child frame: INSUFFICIENT_CADENCE by construction",
+     "status": "scored",
+     "source_path": "RUNS/E100T/frames/nest-child",
+     "samples": 1,
+     "record": [
+      4260.0,
+      4260.0
+     ],
+     "record_T": [
+      "T+71:00",
+      "T+71:00"
+     ],
+     "cadence_s": null,
+     "intervals_s": [],
+     "max_interval_s": null,
+     "dx_m": 4.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "INSUFFICIENT_CADENCE",
+      "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+      "reason": "1 sample(s) spanning 0 s with intervals [] s: no stretch of the record at <= 60 s spacing lasts 120 s",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "U": 1
+      },
+      "condition_counts": {
+       "E": 1,
+       "R": 0,
+       "C": 1,
+       "A": 1,
+       "Z": 1,
+       "W": 0,
+       "S": 0
+      },
+      "marginal_counts": {
+       "R": 1,
+       "Z": 0,
+       "W": 1
+      },
+      "flag_counts": {},
+      "cadence_statement": null
+     },
+     "genesis_T": "-",
+     "v1": {
+      "verdict": "NO_TORNADO",
+      "genesis_model_time_s": null,
+      "samples": 310,
+      "longest_qualifying_run_s": 0.0,
+      "condition_counts": {
+       "zeta": 0,
+       "ground_relative_wind": 0,
+       "core_radius": 310,
+       "centre_move": 298,
+       "qualifying": 0,
+       "no_centre": 0
+      },
+      "first_sample_model_time_s": 4200.375,
+      "last_sample_model_time_s": 4316.25,
+      "source": "live v1 sidecar replayed (v1 samples every parent step)"
+     },
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 1,
+      "class_counts": {
+       "U": 1
+      },
+      "ground_wind_peak_m_s": 34.1775,
+      "ground_wind_peak_time_s": 4260.0,
+      "rmw_at_peak_m": 16.0,
+      "circulation_at_peak_m2_s": 1144.5171,
+      "vmax_peak_m_s": 11.3847
+     },
+     "class_segments": [
+      {
+       "class": "U",
+       "start_s": 4260.0,
+       "end_s": 4260.0,
+       "samples": 1,
+       "start": "T+71:00",
+       "end": "T+71:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 4260.0,
+       "end_s": 4260.0,
+       "start": "T+71:00",
+       "end": "T+71:00",
+       "state": "whole record",
+       "caption": "output too sparse or too short to judge duration (GM1 criterion v2)",
+       "numbers": {
+        "samples": 1,
+        "class_counts": {
+         "U": 1
+        },
+        "ground_wind_peak_m_s": 34.1775,
+        "ground_wind_peak_time_s": 4260.0,
+        "rmw_at_peak_m": 16.0,
+        "circulation_at_peak_m2_s": 1144.5171,
+        "vmax_peak_m_s": 11.3847
+       },
+       "spinup_note": "samples before T+75:00 are judged at the parent spacing (100 m): nest spin-up"
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": {
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0,
+       "spinup_end_s": 4500.0,
+       "samples_judged_at_parent_dx": 1
+      },
+      "source": {
+       "kind": "child",
+       "path": "RUNS/E100T/frames/nest-child",
+       "samples_read": 1,
+       "first_index": 8,
+       "last_index": 8,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": null,
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100T-child",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100T/frames/nest-child",
+        "--out",
+        "runs/E100T-child",
+        "--label",
+        "E100T-child",
+        "--workers",
+        "1",
+        "--kind",
+        "child",
+        "--nest-start-s",
+        "4200",
+        "--parent-dx",
+        "100"
+       ],
+       "wall_s": 1.083683967590332,
+       "nest_start_source": "E100T's deck is not on the scoring node; its live v1 sidecar's first sample is 4200.375 s (parent step 11201), one parent step after the spawn",
+       "parent_dx_source": "manifest: E100P, the 100 m El Reno parent",
+       "nest_start_s": 4200.0,
+       "parent_dx_m": 100.0
+      }
+     }
+    },
+    {
+     "label": "E100T-window",
+     "run": "E100T",
+     "kind": "window",
+     "grid": "4 m",
+     "note": "E100T's window stream",
+     "status": "not scored",
+     "reason": "RUNS/E100T/frames/nest-child-window: no window-stream.json (the stream has no receipt: empty or unfinished)"
+    }
+   ]
+  },
+  "E100": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E100-parent",
+    "span": [
+     "T+5:00",
+     "T+100:00"
+    ],
+    "genesis": "-",
+    "basis": "E100-parent (parent frames, 300 s, T+5:00-T+100:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E100-parent",
+     "run": "E100",
+     "kind": "parent",
+     "grid": "100 m",
+     "note": "100 m storm run, 300 s frames",
+     "status": "scored",
+     "source_path": "RUNS/E100/frames",
+     "samples": 20,
+     "record": [
+      300.0,
+      6000.0
+     ],
+     "record_T": [
+      "T+5:00",
+      "T+100:00"
+     ],
+     "cadence_s": 300.0,
+     "intervals_s": [
+      300.0
+     ],
+     "max_interval_s": 300.0,
+     "dx_m": 100.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "horizontal grid spacing 100 m exceeds 25 m",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "N": 18,
+       "U": 2
+      },
+      "condition_counts": {
+       "E": 19,
+       "R": 2,
+       "C": 15,
+       "A": 10,
+       "Z": 4,
+       "W": 4,
+       "S": 4
+      },
+      "marginal_counts": {
+       "R": 0,
+       "Z": 3,
+       "W": 6
+      },
+      "flag_counts": {
+       "broad": 3,
+       "rmw-at-inner-radius": 13,
+       "extent-limited": 1
+      },
+      "cadence_statement": "judged from parent output at a median 300 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      16.5,
+      16.5
+     ],
+     "whole_record_numbers": {
+      "samples": 20,
+      "class_counts": {
+       "N": 18,
+       "U": 2
+      },
+      "ground_wind_peak_m_s": 70.9341,
+      "ground_wind_peak_time_s": 4800.0,
+      "rmw_at_peak_m": 200.0,
+      "circulation_at_peak_m2_s": 43821.7936,
+      "vmax_peak_m_s": 37.4834
+     },
+     "class_segments": [
+      {
+       "class": "N",
+       "start_s": 300.0,
+       "end_s": 4200.0,
+       "samples": 14,
+       "start": "T+5:00",
+       "end": "T+70:00"
+      },
+      {
+       "class": "U",
+       "start_s": 4500.0,
+       "end_s": 4800.0,
+       "samples": 2,
+       "start": "T+75:00",
+       "end": "T+80:00"
+      },
+      {
+       "class": "N",
+       "start_s": 5100.0,
+       "end_s": 6000.0,
+       "samples": 4,
+       "start": "T+85:00",
+       "end": "T+100:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 300.0,
+       "end_s": 6000.0,
+       "start": "T+5:00",
+       "end": "T+100:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 20,
+        "class_counts": {
+         "N": 18,
+         "U": 2
+        },
+        "ground_wind_peak_m_s": 70.9341,
+        "ground_wind_peak_time_s": 4800.0,
+        "rmw_at_peak_m": 200.0,
+        "circulation_at_peak_m2_s": 43821.7936,
+        "vmax_peak_m_s": 37.4834
+       }
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": null,
+      "source": {
+       "kind": "parent",
+       "path": "RUNS/E100/frames",
+       "samples_read": 20,
+       "first_index": 1,
+       "last_index": 20,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": "RUNS/E100.toml",
+       "dx_override": null
+      },
+      "run": {
+       "label": "E100-parent",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E100/frames",
+        "--out",
+        "runs/E100-parent",
+        "--label",
+        "E100-parent",
+        "--workers",
+        "1",
+        "--kind",
+        "parent",
+        "--deck",
+        "RUNS/E100.toml"
+       ],
+       "wall_s": 79.51841330528259
+      }
+     }
+    }
+   ]
+  },
+  "E": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "E-screen",
+    "span": [
+     "T+5:00",
+     "T+120:00"
+    ],
+    "genesis": "-",
+    "basis": "E-screen (parent frames, 300 s, T+5:00-T+120:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "E-screen",
+     "run": "E",
+     "kind": "parent",
+     "grid": "200 m",
+     "note": "200 m screen, 300 s frames",
+     "status": "scored",
+     "source_path": "RUNS/E/frames",
+     "samples": 24,
+     "record": [
+      300.0,
+      7200.0
+     ],
+     "record_T": [
+      "T+5:00",
+      "T+120:00"
+     ],
+     "cadence_s": 300.0,
+     "intervals_s": [
+      300.0
+     ],
+     "max_interval_s": 300.0,
+     "dx_m": 200.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "horizontal grid spacing 200 m exceeds 25 m",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "N": 23,
+       "U": 1
+      },
+      "condition_counts": {
+       "E": 24,
+       "R": 0,
+       "C": 18,
+       "A": 9,
+       "Z": 0,
+       "W": 3,
+       "S": 5
+      },
+      "marginal_counts": {
+       "R": 1,
+       "Z": 1,
+       "W": 5
+      },
+      "flag_counts": {
+       "broad": 6,
+       "rmw-at-inner-radius": 14
+      },
+      "cadence_statement": "judged from parent output at a median 300 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      14.0,
+      19.25
+     ],
+     "whole_record_numbers": {
+      "samples": 24,
+      "class_counts": {
+       "N": 23,
+       "U": 1
+      },
+      "ground_wind_peak_m_s": 44.0336,
+      "ground_wind_peak_time_s": 3300.0,
+      "rmw_at_peak_m": 400.0,
+      "circulation_at_peak_m2_s": 30671.506,
+      "vmax_peak_m_s": 15.5798
+     },
+     "class_segments": [
+      {
+       "class": "N",
+       "start_s": 300.0,
+       "end_s": 3300.0,
+       "samples": 11,
+       "start": "T+5:00",
+       "end": "T+55:00"
+      },
+      {
+       "class": "U",
+       "start_s": 3600.0,
+       "end_s": 3600.0,
+       "samples": 1,
+       "start": "T+60:00",
+       "end": "T+60:00"
+      },
+      {
+       "class": "N",
+       "start_s": 3900.0,
+       "end_s": 7200.0,
+       "samples": 12,
+       "start": "T+65:00",
+       "end": "T+120:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 300.0,
+       "end_s": 7200.0,
+       "start": "T+5:00",
+       "end": "T+120:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 24,
+        "class_counts": {
+         "N": 23,
+         "U": 1
+        },
+        "ground_wind_peak_m_s": 44.0336,
+        "ground_wind_peak_time_s": 3300.0,
+        "rmw_at_peak_m": 400.0,
+        "circulation_at_peak_m2_s": 30671.506,
+        "vmax_peak_m_s": 15.5798
+       }
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": null,
+      "source": {
+       "kind": "parent",
+       "path": "RUNS/E/frames",
+       "samples_read": 24,
+       "first_index": 1,
+       "last_index": 24,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": "RUNS/E-screen.toml",
+       "dx_override": null
+      },
+      "run": {
+       "label": "E-screen",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/E/frames",
+        "--out",
+        "runs/E-screen",
+        "--label",
+        "E-screen",
+        "--workers",
+        "1",
+        "--kind",
+        "parent",
+        "--deck",
+        "RUNS/E-screen.toml"
+       ],
+       "wall_s": 66.78353905677795
+      }
+     }
+    }
+   ]
+  },
+  "T": {
+   "run_verdict": {
+    "outcome": "UNRESOLVED",
+    "caption": "grid too coarse to judge (GM1 criterion v2)",
+    "source": "T-screen",
+    "span": [
+     "T+5:00",
+     "T+100:00"
+    ],
+    "genesis": "-",
+    "basis": "T-screen (parent frames, 300 s, T+5:00-T+100:00)",
+    "other_sources": {},
+    "pending": []
+   },
+   "sources": [
+    {
+     "label": "T-screen",
+     "run": "T",
+     "kind": "parent",
+     "grid": "200 m",
+     "note": "200 m screen, 300 s frames",
+     "status": "scored",
+     "source_path": "RUNS/T/frames",
+     "samples": 20,
+     "record": [
+      300.0,
+      6000.0
+     ],
+     "record_T": [
+      "T+5:00",
+      "T+100:00"
+     ],
+     "cadence_s": 300.0,
+     "intervals_s": [
+      300.0
+     ],
+     "max_interval_s": 300.0,
+     "dx_m": 200.0,
+     "lowest_scalar_level_m": 10.0,
+     "v2": {
+      "outcome": "UNRESOLVED",
+      "caption": "grid too coarse to judge (GM1 criterion v2)",
+      "reason": "horizontal grid spacing 200 m exceeds 25 m",
+      "genesis_model_time_s": null,
+      "episodes": [],
+      "longest_qualifying_run_s": 0.0,
+      "longest_qualifying_or_unresolved_run_s": 0.0,
+      "longest_qualifying_run_plausible_links_s": 0.0,
+      "reported_60s_rule": {
+       "longest_s": 0.0,
+       "would_be_tornado": false
+      },
+      "class_counts": {
+       "N": 20
+      },
+      "condition_counts": {
+       "E": 20,
+       "R": 0,
+       "C": 14,
+       "A": 4,
+       "Z": 0,
+       "W": 0,
+       "S": 6
+      },
+      "marginal_counts": {
+       "R": 0,
+       "Z": 0,
+       "W": 0
+      },
+      "flag_counts": {
+       "broad": 6,
+       "rmw-at-inner-radius": 10
+      },
+      "cadence_statement": "judged from parent output at a median 300 s spacing; a TORNADO needs the same vortex (overlapping cores in the storm-following frame) in every linked sample; what happens between samples is not observed"
+     },
+     "genesis_T": "-",
+     "v1": null,
+     "tornado_events": [],
+     "episodes_recovered": null,
+     "frame_velocity_m_s": [
+      8.5,
+      6.0
+     ],
+     "whole_record_numbers": {
+      "samples": 20,
+      "class_counts": {
+       "N": 20
+      },
+      "ground_wind_peak_m_s": 13.584,
+      "ground_wind_peak_time_s": 1500.0,
+      "rmw_at_peak_m": 1000.0,
+      "circulation_at_peak_m2_s": 3066.1574,
+      "vmax_peak_m_s": 2.9046
+     },
+     "class_segments": [
+      {
+       "class": "N",
+       "start_s": 300.0,
+       "end_s": 6000.0,
+       "samples": 20,
+       "start": "T+5:00",
+       "end": "T+100:00"
+      }
+     ],
+     "time_windows": [
+      {
+       "start_s": 300.0,
+       "end_s": 6000.0,
+       "start": "T+5:00",
+       "end": "T+100:00",
+       "state": "whole record",
+       "caption": "grid too coarse to judge (GM1 criterion v2)",
+       "numbers": {
+        "samples": 20,
+        "class_counts": {
+         "N": 20
+        },
+        "ground_wind_peak_m_s": 13.584,
+        "ground_wind_peak_time_s": 1500.0,
+        "rmw_at_peak_m": 1000.0,
+        "circulation_at_peak_m2_s": 3066.1574,
+        "vmax_peak_m_s": 2.9046
+       }
+      }
+     ],
+     "integrity": {
+      "criterion_v2_sha256": "807b2cc83dcef09bf8067ab6854a0851a910217e9c7fae972c709af83282532e",
+      "files_sha256": {
+       "v2rule.py": "87f49b8d6008bd9668f6dc392e1c06138ac814ad99e4a426aa69ef60e95d8e27",
+       "score.py": "d46e453e324c801396ec96717ae4eabaebf6c938a144a28fd45274ec7c7f4fcc"
+      },
+      "matches_frozen": true,
+      "protocol_conforming": true,
+      "scorer_commit": "022367000461d8822de994a819b48028a9a258e5",
+      "nest_spinup": null,
+      "source": {
+       "kind": "parent",
+       "path": "RUNS/T/frames",
+       "samples_read": 20,
+       "first_index": 1,
+       "last_index": 20,
+       "every": 1,
+       "start_s": null,
+       "end_s": null,
+       "deck": "RUNS/T-screen.toml",
+       "dx_override": null
+      },
+      "run": {
+       "label": "T-screen",
+       "status": "scored",
+       "command": [
+        "nice",
+        "-n",
+        "19",
+        "ionice",
+        "-c3",
+        "/usr/bin/python3",
+        "CHECKOUT/tools/criterion_v2/score.py",
+        "RUNS/T/frames",
+        "--out",
+        "runs/T-screen",
+        "--label",
+        "T-screen",
+        "--workers",
+        "1",
+        "--kind",
+        "parent",
+        "--deck",
+        "RUNS/T-screen.toml"
+       ],
+       "wall_s": 72.96778512001038
+      }
+     }
+    }
+   ]
+  },
+  "E50N2": {
+   "run_verdict": {
+    "outcome": null,
+    "basis": "no source scored",
+    "pending": [
+     "E50N2-child",
+     "E50N2-window"
+    ]
+   },
+   "sources": [
+    {
+     "label": "E50N2-child",
+     "run": "E50N2",
+     "kind": "child",
+     "grid": "2 m",
+     "note": "2 m moving nest, 15 s child frames",
+     "status": "not scored",
+     "reason": "RUNS-2M/E50N2/frames/nest-child does not exist on this node"
+    },
+    {
+     "label": "E50N2-window",
+     "run": "E50N2",
+     "kind": "window",
+     "grid": "2 m",
+     "note": "2 m window stream, 180-720 s",
+     "status": "not scored",
+     "reason": "RUNS-2M/E50N2/frames/nest-child-window does not exist on this node"
+    }
+   ]
+  }
+ }
+}

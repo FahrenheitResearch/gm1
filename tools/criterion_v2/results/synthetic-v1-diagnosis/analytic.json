@@ -1,0 +1,445 @@
+{
+  "profiles": {
+    "burgers V100 R150": {
+      "half_peak_equiv_radius_m": 111.41324999747563,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 111.41250000000001,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.7944854459385768,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 2.3419082781682268,
+      "zeta_peak_s_inv": 2.3419082781682268
+    },
+    "burgers V100 R20": {
+      "half_peak_equiv_radius_m": 14.855099999663416,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 14.855,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.5591810189263537,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 17.564312086261697,
+      "zeta_peak_s_inv": 17.564312086261697
+    },
+    "burgers V100 R40": {
+      "half_peak_equiv_radius_m": 29.710199999326832,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 29.71,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.1179273271960568,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 8.782156043130849,
+      "zeta_peak_s_inv": 8.782156043130849
+    },
+    "burgers V100 R75": {
+      "half_peak_equiv_radius_m": 55.706624998737816,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 55.706250000000004,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.8722720882151824,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 4.6838165563364536,
+      "zeta_peak_s_inv": 4.6838165563364536
+    },
+    "burgers V50 R150": {
+      "half_peak_equiv_radius_m": 111.41324999747563,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 111.41250000000001,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.8972427229692884,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 1.1709541390841134,
+      "zeta_peak_s_inv": 1.1709541390841134
+    },
+    "burgers V50 R20": {
+      "half_peak_equiv_radius_m": 14.855099999663416,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 14.855,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.2795905094631769,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 8.782156043130849,
+      "zeta_peak_s_inv": 8.782156043130849
+    },
+    "burgers V50 R40": {
+      "half_peak_equiv_radius_m": 29.710199999326832,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 29.71,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.5589636635980284,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 4.391078021565424,
+      "zeta_peak_s_inv": 4.391078021565424
+    },
+    "burgers V50 R75": {
+      "half_peak_equiv_radius_m": 55.706624998737816,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 55.706250000000004,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.9361360441075912,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 2.3419082781682268,
+      "zeta_peak_s_inv": 2.3419082781682268
+    },
+    "burgers+sat V100 R75": {
+      "half_peak_equiv_radius_m": 55.706624998737816,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 55.706250000000004,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.8722720882151824,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 4.6838165563364536,
+      "zeta_peak_s_inv": 4.6838165563364536
+    },
+    "burgers+sat V50 R75": {
+      "half_peak_equiv_radius_m": 55.706624998737816,
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831708,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 55.706250000000004,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.9361360441075912,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 2.3419082781682268,
+      "zeta_peak_s_inv": 2.3419082781682268
+    },
+    "rankine V100 R150": {
+      "half_peak_equiv_radius_m": 149.99924999812498,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999874999,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 149.9985,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.333333333333333,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 1.3333333333333333,
+      "zeta_peak_s_inv": 1.3333333333333333
+    },
+    "rankine V100 R20": {
+      "half_peak_equiv_radius_m": 19.999899999750003,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999875002,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 19.9998,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.4,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 10.0,
+      "zeta_peak_s_inv": 10.0
+    },
+    "rankine V100 R40": {
+      "half_peak_equiv_radius_m": 39.999799999500006,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999875002,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 39.9996,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.8,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 5.0,
+      "zeta_peak_s_inv": 5.0
+    },
+    "rankine V100 R75": {
+      "half_peak_equiv_radius_m": 74.99962499906249,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999874999,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 74.99925,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.5,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 2.6666666666666665,
+      "zeta_peak_s_inv": 2.6666666666666665
+    },
+    "rankine V50 R150": {
+      "half_peak_equiv_radius_m": 149.99924999812498,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999874999,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 149.9985,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.6666666666666665,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.6666666666666666,
+      "zeta_peak_s_inv": 0.6666666666666666
+    },
+    "rankine V50 R20": {
+      "half_peak_equiv_radius_m": 19.999899999750003,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999875002,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 19.9998,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.2,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 5.0,
+      "zeta_peak_s_inv": 5.0
+    },
+    "rankine V50 R40": {
+      "half_peak_equiv_radius_m": 39.999799999500006,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999875002,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 39.9996,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.4,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 2.5,
+      "zeta_peak_s_inv": 2.5
+    },
+    "rankine V50 R75": {
+      "half_peak_equiv_radius_m": 74.99962499906249,
+      "half_peak_equiv_radius_over_rmw": 0.9999949999874999,
+      "half_peak_inner_m": 0.0,
+      "half_peak_outer_m": 74.99925,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.75,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 1.3333333333333333,
+      "zeta_peak_s_inv": 1.3333333333333333
+    },
+    "ring V100 R150": {
+      "half_peak_equiv_radius_m": 75.78522514646242,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097495,
+      "half_peak_inner_m": 120.393,
+      "half_peak_outer_m": 142.2585,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.000849755492894903,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 1.8739794066127292e-43,
+      "zeta_peak_s_inv": 5.037475969864635
+    },
+    "ring V100 R20": {
+      "half_peak_equiv_radius_m": 10.104696686194991,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097496,
+      "half_peak_inner_m": 16.052400000000002,
+      "half_peak_outer_m": 18.9678,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.4106339753019463,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 1.4054845549595468e-42,
+      "zeta_peak_s_inv": 37.78106977398476
+    },
+    "ring V100 R40": {
+      "half_peak_equiv_radius_m": 20.209393372389982,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097496,
+      "half_peak_inner_m": 32.104800000000004,
+      "half_peak_outer_m": 37.9356,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.8212679506038927,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 7.027422774797734e-43,
+      "zeta_peak_s_inv": 18.89053488699238
+    },
+    "ring V100 R75": {
+      "half_peak_equiv_radius_m": 37.89261257323121,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097495,
+      "half_peak_inner_m": 60.1965,
+      "half_peak_outer_m": 71.12925,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.5398774118082323,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 3.7479588132254585e-43,
+      "zeta_peak_s_inv": 10.07495193972927
+    },
+    "ring V50 R150": {
+      "half_peak_equiv_radius_m": 75.78522514646242,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097495,
+      "half_peak_inner_m": 120.393,
+      "half_peak_outer_m": 142.2585,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.0004248777464474515,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 9.369897033063646e-44,
+      "zeta_peak_s_inv": 2.5187379849323177
+    },
+    "ring V50 R20": {
+      "half_peak_equiv_radius_m": 10.104696686194991,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097496,
+      "half_peak_inner_m": 16.052400000000002,
+      "half_peak_outer_m": 18.9678,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.20531698765097314,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 7.027422774797734e-43,
+      "zeta_peak_s_inv": 18.89053488699238
+    },
+    "ring V50 R40": {
+      "half_peak_equiv_radius_m": 20.209393372389982,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097496,
+      "half_peak_inner_m": 32.104800000000004,
+      "half_peak_outer_m": 37.9356,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.41063397530194634,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 3.513711387398867e-43,
+      "zeta_peak_s_inv": 9.44526744349619
+    },
+    "ring V50 R75": {
+      "half_peak_equiv_radius_m": 37.89261257323121,
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097495,
+      "half_peak_inner_m": 60.1965,
+      "half_peak_outer_m": 71.12925,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.7699387059041162,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 1.8739794066127292e-43,
+      "zeta_peak_s_inv": 5.037475969864635
+    },
+    "sullivan V100 R150": {
+      "half_peak_equiv_radius_m": 126.64227829599403,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 59.664,
+      "half_peak_outer_m": 139.992,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.2504745135494766,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.24861052918215848,
+      "zeta_peak_s_inv": 1.9724383613863352
+    },
+    "sullivan V100 R20": {
+      "half_peak_equiv_radius_m": 16.88563710613254,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 7.9552000000000005,
+      "half_peak_outer_m": 18.6656,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.453187056243708,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 1.8645789688661885,
+      "zeta_peak_s_inv": 14.793287710397514
+    },
+    "sullivan V100 R40": {
+      "half_peak_equiv_radius_m": 33.77127421226508,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 15.910400000000001,
+      "half_peak_outer_m": 37.3312,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.9063741124885341,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 0.9322894844330942,
+      "zeta_peak_s_inv": 7.396643855198757
+    },
+    "sullivan V100 R75": {
+      "half_peak_equiv_radius_m": 63.321139147997016,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 29.832,
+      "half_peak_outer_m": 69.996,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.6924701412282284,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.49722105836431696,
+      "zeta_peak_s_inv": 3.9448767227726704
+    },
+    "sullivan V50 R150": {
+      "half_peak_equiv_radius_m": 126.64227829599403,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 59.664,
+      "half_peak_outer_m": 139.992,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.6252372567747383,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.12430526459107924,
+      "zeta_peak_s_inv": 0.9862191806931676
+    },
+    "sullivan V50 R20": {
+      "half_peak_equiv_radius_m": 16.88563710613254,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 7.9552000000000005,
+      "half_peak_outer_m": 18.6656,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.226593528121854,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 0.9322894844330942,
+      "zeta_peak_s_inv": 7.396643855198757
+    },
+    "sullivan V50 R40": {
+      "half_peak_equiv_radius_m": 33.77127421226508,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 15.910400000000001,
+      "half_peak_outer_m": 37.3312,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.45318705624426703,
+      "passes_core_radius_when_resolved": false,
+      "zeta_axis_s_inv": 0.4661447422165471,
+      "zeta_peak_s_inv": 3.6983219275993786
+    },
+    "sullivan V50 R75": {
+      "half_peak_equiv_radius_m": 63.321139147997016,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 29.832,
+      "half_peak_outer_m": 69.996,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.8462350706141142,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.24861052918215848,
+      "zeta_peak_s_inv": 1.9724383613863352
+    },
+    "sullivan+sat V100 R75": {
+      "half_peak_equiv_radius_m": 63.321139147997016,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 29.832,
+      "half_peak_outer_m": 69.996,
+      "mean_zeta_within_100m_of_axis_s_inv": 1.6924701412282284,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.49722105836431696,
+      "zeta_peak_s_inv": 3.9448767227726704
+    },
+    "sullivan+sat V50 R75": {
+      "half_peak_equiv_radius_m": 63.321139147997016,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066269,
+      "half_peak_inner_m": 29.832,
+      "half_peak_outer_m": 69.996,
+      "mean_zeta_within_100m_of_axis_s_inv": 0.8462350706141142,
+      "passes_core_radius_when_resolved": true,
+      "zeta_axis_s_inv": 0.24861052918215848,
+      "zeta_peak_s_inv": 1.9724383613863352
+    }
+  },
+  "rules": {
+    "burgers": {
+      "half_peak_equiv_radius_over_rmw": 0.7427549999831707,
+      "half_peak_inner_over_rmw": 0.0,
+      "half_peak_outer_over_rmw": 0.74275,
+      "rmw_in_grid_lengths_needed_to_pass_C": {
+        "100.0": 0.5385355871169675,
+        "2.0": 26.92677935584837,
+        "20.0": 2.692677935584837,
+        "4.0": 13.463389677924186,
+        "8.0": 6.731694838962093
+      },
+      "smallest_rmw_passing_C_when_resolved_m": 53.85355871169674,
+      "zeta_peak_over_vmax_per_rmw": 3.5128624172523395
+    },
+    "burgers_rmw_over_r0": 1.1209064227785341,
+    "dx_at_which_one_corner_passes_m": 70.89815403622063,
+    "ncore_needed_for_40m": {
+      "100.0": 1,
+      "2.0": 1257,
+      "20.0": 13,
+      "4.0": 315,
+      "8.0": 79
+    },
+    "r_core_floor_one_corner_m": {
+      "100.0": 56.41895835477563,
+      "2.0": 1.1283791670955126,
+      "20.0": 11.283791670955127,
+      "4.0": 2.256758334191025,
+      "8.0": 4.51351666838205
+    },
+    "rankine": {
+      "half_peak_equiv_radius_over_rmw": 0.9999949999875,
+      "half_peak_inner_over_rmw": 0.0,
+      "half_peak_outer_over_rmw": 0.9999899999999999,
+      "rmw_in_grid_lengths_needed_to_pass_C": {
+        "100.0": 0.40000200001500014,
+        "2.0": 20.000100000750006,
+        "20.0": 2.0000100000750005,
+        "4.0": 10.000050000375003,
+        "8.0": 5.0000250001875015
+      },
+      "smallest_rmw_passing_C_when_resolved_m": 40.00020000150001,
+      "zeta_peak_over_vmax_per_rmw": 2.0
+    },
+    "ring": {
+      "half_peak_equiv_radius_over_rmw": 0.5052348343097495,
+      "half_peak_inner_over_rmw": 0.80262,
+      "half_peak_outer_over_rmw": 0.94839,
+      "half_width_over_ring_radius": 0.1,
+      "ring_radius_over_rmw": 0.8755034144633164,
+      "rmw_in_grid_lengths_needed_to_pass_C": {
+        "100.0": 0.7917110476883071,
+        "2.0": 39.58555238441536,
+        "20.0": 3.958555238441536,
+        "4.0": 19.79277619220768,
+        "8.0": 9.89638809610384
+      },
+      "smallest_rmw_passing_C_when_resolved_m": 79.17110476883072,
+      "zeta_peak_over_vmax_per_rmw": 7.556213954796952
+    },
+    "sullivan": {
+      "H_inf": 37.90435029513568,
+      "axis_over_ring_zeta": 0.12604222975691876,
+      "half_peak_equiv_radius_over_rmw": 0.8442818553066267,
+      "half_peak_inner_over_rmw": 0.39776000000000006,
+      "half_peak_outer_over_rmw": 0.93328,
+      "ring_radius_over_rmw": 0.6725214873350633,
+      "rmw_in_grid_lengths_needed_to_pass_C": {
+        "100.0": 0.4737754311381332,
+        "2.0": 23.68877155690666,
+        "20.0": 2.368877155690666,
+        "4.0": 11.84438577845333,
+        "8.0": 5.922192889226665
+      },
+      "smallest_rmw_passing_C_when_resolved_m": 47.37754311381332,
+      "x_ring": 2.8214,
+      "x_rmw": 6.2381,
+      "zeta_peak_over_vmax_per_rmw": 2.958657542079503
+    }
+  }
+}
