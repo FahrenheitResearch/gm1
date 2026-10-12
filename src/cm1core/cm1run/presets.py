@@ -57,8 +57,10 @@ import atexit
 from dataclasses import dataclass, replace
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
+import re
 import shlex
 import shutil
 import sys
@@ -79,9 +81,11 @@ FIT_JSON = "fit.json"
 PROGRAM = "gpuwm-cm1"
 
 #: The budget buttons of the guided screen, in order, in seconds (:data:`.fit.BUDGETS`).
-BUDGET_ORDER = ("10m", "1h", "overnight")
-BUDGETS = {"10m": 600.0, "1h": 3600.0, "overnight": 36000.0}
-BUDGET_BUTTONS = {"10m": "About 10 minutes", "1h": "About 1 hour", "overnight": "Overnight (up to 10 hours)"}
+#: ``any`` is "as long as it takes": no limit on the time, for a run that needs more than overnight's 10 hours.
+BUDGET_ORDER = ("10m", "1h", "overnight", "any")
+BUDGETS = {"10m": 600.0, "1h": 3600.0, "overnight": 36000.0, "any": math.inf}
+BUDGET_BUTTONS = {"10m": "About 10 minutes", "1h": "About 1 hour", "overnight": "Overnight (up to 10 hours)",
+                  "any": "As long as it takes"}
 #: Rain and hail schemes by CM1 ptype, in plain words.
 SCHEMES = {5: "Morrison", 7: "WSM6", 3: "Thompson"}
 #: The gallery's groups, in order: the first card of the first group is the quick look.  Famous
@@ -94,7 +98,14 @@ MOMENT_FIELDS = ("elapsed_s", "created_utc")
 
 
 class PresetError(ValueError):
-    """An unknown preset, a folder that cannot be written, or a preset that cannot run."""
+    """An unknown preset, a folder that cannot be written, or a preset that cannot run.
+
+    ``suggest`` is a Customize value that is taken instead of the one refused (``{"grid": 23.0}``), when there is
+    one: the error's JSON carries it, and the budget screen makes a button of it."""
+
+    def __init__(self, message: str, *, suggest: Mapping[str, Any] | None = None) -> None:
+        super().__init__(message)
+        self.suggest = dict(suggest or {})
 
 
 # ------------------------------------------------------------------ the library
@@ -260,7 +271,8 @@ def _follow_storm(preset: Preset, effective: Mapping[str, Any]) -> Preset:
 def follow_storm_if_it_leaves(preset: Preset) -> Preset:
     """A customized preset whose storm would leave its area (a longer storm time, a smaller area): the frame and
     bubble the storm-track check recommends, as the Domain screen's "Use the recommended frame and bubble" sets them,
-    recorded as one of the preset's ``customized`` changes.  A storm that stays inside keeps the preset's own."""
+    recorded as one of the preset's ``customized`` changes.  A storm the check keeps inside keeps the preset's own.
+    The check is a prediction: the fit's edge note stays on a small area whatever it predicts."""
 
     track = storm_track_for(preset)
     if not track or track.get("status") != "evaluated" or track.get("meets_edge_rule", True):
@@ -297,8 +309,26 @@ def _follow_change(preset: Preset, effective: Mapping[str, Any],
         else ("initialization.bubble_center_x_m", "initialization.bubble_center_y_m")
     )
     was = (settings.get(kx), settings.get(ky))
-    settings[kx] = float(bubble[0]) * 1000.0
-    settings[ky] = float(bubble[1]) * 1000.0
+    place = [float(bubble[0]) * 1000.0, float(bubble[1]) * 1000.0]
+    held = False
+    if iinit == 1:
+        # The whole warm bubble has to lie inside the area (the run's own start refuses a truncated one), so in a
+        # small area the recommended centre is brought in to where the bubble still fits.
+        radius = float(settings.get("initialization.bhrad_m", 10000.0))
+        centred = int(effective.get("iorigin", 1) or 1) == 2
+        for axis, cells in enumerate((int(effective.get("nx", 0)), int(effective.get("ny", 0)))):
+            length = cells * float(effective.get("dx" if axis == 0 else "dy", 0.0))
+            low, high = (-length / 2.0, length / 2.0) if centred else (0.0, length)
+            low, high = low + radius, high - radius
+            if low > high:
+                return None
+            inside = min(high, max(low, place[axis]))
+            if abs(inside - place[axis]) > 1e-6:
+                # A whole 100 m, toward the middle, as the recommendation itself is given.
+                toward = math.floor if inside > (low + high) / 2.0 else math.ceil
+                place[axis], held = toward(inside / 100.0) * 100.0, True
+    settings[kx], settings[ky] = place
+    bubble = (place[0] / 1000.0, place[1] / 1000.0)
     text = set_namelist_values(preset.namelist_text, {"umove": float(frame[0]), "vmove": float(frame[1])})
     folder = _scratch("gm1-preset-")
     (folder / "namelist.input").write_text(text, encoding="ascii")
@@ -308,11 +338,13 @@ def _follow_change(preset: Preset, effective: Mapping[str, Any],
         "keys": {"umove": [before[0], float(frame[0])], "vmove": [before[1], float(frame[1])],
                  kx: [was[0], settings[kx]],
                  ky: [was[1], settings[ky]]},
-        "sentence": (f"The view moves with the storm{cause} ({float(frame[0]):g} m/s east and "
-                     f"{float(frame[1]):g} m/s north, ground-relative), and the "
+        # What is done, and that it follows a prediction: not that the storm stays inside.  On an RTX 4090 a 67 m
+        # storm left a 34 km area within 45 minutes with the view moving as the storm-track check advised.
+        "sentence": (f"The view moves with the storm{cause} as the storm-track check predicts it "
+                     f"({float(frame[0]):g} m/s east and {float(frame[1]):g} m/s north, ground-relative), and the "
                      + ("push of rising air" if iinit == 12 else "warm bubble")
-                     + f" starts at {float(bubble[0]):g}, {float(bubble[1]):g} km from the centre, so the storm "
-                     "stays inside the area."),
+                     + f" starts at {float(bubble[0]):g}, {float(bubble[1]):g} km from the centre"
+                     + (", as far that way as the bubble fits in this area." if held else ".")),
         "why": "the storm-track check's recommended frame and bubble for this sounding",
     }
     return text, record, change, folder
@@ -336,8 +368,15 @@ def storm_track_for(preset: Preset) -> dict[str, Any] | None:
     from ..errors import CM1Refusal
 
     try:
-        deck = load_deck(preset.namelist_path, sounding=preset.sounding_path,
-                         gm1_only=dict(preset.record.get("gm1_settings") or {}) or None)
+        from ..cm1import import coverage
+        from .fit import _restart_at_end
+
+        # The run keeps one restart at its end where the namelist writes none (rstfrq < 0), as the fit prices it:
+        # read as an interval instead, a storm time that is not a whole number of them (45 or 90 min of a 60 min
+        # one) was refused here, so no track came back and the view never followed the storm for those times.
+        settings = {**_restart_at_end(coverage.import_for_report(preset.namelist_path).effective),
+                    **dict(preset.record.get("gm1_settings") or {})}
+        deck = load_deck(preset.namelist_path, sounding=preset.sounding_path, gm1_only=settings or None)
         return storm_track(_model_config(deck.raw), sounding_bytes=deck.sounding_bytes)
     except (CM1Refusal, EstimateError, OSError, ValueError, KeyError, TypeError):
         return None
@@ -607,7 +646,9 @@ def list_record(root: Path | None = None, *, check: bool = True) -> dict[str, An
         "schema": LIST_SCHEMA,
         "groups": list(GROUPS),
         "presets": [summary_record(preset, by_id, check=check) for preset in presets],
-        "budgets": [{"id": key, "words": BUDGET_BUTTONS[key], "seconds": BUDGETS[key]} for key in BUDGET_ORDER],
+        # "seconds" is null for the time with no limit (JSON has no infinity).
+        "budgets": [{"id": key, "words": BUDGET_BUTTONS[key],
+                     "seconds": BUDGETS[key] if math.isfinite(BUDGETS[key]) else None} for key in BUDGET_ORDER],
         "command": command_line(["preset", "list", "--json"]),
     }
 
@@ -727,6 +768,18 @@ def _drift_reason(preset: Preset, reason: str) -> str:
 
     text = "The storm would drift too close to the side of the area before the run ends."
     grid = next((entry for entry in preset.record.get("customized") or [] if entry.get("knob") == "grid"), None)
+    if grid is not None and preset.record.get("start_capped"):
+        # A fine grid's area starts at the most one restart file holds: a larger area is not there to pick, so the
+        # way out is a coarser grid (whose file holds a larger area) or a shorter storm.
+        dx = float(grid["keys"]["dx"][1])
+        try:
+            nx, ny = (int(value[1]) for value in (grid["keys"]["nx"], grid["keys"]["ny"]))
+            held = f" (about {max(nx, ny) * dx / 1000.0:.0f} km)"
+        except (KeyError, IndexError, TypeError, ValueError):
+            held = ""
+        return (f"At a {spacing_words(dx)} grid the largest area one restart file holds{held} is too small for this "
+                "storm: it would drift too close to the side before the run ends. Use a coarser grid, which can "
+                "cover a larger area, or a shorter storm time.")
     if grid is not None:
         dx0, dx = (float(value) for value in grid["keys"]["dx"])
         if dx > dx0:
@@ -749,7 +802,18 @@ def _fitted_facts(preset: Preset, result: "FitResult") -> dict[str, Any]:
         "duration_s": estimate.duration_s, "output_interval_s": estimate.history_interval_s,
         "frames": estimate.frames,
         "words": grid_words(grid["nx"], grid["ny"], grid["dx_m"], estimate.duration_s),
+        "dt_s": estimate.dt_s,
+        "steps": estimate.steps,
+        # The area simulated, said exactly: "67 m grid, 59.0 × 59.0 km, 880 × 880 cells".
+        "exact": exact_words(grid["nx"], grid["ny"], grid["dx_m"]),
     }
+
+
+def exact_words(nx: int, ny: int, dx_m: float) -> str:
+    """The grid and the area it covers, exactly: "67 m grid, 59.0 × 59.0 km, 880 × 880 cells"."""
+
+    width, depth = nx * dx_m / 1000.0, ny * dx_m / 1000.0
+    return f"{spacing_words(dx_m)} grid, {width:.1f} × {depth:.1f} km, {nx} × {ny} cells"
 
 
 # ------------------------------------------------------------------ a new run directory
@@ -767,11 +831,50 @@ def _real_import(namelist: Path, rundir: Path, *, overrides: Mapping[str, Any], 
     return code, payload
 
 
+def run_id_for(preset_id: str, customized: Sequence[Mapping[str, Any]] | None) -> str:
+    """The preset's id with the grid spacing the run really has: ``supercell-1km`` at a 150 m grid of the user's
+    own is ``supercell-150m`` (the id's own spacing replaced; added at the end of an id that names none), so a run
+    is never named after a spacing it does not have."""
+
+    grid = next((entry for entry in customized or [] if entry.get("knob") == "grid"), None)
+    try:
+        dx = float(grid["keys"]["dx"][1]) if grid is not None else None
+    except (KeyError, IndexError, TypeError, ValueError):
+        dx = None
+    if dx is None or not dx > 0.0:
+        return preset_id
+    token = f"{dx / 1000.0:g}km" if dx >= 1000.0 else f"{dx:g}m"
+    renamed, count = re.subn(r"(?<![0-9A-Za-z.])\d+(?:\.\d+)?(?:km|m)(?![0-9A-Za-z])", token, preset_id, count=1)
+    return renamed if count else f"{preset_id}-{token}"
+
+
+def case_words(name: str, customized: Sequence[Mapping[str, Any]] | None) -> str:
+    """What the Runs list calls a run: the preset's name, and for a grid or levels of the user's own the spacing the
+    run really has ("Supercell, 150 m grid (customized from Supercell, quick look, 1 km)")."""
+
+    customized = list(customized or [])
+    if not customized:
+        return name
+    parts = []
+    for knob, key, words in (("grid", "dx", "{} grid"), ("levels", "dz", "levels every {}")):
+        entry = next((item for item in customized if item.get("knob") == knob), None)
+        try:
+            if entry is not None:
+                parts.append(words.format(spacing_words(float(entry["keys"][key][1]))))
+        except (KeyError, IndexError, TypeError, ValueError):
+            continue
+    if not parts:
+        return f"{name} (customized)"
+    return f"{name.split(',')[0]}, {', '.join(parts)} (customized from {name})"
+
+
 def default_name(preset: Preset, root: Path) -> str:
-    """``ID-YYYYMMDD-HHMM``, or ``ID-custom-YYYYMMDD-HHMM`` for a customized preset; ``-2``, ``-3`` when taken."""
+    """``ID-YYYYMMDD-HHMM``, or ``ID-custom-YYYYMMDD-HHMM`` for a customized preset (the id with the run's own grid
+    spacing, :func:`run_id_for`); ``-2``, ``-3`` when taken."""
 
     stamp = time.strftime("%Y%m%d-%H%M", time.localtime())
-    base = f"{preset.id}-custom-{stamp}" if preset.record.get("customized") else f"{preset.id}-{stamp}"
+    customized = preset.record.get("customized")
+    base = f"{run_id_for(preset.id, customized)}-custom-{stamp}" if customized else f"{preset.id}-{stamp}"
     name, number = base, 2
     while (root / name).exists():
         name, number = f"{base}-{number}", number + 1
@@ -877,7 +980,7 @@ def _mark_run(rundir: Path, preset: Preset, result: "FitResult") -> None:
     record["guided"] = {"preset": preset.id, "budget": result.budget, "fit": FIT_JSON}
     customized = preset.record.get("customized") or []
     if customized:
-        record["case"] = f"{preset.name} (customized)"
+        record["case"] = case_words(preset.name, customized)
         record["guided"]["customized"] = [change["knob"] for change in customized]
     _write_json(path, record)
 
@@ -909,7 +1012,8 @@ def add_preset_parser(commands: Any) -> None:
         sub = actions.add_parser(name, help=help_text)
         sub.add_argument("preset")
         sub.add_argument("--budget", required=True, choices=BUDGET_ORDER,
-                         help="about 10 minutes, about 1 hour, or overnight (up to 10 hours)")
+                         help="about 10 minutes, about 1 hour, overnight (up to 10 hours), or any: as long as it "
+                              "takes, with no limit on the time")
         sub.add_argument("--gpu", type=int, default=None, help="nvidia-smi's index of the GPU (default: the first)")
         sub.add_argument("--sounding", type=Path, default=None, metavar="FILE",
                          help="run the preset on this input_sounding instead of its own (presets with isnd = 7)")
@@ -919,7 +1023,8 @@ def add_preset_parser(commands: Any) -> None:
         sub.add_argument("--hodograph", choices=("curved", "straight"), default="curved")
         sub.add_argument("--custom", action="append", default=[], metavar="KNOB=VALUE",
                          help="change one of the preset's settings as guided mode's Customize panel does (repeat for "
-                              "more; 'gpuwm-cm1 preset options ID' lists them); the fit never changes it again")
+                              "more; 'gpuwm-cm1 preset options ID' lists them); the fit never changes it again. The "
+                              "grid spacing and the level height take any value in metres (grid=67, levels=125)")
         sub.add_argument("--set", action="append", default=[], metavar="KEY=VALUE", dest="set_values",
                          help="set a CM1 namelist word of the preset (repeatable); it must still pass the guided check")
         sub.add_argument("--json", action="store_true")
@@ -952,8 +1057,11 @@ def preset_door(arguments: argparse.Namespace, *, importer: Importer | None = No
         return _door(arguments, importer)
     except PresetError as error:
         if getattr(arguments, "json", False):
-            print(json.dumps({"status": "error", "code": "GM1-PRESET", "reason": str(error),
-                              "remedy": "see the reason"}, indent=2), file=sys.stderr)
+            detail: dict[str, Any] = {"status": "error", "code": "GM1-PRESET", "reason": str(error),
+                                      "remedy": "see the reason"}
+            if getattr(error, "suggest", None):
+                detail["suggest"] = dict(error.suggest)
+            print(json.dumps(detail, indent=2), file=sys.stderr)
         else:
             print(f"gpuwm-cm1 preset: {error}", file=sys.stderr)
         return 2
@@ -1021,7 +1129,7 @@ def _given_sounding(preset: Preset, arguments: argparse.Namespace) -> Preset:
         preset = apply(preset, parse(getattr(arguments, "custom", None) or ()),
                        parse_sets(getattr(arguments, "set_values", None) or ()))
     except CustomError as error:
-        raise PresetError(str(error)) from error
+        raise PresetError(str(error), suggest=error.suggest) from error
     sounding = getattr(arguments, "sounding", None)
     instability, shear = getattr(arguments, "instability", None), getattr(arguments, "shear", None)
     if sounding is not None and (instability is not None or shear is not None):
@@ -1093,6 +1201,15 @@ def _options_text(record: Mapping[str, Any]) -> str:
         if knob["id"] == "area":
             shown = (f"{knob['min_km']:g} to {knob['max_km']:g} km in steps of {knob['step_cells']} cells "
                      "(another width is rounded to the nearest step)")
+        elif knob["id"] == "grid":
+            shown = (f"any spacing up to {knob['max_m']:g} m (grid=67); the area keeps its size, rounded up to whole "
+                     "cells, and the time step follows. Quick picks: "
+                     + ", ".join(said(choice["value"]) for choice in knob["choices"]))
+        elif knob["id"] == "levels":
+            low, high = knob["levels_range"]
+            shown = (f"any height from {knob['min_m']:g} to {knob['max_m']:g} m ({high} to {low} levels up to "
+                     f"{knob['top_m']:g} m; the top moves by less than half a level when the height does not divide "
+                     "it). Quick picks: " + ", ".join(said(choice["value"]) for choice in knob["choices"]))
         else:
             shown = ", ".join(("seed:N" if knob["id"] == "bumps" and choice["value"] == "seed" else said(choice["value"]))
                               + ("" if choice.get("available", True) else " (not offered here)")
@@ -1105,7 +1222,7 @@ def _options_text(record: Mapping[str, Any]) -> str:
 
 
 def _list_text(record: Mapping[str, Any]) -> str:
-    lines = ["Presets (gpuwm-cm1 preset fit ID --budget 10m|1h|overnight):"]
+    lines = ["Presets (gpuwm-cm1 preset fit ID --budget 10m|1h|overnight|any):"]
     for row in record["presets"]:
         state = "offered" if row["offered"] else (row["why_not"] or "not offered")
         facts = row.get("facts") or {}
@@ -1142,7 +1259,11 @@ def _fit_text(record: Mapping[str, Any]) -> str:
     lines = [head]
     if record["status"] == "fits":
         lines.append(f"  {record['summary']}")
+        exact = (record.get("facts") or {}).get("exact")
+        if exact and record.get("customized"):
+            lines.append(f"  {exact}; time step {(record.get('facts') or {}).get('dt_s')!r} s")
         lines += _changes_lines(record)
+        lines += _warning_lines(record)
     else:
         reason = str(record["reason"])
         lines.append(f"  {reason}" if reason.lower().startswith("not offered") else f"  Not offered: {reason}")
@@ -1158,8 +1279,15 @@ def _new_text(record: Mapping[str, Any]) -> str:
         return f"{reason}\nNothing was written.\nCommand: {record['command']}"
     lines = [f"Wrote {record['run']}", f"  {record['message']}"]
     lines += _changes_lines(record["fit"])
+    lines += _warning_lines(record["fit"])
     lines.append(f"Start it with: {record['next']}")
     return "\n".join(lines)
+
+
+def _warning_lines(record: Mapping[str, Any]) -> list[str]:
+    """What an offered run should be read with (a storm near the edge, an untried size or spacing); it still runs."""
+
+    return [f"  - Note: {sentence}" for sentence in record.get("warnings") or []]
 
 
 def _customized_sentences(record: Mapping[str, Any]) -> list[str]:

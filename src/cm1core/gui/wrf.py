@@ -330,8 +330,8 @@ class WrfApi:
         when = self.when(payload)
         point = self.point(payload)
         budget = str(payload.get("budget") or "1h")
-        if budget not in ("10m", "1h", "overnight"):
-            raise self._error(400, "The time must be 10m, 1h or overnight.", "Pick one of the three.")
+        if budget not in ("10m", "1h", "overnight", "any"):
+            raise self._error(400, "The time must be 10m, 1h, overnight or any.", "Pick one of the four.")
         stat = path.stat()
         key = _key("use", str(path), stat.st_size, stat.st_mtime_ns, when, point)
         out = self.base / "soundings" / key / "input_sounding"

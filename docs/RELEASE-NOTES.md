@@ -1,5 +1,118 @@
 # gpuwm-cm1 release notes
 
+## 0.1.4
+
+Any grid spacing in guided mode. The model and the engine (ArWen 2.8.9) are 0.1.3's, and every storm that 0.1.3
+runs, 0.1.4 runs the same way. What changed is how guided mode and `gpuwm-cm1 preset` choose the grid, the time
+step and the area, and what they say about them.
+
+### What is new
+
+- **Any grid spacing.** Guided mode's **Customize this storm** takes any grid spacing (quick picks at 100 m, 250 m,
+  500 m, 1 km and 2 km, a slider, or a number you type: 67 m) and any height for the levels, and
+  `gpuwm-cm1 preset fit|new ID --custom grid=67 --custom levels=125` does the same from a terminal. The time step
+  follows the spacing (CM1's 6 s per km across and per 500 m up) and is shortened where needed so every saved picture
+  and the end of the run land on a whole step. Where the domain moves with the storm (`imove = 1`, as in CM1's
+  supercell) the step is also a small odd number over a power of two, so the running sum of the domain's position
+  never rounds: 0.402 s at 67 m becomes 0.390625 s (25/64), a few percent shorter as a rule and a fifth at most.
+  Where it does not move, 0.402 s becomes 0.4 s. The area keeps its size, rounded up to whole cells; the levels keep
+  the model top to the nearest whole level. The fit then sizes the area to the card and says the result exactly
+  ("67 m grid, 74.5 × 74.5 km, 1112 × 1112 cells").
+- **A typed decimal spacing runs.** CM1 holds dx, dy and dz in a 4-byte REAL, and a run starts only with a length
+  that word holds exactly. A typed 82.9 m, or levels every 130.3 m, is given to the run as the nearest such length
+  (82.9000015258789 m in the namelist, which is what CM1 itself makes of 82.9) and is still said as 82.9 m.
+- **Unusual is not refused.** With a choice of your own, a run that fits only in an area smaller than the storm was
+  set up for is offered, with a note that the storm may leave an area this small and an offer to move the view
+  with the storm. A domain larger than the largest GM1 has run (39 million cells) is offered with a note instead of
+  being turned down. What is still not offered is what cannot run, with the reason and what would fit: more GPU
+  memory, RAM or disk than is free even on the smallest area a storm can start in (16 km, or its warm bubble's
+  width); more than 256 levels or fewer than 8; fewer than 8 cells across; more cells than one restart file holds
+  (16 GiB, about 60 million cells); more time than the time picked; and, on a storm that runs a sounding file, a
+  storm that leaves its area (the run's own start refuses that one). Where the reason names a value that would be
+  taken, the screen has a button that sets it, and a finest grid it names has been priced first, so it does fit.
+- **What the fit offers, Start takes.** The famous days start from a push of rising air; the fit now follows that
+  storm's track as the run's own start does, so it no longer offers a small area that Start then refuses. When the
+  largest area that fits is one the storm leaves, the reason says that, with the area the storm needs and a coarser
+  grid that covers it.
+- **A run is named for the spacing it has.** A 150 m run started from the 1 km preset is
+  `supercell-150m-custom-...` and is listed as "Supercell, 150 m grid (customized from Supercell, quick look,
+  1 km)".
+- **An area of your own follows the storm at every storm time.** With 30, 45 or 90 minutes of storm time the view
+  stayed on the preset's own motion, and the storm drifted to the edge of a small area. The view now moves as the
+  storm-track check predicts, and the screen says that and no more: the prediction is not exact.
+- **A small area says what is known about its edges.** Whenever the area is smaller than the one the storm was set
+  up for (64 km for the supercell), or than the room the storm-track check gives the storm, the fit shows one note,
+  whether or not the view follows the storm: "the storm may leave an area this small; pictures near the edges then
+  show edge effects", with the check's own timing as a prediction. Nothing on the screen says the storm stays
+  inside. On an area you chose, the note has a one-tap "Use N km" for the smallest larger area without the note,
+  when one fits the card.
+- **Watching says the grid.** The header line of a run gives its spacing and area beside its name
+  ("67 m grid, 22 × 22 km").
+- **A grid's own measured speed is its fastest recent run.** GM1 prices a storm it has run before on this card at
+  that run's step time. Other work on the card during a run only slows it, and the median of several runs made
+  later estimates too long; the fastest of the last five is used.
+- **As long as it takes.** A fourth time beside About 10 minutes, About 1 hour and Overnight (up to 10 hours):
+  no limit (`--budget any`).
+- **The 100 m supercell is offered again**, with a 0.5 s time step and a picture every 5 minutes. Up to 0.1.3 it was
+  greyed: it stopped after six steps: with its 0.6 s step, CM1's running sum of the moving domain's position
+  (`domainlocy`) rounds in the last place, 10.8 m against 10.799999999999999 m, and GM1's run checks that sum
+  exactly. The check is unchanged (it belongs to the sources the CM1 comparison was measured on); the step is now
+  one it holds exactly, and every step guided mode picks for a moving domain is such a step.
+- **`gpuwm-cm1 estimate` and the Estimate screen name a time step that would stop a moving domain**, with the step
+  at which the run would stop and a time step that works.
+
+### What was measured
+
+- On an RTX 4090 on ArWen 2.8.9, as this version ships: a 67 m storm from Customize's defaults at About 1 hour
+  (a 49.3 km area, 736 × 736 cells, 6,912 steps of 0.390625 s) ran its 45 minutes in 46 minutes against 60
+  estimated, at 0.39 s a step, with 19.0 GB of GPU memory against 20.9 GB estimated; the 100 m supercell (44 km,
+  440 × 440 cells with 80 levels, 0.5 s steps) ran its first 20 minutes, 2,400 steps, at 0.32 s a step against
+  0.28 estimated, with 14.4 GB against 15.0 GB; an 82.9 m grid ran 10 minutes (1,280 steps of 0.46875 s at
+  0.054 s a step, 2.7 GB against 2.9 GB); and a 150 m grid with 153 levels every 130.3 m ran 5 minutes at
+  0.067 s a step against 0.060 estimated, with 3.8 GB against 3.2 GB estimated. None stopped. The storm grew the
+  same at each spacing (strongest updraft 1.3 m/s at 10 minutes and 15 m/s at 20 minutes; 66 m/s at 45 minutes at
+  67 m). Another run was on the card for the last three.
+- Earlier, during development, on the same card on ArWen 2.8.0: spacings of 33 m (the first 10 minutes), 67 m
+  (45 minutes, twice), 100 m (30 minutes), 150 m with levels every 100 m (43 minutes), 333 m (2 hours, and
+  30 minutes on an area of 361 cells across), 500 m (2 hours) and 700 m (the cloud from one bubble, 20 minutes):
+  none stopped, and at 333 m the storm's timing, updraft and radar echo fall beside the 250 m, 500 m and 1 km
+  runs'. Memory came within 10 % of the estimate. Time was within about 10 % at 67 m, 333 m and 500 m; a mature
+  storm ran up to a quarter slower than estimated at 100 m, the 33 m run about a third slower, and the run with
+  200 levels took about twice its estimate. Another run shared the card during these.
+- The edges of a small area, 67 m, 45 minutes of storm time: in a 34 km area with the view moving as predicted the
+  storm moved east faster than predicted and its rain was cut off by the east edge (with the preset's own motion it
+  reached the west and north edges); in the 49 km area the fit gives that card from Customize's defaults, with the
+  preset's own motion, the storm's core stayed inside and the rain ahead of it reached the east edge at 45 minutes.
+- No run finer than 100 m has been compared with CM1. CM1 agreement itself was measured at 1 km.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"); with pip, `pip install --upgrade gpuwm-cm1`. The engine stays at ArWen 2.8.9 (gpuwm 2.8.9 and
+gpuwm-data 2.8.9). Close GM1 and let a running storm finish first; the installer stops with a message while one
+runs. Your storms stay where they are. Finish a storm with the GM1 version that started it.
+
+### Known limitations
+
+- **Time estimates for tall columns.** The time estimate has no term for the number of levels, only a note on a fit
+  with more than 80 levels. The two measured points disagree: 200 levels took about twice the estimate on 2.8.0,
+  153 levels took 11 % longer on 2.8.9, both with another run on the card. In the 153-level run the GPU memory
+  also came out a fifth over its estimate (3.8 GB against 3.2 GB).
+- **Small areas.** The note on a small area is a warning, not a forecast: the storm-track prediction does not match
+  the real motion of the 67 m storm that was measured, and with the view following the storm a 34 km area still lost the storm's
+  rain at the east edge. Even the 49 km area the fit gives a 24 GB card at 67 m let the rain reach the east edge by
+  45 minutes. On a 16 GB card a 67 m area of your own gets no "Use N km" button, because no area without the note
+  fits that card.
+- **A suggestion can lead to a second refusal.** A one-tap suggestion is not always the last step: in a sweep of
+  1820 choices, 11 of 56 suggestions led to another refusal. A grid that fits the memory can then be refused for
+  time on the 1 hour budget; on the 100 m supercell the grid named after a refusal for the restart file's size
+  can then be refused for memory on a 24 GB card; with decimal levels a suggested grid can be a few metres too fine for the storm's room, and
+  the next reply names the one that fits.
+- **`gpuwm-cm1 import` and the Check screen** do not yet name a time step that would stop a moving domain: they
+  still report such a namelist as runnable. `gpuwm-cm1 estimate` says it.
+- The known limitations of 0.1.3, 0.1.2, 0.1.1 and 0.1.0 still apply ("Known limitations" under each, and "Not in
+  v0.1" and "Further known limits" under "0.1.0", below), except that the 100 m supercell is no longer greyed.
+
 ## 0.1.3
 
 A documentation release: the pages that lead beyond the GUI, each saying exactly how far it has been checked.

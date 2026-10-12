@@ -67,7 +67,8 @@ def presets() -> dict[str, PresetSpec]:
         ),
         "supercell-100m": PresetSpec(
             "supercell-100m", "Supercell, 100 m, overnight",
-            set_namelist_values(stock, dict(nx=600, ny=600, nz=80, dx=100.0, dy=100.0, dz=250.0, dtl=0.6)),
+            # 0.5 s, the preset's own step: with this moving domain 0.6 s stops the run at its sixth step.
+            set_namelist_values(stock, dict(nx=600, ny=600, nz=80, dx=100.0, dy=100.0, dz=250.0, dtl=0.5)),
             min_width_km={100.0: 40.0, 0.0: 64.0},
             # The storm-track check's own recommendation for this box: the
             # bubble 11 km east of centre (iorigin = 2), stock frame kept.

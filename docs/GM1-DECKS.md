@@ -203,8 +203,8 @@ namelist, and every later `edit` of that folder fails on it. Set the key back to
 
 ### A 100 m supercell
 
-In guided mode the finest grid offered is 250 m; the 100 m preset is greyed. The engine runs 100 m; these are the 100 m preset's own
-changes to CM1's file, with a 0.5 s step:
+Guided mode offers the 100 m preset and takes any grid spacing (**Customize this storm**). From CM1's own file, these are
+the 100 m preset's grid and its 0.5 s step:
 
 ```sh
 gpuwm-cm1 import cm1/supercell/namelist.input --out runs/supercell-100m

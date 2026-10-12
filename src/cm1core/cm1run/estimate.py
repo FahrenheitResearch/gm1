@@ -1124,6 +1124,40 @@ def _add_checks(
             "and spacing"
             + (": strong storms reach 60-70 m/s updrafts, so a shorter time step is safer." if level == "warn" else "."),
         ))
+    # a moving domain's position: the run checks CM1's running sum of it exactly
+    if not getattr(runtime_config, "adaptive_timestep", False) and getattr(config, "nest", None) is None:
+        steps = int(round(config.run.duration_s / config.run.dt_s)) if config.run.dt_s > 0 else 0
+        stops = [
+            first_inexact_step(config.run.dt_s, speed, steps)
+            for speed in (getattr(runtime_config, "u_move_m_s", 0.0), getattr(runtime_config, "v_move_m_s", 0.0))
+        ]
+        found = [step for step in stops if step]
+        if found:
+            better = ""
+            try:
+                from .customize import snap_time_step
+
+                step = snap_time_step(config.run.dt_s, [config.run.duration_s, config.run.history_interval_s],
+                                      binary=True)
+                better = f" {step!r} s works here."
+            except ValueError:
+                pass
+            sure = [step for step in found if step > 0]
+            if sure:
+                checks.append(Check(
+                    "moving-step", "stop",
+                    f"With a moving domain (umove, vmove) a {config.run.dt_s:g} s time step stops the run after "
+                    f"{min(sure)} steps: CM1's running sum of the domain's position rounds there, and the run "
+                    "checks that sum exactly. A step that is a small odd number over a power of two (0.5 s, "
+                    f"0.375 s, 0.75 s) never rounds.{better}",
+                ))
+            else:
+                checks.append(Check(
+                    "moving-step", "warn",
+                    f"With a moving domain (umove, vmove) a {config.run.dt_s:g} s time step may stop a run this "
+                    "long: CM1's running sum of the domain's position can round, and the run checks that sum "
+                    f"exactly. A step that is a small odd number over a power of two never rounds.{better}",
+                ))
     bounds = (8, 80) if component == "wsm6-mp6" else None
     if bounds and grid.nz > bounds[1]:
         checks.append(Check("levels", "stop", f"WSM6 runs at most {bounds[1]} levels; this deck has {grid.nz}."))
@@ -1143,8 +1177,10 @@ def _add_checks(
             refused = storm.get("door") == "refused"
             checks.append(Check(
                 "storm-track", "stop" if refused else "warn",
-                f"The storm reaches the edge of the area at about {duration_words(exit_s)} "
-                f"(it comes within {clearance:.0f} km of an open side; it needs "
+                # In an area too small for the storm it is short of room at once: said as that, not "at about 0 s".
+                (f"The storm reaches the edge of the area at about {duration_words(exit_s)} " if exit_s >= 30.0
+                 else "The storm is too close to the edge of the area from the start ")
+                + f"(it comes within {clearance:.0f} km of an open side; it needs "
                 f"{storm['admission_clearance_km']:.0f} km). After that, the biggest values are "
                 "edge effects, not the storm. "
                 f"Recommended: frame {storm['recommended_frame_m_s'][0]:.1f}, {storm['recommended_frame_m_s'][1]:.1f} m/s "
@@ -1175,6 +1211,35 @@ def _add_checks(
             ))
     if getattr(config, "nest", None) is not None:
         checks.append(Check("nest", "warn", "Nests are not priced by this estimator: only the parent domain is counted."))
+
+
+def first_inexact_step(dt_s: float, speed_m_s: float, steps: int, *, look: int = 200_000) -> int | None:
+    """The first step at which a moving domain's running sum of ``dt * speed`` stops being ``n * dt * speed``.
+
+    CM1 adds ``dbldt*dble(umove)`` to the domain's position once a step (cm1.F:3512-3513) and the run checks the
+    sum against the product exactly (``gm1_runtime.RuntimeClock``).  The two are equal at every step while no
+    addition rounds: the increment's significant bits and the step count's together fit binary64's 53, which is
+    so for a step that is a small odd number over a power of two and a frame speed of a few binary digits.
+    Returns None when they stay equal for all ``steps``; the step that first differs; or -1 when the first
+    ``look`` steps agree and the bits do not rule out a later one.
+    """
+
+    from ..gm1_runtime import cm1_real
+
+    increment = float(dt_s) * cm1_real(float(speed_m_s))
+    if increment == 0.0 or steps <= 0 or not math.isfinite(increment):
+        return None
+    mantissa = int(abs(math.frexp(increment)[0]) * (1 << 53))
+    while mantissa and mantissa % 2 == 0:
+        mantissa //= 2
+    if mantissa.bit_length() + int(steps).bit_length() <= 53:
+        return None
+    total = 0.0
+    for step in range(1, min(steps, look) + 1):
+        total += increment
+        if total != step * increment:
+            return step
+    return None if steps <= look else -1
 
 
 # ------------------------------------------------------------ plain text

@@ -66,14 +66,17 @@ export function spanWords(seconds) {
   return `${s} s`;
 }
 
+// A size as the fit's own sentences say it: one decimal under 100 GB, whole GB above (15.8 GB, 212 GB).
 export function gb(bytes) {
   if (bytes === null || bytes === undefined) return "";
-  return `${sig2(bytes / 1e9)} GB`;
+  const value = bytes / 1e9;
+  return value < 100 ? `${value.toFixed(1)} GB` : `${Math.round(value)} GB`;
 }
 
 export function metres(m) {
-  if (m >= 1000) return `${Number((m / 1000).toFixed(1))} km`;
-  return `${Math.round(m)} m`;
+  // Any spacing is said as it is: 67 m, 78.2 m, 1.25 km.
+  if (m >= 1000) return `${Number((m / 1000).toFixed(3))} km`;
+  return `${Number(Number(m).toFixed(1))} m`;
 }
 
 export function shortGpu(name) {

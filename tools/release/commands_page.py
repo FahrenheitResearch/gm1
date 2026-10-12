@@ -41,7 +41,7 @@ WHERE = {
     "column": "Results: click a column for its skew-T",
     "convert": "Results: Convert again",
     "reproduce": "Results: Reproduce bundle",
-    "fit": "Guided: How long can it run? (the three buttons)",
+    "fit": "Guided: How long can it run? (the four buttons)",
     "guided-start": "Guided: Start",
     "preset-new": "New run: Start from a preset; guided Customize: All settings (Advanced)",
     "film": "Results: Save as film, Make the film (and Stop)",

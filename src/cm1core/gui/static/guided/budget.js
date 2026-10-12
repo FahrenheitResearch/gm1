@@ -1,4 +1,4 @@
-// Guided screen 2: How long can it run?. Three times; under them "Customize this storm" (closed until opened), the
+// Guided screen 2: How long can it run?. Four times (the last has no limit); under them "Customize this storm" (closed until opened), the
 // fitted run in one sentence, what you get (plain words, CM1's names as grey hints), what you changed, each change
 // the fit made, and one Start button with its command. A preset that runs a sounding file may be given one in the
 // route's query: #/guided/fit/ID/BUDGET?sounding=FILE (the column the WRF card keeps) or
@@ -13,7 +13,8 @@ import { showCommand } from "../js/command.js";
 import { t, term, wallWords, spanWords, gb, metres, shortGpu } from "./copy.js";
 import { customizePanel, customFrom, customQuery, changedKnobs, changedWords, changesStorm } from "./customize.js";
 
-const BUDGETS = ["10m", "1h", "overnight"];
+// "any" is "As long as it takes": no limit on the time, for a run that needs more than overnight's 10 hours.
+const BUDGETS = ["10m", "1h", "overnight", "any"];
 const REFIT_MS = 350;
 // Why a fit is not offered (fit.json reason_kind), and which of them a longer time can help.
 const BADGES = ["time", "gpu", "host", "disk", "edge", "limits", "unpriced", "drift", "withheld", "check"];
@@ -90,9 +91,16 @@ function youGet(fit, p) {
   const est = fit.estimate || {};
   const gpu = fit.gpu;
   const rows = [];
-  if (f.dx_m) rows.push(row("grid_spacing", metres(f.dx_m), f.dx_m));
-  if (f.domain_km) rows.push(row("area", `${f.domain_km[0]} × ${f.domain_km[1]} km`, `${f.nx}, ${f.ny}`));
-  if (f.nz) rows.push(row("levels", `${f.nz} × ${metres(f.dz_m)}`, `${f.nz}, ${f.dz_m}`));
+  // The area as it is simulated: whole km as they are, anything else to a tenth, with its cells.
+  const km = (v) => (Math.abs(v - Math.round(v)) < 0.05 ? String(Math.round(v)) : v.toFixed(1));
+  // A typed 82.9 m is held as 82.9000015258789 (the model's 4-byte word for it): seven figures say the same number.
+  const real = (v) => Number(Number(v).toPrecision(7));
+  if (f.dx_m) rows.push(row("grid_spacing", metres(f.dx_m), real(f.dx_m)));
+  if (f.domain_km) {
+    rows.push(row("area", `${km(f.domain_km[0])} × ${km(f.domain_km[1])} km (${t("budget.cells", { nx: f.nx, ny: f.ny })})`, `${f.nx}, ${f.ny}`));
+  }
+  if (f.nz) rows.push(row("levels", `${f.nz} × ${metres(f.dz_m)}`, `${f.nz}, ${real(f.dz_m)}`));
+  if (f.dt_s) rows.push(row("time_step", `${Number(Number(f.dt_s).toPrecision(7))} s`, Number(Number(f.dt_s).toPrecision(7))));
   if (f.duration_s) rows.push(row("storm_time", spanWords(f.duration_s), f.duration_s));
   if (f.output_interval_s) rows.push(row("picture_every", spanWords(f.output_interval_s), f.output_interval_s));
   if (p.facts && p.facts.scheme) rows.push(row("scheme", p.facts.scheme, p.facts.ptype));
@@ -203,6 +211,8 @@ export async function budget(body, args) {
   const summary = h("p", { class: "g-summary text", tabindex: "-1" });
   const help = h("div", { class: "g-cz-help" });
   const got = h("div", {});
+  // What an offered run should be read with (the storm near the edge, an untried size or spacing): it still runs.
+  const notes = h("div", { class: "g-notes" });
   const yours = h("div", {});
   const changesHead = h("h2", { class: "cap", hidden: true }, t("budget.changes"));
   const changes = h("div", {});
@@ -238,7 +248,7 @@ export async function budget(body, args) {
     },
   }) : null;
 
-  const left = h("section", { class: "panel" }, choice, panel ? panel.el : null, summary, help, got,
+  const left = h("section", { class: "panel" }, choice, panel ? panel.el : null, summary, notes, help, got,
     yours, changesHead, changes,
     h("div", { class: "btns g-go" }, start, h("a", { href: "#/guided" }, t("budget.back"))), cmd,
     h("p", { class: "note" }, t("budget.estimated")));
@@ -280,6 +290,31 @@ export async function budget(body, args) {
     fitNow();
   }
 
+  // A setting that is taken instead of the one turned down ({grid: 23}, {levels: 78}, {area: 36.4}), as one-tap
+  // buttons. The grid is never finer than this card has room for (the panel's own "finest grid").
+  function suggestButtons(suggest) {
+    const out = [];
+    const add = (knob, value, words) => {
+      const b = h("button", { type: "button", class: "btn primary g-suggest", dataset: { use: knob } }, words);
+      b.addEventListener("click", () => refitWith(() => { state.custom[knob] = value; }));
+      out.push(b);
+    };
+    if (!suggest || !panel) return out;
+    if (typeof suggest.grid === "number" && suggest.grid > 0) {
+      const finest = panel.finestGrid() || 0;
+      // A spacing above the card's finest is used as it is; one below it becomes the card's finest.
+      const value = suggest.grid >= finest ? suggest.grid : finest;
+      add("grid", value, t("custom.use_grid", { value: metres(value) }));
+    }
+    if (typeof suggest.levels === "number" && suggest.levels > 0) {
+      add("levels", suggest.levels, t("custom.use_levels", { value: metres(suggest.levels) }));
+    }
+    if (typeof suggest.area === "number" && suggest.area > 0) {
+      add("area", suggest.area, t("custom.use_area", { value: `${Number(suggest.area.toFixed(1))} km` }));
+    }
+    return out;
+  }
+
   // Not offered with the user's own choices: what would take them (a longer time, a larger area, one change
   // undone), and a button per choice to hand back to GM1.
   async function helpFor(reply, mine) {
@@ -287,7 +322,8 @@ export async function budget(body, args) {
     const kind = fit.reason_kind || "";
     if (kind === "withheld" || kind === "check") return;
     const pinned = ["grid", "area", "time", "pictures"].filter((knob) => (fit.pinned || []).includes(knob));
-    const handBack = [];
+    // What the fit says would be offered comes first (a coarser grid that fits), then handing choices back.
+    const handBack = suggestButtons((fit.needs || {}).suggest);
     for (const knob of pinned) {
       const b = h("button", { type: "button", class: "btn" }, t("custom.let_choose", { what: t(`custom.what.${knob}`) }));
       b.addEventListener("click", () => refitWith(() => { delete state.custom[knob]; }));
@@ -308,7 +344,10 @@ export async function budget(body, args) {
     if (i < 0) return;
     const ofit = replies[i].fit || {};
     const wall = wallWords((ofit.estimate || {}).wall_s);
-    const words = ofit.gpu ? t("custom.need_longer", { wall, gpu: shortGpu(ofit.gpu.name) }) : t("custom.need_longer_nogpu", { wall });
+    // The longer time is for the area that time fits, which can be larger than the one the reason above is for.
+    const side = Math.max(...(((ofit.facts || {}).domain_km) || [0]));
+    const values = { wall, budget: t(`budget.${later[i]}`), area: `${Number(side.toFixed(1))} km` };
+    const words = ofit.gpu ? t("custom.need_longer", { ...values, gpu: shortGpu(ofit.gpu.name) }) : t("custom.need_longer_nogpu", values);
     const use = h("button", { type: "button", class: "btn primary" }, t("custom.use_budget", { budget: t(`budget.${later[i]}`) }));
     use.addEventListener("click", () => pick(later[i]));
     help.prepend(h("p", { class: "text" }, words, " ", use));
@@ -353,6 +392,25 @@ export async function budget(body, args) {
     }
   }
 
+  // The storm comes close to the edge of an area the user chose: the smallest larger area with no such note, as
+  // one button (the area slider's own steps are tried, a few at a time).
+  async function clearOfEdge(mine, li, setUpForKm) {
+    const larger = panel ? panel.largerAreas() : [];
+    // The first step at least as wide as the area the storm was set up for is the likeliest smallest area without
+    // the note, and a spread of six can step over it: it is tried with them.
+    const own = larger.find((a) => a >= Number(setUpForKm) - 1e-6);
+    const areas = [...new Set([...(own === undefined ? [] : [own]), ...spread(larger, 6)])].sort((a, b) => a - b);
+    if (!areas.length) return;
+    const replies = await pooled(areas.map((a) => () => api.post("/api/fit", { preset: p.id, budget: chosen, ...requestWith({ ...state.custom, area: a }, state.environment) })));
+    if (mine !== serial || !li.isConnected) return;
+    const clear = (r) => Boolean(r && r.offered && !((r.fit || {}).warning_records || []).some((w) => w.kind === "edge"));
+    const area = areas.find((a, i) => clear(replies[i]));
+    if (area === undefined) return;
+    const use = h("button", { type: "button", class: "btn g-follow" }, t("custom.use_area", { value: `${Math.round(area)} km` }));
+    use.addEventListener("click", () => refitWith(() => { state.custom.area = area; }));
+    li.append(" ", t("custom.edge_area", { value: `${Math.round(area)} km` }), " ", use);
+  }
+
   async function fitNow() {
     const mine = ++serial;
     current = null;
@@ -361,6 +419,7 @@ export async function budget(body, args) {
     try {
       summary.textContent = t("budget.fitting");
       help.replaceChildren();
+      notes.replaceChildren();
       got.replaceChildren();
       yours.replaceChildren();
       changes.replaceChildren();
@@ -376,6 +435,17 @@ export async function budget(body, args) {
         summary.replaceChildren(h("span", { class: "st refused" }, t("budget.badge.setting")), " ",
           `${err.message} ${err.fix || ""}`.trim());
         if (panel) panel.showFit({ offered: false });
+        // The value the message names as taken, one tap away, and the choice handed back to GM1.
+        const suggest = (err.body && err.body.suggest) || {};
+        const use = suggestButtons(suggest);
+        for (const knob of Object.keys(suggest)) {
+          if (state.custom[knob] === undefined || !["grid", "area", "levels"].includes(knob)) continue;
+          const words = knob === "levels" ? t("custom.as_preset_what", { what: t("custom.what.levels") }) : t("custom.let_choose", { what: t(`custom.what.${knob}`) });
+          const b = h("button", { type: "button", class: "btn" }, words);
+          b.addEventListener("click", () => refitWith(() => { delete state.custom[knob]; }));
+          use.push(b);
+        }
+        if (use.length) help.replaceChildren(h("div", { class: "btns" }, use));
         return;
       }
       if (mine !== serial) return;
@@ -396,6 +466,22 @@ export async function budget(body, args) {
       }
       current = reply;
       summary.textContent = fit.summary || "";
+      const warned = fit.warning_records || [];
+      if (warned.length) {
+        const items = warned.map((w) => {
+          const li = h("li", {}, w.lead || w.sentence);
+          // Keeping the area as the user's own choice makes Customize move the view with the storm.
+          if (w.kind === "edge" && w.follow_area_km && panel && state.custom.area === undefined) {
+            const follow = h("button", { type: "button", class: "btn g-follow" }, t("custom.follow_storm"));
+            follow.addEventListener("click", () => refitWith(() => { state.custom.area = w.follow_area_km; }));
+            li.append(" ", follow);
+          } else if (w.kind === "edge" && panel && state.custom.area !== undefined) {
+            clearOfEdge(mine, li, w.set_up_for_km);
+          }
+          return li;
+        });
+        notes.replaceChildren(h("h2", { class: "cap" }, t("budget.notes")), h("ul", { class: "g-changes g-notes-list" }, items));
+      }
       got.replaceChildren(h("h2", { class: "cap" }, t("budget.you_get")), youGet(fit, p));
       const sentences = fit.sentences || [];
       changesHead.hidden = false;

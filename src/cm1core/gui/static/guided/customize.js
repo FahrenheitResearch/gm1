@@ -36,7 +36,10 @@ export function customFrom(params) {
 export function customQuery(custom, environment) {
   const params = new URLSearchParams();
   for (const knob of KNOB_QUERY) {
-    if (custom[knob] !== undefined) params.set(knob, String(custom[knob]));
+    if (custom[knob] === undefined) continue;
+    // An area is kept to the metre, so the route never carries 239.59199999999998.
+    const value = knob === "area" && typeof custom[knob] === "number" ? Math.round(custom[knob] * 1000) / 1000 : custom[knob];
+    params.set(knob, String(value));
   }
   if (environment) {
     params.set("instability", String(environment.instability));
@@ -46,9 +49,30 @@ export function customQuery(custom, environment) {
   return params.toString();
 }
 
-// The time step a grid and its levels take (customize.time_step: CM1's 6 s per 1 km and per 500 m up).
-export function timeStep(dx, dz) {
-  return Math.min(0.006 * dx, 0.012 * dz);
+// Whether an interval is a whole number of time steps, by the runtime's own arithmetic (customize.lands).
+export function lands(interval, dt) {
+  if (!(dt > 0) || !(interval > 0)) return false;
+  const steps = interval / dt;
+  return Number.isFinite(steps) && steps >= 1 && Number.isInteger(steps);
+}
+
+// The cells a side takes at a spacing: the exact count when that is whole, otherwise the next whole number up,
+// never fewer than 8 (customize.cells_across).
+export function cellsAcross(lengthM, dx) {
+  const exact = lengthM / dx;
+  const whole = Math.round(exact);
+  return Math.max(8, Math.abs(exact - whole) < 1e-6 ? whole : Math.ceil(exact));
+}
+
+// The cells one saved picture of the storm holds (customize.FRAME_CELLS_MAX): an area past it cannot be saved on
+// any card, so the area slider stops there.
+const FRAME_CELLS = 150e6;
+
+// A slid spacing as a number worth keeping: whole metres under 200 m, 5 m steps to 1 km, 50 m steps above.
+function slidMetres(m) {
+  if (m < 200) return Math.max(1, Math.round(m));
+  if (m < 1000) return 5 * Math.round(m / 5);
+  return 50 * Math.round(m / 50);
 }
 
 function whole(x) { return Math.abs(x - Math.round(x)) < 1e-6; }
@@ -145,10 +169,34 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
   // was moved (shown on its row).
   let fitted = null;
   let areaNote = null;
+  // What the last fit said this card holds: the cells along the side of the largest square area, at how many levels.
+  let card = null;
+  // A redraw replaces every control, so it waits while one is in use: a number box with text not yet entered, or a
+  // slider held down. It is drawn once that control is let go (pendingPaint).
+  let painting = false;
+  let paintAgain = false;
+  let pendingPaint = false;
+  let dragging = false;
+  let nowLine = null;
   const toggle = h("button", { type: "button", class: "btn g-cz-toggle", "aria-expanded": "false", "aria-controls": panelId },
     t("custom.open"));
   const live = h("p", { class: "g-cz-live", "aria-live": "polite" });
   const body = h("div", { class: "g-cz-body" });
+  // Whether a control is in the middle of being used (see pendingPaint).
+  function busy() {
+    if (dragging) return true;
+    const el = document.activeElement;
+    return Boolean(el && body.contains(el) && el.matches("input.g-cz-num") && el.value !== el.dataset.committed);
+  }
+  function flushPaint() { if (pendingPaint && !painting && !busy()) paint(); }
+  body.addEventListener("pointerdown", (event) => {
+    if (event.target instanceof Element && event.target.matches('input[type="range"]')) dragging = true;
+  });
+  // The slider's own "change" comes after the pointer is let go: it is handled first, then anything still waiting.
+  const letGo = () => { if (dragging) { dragging = false; setTimeout(flushPaint, 0); } };
+  window.addEventListener("pointerup", letGo);
+  window.addEventListener("pointercancel", letGo);
+  body.addEventListener("focusout", () => setTimeout(flushPaint, 0));
   const reset = h("button", { type: "button", class: "btn" }, t("custom.reset"));
   const advanced = h("button", { type: "button", class: "btn" }, t("custom.advanced"));
   const foot = h("div", { class: "g-cz-foot" },
@@ -196,7 +244,7 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
         const key = now < chosen ? (cap === "run" ? "custom.area_cut_run" : "custom.area_cut_offer") : "custom.area_raised";
         areaNote = t(key, { value: `${Math.round(now)} km`, was: `${Math.round(chosen)} km` });
       }
-      state.custom.area = now;
+      state.custom.area = Math.round(now * 1000) / 1000;
     } else areaNote = null;
     paint();
     onChange({ refit: true });
@@ -204,15 +252,18 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
 
   const dxNow = () => Number(state.custom.grid ?? grid.dx_m);
   const dzNow = () => Number(state.custom.levels ?? grid.dz_m);
-  const dtNow = () => (state.custom.grid === undefined && state.custom.levels === undefined ? Number(grid.dt_s) : timeStep(dxNow(), dzNow()));
   const timeNow = () => Number(state.custom.time ?? (fitted && fitted.time) ?? (knobs.time ? knobs.time.default : 0));
 
   function pictureChoices() {
     const knob = knobs.pictures;
     if (!knob) return [];
     const seconds = Number(state.custom.time ?? (knobs.time ? knobs.time.default : 0)) * 60;
-    const dt = dtNow();
-    return (knob.all || []).filter((m) => m * 60 <= seconds + 1e-6 && whole(seconds / (m * 60)) && whole((m * 60) / dt));
+    // With a grid spacing or level height of the user's own the time step is made to land on the picture interval
+    // chosen (customize.snapped_time_step), so every interval that splits the storm time is a choice; otherwise the
+    // preset's own step decides.
+    const own = !same(dxNow(), grid.dx_m) || !same(dzNow(), grid.dz_m);
+    return (knob.all || []).filter((m) => m * 60 <= seconds + 1e-6 && whole(seconds / (m * 60))
+      && (own || lands(m * 60, Number(grid.dt_s))));
   }
 
   // The area slider's ends, in km of the longer side, in steps of 8 cells of the grid in use, and what caps the top
@@ -222,17 +273,20 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     const dx = dxNow();
     const aspect = area.aspect || 1;
     const parcels = (state.custom.parcels ?? knobs.parcels.default) === "on";
-    const floor = Math.max(area.floor_km, parcels ? area.parcels_floor_km : 0);
-    const nz = Math.round((grid.top_m || area.nz * grid.dz_m) / dzNow());
-    const maxCells = Math.floor(Math.sqrt(area.largest_cells / (nz * aspect)));
+    // The smallest area a storm starts in (16 km, or the bubble's own width), and never fewer than 8 cells.
+    const floor = Math.max(area.floor_km, parcels ? area.parcels_floor_km : 0, (8 * dx) / 1000);
     const step = (area.step_cells * dx) / 1000;
-    const base = Math.round((grid.nx >= grid.ny ? grid.nx : grid.ny) * grid.dx_m / dx);
+    const base = cellsAcross((grid.nx >= grid.ny ? grid.nx : grid.ny) * grid.dx_m, dx);
     const baseKm = (base * dx) / 1000;
     const low = baseKm - step * Math.floor((baseKm - floor / aspect) / step + 1e-9);
-    const runKm = (maxCells * dx) / 1000;
+    // An area larger than any GM1 has run is offered with a note; one past what a saved picture holds at this grid
+    // and these levels is not offered, since it cannot be saved (cells = long side x short side x levels).
+    const levels = Math.max(1, Math.round((grid.top_m || grid.nz * grid.dz_m) / dzNow()) || grid.nz || 1);
+    const runKm = (Math.sqrt(FRAME_CELLS / (levels * aspect)) * dx) / 1000;
     const high = Math.min(area.max_km, runKm);
     const top = baseKm + step * Math.floor((high - baseKm) / step + 1e-9);
-    return [low, Math.max(low, top), step, runKm < area.max_km ? "run" : "offer"];
+    const km = (v) => Math.round(v * 1000) / 1000;
+    return [km(low), km(Math.max(low, top)), step, runKm < area.max_km ? "run" : "offer"];
   }
 
   // The area slider's steps above the area in use, for "Make the area larger" (budget.js tries some of them).
@@ -279,8 +333,127 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
       select.append(h("option", { value: String(v) }, valueWords(knob, v)));
     }
     select.value = state.custom[knob.id] !== undefined ? String(state.custom[knob.id]) : "";
-    select.addEventListener("change", () => set(knob.id, select.value === "" ? undefined : Number(select.value)));
+    select.addEventListener("change", () => {
+      if (painting || !select.isConnected) return;
+      set(knob.id, select.value === "" ? undefined : Number(select.value));
+    });
     return row(knob, select, extra);
+  }
+
+  // The grid slider's ends in metres: from the finest spacing this card can run this storm at, on its smallest
+  // area (once a fit has said what the card holds), up to a few km. A typed spacing outside them leaves the ends
+  // where they are, with the thumb at the nearer one.
+  function gridEnds(knob) {
+    let [low, high] = knob.slider_m || [20, 4000];
+    const finest = finestGrid();
+    if (finest) low = Math.min(finest, high / 2);
+    return [Math.max(1, low), high];
+  }
+
+  // A short note under a number box for a value that is not a spacing (0, a minus, letters), gone after a moment.
+  function badValue(noteEl, key) {
+    noteEl.textContent = t(key);
+    setTimeout(() => { if (noteEl.isConnected) noteEl.textContent = ""; }, 3000);
+  }
+
+  // The finest spacing whose smallest area fits this card's free memory (the last fit's largest square area, at
+  // the levels in use), or null before a fit has said.
+  function finestGrid() {
+    if (!card || !card.side || !knobs.area) return null;
+    const levels = Math.round((grid.top_m || card.nz * grid.dz_m) / dzNow());
+    const side = card.side * Math.sqrt(card.nz / Math.max(1, levels));
+    return Math.max(1, Math.ceil((knobs.area.floor_km * 1000) / side));
+  }
+
+  const nowWords = (f) => t("custom.grid_now", { exact: f.exact, dt: Number(Number(f.dt).toPrecision(7)) });
+
+  // The grid spacing: any value. Quick picks, a slider on a log scale and a box to type metres in; left alone, GM1
+  // chooses it. The time step and the cells follow (the fit says what they come to).
+  function gridRow(knob) {
+    const pinned = state.custom.grid !== undefined;
+    const now = Number(pinned ? state.custom.grid : ((fitted && fitted.grid) ?? knob.default));
+    const [low, high] = gridEnds(knob);
+    // Left to GM1, the first button says what the fit chose; with a spacing of the user's own it hands it back.
+    const items = [{ value: "", words: pinned ? t("custom.auto") : autoWords(knob) },
+      ...knob.choices.map((c) => ({ value: Number(c.value), words: valueWords(knob, c.value) }))];
+    const seg = segmented(term("grid_spacing")[0], items, pinned ? Number(state.custom.grid) : "",
+      (v) => set("grid", v === "" ? undefined : Number(v)));
+    const span = Math.log(high / low) || 1;
+    const toPlace = (m) => Math.min(1000, Math.max(0, Math.round((1000 * Math.log(m / low)) / span)));
+    const fromPlace = (place) => slidMetres(low * Math.exp((span * place) / 1000));
+    const slider = h("input", { type: "range", min: "0", max: "1000", step: "1", value: String(toPlace(now)),
+      "aria-label": t("custom.grid_slider") });
+    const box = h("input", { type: "number", class: "input num g-cz-num", min: "1", step: "any", value: String(now),
+      "aria-label": t("custom.grid_box"), dataset: { value: "box", committed: String(now) } });
+    // The buttons above say "Let GM1 choose: now 1 km"; the slider's own label is the spacing alone.
+    const shown = h("span", { class: "g-cz-value" }, metres(now));
+    const bad = h("span", { class: "note g-cz-bad", "aria-live": "polite" });
+    slider.addEventListener("input", () => {
+      const m = fromPlace(Number(slider.value));
+      box.value = String(m);
+      shown.textContent = metres(m);
+    });
+    slider.addEventListener("change", () => {
+      // A slider taken off the page by a redraw is no longer the one in use: its last event changes nothing.
+      if (painting || !slider.isConnected) return;
+      // An arrow key moves the thumb less than a metre at the fine end: the spacing then moves one step that way.
+      const place = Number(slider.value);
+      let m = fromPlace(place);
+      if (pinned && m === now && place !== toPlace(now)) {
+        const step = now < 200 ? 1 : now < 1000 ? 5 : 50;
+        m = Math.max(1, now + (place > toPlace(now) ? step : -step));
+      }
+      set("grid", m);
+    });
+    box.addEventListener("change", () => {
+      // A box taken off the page by a redraw is no longer the one in use: what it held is not entered for it.
+      if (painting || !box.isConnected) return;
+      const m = Number(box.value);
+      if (box.value.trim() !== "" && Number.isFinite(m) && m > 0) set("grid", m);
+      else { box.value = String(now); badValue(bad, "custom.grid_bad"); flushPaint(); }
+    });
+    const ends = h("div", { class: "g-cz-ends", "aria-hidden": "true" }, h("span", {}, metres(low)), h("span", {}, metres(high)));
+    const typed = h("label", { class: "g-cz-type" }, t("custom.grid_type"), " ", box, " ", t("custom.metres"));
+    const notes = [bad, h("p", { class: "note" }, t("custom.grid_any"))];
+    nowLine = null;
+    if (fitted && fitted.exact) {
+      nowLine = h("p", { class: "note g-cz-now" }, nowWords(fitted));
+      notes.push(nowLine);
+    }
+    const finest = finestGrid();
+    if (finest) {
+      notes.push(h("p", { class: "note" }, t("custom.grid_finest", { value: metres(finest), area: `${Math.round(knobs.area.floor_km)} km` })));
+    }
+    return row(knob, h("div", { class: "g-cz-free" }, seg, h("div", { class: "g-cz-slider" }, shown, slider, ends), typed), notes);
+  }
+
+  // The height of a level: any value that gives the model's 8 to 256 levels under the preset's top.
+  function levelsRow(knob) {
+    const chosen = state.custom.levels !== undefined;
+    const now = Number(chosen ? state.custom.levels : knob.default);
+    const items = [{ value: "", words: `${t("custom.as_preset")} (${valueWords(knob, knob.default)})` },
+      ...knob.choices.filter((c) => !same(c.value, knob.default)).map((c) => ({ value: Number(c.value), words: metres(c.value) }))];
+    const seg = segmented(term("levels")[0], items, chosen ? Number(state.custom.levels) : "",
+      (v) => set("levels", v === "" ? undefined : Number(v)));
+    const box = h("input", { type: "number", class: "input num g-cz-num", min: "1", step: "any", value: String(now),
+      "aria-label": t("custom.levels_box"), dataset: { value: "box", committed: String(now) } });
+    const bad = h("span", { class: "note g-cz-bad", "aria-live": "polite" });
+    box.addEventListener("change", () => {
+      if (painting || !box.isConnected) return;
+      const m = Number(box.value);
+      if (box.value.trim() !== "" && Number.isFinite(m) && m > 0) set("levels", same(m, knob.default) ? undefined : m);
+      else { box.value = String(now); badValue(bad, "custom.levels_bad"); flushPaint(); }
+    });
+    const typed = h("label", { class: "g-cz-type" }, t("custom.levels_type"), " ", box, " ", t("custom.metres"));
+    const count = Math.round(knob.top_m / dzNow());
+    const [fewest, most] = knob.levels_range || [8, 256];
+    // More levels than the model takes (or fewer) is said here, before the fit refuses it.
+    const over = count > most ? t("custom.levels_over", { count, most }) : count < fewest ? t("custom.levels_under", { count, fewest }) : null;
+    return row(knob, h("div", { class: "g-cz-free" }, seg, typed), [
+      bad,
+      h("p", { class: `note${over ? " g-cz-clamp" : ""}` }, over || t("custom.levels_note", { top: metres(count * dzNow()), count })),
+      h("p", { class: "note" }, t("custom.levels_any", { low: metres(Math.ceil((knob.min_m || knob.top_m / most) * 10) / 10), count: most })),
+    ]);
   }
 
   function areaRow(knob) {
@@ -295,7 +468,10 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     input.addEventListener("input", () => {
       shown.textContent = t("custom.area_value", { value: valueWords(knob, Number(input.value)) });
     });
-    input.addEventListener("change", () => set("area", Math.round(Number(input.value) * 1000) / 1000));
+    input.addEventListener("change", () => {
+      if (painting || !input.isConnected) return;
+      set("area", Math.round(Number(input.value) * 1000) / 1000);
+    });
     const ends = h("div", { class: "g-cz-ends", "aria-hidden": "true" },
       h("span", {}, `${Math.round(low)} km`), h("span", {}, `${Math.round(high)} km`));
     return row(knob, h("div", { class: "g-cz-slider" }, shown, input, ends),
@@ -350,6 +526,7 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     const slider = (label, value, low, high, key) => {
       const input = h("input", { type: "range", min: "0", max: String(AIR_STEPS), step: "1", value: String(Math.round(value * AIR_STEPS)), "aria-label": label });
       input.addEventListener("change", () => {
+        if (painting || !input.isConnected) return;
         state.environment = { ...env, [key]: Number(input.value) / AIR_STEPS };
         paint();
         onChange({ refit: true });
@@ -386,16 +563,22 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
   // Draws the rows again. The page stays where it is and the focus stays on the control that had it (a pressed
   // button, a list), so a change never moves the reader.
   function paint() {
+    // Taking a focused control off the page makes the browser send its last "change"; that must not start a
+    // second redraw inside this one (the handlers above also ignore it).
+    if (painting) { paintAgain = true; return; }
+    painting = true;
+    pendingPaint = false;
+    try { paintNow(); } finally { painting = false; }
+    if (paintAgain) { paintAgain = false; paint(); }
+  }
+
+  function paintNow() {
     const keep = focusKey(body);
     const y = window.scrollY;
     const groups = {};
     const add = (group, rowEl) => { (groups[group] = groups[group] || []).push(rowEl); };
-    if (knobs.grid) add("size", choiceRow(knobs.grid, knobs.grid.choices.map((c) => c.value)));
-    if (knobs.levels) {
-      const count = Math.round(knobs.levels.top_m / dzNow());
-      add("size", choiceRow(knobs.levels, knobs.levels.choices.map((c) => c.value),
-        h("p", { class: "note" }, t("custom.levels_note", { top: metres(knobs.levels.top_m), count }))));
-    }
+    if (knobs.grid) add("size", gridRow(knobs.grid));
+    if (knobs.levels) add("size", levelsRow(knobs.levels));
     if (knobs.area) add("size", areaRow(knobs.area));
     if (knobs.time) add("size", choiceRow(knobs.time, knobs.time.choices.map((c) => c.value)));
     if (knobs.pictures) add("size", choiceRow(knobs.pictures, pictureChoices()));
@@ -426,11 +609,23 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
       now = {
         grid: f.dx_m, area: f.domain_km ? Math.max(...f.domain_km) : undefined,
         time: f.duration_s ? f.duration_s / 60 : undefined, pictures: f.output_interval_s ? f.output_interval_s / 60 : undefined,
+        exact: f.exact, dt: f.dt_s,
       };
     }
-    if (reply && JSON.stringify(now) !== JSON.stringify(fitted)) {
+    // What the card holds, from an offered fit's estimate or a not-offered one's needs.
+    const fit = (reply && reply.fit) || {};
+    const side = (fit.estimate || {}).largest_square_side_cells || (fit.needs || {}).largest_square_side_cells;
+    const levels = (fit.facts || {}).nz || Math.round((grid.top_m || 0) / dzNow());
+    const held = side && levels ? { side, nz: levels } : card;
+    if (reply && (JSON.stringify(now) !== JSON.stringify(fitted) || JSON.stringify(held) !== JSON.stringify(card))) {
       fitted = now;
-      paint();
+      card = held;
+      // Not while a box holds text not yet entered or a slider is held: the redraw would enter half a number or
+      // drop the thumb. The line that says what the fit came to is brought up to date in place meanwhile.
+      if (busy()) {
+        pendingPaint = true;
+        if (nowLine && now && now.exact) nowLine.textContent = nowWords(now);
+      } else paint();
     }
     if (!reply) { live.textContent = t("custom.live_fitting"); return; }
     if (!reply.offered) {
@@ -444,5 +639,5 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
 
   setOpen(Boolean(state.open));
   paint();
-  return { el, setOpen, paint, showFit, largerAreas };
+  return { el, setOpen, paint, showFit, largerAreas, finestGrid };
 }

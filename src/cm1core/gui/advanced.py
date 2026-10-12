@@ -403,7 +403,7 @@ class AdvancedApi:
             raise ApiError(400, "No preset was picked.", "Pick one of the presets.")
         budget = payload.get("budget")
         if budget not in BUDGETS:
-            raise ApiError(400, f"There is no {budget!r} time.", "Use 10m, 1h or overnight.")
+            raise ApiError(400, f"There is no {budget!r} time.", "Use 10m, 1h, overnight or any.")
         gpu = payload.get("gpu")
         if gpu is not None and (isinstance(gpu, bool) or not isinstance(gpu, int) or gpu < 0):
             raise ApiError(400, "gpu must be a whole number.", "Use 0 for the first GPU.")
@@ -412,8 +412,8 @@ class AdvancedApi:
         given = Guided._given(payload) + custom
         sets = self._greyed_sets(payload.get("greyed"))
         root = self.api.root
-        name = payload.get("name") or unique_name(
-            preset, root.path, custom=bool(custom) and self.api.guided.customized(payload))
+        changed = self.api.guided.customized_list(payload) if custom and not payload.get("name") else []
+        name = payload.get("name") or unique_name(preset, root.path, custom=bool(changed), customized=changed)
         try:
             name = require_name(str(name), "run name")
         except PathRefused as error:

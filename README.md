@@ -169,7 +169,7 @@ uninstalling, the exact tested versions (`constraints-gpu-cu13.txt`), uv, cluste
   from a terminal) with the estimate updating as you change it, the live view and results on four quick-looks; or, in advanced mode, the namelist editor, the coverage report, every
   setting, the estimator's numbers, resume and job scripts, with "Show command" beside every action.
 
-Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode offers 250 m to 2 km), and
+Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode takes any grid spacing you pick or type), and
 through GM1's own decks also stretched near-ground levels and storm-following nests ("Beyond the GUI", above); Morrison (`ptype = 5`) and WSM6 (`ptype = 7`)
 microphysics, Thompson (`ptype = 3`) after an acknowledgment (CM1's own file also needs `nt_c = 100.0` for it). What
 is refused and why is in the release notes.
@@ -216,8 +216,7 @@ it is at 250 m and finer. No comparison with CM1 on a cluster is made.
 ## Known limitations
 
 The release notes list them in full ([`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTES.md), "Known limitations"). In
-short: some guided presets are greyed with their measured reason (the squall lines, and for now the 100 m
-supercell, which stops early on a domain-position check); `gpuwm-cm1 run` and the GUI do not check whether another
+short: some guided presets are greyed with their measured reason (the squall lines); `gpuwm-cm1 run` and the GUI do not check whether another
 program is already using the GPU, so run on a card with enough free memory; the first run on a machine compiles GPU
 kernels (about 10 s) without a notice; an imported namelist's surface drag runs with `cecd = 1` only; NSSL and other unported microphysics
 schemes are refused by name; 21 of CM1's 23 shipped namelists are refused (the supercell and squall line run); job

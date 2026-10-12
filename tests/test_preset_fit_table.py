@@ -166,7 +166,7 @@ def test_supercell_250m_in_10_minutes_takes_the_500m_rung_on_the_desktop():
 
 
 def test_supercell_100m_overnight(tmp_path, monkeypatch):
-    assert not fitted("supercell-100m", "overnight", "32GB").offered      # this version withholds it
+    assert fitted("supercell-100m", "overnight", "32GB").offered          # offered again (earlier versions withheld it)
     monkeypatch.setenv(P.PRESETS_ENV, str(_offered_copy(tmp_path, "supercell-100m")))
     desktop = fitted("supercell-100m", "overnight", "3080-WSL2")
     assert not desktop.offered

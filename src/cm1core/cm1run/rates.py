@@ -17,7 +17,12 @@ crossover measures the per-cell rate.  A deck with the same number of cells as
 a measured point is priced at that point's own step time, whatever the
 regime: a run of that very grid on this card is the best estimate there is,
 and the crossover band, where a point measures neither term cleanly, is
-priced that way too.
+priced that way too.  When the grid has been run more than once, the fastest
+of its recent runs prices it: other work on the card during a run can only
+slow it, so a run made beside other work would otherwise make every later
+estimate of that storm too long (measured: an 8 km hurricane grid at 0.038 s
+a step alone and 0.067 to 0.099 s beside other work, whose median shortened
+the next fit of the same storm).
 """
 
 from __future__ import annotations
@@ -49,7 +54,7 @@ REGIME_MARGIN = 1.5
 #: A measured point prices a deck directly when their cell counts agree to
 #: this fraction (the same grid, or one of the same size).
 SAME_GRID_REL = 0.005
-#: How many of the most recent same-grid points the median is taken over.
+#: How many of the most recent same-grid points are looked at; the fastest of them prices the grid.
 SAME_GRID_POINTS = 5
 #: A receipt with fewer measured steps than this is not learned: its mean
 #: would carry the first steps' one-off costs (lazy module loads, the first
@@ -141,8 +146,8 @@ class StepModel:
     def seconds_per_step(self, cells: int, tiles: int = 1) -> float:
         same = self.same_grid(cells, tiles)
         if same:
-            values = sorted(float(point["seconds_per_step"]) for point in same)
-            return values[len(values) // 2]
+            # The fastest recent run of this grid: a run that shared the card is slower, never faster.
+            return min(float(point["seconds_per_step"]) for point in same)
         return max(self.host_s(tiles), self.device_s(cells))
 
     def regime(self, cells: int, tiles: int = 1) -> str:
@@ -167,7 +172,7 @@ class StepModel:
         if regime == "this-grid":
             same = self.same_grid(cells, tiles)
             return (
-                f"measured on this machine at this grid's size: median of {len(same)} run(s), "
+                f"measured on this machine at this grid's size: fastest of {len(same)} run(s), "
                 + ", ".join(
                     f"{float(point['seconds_per_step']):.4f} s/step at {int(point['cells']) / 1e6:.2f} M cells"
                     for point in same

@@ -294,7 +294,10 @@ def test_with_sounding_keeps_a_changed_namelist(tmp_path):
 
 
 def test_an_unknown_or_unoffered_setting_exits_2_with_the_reason():
-    for args, words in ((["--custom", "grid=300"], "is not one of the choices"),
+    for args, words in ((["--custom", "grid=20000"], "fewer than 8 cells across"),
+                        (["--custom", "grid=0"], "above zero"),
+                        (["--custom", "levels=50"], "built for at most 256"),
+                        (["--custom", "time=17"], "is not one of the choices"),
                         (["--custom", "colour=red"], "There is no setting called colour"),
                         (["--custom", "time"], "--custom takes KNOB=VALUE")):
         done = cli("preset", "fit", "supercell-1km", "--budget", "10m", *args, env=fixture_env("rtx5090-32gb"))
@@ -318,11 +321,11 @@ def test_preset_new_with_choices_labels_the_run_and_replays_byte_for_byte(tmp_pa
     assert made.returncode == 0, made.stderr
     record = json.loads(made.stdout)
     rundir = Path(record["run"])
-    assert "-custom-" in rundir.name
+    assert rundir.name.startswith("supercell-500m-custom-")
     assert record["command"].endswith(" ".join(["--custom", "grid=500", "--custom", "push=2", "--custom",
                                                 "bumps=seed:77", "--custom", "rotation=on"]))
     run = json.loads((rundir / "run.json").read_text())
-    assert run["case"] == "Supercell, quick look, 1 km (customized)"
+    assert run["case"] == "Supercell, 500 m grid (customized from Supercell, quick look, 1 km)"
     assert run["guided"]["customized"] == ["grid", "push", "bumps", "rotation"]
     fit_json = json.loads((rundir / "fit.json").read_text())
     assert [entry["knob"] for entry in fit_json["customized"]] == ["grid", "push", "bumps", "rotation"]
@@ -396,8 +399,11 @@ def test_set_refuses_the_words_the_knobs_and_the_fit_own():
 
 def test_the_area_is_refused_in_the_right_words_and_kept_on_its_steps():
     preset = P.load("supercell-1km")
-    with pytest.raises(C.CustomError, match="The area must be at least 64 km across; 0.5 km is too small."):
+    # The smallest area is the smallest a storm can start in (the warm bubble's own 20 km), not the 64 km the
+    # preset was set up for: between the two the run is offered and the fit says what the edges do.
+    with pytest.raises(C.CustomError, match="The area must be at least 20 km across; 0.5 km is too small."):
         C.apply(preset, {"area": 0.5})
+    assert int(C._effective(C.apply(preset, {"area": 24.0}))["nx"]) == 24
     with pytest.raises(C.CustomError, match="is larger than this storm offers"):
         C.apply(preset, {"area": 500.0})
     stepped = C._effective(C.apply(preset, {"area": 97.3}))

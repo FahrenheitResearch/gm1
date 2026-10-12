@@ -89,7 +89,7 @@ first launch; each other group shows one row of cards and a **Show all** button 
 
 | Group | Cards |
 |---|---|
-| Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight (greyed in this version) |
+| Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight |
 | Explore | Make your own environment; storms that split in two; clusters of short-lived storms; a storm in almost calm air |
 | Other storm types | A line of storms; cold air spreading out as a gust front; a warm bubble growing into a cloud; the two squall lines |
 | Famous environments | The air measured by weather balloons on well-known days (Norman, Oklahoma; Birmingham, Alabama; Denver, Colorado; Wilmington, Ohio; Tallahassee, Florida; Jackson, Mississippi), each named by its station and date |
@@ -115,8 +115,9 @@ Choose **Supercell, quick look, 1 km**.
 
 ## 6. Pick how long it may run, and press Start
 
-The next screen asks **How long can it run?** with three buttons: **About 10 minutes**, **About 1 hour** and
-**Overnight (up to 10 hours)**. Choose **About 10 minutes**.
+The next screen asks **How long can it run?** with four buttons: **About 10 minutes**, **About 1 hour**,
+**Overnight (up to 10 hours)** and **As long as it takes**, which sets no limit on the time (for a very fine grid
+that needs more than a night). Choose **About 10 minutes**.
 
 GM1 fits the storm to your card and that time. Under **What you get** it says, in one sentence, the area, the grid
 spacing, the storm time, about how long it will take and how much memory and disk it needs. Under **What was changed
@@ -128,17 +129,39 @@ while plugged in). A restart or sleep stops the storm; **Run it longer** or Resu
 point.
 
 To change the storm before it starts, press **Customize this storm** (or **Customize** on its card in the gallery).
-You can pick the grid spacing, the height levels, the area, the storm time and how often a picture is saved; the air
+You can set the grid spacing, the height levels, the area, the storm time and how often a picture is saved; the air
 (the same two sliders as **Make your own environment**, on the storms that use made air); how the storm is started;
 random bumps at the start; Earth's rotation; and following air parcels. Each row says its CM1 name in small grey
 letters, and the line at the top of the panel says again how long it will take, how much GPU memory and how much disk,
 as you change things. What you set stays as you set it: GM1 fits only the rest to your card and time, and lists your
 changes under **What you changed**. If your choices do not fit the time you picked, the screen says which time does
 (**Use About 1 hour**) or offers to let GM1 choose a setting again; when the storm would drift out of the area it
-names the area that keeps it inside, and which one of your changes moves it out. A choice guided mode cannot offer yet (WSM6 or
+names the area the storm needs, and which one of your changes moves it out. A choice guided mode cannot offer yet (WSM6 or
 Thompson rain and hail, ground friction) is greyed with the reason and a button that makes the run folder with it
 set and opens it in Advanced; **All settings (Advanced)** makes the run folder
-with your choices and opens every CM1 setting, and nothing runs until you press Start there. **Reset to the preset**
+with your choices and opens every CM1 setting, and nothing runs until you press Start there.
+
+**Any grid spacing.** The grid spacing is not a menu: press one of the quick picks (100 m, 250 m, 500 m, 1 km,
+2 km), move the slider, or type any number of metres, 67 for example. GM1 works out the rest and says it exactly
+under **What you get** ("67 m grid, 74.5 × 74.5 km, 1112 × 1112 cells"): the area keeps its size, rounded
+up to whole cells, and is then made as large as your card's free memory, the disk and the time allow; the time step follows
+the spacing (CM1's own 6 s per km) and is shortened where needed so that every saved picture lands on a whole step
+and, in a storm whose view moves with it, so that the place of the view adds up exactly (0.390625 s at 67 m in
+place of 0.402 s: a few percent shorter as a rule, a fifth at most). The height of the levels takes any value too,
+from 8 up to the 256 levels the model is built
+for; the top of the model stays where it was, to the nearest whole level. GM1 does not turn a spacing down for
+being unusual. It turns down only what cannot run, says why, and says what would: a grid so fine that even the
+smallest area a storm can start in (16 km, or the width of its warm bubble) does not fit your card's free memory,
+with the finest spacing that does fit. A run that fits only in an area smaller than the storm was set up for is
+offered with a note under **Good to know before you start**: the storm may leave an area this small, and pictures
+near the edges then show edge effects. The note stays whatever GM1 predicts about the storm's track. Where GM1 chose
+the small area, **Keep this area and follow the storm** moves the view as GM1 predicts the storm moves, which is not
+exact; where you chose the area, a **Use ...** button sets the smallest larger area without the note, when one fits
+your card. A grid finer than 100 m or
+coarser than 2 km, or more cells than GM1 has run before, is offered with a one-line note saying so. If your
+choices need more time than you picked, the screen offers the next longer time. Where a refusal names a value that
+would be taken (a coarser grid, thicker levels, a smaller area), a **Use ...** button beside it sets that value.
+A run with a grid spacing of your own is named for it: `supercell-150m-custom-...`, not `supercell-1km-custom-...`. **Reset to the preset**
 puts everything back.
 
 Press **Start**.
@@ -209,7 +232,9 @@ gpuwm-cm1 run ~/gm1-runs/my-first-storm
 
 `preset fit` only says what Start would make on your card; `preset new` writes the storm's folder, and `run` runs
 it. A customized storm adds one `--custom KNOB=VALUE` per change, for example
-`gpuwm-cm1 preset fit supercell-1km --budget 10m --custom grid=500 --custom parcels=on`, and
+`gpuwm-cm1 preset fit supercell-1km --budget 10m --custom grid=500 --custom parcels=on` (the grid spacing and the
+level height take any number of metres: `--custom grid=67 --custom levels=125`; `--budget any` is "as long as it
+takes"), and
 `gpuwm-cm1 preset options supercell-1km` lists what can be changed and the choices. `gpuwm-cm1 preset list` shows every storm the gallery offers, and whether it is offered here:
 
 ```sh

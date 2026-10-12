@@ -55,9 +55,23 @@ export function shownStatus(status, model, total) {
 
 // ------------------------------------------------------------------ guided: Watching
 
+// The grid a run has, for the Watching header: "67 m grid, 33.8 × 33.8 km". A run with a spacing of its own is
+// named for it, but the name does not give the area, and a name can be anything.
+function guidedGridWords(g) {
+  const dx = Number(g && g.dx_m), nx = Number(g && g.nx), ny = Number(g && g.ny);
+  if (!(dx > 0 && nx > 0 && ny > 0)) return "";
+  const dy = Number(g.dy_m) > 0 ? Number(g.dy_m) : dx;
+  const spacing = dx >= 1000 ? `${Number((dx / 1000).toFixed(3))} km` : `${Number(dx.toFixed(2))} m`;
+  const km = (cells, d) => Number((cells * d / 1000).toFixed(1));
+  const area = nx === ny && dx === dy ? `${km(nx, dx)} × ${km(nx, dx)} km` : `${km(nx, dx)} × ${km(ny, dy)} km`;
+  return t("watch.grid", { spacing, area });
+}
+
 async function guidedRun(body, id, page) {
   await copyReady();
   const runUrl = encodeURIComponent(id);
+  // The run's own grid (run.json) until the running model states the one it admitted.
+  let runGrid = null;
   const clockEl = headerClock(t("watch.storm_time"));
   const progressEl = progressBlock({
     of: (total) => t("watch.progress_of", { total }), percent: (n) => t("watch.percent", { percent: n }),
@@ -111,7 +125,7 @@ async function guidedRun(body, id, page) {
     const left = status.state === "running" ? (progress.eta_s ?? status.eta_s) : null;
     clockEl.set(model);
     const badge = shownStatus(status, model, total);
-    page.setData(`${id} · ${badge.label || ""}`);
+    page.setData([id, guidedGridWords(status.grid || runGrid), badge.label || ""].filter(Boolean).join(" · "));
     // Time left is shown only while the run goes; a run that has ended has none to show. The next picture's time
     // (and, before the first, when the first comes) is said under the bar while the run goes.
     const going = LIVE_STATES.includes(status.state);
@@ -187,6 +201,7 @@ async function guidedRun(body, id, page) {
   });
   paint();
   poll();
+  api.get(api.runPath(id)).then((d) => { runGrid = (d && d.run && d.run.grid) || null; paint(); }).catch(() => {});
   return () => { closed = true; clearTimeout(timer); close(); view.stop(); };
 }
 

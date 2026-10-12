@@ -91,7 +91,8 @@ def test_fit_returns_its_command_and_what_start_would_run(live):
     ]
     not_here = client.post("/api/fit", {"preset": "supercell-100m", "budget": "overnight"}).json
     assert not_here["ok"] and not not_here["offered"]
-    assert not_here["message"].startswith("Not offered in this version: "), not_here      # withheld by its preset.json
+    # Offered again (earlier versions withheld it); this 10 GB card under a Windows desktop has too little memory free.
+    assert not_here["fit"]["reason_kind"] == "gpu" and "of free GPU memory" in not_here["message"], not_here
     assert client.post("/api/fit", {"preset": "supercell-1km", "budget": "2h"}).status == 400
     assert client.post("/api/fit", {"budget": "10m"}).status == 400
     unknown = client.post("/api/fit", {"preset": "no-such", "budget": "10m"})
@@ -114,7 +115,8 @@ def test_customize_choices_go_to_the_fit_and_start_as_custom_flags(live):
     assert [entry["knob"] for entry in fit["customized"]] == ["grid", "rotation", "parcels"]
     assert fit["pinned"] == ["grid"] and fit["facts"]["dx_m"] == 500.0
     name = body["start"]["name"]
-    assert name.startswith("supercell-1km-custom-")
+    # Named with the spacing the run really has, not the preset's.
+    assert name.startswith("supercell-500m-custom-")
     assert body["start"]["commands"][0] == (f"gpuwm-cm1 preset new supercell-1km --budget 1h --root {root} "
                                             f"--name {name} {flags} --json")
     # The cache tells a customized fit from the preset's own.
@@ -126,8 +128,38 @@ def test_customize_choices_go_to_the_fit_and_start_as_custom_flags(live):
     assert unknown.status == 400 and unknown.json["message"] == "There is no setting called colour."
     for bad in ({"grid": [500]}, {"grid": None}, {"grid": "5 0 0"}, ["grid=500"]):
         assert client.post("/api/fit", {"preset": "supercell-1km", "budget": "1h", "custom": bad}).status == 400
-    unoffered = client.post("/api/fit", {"preset": "supercell-1km", "budget": "1h", "custom": {"grid": 300}})
-    assert unoffered.status == 400 and "is not one of the choices" in unoffered.json["message"]
+    # Any grid spacing is a choice; the only ones turned down cannot be a grid.
+    unoffered = client.post("/api/fit", {"preset": "supercell-1km", "budget": "1h", "custom": {"grid": 20000}})
+    assert unoffered.status == 400 and "fewer than 8 cells across" in unoffered.json["message"]
+    # The value the message names as taken comes with it, for the screen's one-tap button.
+    assert unoffered.json["suggest"] == {"grid": 15000}
+    thin = client.post("/api/fit", {"preset": "supercell-1km", "budget": "1h", "custom": {"levels": 50}})
+    assert thin.status == 400 and thin.json["suggest"] == {"levels": 78.0}
+
+
+def test_any_grid_spacing_is_fitted_through_the_api(live):
+    """The Customize panel's slider and number box: {custom: {grid: 67}} is --custom grid=67, and the fit says the
+    grid, the area and the cells exactly, the time step that lands on the pictures, and what to know."""
+
+    server, client, root = live
+    reply = client.post("/api/fit", {"preset": "supercell-1km", "budget": "1h", "custom": {"grid": 67}})
+    assert reply.status == 200, reply.raw
+    body = reply.json
+    assert body["command"] == f"gpuwm-cm1 preset fit supercell-1km --budget 1h --custom grid=67 --root {root} --json"
+    assert body["offered"], body["message"]
+    fit = body["fit"]
+    facts = fit["facts"]
+    assert facts["dx_m"] == 67.0 and facts["dt_s"] == 0.390625      # a moving domain: a short binary fraction
+    assert facts["exact"] == (
+        f"67 m grid, {facts['nx'] * 0.067:.1f} × {facts['ny'] * 0.067:.1f} km, {facts['nx']} × {facts['ny']} cells")
+    assert fit["customized"][0]["sentence"].startswith(
+        "Grid spacing 67 m instead of 1 km (and a 0.390625 s time step")
+    assert fit["pinned"] == ["grid"] and any("finer than any storm GM1 ships" in line for line in fit["warnings"])
+    assert fit["estimate"]["largest_square_side_cells"] > 0
+    # The time with no limit is one of the times.
+    open_ended = client.post("/api/fit", {"preset": "supercell-1km", "budget": "any", "custom": {"grid": 67}})
+    assert open_ended.status == 200 and open_ended.json["fit"]["budget_s"] is None
+    assert open_ended.json["fit"]["budget_words"] == "as long as it takes"
 
 
 def test_a_customized_start_makes_a_custom_run_and_advanced_makes_its_folder_without_starting(live):
@@ -152,7 +184,7 @@ def test_a_customized_start_makes_a_custom_run_and_advanced_makes_its_folder_wit
                                             "environment": {"instability": 0.4, "shear": 0.6}})
     assert made.status == 200, made.raw
     folder = root / made.json["run"]
-    assert made.json["run"].startswith("supercell-1km-custom-")
+    assert made.json["run"].startswith("supercell-500m-custom-")
     assert "--instability 0.4 --shear 0.6 --hodograph curved --custom grid=500" in made.json["command"]
     assert (folder / "namelist.input").is_file() and (folder / "input_sounding").is_file()
     status = client.get(f"/api/runs/{made.json['run']}/status").json
@@ -260,7 +292,7 @@ def test_guided_start_refuses_a_name_in_use_and_a_run_that_does_not_fit(live):
     assert taken.status == 409 and taken.json["fix"] == "Pick another name."
     too_big = client.post("/api/guided/start", {"preset": "supercell-100m", "budget": "overnight", "name": "big"})
     assert too_big.status == 409
-    assert "Not offered in this version" in too_big.json["message"] and too_big.json["command"].startswith("gpuwm-cm1 preset new")
+    assert "of free GPU memory" in too_big.json["message"] and too_big.json["command"].startswith("gpuwm-cm1 preset new")
     assert not (root / "big").exists()
     bad = client.post("/api/guided/start", {"preset": "supercell-1km", "budget": "10m", "name": "../x"})
     assert bad.status == 400

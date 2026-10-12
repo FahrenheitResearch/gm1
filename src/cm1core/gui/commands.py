@@ -640,15 +640,15 @@ API: tuple[Endpoint, ...] = (
     # "shear", "hodograph"?}}; the reply's fit.sounding names the file, its SHA-256 and where it came from.
     # {"custom": {KNOB: VALUE}} is guided Customize's choices (--custom KNOB=VALUE; preset options ID lists them).
     Endpoint("POST", "/api/fit", "fit", "host",
-             "gpuwm-cm1 preset fit PRESET --budget 10m|1h|overnight [--sounding FILE | --instability I --shear S "
+             "gpuwm-cm1 preset fit PRESET --budget 10m|1h|overnight|any [--sounding FILE | --instability I --shear S "
              "--hodograph curved|straight] [--custom KNOB=VALUE ...] [--gpu N] --root ROOT --json",
              "Changes nothing: the storm Start would make on this GPU, for this time."),
     Endpoint("POST", "/api/guided/start", "guided-start", "host",
-             "gpuwm-cm1 preset new PRESET --budget 10m|1h|overnight --root ROOT --name NAME [--sounding FILE | "
+             "gpuwm-cm1 preset new PRESET --budget 10m|1h|overnight|any --root ROOT --name NAME [--sounding FILE | "
              "--instability I --shear S --hodograph curved|straight] [--custom KNOB=VALUE ...] [--gpu N] --json",
              "Then gpuwm-cm1 run ROOT/NAME, with the sidecars, as Start does; the reply's command has both lines."),
     Endpoint("POST", "/api/presets/new", "preset-new", "host",
-             "gpuwm-cm1 preset new PRESET --budget 10m|1h|overnight --root ROOT --name NAME [--instability I "
+             "gpuwm-cm1 preset new PRESET --budget 10m|1h|overnight|any --root ROOT --name NAME [--instability I "
              "--shear S --hodograph curved|straight] [--custom KNOB=VALUE ...] [--gpu N] --json",
              "New run, Start from a preset: the preset fitted to this GPU and time, as a run folder to edit; "
              "nothing runs. A choice guided Customize greys (WSM6, Thompson, ground friction) is then set with "

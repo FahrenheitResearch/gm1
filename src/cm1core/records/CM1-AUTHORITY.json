@@ -333,8 +333,8 @@
         "path": "src/cm1core/presets/supercell-100m/namelist.input",
         "source_path": "run/config_files/supercell/namelist.input",
         "source_sha256": "3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4",
-        "sha256": "272382e0d9264d44a706c8caa2e4d1e78d8fd116089d2930bd11701d62f925e5",
-        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (9: nx, ny, nz, dx, dy, dz, dtl, output_format, output_filetype) differ from the source file",
+        "sha256": "22d679906bcab45a38c6af155bbf81c448a3a08c88efe5a920a2b7ec3d3bd950",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (10: nx, ny, nz, dx, dy, dz, dtl, tapfrq, output_format, output_filetype) differ from the source file",
         "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
         "why": "the GUI's and gpuwm-cm1 preset's ready-made storms, each made from one of CM1's two example namelists",
         "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"

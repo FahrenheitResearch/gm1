@@ -134,8 +134,45 @@ yours has right now: close other programs that use the graphics card (games, vid
 time, which makes the storm smaller. On Windows the desktop itself keeps 4-5 GB of the card. `gpuwm-cm1 doctor
 --plain` lists, under Presets, every storm that does not fit this computer and why.
 
-**"Supercell, 100 m" is greyed.** In this version that storm stops early on a check of where the storm is in its area, on
-every computer, so it is not offered yet. "Supercell, 250 m" shows the same storm in fine detail.
+**"Supercell, 100 m" is greyed.** It needs about 9.4 GB of free graphics memory at its smallest size (a 46 km
+area), so on a smaller card, or one a desktop is using, the card says how much it needs and how much is free. Earlier versions
+greyed it on every computer: with its 0.6 s time step the run stopped after six steps, at its check of where the
+storm's area is on the ground. Its time step is now 0.5 s, which that check holds exactly, and it is offered
+wherever it fits. On a smaller card, "Supercell, 250 m" shows the same storm in fine detail, or use **Customize
+this storm** to pick a grid your card has room for.
+
+**Estimate says the time step stops the run with a moving domain.** In Advanced, a namelist whose domain moves
+(`imove = 1` with `umove` or `vmove` not zero) needs a time step that is a small odd number over a power of two:
+6, 3, 1.5, 0.75, 0.5, 0.375 s. CM1 keeps the place of a moving domain as a running sum, one step at a time, and GM1
+checks that sum exactly; with a step such as 0.6 s or 0.4 s the sum rounds in its last digit after a few steps and
+the run stops there. The Estimate screen (`gpuwm-cm1 estimate`) names the step at which it would stop and a time
+step that works; set `dtl` to it. Guided mode picks such a step by itself. A domain that does not move takes any
+time step that divides its output times.
+
+**I typed a grid spacing and it says "Too big for this GPU".** The line under it says how much free graphics memory
+that spacing needs on the smallest area a storm can start in and the finest spacing that does fit your card, which
+GM1 has priced before naming it. Press the **Use ...** button beside it, or close other programs that use the
+graphics card. Thinner height levels need memory too: with levels every 100 m the same card holds an area less than
+half as wide as with levels every 500 m.
+
+**It says the storm leaves the largest area that fits.** A storm that runs on a sounding file (a famous day, the
+cloud from one bubble) is not started in an area it would leave before the end. When the largest area your card or
+your time allows at that spacing is too small for the storm, the line says so, says the area the storm needs, and
+names a coarser spacing that covers it, with a button to use it. A shorter storm time also helps.
+
+**Under "Good to know before you start" it says the storm may leave an area this small.** The run fits your card
+only in an area smaller than the one the storm was set up for, or than the room GM1's storm-track check gives it.
+It still runs, but once the storm reaches an edge, what happens near the sides is the sides' doing more than the
+storm's. The note stays even when the view moves with the storm, because where the storm goes is a prediction: on
+an RTX 4090 a 67 m storm left a 34 km area within 45 minutes with the view moving as GM1 predicted.
+**Keep this area and follow the storm** moves the view as GM1 predicts the storm moves (the change is listed under
+**What you changed**). When the area is your own choice, the note names the smallest larger area without it, with
+a button to use it, when one fits your card. Or pick a coarser grid or a longer time so a larger area fits, or go
+ahead and read the pictures near the edges with that in mind.
+
+**Levels thinner than about 78 m are refused.** The model is built for at most 256 levels, and the storms' 20 km
+top divided by 256 is 78 m. The message names the thinnest levels that fit. Levels thicker than about 2.7 km are
+refused too: the model needs at least 8 of them.
 
 **The squall lines are greyed.** They are not offered yet on any computer: how they treat the sides of their area
 has not been fully checked against CM1 yet.

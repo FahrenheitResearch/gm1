@@ -39,6 +39,17 @@
 .g-cz-slider input[type="range"] { width: 100%; margin: 2px 0 0; accent-color: var(--gm1-title); }
 .g-cz-value { color: var(--gm1-data); font-size: var(--fs-small); }
 .g-cz-ends { display: flex; justify-content: space-between; gap: 8px; color: var(--gm1-dim); font-size: var(--fs-micro); }
+/* A setting that takes any value: its quick picks, its slider and the box to type in, one under the other. */
+.g-cz-free { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; width: 100%; min-width: 0; }
+.g-cz-type { display: inline-flex; align-items: center; gap: 6px; color: var(--gm1-muted); font-size: var(--fs-small); }
+.g-cz-num { width: 96px; }
+.g-cz-now { color: var(--gm1-data); }
+/* A typed value that is not a spacing: a short note under the box, gone after a moment. */
+.g-cz-bad { color: var(--gm1-warn); }
+.g-cz-bad:empty { display: none; }
+.g-notes:empty { display: none; }
+.g-notes-list li { border-left: 2px solid var(--gm1-warn); padding-left: 8px; list-style: none; margin-left: -18px; }
+.g-notes-list .btn { margin-top: 4px; }
 .g-cz-foot { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--gm1-rule-soft); }
 .g-cz-foot .note { margin: 6px 0 0; }
 .g-cz-help { margin: 0 0 12px; }

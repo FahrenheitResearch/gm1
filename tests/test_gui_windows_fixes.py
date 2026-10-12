@@ -804,7 +804,9 @@ def test_watching_keeps_its_words_in_step_with_the_run() -> None:
     assert "export function shownStatus(status, model, total)" in run
     assert "return { ...st, label: `Running ${Math.round(Math.max(0, Math.min(100, Number(share))))}%` };" in run
     assert "const badge = shownStatus(status, model, total);" in run
-    assert "chip.replaceChildren(stateChip(badge));" in run and '${badge.label || ""}`);' in run
+    assert "chip.replaceChildren(stateChip(badge));" in run
+    # The header line: the run, its grid ("67 m grid, 33.8 x 33.8 km") and the same badge.
+    assert 'page.setData([id, guidedGridWords(status.grid || runGrid), badge.label || ""].filter(Boolean).join(" · "));' in run
     assert "stateChip(shownStatus(st, model || 0, p.duration_s ?? st.duration_s))" in run
     assert "stateChip(status)" not in run and "stateChip(st)" not in run and "status.label || \"\"}`)" not in run
     # The Stop question says why a stopped storm cannot be run longer, without "no saved point yet".

@@ -50,8 +50,14 @@
       {
         "key": "dtl",
         "from": 6.0,
-        "to": 0.6,
-        "why": "the time step scaled with the grid spacing"
+        "to": 0.5,
+        "why": "half a second: just under the 0.6 s the grid spacing gives, and a power of two, so the moving domain's position adds up exactly"
+      },
+      {
+        "key": "tapfrq",
+        "from": 900.0,
+        "to": 300.0,
+        "why": "a picture every 5 minutes, so the live view moves"
       },
       {
         "key": "output_format",
@@ -73,8 +79,6 @@
   },
   "min_duration_s": 3600,
   "shrink": "both",
-  "offered": false,
-  "not_offered_reason": "Not offered in this version: this preset stops early on a domain-position check; being fixed.",
   "picture_from": "supercell-250m",
   "gm1_settings": {
     "initialization.bubble_center_x_m": 11000.0,

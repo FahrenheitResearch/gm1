@@ -49,7 +49,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 COPY_DIR = Path(__file__).resolve().parent / "copy"
 PRESETS_ENV = "GPUWM_CM1_PRESETS_DIR"
-BUDGETS = ("10m", "1h", "overnight")
+#: "any" is "As long as it takes": no limit on the time.
+BUDGETS = ("10m", "1h", "overnight", "any")
 #: How long the gallery list and a fit are reused before they are asked for again.
 LIST_TTL_S = 300.0
 FIT_TTL_S = 20.0
@@ -382,7 +383,7 @@ class Guided:
             raise ApiError(400, "No storm was picked.", "Pick a storm from the gallery.")
         budget = payload.get("budget")
         if budget not in BUDGETS:
-            raise ApiError(400, f"There is no {budget!r} time.", "Pick about 10 minutes, about 1 hour or overnight.")
+            raise ApiError(400, f"There is no {budget!r} time.", "Pick about 10 minutes, about 1 hour, overnight or as long as it takes.")
         gpu = payload.get("gpu")
         if gpu is not None and (isinstance(gpu, bool) or not isinstance(gpu, int) or gpu < 0):
             raise ApiError(400, "gpu must be a whole number.", "Use 0 for the first GPU.")
@@ -410,8 +411,9 @@ class Guided:
             # another storm.
             fix = ("Change the setting it names, or press Reset to the preset." if custom
                    else "Pick another storm, or switch to Advanced to see the details.")
+            # A value that is taken instead of the one refused ({"grid": 23}), for the screen's one-tap button.
             raise ApiError(400, f"The storm could not be fitted: {reason}", fix,
-                           command=result.command, output=result.as_dict())
+                           command=result.command, output=result.as_dict(), suggest=_suggest(result))
         record = result.json
         offered = record.get("status") == "fits"
         body = {
@@ -428,7 +430,8 @@ class Guided:
             # What Start would run, so "Show command" can show it before it is pressed.
             # Named from what the fit says changed, as run.json's case and fit.json say it (a choice at the
             # preset's own value is not a change).
-            name = unique_name(preset, self.api.root.path, custom=bool(record.get("customized")))
+            name = unique_name(preset, self.api.root.path, custom=bool(record.get("customized")),
+                               customized=record.get("customized"))
             rundir = self.api.root.run_path(name)
             body["start"] = {"name": name, "commands": [
                 C.display(C.preset_new_args(preset, budget, self.api.root.path, name, gpu, given)),
@@ -441,16 +444,25 @@ class Guided:
     def customized(self, payload: Mapping[str, Any]) -> bool:
         """Whether the fit of ``payload`` changes the preset (its ``customized`` list); a refused fit counts as not."""
 
+        return bool(self.customized_list(payload))
+
+    def customized_list(self, payload: Mapping[str, Any]) -> list[Any]:
+        """What the fit of ``payload`` says the user changed (its ``customized`` list); none for a refused fit."""
+
         from .api import ApiError
 
         if self.api.jobs.dry_active():
-            return bool(payload.get("custom"))  # a dry run shows the commands only: named from the choices sent
+            # A dry run shows the commands only: named from the choices sent.
+            custom = payload.get("custom") or {}
+            grid = custom.get("grid") if isinstance(custom, Mapping) else None
+            named = [{"knob": "grid", "keys": {"dx": [None, grid]}}] if isinstance(grid, (int, float)) else []
+            return named or ([{"knob": "custom"}] if custom else [])
         try:
             body = self.fit({key: payload.get(key) for key in ("preset", "budget", "gpu", "sounding", "environment",
                                                                "custom")})
         except ApiError:
-            return False
-        return bool((body.get("fit") or {}).get("customized"))
+            return []
+        return list((body.get("fit") or {}).get("customized") or [])
 
     def start(self, payload: Mapping[str, Any]):
         from .api import ApiError
@@ -460,10 +472,10 @@ class Guided:
         given = self._given(payload) + custom
         name = payload.get("name")
         root = self.api.root
-        changed = bool(custom) and name in (None, "") and self.customized(payload)
+        changed = self.customized_list(payload) if bool(custom) and name in (None, "") else []
         with self._lock:
             if name in (None, ""):
-                name = unique_name(preset, root.path, taken=self._starting, custom=changed)
+                name = unique_name(preset, root.path, taken=self._starting, custom=bool(changed), customized=changed)
             try:
                 require_name(str(name), "run name")
             except PathRefused as error:
@@ -568,6 +580,18 @@ class Guided:
         return extra
 
 
+def _suggest(result: Any) -> dict[str, Any]:
+    """The ``suggest`` of a refused ``preset`` command's JSON (a Customize value that is taken), or nothing."""
+
+    try:
+        detail = json.loads(result.stderr)
+    except (TypeError, ValueError):
+        return {}
+    suggest = detail.get("suggest") if isinstance(detail, dict) else None
+    return {str(knob): value for knob, value in suggest.items()
+            if isinstance(value, (int, float)) and not isinstance(value, bool)} if isinstance(suggest, dict) else {}
+
+
 def _reason(result: Any) -> str:
     try:
         detail = json.loads(result.stderr)
@@ -580,10 +604,17 @@ def _reason(result: Any) -> str:
 
 
 def unique_name(preset_id: str, root: Path, taken: set[str] | frozenset[str] = frozenset(), *,
-                custom: bool = False) -> str:
-    """``PRESET-YYYYMMDD-HHMM`` (``PRESET-custom-...`` for a customized storm), ``-2``, ``-3`` when taken."""
+                custom: bool = False, customized: Any = None) -> str:
+    """``PRESET-YYYYMMDD-HHMM`` (``PRESET-custom-...`` for a customized storm), ``-2``, ``-3`` when taken.
+
+    ``customized`` is the fit's list of what the user changed: with a grid spacing of the user's own the name carries
+    that spacing in place of the preset's (``supercell-150m-custom-...``), as ``preset new`` names it."""
 
     stamp = time.strftime("%Y%m%d-%H%M", time.localtime())
+    if custom and customized:
+        from ..cm1run.presets import run_id_for
+
+        preset_id = run_id_for(preset_id, customized)
     base = (f"{preset_id}-custom-{stamp}" if custom else f"{preset_id}-{stamp}")[:60]
     name, number = base, 2
     while (root / name).exists() or name in taken:

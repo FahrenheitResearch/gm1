@@ -628,6 +628,25 @@ def _fake_harness(tmp_path: Path, gpu_name: str, seconds: float) -> Path:
     return script
 
 
+def test_a_run_that_shared_the_card_does_not_make_the_next_estimate_longer(monkeypatch) -> None:
+    """A grid run once alone and then again while other work used the card is still priced at its own speed:
+    the fastest of its recent runs, since sharing can only slow a run."""
+
+    gpu = fixture_gpus("rtx3080-wsl2-desktop", monkeypatch, wsl2=True).select()
+    deck = deck_from_mapping(_scaled_stock(128, 250.0), name="128")
+    for index, seconds in enumerate((0.080, 0.170, 0.200, 0.190)):
+        receipt = _receipt_for_grid(128, 128, 80, seconds, count=200 + index)
+        assert rates.learn_receipt(receipt)[1]
+    after = price(deck, gpu, host=HOST)
+    assert after.step["regime"] == "this-grid"
+    assert after.step["seconds_per_step"] == pytest.approx(0.080)
+    assert "fastest of 4 run(s)" in after.step["basis_used"]
+    # Only the recent runs count: six slower ones later, the fast one has left the window.
+    for index in range(6):
+        assert rates.learn_receipt(_receipt_for_grid(128, 128, 80, 0.150 + 0.001 * index, count=300 + index))[1]
+    assert price(deck, gpu, host=HOST).step["seconds_per_step"] == pytest.approx(0.151)
+
+
 def test_measure_speed_gives_the_harness_the_budget_its_own_peak_needs(tmp_path, monkeypatch) -> None:
     """A 600 x 600 x 80 deck prices well over 8 GB of registry; the importer's
     8192 MiB would have refused the measurement on a 32 GB card."""
