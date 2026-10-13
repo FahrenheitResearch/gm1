@@ -766,7 +766,10 @@ class LowerBoundaryState:
     layer's ``ust``, ``znt`` and lowest-level wind, which
     ``misclibs.F:2165-2172`` divides by to build the log-layer horizontal
     vorticity; ``cnstcd`` is enough to rebuild them for ``cecd=1``, CM1's
-    constant drag coefficient branch (``sfcphys.F:120-136``).
+    constant drag coefficient branch (``sfcphys.F:120-136``).  For the
+    wind-dependent branches (``cecd=2`` and ``3``, ``sfcphys.F:138-195``) the
+    roughness length is the run's own carried state and is handed to
+    :func:`surface_layer_state` beside this record.
     """
 
     bbc: int = 1
@@ -778,9 +781,11 @@ class LowerBoundaryState:
 
 
 def surface_layer_state(
-    xp: Any, *, u: Any, v: Any, lower: LowerBoundaryState, za_m: float
+    xp: Any, *, u: Any, v: Any, lower: LowerBoundaryState, za_m: float, znt: Any = None
 ) -> dict[str, Any]:
-    """CM1's ``getsfc``/``getcecd`` pair for the constant-Cd branch.
+    """CM1's ``getsfc``/``getcecd`` pair for the constant-Cd branch, and the
+    friction velocity of the wind-dependent branches from the run's own
+    roughness length.
 
     ``turb.F:539-543`` averages the *ground-relative* lowest-level wind to the
     scalar point; ``sfcphys.F:126-135`` turns the declared constant drag
@@ -791,9 +796,29 @@ def surface_layer_state(
     closure's surface carriers live inside its held phase and are released
     with it; a diagnostic at the post-solve3 boundary can see none of them.
     The arithmetic is the same source, so the numbers are the same numbers.
+
+    ``cecd=2`` (Deacon) and ``cecd=3`` (Fairall/Donelan) make the roughness
+    length over water a function of the 10 m wind and find it by an
+    iteration that starts from the last known ``z0`` (``sfcphys.F:138-178``),
+    so it cannot be rebuilt from the wind alone.  It does not have to be:
+    ``getcecd`` writes it back, and the closure keeps that plane between
+    steps (its ``surface_state["znt"]``, which is what the parcel step reads
+    too).  Given that plane as ``znt``, ``sfcphys.F:190`` turns it into the
+    friction velocity with the same statement the constant branch's
+    ``sfcphys.F:135`` uses, over water and land alike, and ``cd`` follows
+    from inverting ``sfcphys.F:167``.  The roughness is the one the run's
+    last ``getcecd`` call left, and the wind is this boundary's, as it is on
+    the constant branch.  Without ``znt`` a wind-dependent ``cecd`` is
+    refused as before: a roughness invented here would report a friction
+    velocity the run never used.
     """
 
-    if int(lower.cecd) != 1:
+    wind_dependent = int(lower.cecd) != 1
+    if wind_dependent and int(lower.cecd) not in (2, 3):
+        raise ValueError(
+            f"cecd={lower.cecd} is not one of sfcphys.F's three drag branches (1, 2, 3)"
+        )
+    if wind_dependent and znt is None:
         raise ValueError(
             f"cecd={lower.cecd} selects one of sfcphys.F's wind-dependent "
             "drag branches, which iterate on the 10 m wind; only cecd=1, the "
@@ -816,6 +841,30 @@ def surface_layer_state(
     xp.multiply(u1, u1, out=s1)
     xp.add(s1, xp.multiply(v1, v1), out=s1)
     xp.sqrt(s1, out=s1)
+    if wind_dependent:
+        roughness = xp.asarray(znt, dtype=xp.float32)
+        if tuple(roughness.shape) != (ny, nx):
+            raise ValueError(
+                f"znt has shape {tuple(roughness.shape)}, but the surface layer of this grid is "
+                f"({ny}, {nx}): the roughness length must be the run's own whole-domain plane"
+            )
+        if not bool(xp.all(roughness > _f32(xp, 0.0))):
+            raise ValueError(
+                "znt must be positive everywhere: sfcphys.F:189 divides by it, and a zero or "
+                "negative roughness length has no logarithmic layer above it"
+            )
+        # sfcphys.F:189-190: rznt = 1.0/znt; ust = max(s1*karman/alog((za+znt)*rznt), 1.0e-6)
+        rznt = xp.divide(_f32(xp, 1.0), roughness)
+        level_plane = xp.log(xp.multiply(xp.add(roughness, _f32(xp, float(za_m))), rznt))
+        ust = xp.maximum(
+            xp.divide(xp.multiply(s1, _f32(xp, CM1_KARMAN)), level_plane), _f32(xp, 1.0e-6)
+        )
+        # sfcphys.F:167 inverted: znt = 10/(exp(karman/sqrt(cd)) - 1), so cd = (karman/alog((10+znt)*rznt))**2.
+        cd_plane = xp.square(xp.divide(
+            _f32(xp, CM1_KARMAN), xp.log(xp.multiply(xp.add(roughness, _f32(xp, 10.0)), rznt))
+        ))
+        return {"u1": u1, "v1": v1, "s1": s1, "znt": roughness, "ust": ust, "cd": cd_plane,
+                "za_m": float(za_m)}
     # sfcphys.F:126-128
     cd = max(1.0e-10, float(lower.cnstcd))
     znt = 10.0 / (math.exp(CM1_KARMAN / math.sqrt(cd)) - 1.0)
@@ -888,8 +937,14 @@ def vorticity_components(
     allocate: Any = None,
     release: Any = None,
     out: Mapping[str, Any] | None = None,
+    surface_znt: Any = None,
 ) -> dict[str, Any]:
     """CM1 ``xvort``/``yvort``/``zvort`` at scalar points, 1/s.
+
+    ``surface_znt`` is the run's own roughness-length plane, which a
+    ``bbc=3`` boundary with a wind-dependent drag (``cecd=2`` or ``3``)
+    needs for its log-layer vorticity (:func:`surface_layer_state`); the
+    constant-drag branch does not read it.
 
     ``misclibs.F:1540-2174``, Cartesian grid without terrain.  The winds are
     the *ground-relative* ones (``misclibs.F:1551``, ``writeout.F:291-296``),
@@ -1042,11 +1097,18 @@ def vorticity_components(
         # because the free-slip copy-down above would report no surface
         # vorticity on a boundary that is generating it -- and that surface
         # vorticity is exactly what a low-level mesocyclone tilts upward.
-        surface = surface_layer_state(xp, u=u, v=v, lower=lower, za_m=column.zh_m[0])
-        scale = xp.divide(
-            surface["ust"],
-            _f32(xp, CM1_KARMAN * (column.zh_m[0] + surface["znt"])),
+        surface = surface_layer_state(
+            xp, u=u, v=v, lower=lower, za_m=column.zh_m[0],
+            znt=surface_znt if int(lower.cecd) != 1 else None,
         )
+        if isinstance(surface["znt"], float):
+            depth = _f32(xp, CM1_KARMAN * (column.zh_m[0] + surface["znt"]))
+        else:
+            # A wind-dependent drag: the roughness is a plane, so karman*(zh + znt) is one too.
+            depth = xp.multiply(
+                xp.add(surface["znt"], _f32(xp, float(column.zh_m[0]))), _f32(xp, CM1_KARMAN)
+            )
+        scale = xp.divide(surface["ust"], depth)
         speed = xp.maximum(surface["s1"], _f32(xp, 0.01))
         xvort[0] = xp.multiply(
             xp.multiply(scale, _f32(xp, -1.0)), xp.divide(surface["v1"], speed)

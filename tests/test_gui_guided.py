@@ -55,8 +55,10 @@ def test_a_first_launch_opens_guided_and_the_gallery_lists_every_preset(live):
     assert client.get("/api/mode").json["mode"] == "guided"
     copy = client.get("/api/copy").json
     assert copy["guided"]["strings"]["gallery.title"]["text"] == "Pick a storm"
+    # The four favourites, then a hurricane run's own two (its wind and its pressure).
     assert [look["id"] for look in copy["looks"]["looks"]] == ["reflectivity", "spin-near-ground",
-                                                                 "updraft-5km", "swath"]
+                                                                 "updraft-5km", "swath", "wind-lowest",
+                                                                 "pressure-lowest"]
     listed = client.get("/api/presets")
     assert listed.status == 200
     body = listed.json

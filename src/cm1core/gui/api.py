@@ -82,6 +82,8 @@ NAMELIST_LIMIT = 1024 * 1024
 SOUNDING_LIMIT = 16 * 1024 * 1024
 #: The guided Results screen opens on these looks, in this order.
 GUIDED_LOOKS = ("reflectivity", "spin-near-ground", "updraft-5km", "swath")
+#: A hurricane run's favourite looks (the thunderstorm looks are not drawn for it; ``quicklook.products``).
+HURRICANE_LOOKS = ("reflectivity", "wind-lowest", "pressure-lowest")
 ESCALATE_AFTER_S = 30.0
 #: In a run folder whose big files were deleted to free the disk (the pictures kept): what was removed.
 TRIMMED_FILE = "trimmed.json"
@@ -542,6 +544,8 @@ class Api:
         index = read_json(rundir / "quicklook" / "index.json", default=None)
         # A picture with no storm in it yet says so beside it (:mod:`.storm`).
         notes = storm.run_notes(rundir, index)
+        # Guided mode's words, to tell a line said beside a storm from one said in place of it.
+        strings = (self.guided.copy()["guided"].get("strings") or {}) if notes else {}
         if isinstance(index, dict) and isinstance(index.get("products"), list):
             for product in index["products"]:
                 if not isinstance(product, dict):
@@ -556,6 +560,8 @@ class Api:
                         line = None if product.get("once") else storm.note_for(notes, frame.get("time_s"))
                         if line:
                             row["storm"] = line
+                            if storm.shows_storm(line, strings):
+                                row["storm_showing"] = True
                         frames.append(row)
                 looks.append({**{k: v for k, v in product.items() if k != "frames"}, "frames": frames})
         series = None
@@ -564,7 +570,9 @@ class Api:
             if isinstance(index["series"].get("picture"), str):
                 series["picture_url"] = base + "quicklook/" + quote(index["series"]["picture"])
         if mode == "guided":
-            order = {name: position for position, name in enumerate(GUIDED_LOOKS)}
+            shown = index.get("run") if isinstance(index, dict) and isinstance(index.get("run"), dict) else {}
+            favourites = HURRICANE_LOOKS if shown.get("storm_kind") == "hurricane" else GUIDED_LOOKS
+            order = {name: position for position, name in enumerate(favourites)}
             looks.sort(key=lambda look: order.get(str(look.get("id")), len(order)))
             for look in looks:
                 look["favourite"] = str(look.get("id")) in order
@@ -1212,4 +1220,4 @@ def parse_event_id(value: str | None) -> tuple[int, int] | None:
         return None
 
 
-__all__ = ["Api", "ApiError", "GUIDED_LOOKS", "Reply", "parse_event_id", "run_url"]
+__all__ = ["Api", "ApiError", "GUIDED_LOOKS", "HURRICANE_LOOKS", "Reply", "parse_event_id", "run_url"]

@@ -270,6 +270,20 @@ class QuickFrame:
 
         return self.get("th3d", k)
 
+    def pressure_level(self, k: int) -> np.ndarray | None:
+        """Pressure (Pa) at scalar level k: the frame's ``prs``, else CM1's ``p00*(pi0+ppi)**(cp/rd)``
+        (solve2.F:1588) from the frame's pi0 column and ``pp3d``; None when the frame carries neither."""
+
+        if self.has("prs"):
+            return self.get("prs", k)
+        pi0 = self.base_column("pi0")
+        if pi0 is None or not self.has("pp3d"):
+            return None
+        from ..cm1out.fields import _CP, _P00, _RD
+
+        total = float(pi0[k]) + self.get("pp3d", k).astype(np.float64)
+        return (_P00 * np.power(total, _CP / _RD)).astype(np.float32)
+
     def base_column(self, name: str) -> np.ndarray | None:
         """A base-state column (th0, pi0, prs0, qv0, u0, v0) when the frame carries it."""
 

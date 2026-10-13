@@ -9,13 +9,13 @@
 //
 // A run started from a terminal or a batch job reads the same (attach): the page reads the run folder.
 
-import { h, num, clock, parseClock, button, schemeName } from "../core.js";
+import { h, num, clock, stormClock, setLongRun, parseClock, button, schemeName } from "../core.js";
 import * as api from "../api.js";
 import { register, go, notice, runRoute } from "../router.js";
 import { showCommand } from "../command.js";
 import { ready as copyReady, t, looks as favouriteCopy } from "../../guided/copy.js";
 import {
-  FAVOURITES, LIVE_STATES, OVER_STATES, actionButton, advancedReadouts, attachedLine, fold, headerClock, logPanel,
+  FAVOURITES, favouritesOf, LIVE_STATES, OVER_STATES, actionButton, advancedReadouts, attachedLine, fold, headerClock, logPanel,
   pictureWords, progressBlock, put, segmentsTable, seriesPanel, startupTable, stateChip, stormLine, viewer,
   wallWords, warningsBlock, gridWords, continueClock, runExists, runNotFound, untilProblem,
 } from "./parts.js";
@@ -97,7 +97,7 @@ async function guidedRun(body, id, page) {
   const view = viewer({
     order: FAVOURITES, limit: 4, empty: t("watch.first_picture"),
     caption: (look, f) => [h("b", {}, t("watch.picture_at", { look: titles[look.id] || look.title || look.id,
-      clock: clock(f.time_s || 0) }))],
+      clock: stormClock(f.time_s || 0) }))],
     note: (look, f) => stormLine(f),
   });
   view.classList.add("g-viewer");
@@ -188,6 +188,9 @@ async function guidedRun(body, id, page) {
       if (newer(live.progress, progress)) progress = live.progress;
       pictures = live.pictures || null;
       behind = live.pictures_behind || null;
+      // A hurricane run shows its own favourites (known once its first picture is drawn).
+      view.setOrder(favouritesOf(live.run));
+      setLongRun(status.duration_s || progress.duration_s || 0);
       view.update((live.looks || []).map((l) => ({ ...l, title: titles[l.id] || l.title })));
       paint();
     } catch (_) { /* the run folder may still be writing; the next poll reads it */ }
@@ -285,7 +288,8 @@ async function advancedRun(body, id, page) {
     const st = status;
     const p = progress;
     const model = p.model_time_s ?? st.model_time_s;
-    clockEl.set(model || 0, st.duration_s || p.duration_s ? `of ${clock(st.duration_s || p.duration_s)}` : "model time");
+    setLongRun(st.duration_s || p.duration_s || 0);
+    clockEl.set(model || 0, st.duration_s || p.duration_s ? `of ${stormClock(st.duration_s || p.duration_s)}` : "model time");
     const grid = gridWords(st.grid || (live.admitted || {}).grid);
     page.setData([id, live.case, grid, schemeName(st.microphysics || (live.admitted || {}).microphysics)].filter(Boolean).join(" · "));
     const steps = p.step != null && p.total_steps ? ` · step ${num(p.step)} of ${num(p.total_steps)}` : "";
@@ -321,6 +325,8 @@ async function advancedRun(body, id, page) {
     } else if (actions.has("resume")) {
       words = st.state === "finished" ? "Continue runs it longer from its last restart, to the end time given." :
         "Continue goes on from the last restart, to the end time given.";
+    } else if (st.no_resume_why) {
+      words = st.no_resume_why;
     } else if (actions.has("start")) {
       words = "Start runs it on this computer's GPU, with the cm1out and quick-look workers on its CPUs. The Estimate " +
         "page says what it needs first.";
@@ -349,7 +355,7 @@ async function advancedRun(body, id, page) {
     view.update(live.looks || []);
     const shown = (live.looks || []).find((l) => l.url);
     put(viewCap, "Latest quick-looks", shown ? h("span", { class: "n" },
-      `${live.frames_drawn || 0} frame${live.frames_drawn === 1 ? "" : "s"} drawn, the latest ${clock(shown.time_s || 0)}`) : null);
+      `${live.frames_drawn || 0} frame${live.frames_drawn === 1 ? "" : "s"} drawn, the latest ${stormClock(shown.time_s || 0)}`) : null);
     seriesBox.replaceChildren(seriesPanel(live.series, { now: status.model_time_s, tmax: status.duration_s, limit: 6 }));
     startupBox.replaceChildren(startupTable(live.startup) || h("p", { class: "muted" }, "Written right before the first step."));
     segmentsBox.replaceChildren(segmentsTable(live.segments) || h("p", { class: "muted" }, "None yet."));
@@ -393,8 +399,8 @@ async function advancedRun(body, id, page) {
     any: (kind, data) => {
       if (kind === "status") return;
       const text = kind === "progress" ? `step ${data.step ?? ""}${data.heartbeat ? " (heartbeat)" : ""}` :
-        kind === "frame" ? `frame ${data.index} at ${clock(data.model_time_s || 0)}` :
-        kind === "restart" ? `restart ${data.number} at ${clock(data.model_time_s || 0)}` :
+        kind === "frame" ? `frame ${data.index} at ${stormClock(data.model_time_s || 0)}` :
+        kind === "restart" ? `restart ${data.number} at ${stormClock(data.model_time_s || 0)}` :
         kind === "end" ? `end: ${data.reason}` : kind === "warning" ? `warning: ${data.code || ""}` : kind;
       events.prepend(h("div", {}, `${data.segment || ""}  ${text}`));
       while (events.childNodes.length > 200) events.lastChild.remove();

@@ -1,5 +1,171 @@
 # gpuwm-cm1 release notes
 
+## 0.1.5
+
+Hurricanes. Two hurricane presets join the gallery, made from CM1 r21.1's own hurricane case, and ground friction
+becomes a choice in Customize. The engine is 0.1.4's (ArWen 2.8.9), and every storm that 0.1.4 runs, 0.1.5 runs the
+same way; any grid spacing on the thunderstorm presets and the 100 m supercell stay as 0.1.4 has them.
+
+### What is new
+
+- **Hurricane, quick look, 8 km**, a new card under Other storm types: CM1 r21.1's `hurricane_3d_cpm` case with 23
+  settings changed to what GM1 has (an even 8 km grid of 128 x 128 x 59 cells over 1024 km with repeating sides,
+  4 days, a fixed 7.5 s time step, GM1's turbulence scheme in place of the boundary layer scheme, a constant ocean
+  drag of 0.0024 with a heat and moisture exchange of 0.0012, the lowest three levels equally spaced, 250 cloud
+  droplets per cubic centimetre, no restart files along the way), on CM1's own moist tropical sounding. It is
+  CM1's hurricane case with GM1's physics choices, not CM1's stock hurricane, and the card says so. It was run
+  for its whole 4 days from the guided GUI on an RTX 4090 and compared with CM1 r21.1 run with the same changed
+  settings but its own adaptive time step; the numbers are under "What was measured" below. The card's picture
+  is that run's wind at the lowest level at hour 90. The two hurricane cards lead Other storm types, so both
+  show before "Show all".
+- **Hurricane, 4 km**, a second card: the same case on a 4 km grid of 256 x 256 x 59 cells, an overnight budget.
+  CM1 has not been run with these settings at 4 km, so the card, its note and its pictures say it is not
+  compared. It was run for its whole 4 days from the guided GUI on the same card and engine as the 8 km one; its
+  card gives the numbers, and its picture is that run's wind at the lowest level at hour 90.
+- **A hurricane takes a fixed time step.** CM1's hurricane file lets the time step grow with the storm
+  (`adapt_dt = 1`, up to twice `dtl`). With it GM1's hurricane stops early or makes a much weaker storm (a known
+  issue, below); with a fixed step the same storm stays close to CM1's until the last day. The hurricane cards
+  take `adapt_dt = 0` with `dtl = 7.5`, `--set adapt_dt=1` on a hurricane card is refused with the reason, and the
+  import report says "Runs differently" for any namelist with the adaptive step on stretched levels, with that
+  fix. A run on the adaptive step cannot be continued, and Results says why instead of offering it.
+- **A hurricane keeps its own grid.** Any grid spacing (0.1.4) is for the thunderstorm presets. A hurricane card
+  offers its own grid only: Customize shows it as a choice, with no slider and no box to type in, and
+  `--custom grid=` with another spacing is refused in plain words.
+- **Settings not yet compared with CM1 no longer hold a storm back.** Guided mode used to offer only storms with
+  nothing under "Not yet checked against CM1". Such a storm now runs, and its card and the budget screen say
+  which settings are not yet compared: "Runs, not yet compared with CM1: ...". A refusal still blocks, and so does
+  a setting that asks for an acknowledgment (Thompson). The hurricanes have been run and are offered this way; the
+  two squall-line presets would be too, and each stays greyed with "not run yet" until it has been run on a GPU as
+  it is set up. The rule also changes one thing on every other storm: see "Also in this release" below.
+- **A hurricane run has its own pictures and words.** The wind (0 to 80 m/s ground-relative) and the pressure at
+  the lowest model level (as hPa below the pressure at the area's edge, 0 to 70; the lowest level, not sea level,
+  and the picture says so) in place of the looks made for one thunderstorm, which the More looks row leaves out;
+  GM1's runs stay inside both ranges. Rain from 1 mm to 400 cm, which holds the most rain the runs made in one
+  cell. Each of these and the reflectivity shows the whole area and, beside it, the inner 500 km around the
+  middle of the area, marked as a square on the whole-area panel. The wind colours start at 10 m/s
+  ground-relative and a white line marks hurricane force (33 m/s ground-relative); the picture places the
+  fastest wind from the pressure centre ("12 km east of the pressure centre", for example). The pressure has a
+  line every 4 hPa and colours placed by the square root of the drop, so the wide shallow low shows as well as
+  the centre;
+  the rain colours step tenfold (a logarithmic scale). Every range is fixed and printed on the picture, and the
+  numbers beside it are the run's own. Also: a time series that leads with the lowest pressure and the fastest
+  wind, in hours; storm time in hours and days on Watching, Results and the pictures themselves, header and
+  footer ("T+81 h (3 d 9 h)"); and, in place of "No storm yet", what the swirl is doing and when the eye is
+  usually clear. Each picture's footer says whether CM1 has been run with that run's settings: "compared with
+  CM1 on this 8 km case (measured)" for the 8 km card's settings (grid, levels, time step, drag, sea and cloud
+  droplets), "not compared with CM1 at these settings" for any other.
+- **The fit keeps a hurricane whole.** Its area is never made smaller than 1000 km (the starting swirl is 500 km
+  in radius) and its storm time never shorter than 3 days (the eye forms on the second day); when it does not fit
+  a time, the reason says so. Customize offers 3 to 6 days of storm time (a time longer than GM1 has run says
+  "not run yet"), a picture every 1 to 12 hours and the sea surface temperature (26 to 31 °C; only 28 °C has
+  been run). The budget screen says a hurricane's stretched levels as they are ("59 levels, 50 m at the bottom
+  to 500 m aloft"). On the command line `preset options hurricane-8km` lists the times in days and hours with
+  the minutes `--custom` takes; `--set tsk0` (the sea knob owns it), `--set` of a levels word (`stretch_z`,
+  `ztop`, `dz_bot`, `dz_top`, `str_bot`, `str_top`), `--sounding`, `--instability` and `--shear` are refused on a
+  hurricane card in plain words, each naming the knob or the Advanced route. Results offers "Run it 1 day
+  longer" for a hurricane, and says when that day is past what GM1 has run.
+- **The 8 km card on a small card.** Where the storm does not fit about 1 hour, the card says so and opens on
+  Overnight: an 8 GB card that also drives a desktop is estimated at about 65 minutes even at the shortest
+  3 days, and at about 87 minutes for the card's 4 days.
+- **CM1's 3-D hurricane namelist imports** once ten of its settings are replaced with what GM1 has (a uniform grid,
+  GM1's turbulence scheme, a constant ocean drag, equally spaced lowest levels and 250 cloud droplets per cubic
+  centimetre); as CM1 ships it, it is still refused, and the axisymmetric one cannot run. The 0.1.0 notes'
+  "21 of CM1's 23 shipped namelists are refused" holds for those namelists as CM1 ships them.
+- **The hurricane grids are timed on an RTX 4090 out of the box.** The record of measured speeds now carries
+  both hurricane grids on an RTX 4090, from the parts of the runs when the card was their own: 0.0198 s a step
+  at 8 km and 0.0642 s a step at 4 km (measured). A fresh install on that card says about 15 minutes for the 8 km
+  card and about 50 minutes for the 4 km one; before, it priced the 8 km grid at the reference computer's
+  slower floor, about 37 minutes. Other cards are priced as before, and a computer's own run of a grid replaces
+  the record's number. A grid within 0.5 % of the same number of cells on an RTX 4090 with the same rain scheme
+  is priced at the same point.
+- **The rate rule.** The fastest of a grid's recent runs prices it (since 0.1.4), not the median of its runs:
+  runs made while other work shared the card had made the next estimate too long, and the fit had shortened a
+  storm that fits (the 8 km hurricane's 4 days, priced at 58 minutes, were cut to 3 days 9 h for a 1 hour
+  budget). With the fastest run the same fit prices the 4 days at about 15 minutes. This changes the time
+  estimate of every storm that has been run more than once on a card, not only a hurricane's.
+- **Smaller fixes.** The fit's first line gives the cells for every spacing of your own that is not a round
+  number, as it already did when the area came out at a fraction of a km ("A 30.0 × 30.0 km area (448 × 448
+  cells) at 67 m"), and says "An 82.9 m grid" and "An 8 km grid". `docs/INSTALL.md` gives the disk the largest
+  storms take: the 100 m supercell and the hurricanes.
+
+### Also in this release: ground friction in Customize
+
+Not hurricane work, but it comes from the same rule. Ground friction (`bbc = 3`, `sfcmodel = 1`, `cecd = 1`) is
+now a choice in Customize this storm on every storm that has the panel; it was greyed. What has been measured
+is what the 0.1.2 notes give: CM1's supercell with ground friction against CM1 r21.1 on an RTX 4090 only, where
+nine statistics are 0.986 to 1.018 of CM1's and max vertical vorticity is 1.072. It has not been run on an RTX
+3080 and not compared in any other storm. The note under the switch says this, the budget screen lists the
+storm under "Runs, not yet compared with CM1", and the import report's row for these settings now gives the
+same numbers in place of "has not been compared with CM1 in a storm". WSM6 and Thompson stay greyed in
+Customize, as before.
+
+### What was measured
+
+Each hurricane preset was run once, for its whole 4 days, from the guided GUI on an RTX 4090 on ArWen 2.8.9, with
+a development build of the hurricane work and the same namelists this version ships, byte for byte. CM1 r21.1 ran
+the 8 km case on a CPU.
+
+- **8 km, against CM1.** GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9), on a fixed 7.5 s
+  time step, is compared with a CM1 r21.1 run with the same changed settings but its own adaptive time step (from
+  10 s, as CM1's file has it). Through hour 54 the two stay within about 6 hPa and 7 m/s ground-relative at the
+  lowest level. GM1 reaches 951.2 hPa at hour 90, with its fastest wind, 62.9 m/s ground-relative, at hour 93; CM1
+  reaches 954.9 hPa and 62.0 m/s ground-relative at hour 81. GM1's storm holds near its peak after it: 954.0 hPa
+  and 58.8 m/s ground-relative at hour 96; CM1's storm weakens after it: 971.7 hPa and 50.7 m/s ground-relative at
+  hour 96 (all measured).
+- **The last day.** From hour 81 to hour 96 GM1's storm goes from 954.6 hPa and 61.4 m/s ground-relative to
+  954.0 hPa and 58.8 m/s ground-relative (in those hours its lowest pressure is 951.2 hPa, its fastest wind
+  62.9 m/s ground-relative, its radius of maximum wind 20 km throughout); CM1's goes from 954.9 hPa and 62.0 m/s
+  ground-relative to 971.7 hPa and 50.7 m/s ground-relative (radius of maximum wind 20 to 28 km). So GM1's storm
+  holds its strength through the last 15 hours while CM1's weakens (measured).
+- **The eye.** Both runs have a clear eye and eyewall by hour 48. In both runs the radius of maximum wind is
+  20 km or less from hour 21: in GM1's run to the end (hour 96), in CM1's to hour 90, then 28 km (both measured,
+  from the 3-hourly frames).
+- **4 km.** GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9) ran its whole 4 days:
+  989.6 hPa and 37.8 m/s ground-relative at the lowest level at hour 48, 965.6 hPa and 58.5 m/s ground-relative
+  at hour 72, and 965.5 hPa and 52.4 m/s ground-relative at hour 96; it was strongest at hour 90, with 952.3 hPa
+  and 69.9 m/s ground-relative (measured). The run with ArWen 2.8.0 (gpuwm 2.8.0) ended at 958.7 hPa and
+  61.8 m/s ground-relative. CM1 has not been run with these settings at 4 km, so this storm has nothing to be
+  compared with.
+- **Time.** On an RTX 4090 the 8 km card's 4 days took 24 minutes (46080 steps; other work shared the card for
+  the first 12 minutes), and the 4 km card's took 49 minutes (46080 steps, 0.0642 s a step).
+- The hour-by-hour table of both 8 km runs (pressure, wind, radius of maximum wind and warm core) is in
+  `docs/TROUBLESHOOTING.md`, under "How close is GM1's hurricane to CM1's?".
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"); with pip, `pip install --upgrade gpuwm-cm1`. The engine stays at ArWen 2.8.9 (gpuwm 2.8.9 and
+gpuwm-data 2.8.9). Close GM1 and let a running storm finish first; the installer stops with a message while one
+runs. Your storms stay where they are. Finish a storm with the GM1 version that started it. A hurricane run needs
+about 7.5 GB of disk at 8 km and about 30 GB at 4 km (4 days, a picture every 3 hours).
+
+### Known limitations
+
+- **One run each.** Every hurricane number above comes from one run of each card on one RTX 4090, and so do the
+  two measured speeds; the 8 km speed comes from the part of that run after other work left the card. No other
+  card has run a hurricane.
+- **The 8 km storm differs from CM1's in the last day.** Through hour 54 the two stay close; from hour 81 GM1's
+  storm holds near its peak while CM1's weakens, and at hour 96 they are 954.0 hPa against 971.7 hPa. The CM1 run
+  used its own adaptive time step, GM1 a fixed 7.5 s one.
+- **The adaptive time step.** With CM1's own adaptive setting GM1's hurricane stops early or makes a much weaker
+  storm, a known issue: 8 km runs on it stopped at hour 20.8 and at hour 29.1, and the one that ran to the end
+  reached 995 hPa and 35 m/s ground-relative where CM1 reaches 955 hPa and 62 m/s ground-relative (measured with
+  ArWen 2.8.0 (gpuwm 2.8.0)). It has not been measured again on ArWen 2.8.9; the hurricane cards refuse it.
+- **The 4 km storm is not compared with CM1.** CM1 has not been run with these settings at 4 km.
+- **Times past 4 days and other sea temperatures** are offered but have not been run: Customize says "not run
+  yet" beside 5 and 6 days, and only 28 °C has been run.
+- **The released package itself has not run a hurricane on a GPU.** The runs above used a development build of
+  the hurricane work with the same namelists; the card pictures were drawn from those runs, and their records name
+  that build's version number (0.1.2).
+- **Not in this version:** CM1's stock hurricane as written (it needs horizontal grid stretching, a boundary layer
+  scheme and separate horizontal and vertical mixing lengths), the axisymmetric hurricane, a 2 km hurricane
+  preset, and CM1's wind-dependent ocean drag (`cecd = 3`), which the import still refuses. The diagnostic that
+  stopped such a run before its first step now takes the run's own roughness length; lifting the refusal waits
+  for a GPU run of CM1's supercell with that drag, compared with CM1's own.
+- The known limitations of 0.1.4, 0.1.3, 0.1.2, 0.1.1 and 0.1.0 still apply ("Known limitations" under each, and
+  "Not in v0.1" and "Further known limits" under "0.1.0", below), except that the 100 m supercell is no longer
+  greyed (since 0.1.4) and ground friction is no longer greyed in Customize.
+
 ## 0.1.4
 
 Any grid spacing in guided mode. The model and the engine (ArWen 2.8.9) are 0.1.3's, and every storm that 0.1.3

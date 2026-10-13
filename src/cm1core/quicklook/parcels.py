@@ -170,7 +170,7 @@ def picture(track: dict[str, Any], n: int, chosen: np.ndarray, facts: Any, exten
     ov = S.Overlay((W, H))
     ov.title("Air rising into the storm", data or S.data_line(facts.name, f"{int(chosen.sum()):,} of "
                                                               f"{track['nparcels']:,} parcels rise more than 3 km"))
-    ov.clock(t)
+    ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(t))
     ov.footer(facts.footer(t=t, level="the parcels' own heights", wind="",
                            notes=S.data_line("the model's own air parcels, moved by its resolved wind",
                                              "trails: the last 10 min, straight between saved parcel times",

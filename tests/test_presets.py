@@ -113,8 +113,15 @@ def test_every_preset_namelist_is_in_the_cm1_redistribution_inventory():
         source = json.loads((namelist.parent / "preset.json").read_text(encoding="utf-8"))["source"]
         assert source["file"] == "CM1 r21.1 " + row["source_path"], path
         assert source["sha256"] == row["source_sha256"], path
-    listed = {path for path in rows if path.startswith("src/cm1core/presets/")}
+    listed = {path for path in rows if path.startswith("src/cm1core/presets/") and path.endswith("/namelist.input")}
     assert listed == {namelist.relative_to(ROOT).as_posix() for namelist in namelists}
+    # A sounding file CM1 ships beside a namelist (the hurricane's) has its own row, with CM1's own digest.
+    for preset in P.load_all():
+        stored = preset.record.get("sounding") or {}
+        if str(stored.get("source") or "").startswith("CM1 r21.1 "):
+            path = (preset.folder / "input_sounding").relative_to(ROOT).as_posix()
+            assert rows[path]["sha256"] == hashlib.sha256((preset.folder / "input_sounding").read_bytes()).hexdigest()
+            assert stored["source"] == "CM1 r21.1 " + rows[path]["source_path"]
 
 
 def test_the_five_presets_of_7_3_are_installed_in_order():
@@ -124,6 +131,7 @@ def test_the_five_presets_of_7_3_are_installed_in_order():
     # storm types" (Famous environments follow it); test_presets_gallery.py pins every group and its order.
     assert ids[:3] == ["supercell-1km", "supercell-250m", "supercell-100m"]
     other = [preset.id for preset in presets if preset.group == "other"]
+    assert other[:2] == ["hurricane-8km", "hurricane-4km"]
     assert other[-2:] == ["squall-line-1km", "squall-line-250m"]
     names = {preset.id: preset.name for preset in presets}
     assert names["supercell-1km"] == "Supercell, quick look, 1 km"
@@ -161,20 +169,25 @@ def test_every_preset_imports_as_a_run_gm1_runs_as_cm1_does(preset_id, tmp_path)
     assert _rows(payload, "refused") == [] and _rows(payload, "not_read") == []
     assert payload["acknowledgments"]["needed"] == []
     not_checked = _rows(payload, "not_checked")
-    if examined["offered"]:
-        assert not_checked == [], not_checked
-        assert payload["guided"]["offered"] is True
-    elif preset.record.get("offered") is False:
-        # Withheld by its own preset.json, though its namelist imports as a run GM1 runs as CM1 does.
-        assert not_checked == [], not_checked
-        assert payload["guided"]["offered"] is True
-        assert examined["why_not"] == preset.record["not_offered_reason"]
-    else:
-        # Until the periodic-sides fix: the squall lines' repeating north and south sides, and nothing else.
-        assert preset_id.startswith("squall-line")
+    # A setting not yet compared with CM1 does not hold a run back: the import offers it and lists the setting.
+    assert payload["guided"]["offered"] is True
+    assert payload["guided"].get("not_compared", []) == examined["not_compared"]
+    if preset_id.startswith("squall-line"):
+        # The squall lines' repeating north and south sides, and nothing else, are not yet compared with CM1.
         assert [tuple(row["keys"]) for row in not_checked] == [("sbc", "nbc")]
-        assert examined["reasons"] == [REPEATING_REASON]
-        assert examined["why_not"] == "Not offered: repeating sides have not been fully checked against CM1 yet."
+        assert examined["not_compared"] == [REPEATING_REASON]
+        # Neither has been run on a GPU as the preset is, so its own preset.json still withholds it.
+        assert examined["offered"] is False and examined["reasons"] == [preset.record["not_offered_reason"]]
+        assert examined["why_not"].startswith("Not offered yet: not run yet.")
+    else:
+        assert not_checked == [], not_checked
+        assert "not_compared" not in payload["guided"]
+    if examined["offered"]:
+        assert preset.record.get("offered") is not False
+    else:
+        # Withheld by its own preset.json (the squall lines), though its namelist imports.
+        assert preset.record.get("offered") is False
+        assert examined["why_not"] == preset.record["not_offered_reason"]
 
 
 def test_the_supercell_presets_are_offered_and_the_squall_lines_wait_for_the_repeating_sides():
@@ -183,12 +196,13 @@ def test_the_supercell_presets_are_offered_and_the_squall_lines_wait_for_the_rep
     # Earlier versions withheld the 100 m supercell (a check of the domain's position stopped it); it is offered again.
     assert offered["supercell-100m"]
     assert P.examine(P.load("supercell-100m"))["why_not"] is None
-    from cm1core.boundary_validation_register import register as boundary_register
-
-    caveat = boundary_register()["wbc/ebc/sbc/nbc=1 (periodic)"].get("caveat") or ""
-    squall_expected = "SGS closure" not in caveat
-    assert offered["squall-line-1km"] is squall_expected
-    assert offered["squall-line-250m"] is squall_expected
+    # The repeating sides no longer hold the squall lines back (they are said on the card); what does is that
+    # neither has been run on a GPU as the preset is.
+    for preset_id in ("squall-line-1km", "squall-line-250m"):
+        examined = P.examine(P.load(preset_id))
+        assert not offered[preset_id]
+        assert examined["why_not"].startswith("Not offered yet: not run yet.")
+        assert examined["not_compared"] == [REPEATING_REASON]
 
 
 def test_a_preset_json_can_withhold_a_preset_with_its_own_reason(tmp_path, monkeypatch):
@@ -253,7 +267,7 @@ def test_preset_fit_on_a_fixture_gpu_says_what_it_changed(tmp_path):
     offered = P.examine(P.load("squall-line-1km"))["offered"]
     assert squall.returncode == (0 if offered else 1)
     if not offered:
-        assert body["reason"].startswith("Not offered: repeating sides")
+        assert body["reason"].startswith("Not offered yet: not run yet.")
 
 
 def test_preset_new_writes_the_fitted_run_directory(tmp_path):

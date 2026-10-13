@@ -44,6 +44,24 @@ export function clock(t) {
   return `T+${Math.floor(s / 3600)}:${two(Math.floor((s % 3600) / 60))}:${two(s % 60)}`;
 }
 
+// A long run (two days of storm time or more, a hurricane) says its time in hours and days, not H:MM:SS:
+// "T+81 h (3 d 9 h)". Watching and Results call setLongRun with the run's own storm time; a list of runs gives
+// each run's total. Anything typed back in (Continue until) keeps clock's own form.
+const LONG_RUN_S = 172800;
+let longRun = false;
+export function setLongRun(totalSeconds) {
+  longRun = Number(totalSeconds) >= LONG_RUN_S;
+}
+export function stormClock(t, total) {
+  const s = Math.max(0, Math.round(Number(t) || 0));
+  const long = total === undefined || total === null ? (longRun || s >= LONG_RUN_S) : Number(total) >= LONG_RUN_S;
+  if (!long) return clock(t);
+  const whole = Math.floor(s / 3600);
+  const shown = s % 3600 === 0 ? String(whole) : (s / 3600).toFixed(1);
+  const days = Math.floor(whole / 24);
+  return days ? `T+${shown} h (${days} d ${whole % 24} h)` : `T+${shown} h`;
+}
+
 // A storm time typed in that one form, back to seconds: "T+2:30:00", "2:30:00" and "2:30" (hours and minutes)
 // are the same time. null for anything else, or for T+0:00:00.
 export function parseClock(text) {

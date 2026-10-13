@@ -91,12 +91,62 @@ first launch; each other group shows one row of cards and a **Show all** button 
 |---|---|
 | Start here | Supercell, quick look, 1 km (the quickest to try; each card says about how long it takes on your GPU); Supercell, 250 m; Supercell, 100 m, overnight |
 | Explore | Make your own environment; storms that split in two; clusters of short-lived storms; a storm in almost calm air |
-| Other storm types | A line of storms; cold air spreading out as a gust front; a warm bubble growing into a cloud; the two squall lines |
+| Other storm types | A line of storms; cold air spreading out as a gust front; a warm bubble growing into a cloud; a hurricane, as a quick look at 8 km and overnight at 4 km; the two squall lines (greyed until each has been run on a GPU) |
 | Famous environments | The air measured by weather balloons on well-known days (Norman, Oklahoma; Birmingham, Alabama; Denver, Colorado; Wilmington, Ohio; Tallahassee, Florida; Jackson, Mississippi), each named by its station and date |
 
 Each card has a picture from a real run and says about how long it takes on your card. A card that cannot run on
 your computer is greyed out with one line saying why, for example that it needs more free graphics memory than your
-card has. Only storms GM1 runs the way CM1 does are offered.
+card has. Only storms GM1 runs are offered. A storm that uses a setting not yet compared with CM1 runs too, and
+its card says which: "Runs, not yet compared with CM1: ...".
+
+**Hurricane, quick look, 8 km** is CM1's hurricane case run with GM1's own physics choices, not CM1's stock
+hurricane: an even 8 km grid over 1024 km in place of CM1's stretched one, GM1's turbulence scheme in place of a
+boundary layer scheme, a constant ocean drag, 250 cloud droplets per cubic centimetre, and a fixed 7.5 s time
+step. A weak swirl over warm ocean goes ragged for the first day while rain cells form around it, then tightens,
+and the eye is clear by hour 48. Its pictures are its own: the wind and the pressure at the lowest level in place
+of the thunderstorm looks, the clouds seen from above with the eye in the middle, storm time in hours and days,
+and a chart of its lowest pressure. The wind, the pressure, the rain and the reflectivity each show the whole
+area and, beside it, the inner 500 km, where the eyewall and the rain bands are: the wind with a white line at
+hurricane force (33 m/s ground-relative), the pressure with a line every 4 hPa, the rain on a scale that steps
+tenfold from 1 mm to 400 cm. The card says about how long it takes on your card; on a card where the storm does
+not fit about 1 hour it says so and opens on Overnight. Customize offers 3 to 6
+days of storm time (a time longer than GM1 has run says "not run yet"), a picture every 1 to 12 hours and the sea
+surface temperature (26 to 31 °C; CM1's case has 28, and only 28 has been run). On the command line a hurricane
+card takes the same three through `--custom`; `--set tsk0`, `--set` of a levels word, `--sounding`,
+`--instability` and `--shear` are refused in plain words that name what to use, and Advanced can still try them.
+
+<!-- hurricane-runs:card_8km_measured -->
+GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9), on a fixed 7.5 s time step, is compared with
+a CM1 r21.1 run with the same changed settings but its own adaptive time step (from 10 s, as CM1's file has it).
+Through hour 54 the two stay within about 6 hPa and 7 m/s ground-relative at the lowest level. GM1 reaches 951.2 hPa
+at hour 90, with its fastest wind, 62.9 m/s ground-relative, at hour 93; CM1 reaches 954.9 hPa and
+62.0 m/s ground-relative at hour 81. GM1's storm holds near its peak after it: 954.0 hPa and
+58.8 m/s ground-relative at hour 96; CM1's storm weakens after it: 971.7 hPa and 50.7 m/s ground-relative at hour 96
+(all measured).
+<!-- /hurricane-runs -->
+
+<!-- hurricane-runs:time_8km -->
+On an RTX 4090 the 4 days took 24 minutes (46080 steps; other work shared the card for the first 12 minutes).
+<!-- /hurricane-runs -->
+
+<!-- hurricane-runs:known_issue_adaptive_step -->
+With CM1's own adaptive setting GM1's hurricane stops early or makes a much weaker storm, a known issue: 8 km runs
+on it stopped at hour 20.8 and at hour 29.1, and the one that ran to the end reached 995 hPa and
+35 m/s ground-relative where CM1 reaches 955 hPa and 62 m/s ground-relative (measured with ArWen 2.8.0 (gpuwm
+2.8.0)).
+<!-- /hurricane-runs -->
+
+**Hurricane, 4 km** is the same case on a 4 km grid of 256 x 256 cells, offered at the overnight budget. Its eye
+is drawn smaller than the 8 km run's.
+
+<!-- hurricane-runs:card_4km_measured -->
+GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9) ran its whole 4 days: 989.6 hPa and
+37.8 m/s ground-relative at the lowest level at hour 48, 965.6 hPa and 58.5 m/s ground-relative at hour 72, and
+965.5 hPa and 52.4 m/s ground-relative at hour 96; it was strongest at hour 90, with 952.3 hPa and
+69.9 m/s ground-relative (measured). The run with ArWen 2.8.0 (gpuwm 2.8.0) ended at 958.7 hPa and
+61.8 m/s ground-relative. CM1 has not been run with these settings at 4 km, so this storm has nothing to be compared
+with.
+<!-- /hurricane-runs -->
 
 A famous-environment card uses that day's balloon sounding in an idealized storm: the same air everywhere, flat
 ground, and a gentle push of rising air for the first 20 minutes to start the storm, as CM1's updraft nudging does (from
@@ -137,8 +187,11 @@ as you change things. What you set stays as you set it: GM1 fits only the rest t
 changes under **What you changed**. If your choices do not fit the time you picked, the screen says which time does
 (**Use About 1 hour**) or offers to let GM1 choose a setting again; when the storm would drift out of the area it
 names the area the storm needs, and which one of your changes moves it out. A choice guided mode cannot offer yet (WSM6 or
-Thompson rain and hail, ground friction) is greyed with the reason and a button that makes the run folder with it
-set and opens it in Advanced; **All settings (Advanced)** makes the run folder
+Thompson rain and hail) is greyed with the reason and a button that makes the run folder with it
+set and opens it in Advanced. Ground friction is a choice you can turn on: it runs, and the note under it says what
+has been compared with CM1 (CM1's supercell with ground friction on an RTX 4090: nine statistics 0.986 to 1.018
+of CM1's and the strongest spin 1.072, measured) and that no other storm and no other card has. The budget screen
+then lists it under "Runs, not yet compared with CM1". **All settings (Advanced)** makes the run folder
 with your choices and opens every CM1 setting, and nothing runs until you press Start there.
 
 **Any grid spacing.** The grid spacing is not a menu: press one of the quick picks (100 m, 250 m, 500 m, 1 km,

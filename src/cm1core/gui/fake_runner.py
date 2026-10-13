@@ -63,6 +63,14 @@ PRODUCTS = (
     ("surface", "Lowest level \u03b8\u2032 and wind"),
     ("rain", "Accumulated rain"),
 )
+#: The quick-looks of a hurricane run (CM1's swirl start, ``iinit = 7``): its own wind and pressure looks in place
+#: of the looks made for one thunderstorm (cm1core.quicklook.products.HURRICANE_ONLY and THUNDERSTORM_ONLY).
+HURRICANE_PRODUCTS = (
+    ("reflectivity", "Reflectivity at 1 km"),
+    ("wind-lowest", "Wind at the lowest level"),
+    ("pressure-lowest", "Pressure at the lowest level"),
+    ("rain", "Accumulated rain"),
+)
 MICROPHYSICS = {5: "morrison-mp10", 7: "wsm6-mp6", 3: "thompson-mp8"}
 
 
@@ -1150,6 +1158,50 @@ FAKE_STORM = ((0.0, -35.0, -35.0, 0.0), (900.0, -34.0, -23.0, 0.3), (1200.0, -28
               (1500.0, 2.0, 60.0, 19.0), (1800.0, 52.0, 65.0, 25.0))
 
 
+#: Made-up facts in the shape of a hurricane's four days (a ragged first day, an eye by the second): (time s,
+#: strongest reflectivity at 1 km and in the column in dBZ, fastest wind at the lowest level in m/s, lowest pressure
+#: there in hPa, most rain in one cell in cm).
+FAKE_HURRICANE = ((0.0, -35.0, -35.0, 15.0, 1006.0, 0.0), (21600.0, 41.0, 42.0, 14.0, 1006.5, 2.0),
+                  (86400.0, 46.0, 52.0, 16.0, 1005.5, 20.0), (172800.0, 52.0, 58.0, 47.0, 979.0, 90.0),
+                  (259200.0, 54.0, 60.0, 56.0, 963.0, 200.0), (345600.0, 54.0, 61.0, 59.0, 954.0, 360.0))
+
+
+def _between(rows: tuple[tuple[float, ...], ...], seconds: float) -> tuple[float, ...]:
+    """The made-up values at ``seconds``, straight lines between the table's rows."""
+
+    if seconds >= rows[-1][0]:
+        return tuple(rows[-1][1:])
+    after = next(n for n, row in enumerate(rows) if row[0] > seconds)
+    (t0, *a), (t1, *b) = rows[after - 1], rows[after]
+    share = (seconds - t0) / (t1 - t0)
+    return tuple(x + share * (y - x) for x, y in zip(a, b))
+
+
+def _fake_hurricane_facts(product: str, seconds: float) -> dict[str, Any]:
+    """The facts a hurricane run's quick-look records for ``product`` (cm1core.quicklook's keys), made up."""
+
+    dbz_1km, dbz_column, wind, pressure, rain = (round(value, 2) for value in _between(FAKE_HURRICANE, seconds))
+    if product == "reflectivity":
+        return {"dbz_max_1km": dbz_1km, "dbz_max_column": dbz_column, "fake_runner": True}
+    if product == "wind-lowest":
+        return {"height_m": 25.0, "wind_max_ground_relative": wind, "range_m_s": 80.0, "p_min_hpa": pressure,
+                "fake_runner": True}
+    if product == "pressure-lowest":
+        return {"height_m": 25.0, "p_min_hpa": pressure, "p_edge_hpa": 1012.0,
+                "p_drop_max_hpa": round(1012.0 - pressure, 2), "range_hpa": 70.0, "fake_runner": True}
+    if product == "rain":
+        return {"rain_max_cm": rain, "range_cm": 400.0, "fake_runner": True}
+    return {"fake_runner": True}
+
+
+def _long_clock(seconds: int) -> str:
+    """A hurricane's storm time as the pages say it: ``T+81 h (3 d 9 h)`` (cm1core.quicklook.style.fmt_long_clock)."""
+
+    whole = seconds // 3600
+    shown = str(whole) if seconds % 3600 == 0 else f"{seconds / 3600:.1f}"
+    return f"T+{shown} h ({whole // 24} d {whole % 24} h)" if whole >= 24 else f"T+{shown} h"
+
+
 def _fake_facts(product: str, seconds: float) -> dict[str, Any]:
     """The facts a quick-look records for ``product`` at ``seconds`` (cm1core.quicklook's keys), made up."""
 
@@ -1188,6 +1240,10 @@ def cmd_quicklook(arguments: argparse.Namespace) -> int:
     out.mkdir(exist_ok=True)
     hues = ((250, 90, 60), (220, 60, 200), (240, 200, 90), (90, 200, 250), (150, 110, 240), (80, 220, 120))
     index_path = out / "index.json"
+    # A hurricane run (CM1's swirl start) has its own looks, facts, clock and charts, as the real quick-looks do.
+    hurricane = _fake_setting(rundir, "iinit") == "7"
+    listed = HURRICANE_PRODUCTS if hurricane else PRODUCTS
+    facts_of = _fake_hurricane_facts if hurricane else _fake_facts
 
     def convert(index: int, meta: dict[str, Any]) -> None:
         current = {}
@@ -1197,7 +1253,7 @@ def cmd_quicklook(arguments: argparse.Namespace) -> int:
             pass
         products = {row["id"]: row for row in current.get("products", [])}
         seconds = int(round(float(meta["model_time_s"])))
-        for (product, title), hue in zip(PRODUCTS, hues):
+        for (product, title), hue in zip(listed, hues):
             (out / product).mkdir(exist_ok=True)
             name = f"{product}/t{seconds:06d}.png"
             (out / name).write_bytes(_png(96, 54, index + 3, hue))
@@ -1205,14 +1261,33 @@ def cmd_quicklook(arguments: argparse.Namespace) -> int:
                                                 "footer": f"SIMULATED · {FAKE}", "fake_runner": True})
             if all(frame["index"] != index for frame in row["frames"]):
                 row["frames"].append({"index": index, "time_s": seconds, "file": name,
-                                      "facts": _fake_facts(product, seconds)})
+                                      "facts": facts_of(product, seconds)})
         times = sorted({frame["time_s"] for row in products.values() for frame in row["frames"]})
         document = {"schema": "gm1.quicklook-index/v1", "fake_runner": True,
-                    "products": [products[product] for product, _ in PRODUCTS if product in products],
-                    "frames": [{"index": i, "time_s": t, "clock": f"T+{t // 3600}:{t % 3600 // 60:02d}:{t % 60:02d}"}
+                    "products": [products[product] for product, _ in listed if product in products],
+                    "frames": [{"index": i, "time_s": t,
+                                "clock": _long_clock(t) if hurricane
+                                else f"T+{t // 3600}:{t % 3600 // 60:02d}:{t % 60:02d}"}
                                for i, t in enumerate(times)],
                     "series": {"file": "series.json"}}
+        if hurricane:
+            # The run's own facts, as the real index states them: Results reads the kind of storm from here.
+            document["run"] = {"name": rundir.name, "storm_kind": "hurricane", "lowest_level_m": 25.0,
+                               "fake_runner": True}
         write_json_atomic(index_path, document)
+        if hurricane:
+            rows = [(t, _between(FAKE_HURRICANE, t)) for t in times]
+            charts = [{"key": key, "label": label, "unit": unit, **({"zero": False} if key == "prs_sfc_min_hpa" else {}),
+                       "gm1": [[t, round(values[column], 3)] for t, values in rows]}
+                      for key, label, unit, column in (
+                          ("prs_sfc_min_hpa", "lowest pressure at 25 m (not sea level)", "hPa", 3),
+                          ("wind_sfc_max", "fastest wind at 25 m, ground-relative", "m/s", 2),
+                          ("rain_max_cm", "most rain in one cell", "cm", 4),
+                          ("dbz_max", "highest reflectivity", "dBZ", 1))]
+            write_json_atomic(out / "series.json", {
+                "schema": "gm1.quicklook-series/v1", "gm1_label": "GM1, fake runner", "note": FAKE,
+                "time_unit": "h", "storm_kind": "hurricane", "charts": charts})
+            return
         # A made-up time series in the shape of cm1core.quicklook.series (gm1.quicklook-series/v1).
         charts = []
         for key, label, unit, scale in (("wmax", "strongest updraft", "m/s", 50.0),

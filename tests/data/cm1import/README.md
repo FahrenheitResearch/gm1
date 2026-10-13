@@ -1,7 +1,7 @@
 # CM1 namelist fixtures for the importer tests
 
 Byte copies of CM1's own files, used by `tests/test_cm1import_*.py`. `tests/`
-is not in the sdist or the wheel. The public source snapshot carries the three
+is not in the sdist or the wheel. The public source snapshot carries the five
 CM1 r21.1 files below, which `NOTICE` lists under the CM1 r21.1 release grant
 it quotes, and leaves out the r22.0 and r18 files, whose terms `NOTICE` does
 not quote; the tests that read those two skip there.
@@ -11,10 +11,12 @@ not quote; the tests that read those two skip there.
 | `r21.1-supercell.namelist.input` | cm1r21.1 `run/config_files/supercell/namelist.input` | `3854f731efe6a6a9d56d6aa3db198434ccaba85bc5584b5e8ce1c5edfd3b56a4` |
 | `r21.1-squall_line.namelist.input` | cm1r21.1 `run/config_files/squall_line/namelist.input` | `2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8` |
 | `r21.1-run.namelist.input` | cm1r21.1 `run/namelist.input` | `3cf17aa1ac513544d4695994013fd30ea89c2bb0f7d926e41e348635882a6ca5` |
+| `r21.1-hurricane_3d_cpm.namelist.input` | cm1r21.1 `run/config_files/hurricane_3d_cpm/namelist.input` (the two hurricane presets are made from it by `tools/presets/make_presets.py`) | `575eee874d8aeb8244ba733ce189f5bdfa3637f4fb73ed25c7c56210e18f4d9d` |
+| `r21.1-hurricane_3d_cpm.input_sounding` | cm1r21.1 `run/config_files/hurricane_3d_cpm/input_sounding` (shipped unchanged beside each hurricane preset) | `295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5` |
 | `r22.0-supercell.namelist.input` | cm1r22.0 `run/config_files/supercell/namelist.input` (development repository only) | `d8e64ca3de41ed855c7fc486e1a87adb1bda4d15ea260bd2705e631f735011bb` |
 | `r18-run.namelist.input` | cm1r18 `run/namelist.input` (development repository only) | `47b9c7dd27c77f452a3eb606066289302d7a644b119f13ea8e21f7aaa9f14ef3` |
 
-The three r21.1 digests are the ones `tools/authority/cm1r21.1-content-sha256.tsv`
+The five r21.1 digests are the ones `tools/authority/cm1r21.1-content-sha256.tsv`
 records for the pinned tarball; the tests check them against it.
 
 `r21.1-run.harness-translation.toml` is the reference translation of the

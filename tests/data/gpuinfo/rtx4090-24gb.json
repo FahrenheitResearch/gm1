@@ -1,0 +1,18 @@
+{
+ "_about": "A 24 GB RTX 4090 with nothing on it",
+ "gpus": [
+  {
+   "index": 0,
+   "uuid": "GPU-44444444-5555-6666-7777-888888888888",
+   "name": "NVIDIA GeForce RTX 4090",
+   "memory.total": 24564,
+   "memory.used": 2,
+   "memory.free": 24110,
+   "memory.reserved": 450,
+   "compute_cap": "8.9",
+   "driver_version": "610.43.02",
+   "pci.bus_id": "00000000:01:00.0"
+  }
+ ],
+ "apps": []
+}

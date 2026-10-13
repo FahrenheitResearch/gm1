@@ -304,7 +304,9 @@ def test_a_picture_with_no_storm_yet_says_so_above_it_on_every_run_and_results_v
     assert "storm: look.storm" in parts and "put(noteBox, opts.note ? opts.note(look, f) : null);" in parts
     assert parts.index("tabs, noteBox, empty, figure") > 0
     # "What am I looking at" says it too, in place of a strongest value from quiet air
-    assert "more ? null : noStorm," in results and "frame.strongest && !quiet" in results
+    # (a hurricane's early pictures have a storm in them and a line beside it: those keep their value)
+    assert "more ? null : noStorm," in results
+    assert "frame.strongest && (!quiet || frame.storm_showing)" in results
 
 
 def test_every_watching_string_the_pages_ask_for_is_in_the_copy():
@@ -333,6 +335,10 @@ def test_every_offered_preset_saves_a_picture_at_least_every_5_minutes_and_its_c
             continue
         offered += 1
         interval = _tapfrq(preset.namelist_text)
+        if preset.record.get("storm_kind") == "hurricane":
+            # A storm of days, not hours: a picture every 3 hours at most (33 pictures in 4 days).
+            assert interval <= 10800.0, preset.id
+            continue
         assert interval <= 300.0, preset.id
         picture = preset.folder / "picture.json"
         if picture.is_file():

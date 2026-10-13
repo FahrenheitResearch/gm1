@@ -10,7 +10,7 @@
 // the pictures. Both ask first, naming the run and its size, and neither is offered while the run is going.
 // Under Windows (WSL2) the runs folder is also named as File Explorer sees it, with a button that opens it.
 
-import { h, num, clock, bytes, button, table, meter, copyline, status as statusChip } from "./core.js";
+import { h, num, stormClock, bytes, button, table, meter, copyline, status as statusChip } from "./core.js";
 import * as api from "./api.js";
 import { register, go, notice, homeRoute, openRunRoute } from "./router.js";
 import { wallWords } from "./run/parts.js";
@@ -129,7 +129,7 @@ async function render(body, args, page) {
       const st = r.status || {};
       const grid = r.grid ? `${r.grid.nx} × ${r.grid.ny} × ${r.grid.nz}` : "";
       const dx = r.grid && r.grid.dx_m ? `dx ${num(r.grid.dx_m)} m` : "";
-      const model = st.model_time_s != null ? clock(st.model_time_s) : "";
+      const model = st.model_time_s != null ? stormClock(st.model_time_s, st.duration_s || st.model_time_s) : "";
       const fallback = r.view_only ? `run/${r.url}` : ["imported", "ready"].includes(st.state) ?
         (mode === "guided" ? `estimate/${r.url}` : `check/${r.url}`) : `run/${r.url}`;
       const target = openRunRoute(r, mode, fallback);
@@ -144,7 +144,7 @@ async function render(body, args, page) {
       h("td", { class: "wide-only" }, r.case || ""),
       h("td", { class: "nowrap wide-only advanced-only" }, grid, dx ? h("span", { class: "sub" }, dx) : null),
       h("td", {}, statusChip(st.state || "imported", st.label || ""), sub.length ? h("span", { class: "sub" }, sub.join(" · ")) : null),
-      h("td", { class: "num" }, model, st.duration_s ? h("span", { class: "sub" }, `of ${clock(st.duration_s)}`) : null),
+      h("td", { class: "num" }, model, st.duration_s ? h("span", { class: "sub" }, `of ${stormClock(st.duration_s, st.duration_s)}`) : null),
       h("td", { class: "num wide-only advanced-only" }, r.wall_s != null ? wallWords(r.wall_s) : ""),
       h("td", { class: "num rundisk" }, r.disk_bytes != null ? bytes(r.disk_bytes) : "",
         r.trimmed ? h("span", { class: "sub" }, "pictures only") : null),

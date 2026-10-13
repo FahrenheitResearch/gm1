@@ -504,10 +504,14 @@ def test_every_evidence_path_exists(tmp_path: Path) -> None:
 def test_guided_mode_offers_only_what_runs_as_cm1_does(tmp_path: Path) -> None:
     stock = _report(SUPERCELL).as_dict()["guided"]
     assert stock == {"offered": True, "why_not": None, "reasons": []}
-    # The squall line waits for the periodic-sides fix: not yet checked, so not offered, with the plain reason.
+    # The squall line's repeating sides are not yet compared with CM1: it runs, so it is offered, and the
+    # guided block lists the setting in a plain sentence for the card ("Runs, not yet compared with CM1: ...").
     squall = _report(SQUALL_LINE).as_dict()["guided"]
     if _row(_report(SQUALL_LINE), "not_checked", "sbc") is not None:
-        assert not squall["offered"] and squall["why_not"].startswith("Repeating sides")
+        assert squall["offered"] and squall["why_not"] is None and squall["reasons"] == []
+        assert [text.split()[0:2] for text in squall["not_compared"]] == [["Repeating", "sides"]]
+    # A run with nothing unchecked has no such key: its report is byte for byte what it was.
+    assert "not_compared" not in stock
     refused = _report(edited(SUPERCELL, tmp_path, {"ptype": "26"})).as_dict()["guided"]
     assert not refused["offered"] and refused["why_not"] == "NSSL microphysics is not available in GM1."
     # WSM6 runs (exit 0) but measurably differently from CM1's ptype = 7: not a beginner's run.

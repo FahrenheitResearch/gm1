@@ -218,7 +218,7 @@ def column(qf: QuickFrame, facts: RunFacts, out: Path, *, x_km: float | None = N
     ov = S.Overlay((W, H))
     where = f"x {S.fmt_num(xk, 1)} km, y {S.fmt_num(yk, 1)} km"
     ov.title("Column skew-T", S.data_line(facts.name, where, chosen, f"{S.fmt_grid(qf.dx)} grid"))
-    ov.clock(qf.t)
+    ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
     notes = S.data_line("T from the frame's θ and pressure; dewpoint from its qv (CM1 getcape.F gettd)",
                         f"dashed: the base state (qv0: {qv0_source})", "barbs: ground-relative wind in knots")
     ov.footer(facts.footer(t=qf.t, level="the whole column", wind="ground-relative", notes=notes))

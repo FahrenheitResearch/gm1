@@ -36,6 +36,21 @@ CHARTS: tuple[tuple[str, str, str], ...] = (
     ("wind_sfc_max", "fastest wind at {z0}, ground-relative", "m/s"),
     ("zeta_sfc_max", "strongest spin at {z0}", S.PER_S),
 )
+#: A hurricane run's charts, in order: its lowest pressure and its fastest wind first, and none of the charts made
+#: for one thunderstorm (updraft helicity, the cold pool, the near-ground spin).  The pressure is the lowest model
+#: level's, not sea level; its chart's value axis does not start at zero (``"zero": false``).
+HURRICANE_CHARTS: tuple[tuple[str, str, str], ...] = (
+    ("prs_sfc_min_hpa", "lowest pressure at {z0} (not sea level)", "hPa"),
+    ("wind_sfc_max", "fastest wind at {z0}, ground-relative", "m/s"),
+    ("wmax", "strongest updraft", "m/s"),
+    ("rain_max_cm", "most rain in one cell", "cm"),
+    ("dbz_max", "highest reflectivity", "dBZ"),
+    ("wmin", "strongest downdraft", "m/s"),
+)
+#: Charts whose value axis should not be stretched down to zero (a pressure near 1000 hPa).
+NOT_FROM_ZERO = frozenset({"prs_sfc_min_hpa"})
+#: A run this long (its end time, or its saved times) is charted in hours, not minutes (``"time_unit": "h"``).
+HOURS_FROM_S = 172800.0
 #: Settings that do not change the storm: output selection, statistics, logging, and the cadence of writes.
 EXCLUDED_GROUPS = ("param9", "param10", "param13", "param14", "param15", "param16", "logging",
                    "nssl2mom_params", "nssl_mp_params")
@@ -100,14 +115,18 @@ def reference_for(settings: Any) -> tuple[Mapping[str, Any] | None, str]:
 
 
 def series_document(rows: Sequence[tuple[float, Mapping[str, float]]], *, z0: float, name: str,
-                    reference: Mapping[str, Any] | None, t_end: float | None) -> dict[str, Any]:
+                    reference: Mapping[str, Any] | None, t_end: float | None, kind: str = "") -> dict[str, Any]:
+    """``kind``: ``"hurricane"`` charts :data:`HURRICANE_CHARTS`; any other run charts :data:`CHARTS`."""
+
     charts = []
-    for key, label, unit in CHARTS:
+    for key, label, unit in (HURRICANE_CHARTS if kind == "hurricane" else CHARTS):
         points = [[t, round(float(r[key]), 6)] for t, r in rows if key in r]
         if not points:
             continue
         chart: dict[str, Any] = {"key": key, "label": label.format(z0=S.fmt_height(z0)), "unit": unit,
                                  "gm1": points}
+        if key in NOT_FROM_ZERO:
+            chart["zero"] = False
         if reference is not None and key in reference["series"]:
             chart["cm1"] = [p for p in reference["series"][key] if t_end is None or p[0] <= t_end + 1e-6]
         charts.append(chart)
@@ -117,10 +136,23 @@ def series_document(rows: Sequence[tuple[float, Mapping[str, float]]], *, z0: fl
         "note": "domain extremes at every saved frame; minutes since the start on the horizontal axis",
         "charts": charts,
     }
+    if (t_end is not None and t_end >= HOURS_FROM_S) or (rows and max(t for t, _ in rows) >= HOURS_FROM_S):
+        # A long run (two days of storm time or more, by its own end time or its saved times) is charted in hours.
+        doc["time_unit"] = "h"
+        doc["note"] = "domain extremes at every saved frame; hours since the start on the horizontal axis"
+    if kind:
+        doc["storm_kind"] = kind
     if reference is not None:
         doc["cm1_label"] = reference["label"]
         doc["provenance"] = reference["provenance"]
     return doc
+
+
+def clock_words(doc: Mapping[str, Any], t: float) -> str:
+    """The sheet's time, in its header and in its footer: a hurricane's charts run for days, so its time reads
+    as the page around it does (hours and days); any other run's as ``T+H:MM:SS``."""
+
+    return S.fmt_long_clock(t) if doc.get("storm_kind") == "hurricane" else S.fmt_clock(t)
 
 
 def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequence[str]) -> Path:
@@ -138,7 +170,9 @@ def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequ
     gw, gh = 90 / W, 110 / H
     pw = (right - left - (cols - 1) * gw) / cols
     ph = (top - bottom - (rows_n - 1) * gh) / rows_n
-    tmax = max([p[0] for c in charts for p in c["gm1"] + c.get("cm1", [])] + [t_now, 60.0]) / 60.0
+    hours = doc.get("time_unit") == "h"
+    per = 3600.0 if hours else 60.0
+    tmax = max([p[0] for c in charts for p in c["gm1"] + c.get("cm1", [])] + [t_now, 60.0]) / per
     fp = S.mpl_fontprops("label", fig)
     fm = S.mpl_fontprops("micro", fig)
     gm1_colour, cm1_colour = "#d95926", "#3987e5"
@@ -153,22 +187,23 @@ def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequ
         for key, colour, style in (("cm1", cm1_colour, (0, (4, 3))), ("gm1", gm1_colour, "-")):
             pts = chart.get(key) or []
             if pts:
-                x = [p[0] / 60.0 for p in pts]
+                x = [p[0] / per for p in pts]
                 y = [p[1] for p in pts]
                 ax.plot(x, y, color=colour, linewidth=2.0, linestyle=style, zorder=3 if key == "gm1" else 2)
                 ax.plot([x[-1]], [y[-1]], "o", color=colour, markersize=5, markeredgecolor=S.PALETTE["void"],
                         markeredgewidth=1.5, zorder=4)
-        ax.axvline(t_now / 60.0, color=S.PALETTE["gold"], linewidth=1.0, alpha=0.6)
+        ax.axvline(t_now / per, color=S.PALETTE["gold"], linewidth=1.0, alpha=0.6)
         ax.set_xlim(0, tmax * 1.02)
         ax.set_title(f"{chart['label']} ({chart['unit']})", loc="left", fontproperties=fp,
                      color=S.PALETTE["text"], pad=8)
-        ax.set_xlabel("minutes since the start", fontproperties=fm, color=S.PALETTE["muted"])
+        ax.set_xlabel("hours since the start" if hours else "minutes since the start", fontproperties=fm,
+                      color=S.PALETTE["muted"])
     base = S.fig_to_rgb(fig)
     ov = S.Overlay((W, H))
     has_cm1 = any(c.get("cm1") for c in charts)
     ov.title("Storm over time", S.data_line(doc["gm1_label"], "domain extremes at every saved frame",
                                             "gold line: the latest frame"))
-    ov.clock(t_now)
+    ov.clock(clock_words(doc, t_now))
     key_y = ov.U(178)
     ov.rule(ov.x0, key_y, ov.U(40), thickness=3, colour=gm1_colour)
     ov.text((ov.x0 + ov.U(52), key_y + ov.U(6)), doc["gm1_label"], "label", colour="data", anchor="ls")
@@ -196,5 +231,5 @@ def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequ
     return path
 
 
-__all__ = ["CHARTS", "SERIES_SCHEMA", "reference_for", "record", "render_png", "series_document",
+__all__ = ["CHARTS", "HURRICANE_CHARTS", "SERIES_SCHEMA", "reference_for", "record", "render_png", "series_document",
            "storm_settings"]

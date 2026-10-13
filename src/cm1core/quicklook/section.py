@@ -52,7 +52,8 @@ def _panel(L: "P.Looks", along: str, index: int, x0: int, y0: int, pw: int, ph: 
         ci, cj = np.full(pw, float(index)), s
     zs = (1.0 - (np.arange(ph) + 0.5) / ph) * top
     w_sec = _section(f.view("w3d"), f.zf, zs, cj, ci)
-    img = S.to8(S.colours("w_sym", w_sec, -P.W_RANGE, P.W_RANGE))
+    span = P.w_range(L)
+    img = S.to8(S.colours("w_sym", w_sec, -span, span))
     notes = []
     if f.has_species("qc") and f.has_species("qi"):
         names = f.species_names("q3d")
@@ -98,7 +99,7 @@ def product_updraft_slice(L: "P.Looks", out: Path) -> dict[str, Any]:
                    L.data_line(f"through the strongest w at {S.fmt_height(z5)}",
                                f"x {S.fmt_num(xk, 1)} km, y {S.fmt_num(yk, 1)} km"),
                    level=f"ground to {S.fmt_height(top)}", wind="",
-                   notes=S.data_line(f"w ±{P.W_RANGE:g} m/s fixed", "bilinear between levels and columns",
+                   notes=S.data_line(f"w ±{P.w_range(L):g} m/s fixed", "bilinear between levels and columns",
                                      L.frame_words()),
                    notes_vertical=True)
     for n, line in enumerate(lines):
@@ -127,8 +128,9 @@ def product_updraft_slice(L: "P.Looks", out: Path) -> dict[str, Any]:
     ov.text((x0 + pw, y2 + ph + ov.U(50)), f"km across the domain; vertical scale {stretch_we:.1f} × horizontal",
             "micro", colour="muted", anchor="rs", halo=False)
     ov.ramp_bar("w_sym", (x0, y2 + ph + ov.U(66), x0 + ov.U(400), y2 + ph + ov.U(66) + max(3, ov.U(7))),
-                vmin=-P.W_RANGE, vmax=P.W_RANGE,
-                ticks=[(-P.W_RANGE, S.fmt_num(-P.W_RANGE)), (0.0, "0"), (P.W_RANGE, f"{P.W_RANGE:.0f} m/s")],
+                vmin=-P.w_range(L), vmax=P.w_range(L),
+                ticks=[(-P.w_range(L), S.fmt_num(-P.w_range(L))), (0.0, "0"),
+                       (P.w_range(L), f"{P.w_range(L):.0f} m/s")],
                 title="vertical velocity w", vertical=True)
     P.save(ov, cv, out)
     return {"w5_max": float(w5.max()), "level_m": z5, "x_km": xk, "y_km": yk, "i": int(i) + 1, "j": int(j) + 1,

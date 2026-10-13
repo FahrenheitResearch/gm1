@@ -220,10 +220,11 @@ def draw(qf: QuickFrame, facts: Any, out: Path, env: Mapping[str, Any] | None, s
     ov = S.Overlay((W, H))
     ov.title("The storm's environment", S.data_line(facts.name, "the air the storm starts in",
                                                     f"{S.fmt_grid(qf.dx)} grid"))
-    ov.clock(qf.t)
+    shown = (getattr(facts, "clock", None) or S.fmt_clock)(qf.t)
+    ov.clock(shown)
     where = ("south-west corner columns (this run's air differs from place to place)" if varies
              else "undisturbed corner columns")
-    notes = S.data_line(f"profile: the {S.fmt_clock(qf.t)} frame's {where}",
+    notes = S.data_line(f"profile: the {shown} frame's {where}",
                         "dewpoint from qv (CM1 getcape.F gettd)",
                         f"numbers: {source}" if env is not None else "the run recorded no CAPE or shear")
     ov.footer(facts.footer(t=qf.t, level="the whole column", wind="ground-relative", notes=notes))

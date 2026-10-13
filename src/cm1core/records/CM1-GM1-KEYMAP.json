@@ -865,7 +865,7 @@
         ]
       },
       "gm1_key": null,
-      "note": "idealized hurricane vortex; GM1 has no axisymmetric/hurricane initializer",
+      "note": "the analytic hurricane wind profile of iwnd = 8, which GM1 does not build; GM1 does have CM1's hurricane vortex start (iinit = 7), which reads none of the hurr_* words",
       "transform": "none"
     },
     {

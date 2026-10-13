@@ -19,8 +19,9 @@ Commands (each is what a guided GUI action runs):
 
 ``gpuwm-cm1 preset list [--json]``
     every preset, whether GM1 offers it (its namelist imports with no
-    refusal, nothing to acknowledge and nothing not yet checked against
-    CM1; otherwise the report's first reason), its grid and its picture.
+    refusal and nothing to acknowledge; otherwise the report's first
+    reason), the settings it runs that are not yet compared with CM1, its
+    grid and its picture.
 ``gpuwm-cm1 preset show ID [--json]``
     one preset, with its namelist and what changed from CM1's file.
 ``gpuwm-cm1 preset fit ID --budget 10m|1h|overnight [--sounding FILE] [--custom KNOB=VALUE ...] [--gpu N] [--root DIR] [--json]``
@@ -43,8 +44,9 @@ Commands (each is what a guided GUI action runs):
     namelist), ``namelist.input.original`` (the preset's), ``fit.json``, and
     everything ``gpuwm-cm1 import`` writes.  Guided Start is this command
     followed by ``gpuwm-cm1 run RUNS/NAME``.  It refuses (exit 1) anything
-    that does not import with no refusal, nothing to acknowledge and nothing
-    not yet checked: the guided path offers only what GM1 runs as CM1 does.
+    that does not import with no refusal and nothing to acknowledge: the
+    guided path offers only what GM1 runs, and says which of a run's
+    settings have not yet been compared with CM1.
 
 Nothing here imports CuPy or opens a GPU; the GPU is read through
 ``nvidia-smi`` (:mod:`.gpuinfo`).
@@ -480,10 +482,13 @@ def examine(preset: Preset) -> dict[str, Any]:
     """The preset's namelist read as ``gpuwm-cm1 import`` reads it: may guided mode offer it?
 
     Offered means the import exits 0 and its report's guided block has no
-    reason against it (no refusal, nothing to acknowledge, nothing not yet
-    checked against CM1, no microphysics that measurably runs differently).
-    A ``preset.json`` may also withhold a preset with ``"offered": false`` and
-    its own ``not_offered_reason``.
+    reason against it (no refusal, nothing to acknowledge, no microphysics
+    that measurably runs differently).  A setting that runs but has not yet
+    been compared with CM1 does not hold a preset back: ``not_compared``
+    lists those settings in plain sentences, and the card and the budget
+    screen show them (:func:`not_compared_words`).  A ``preset.json`` may
+    also withhold a preset with ``"offered": false`` and its own
+    ``not_offered_reason`` (a preset nobody has run on a GPU yet).
     """
 
     settings = preset.record.get("gm1_settings") or None
@@ -499,6 +504,7 @@ def examine(preset: Preset) -> dict[str, Any]:
                                    overrides=settings, seed=seed)
     guided = report.guided()
     reasons = list(guided.get("reasons") or [])
+    not_compared = [str(text) for text in guided.get("not_compared") or []]
     if report.exit_code != 0 and not reasons:
         reasons.append(report.as_dict().get("verdict_text") or "GM1 does not run this namelist as written.")
     if preset.record.get("offered") is False:
@@ -514,6 +520,7 @@ def examine(preset: Preset) -> dict[str, Any]:
         "offered": offered,
         "why_not": why_not,
         "reasons": reasons,
+        "not_compared": not_compared,
         "import_exit": report.exit_code,
         "verdict": report.as_dict().get("verdict"),
         "facts": facts(effective),
@@ -521,6 +528,17 @@ def examine(preset: Preset) -> dict[str, Any]:
     _EFFECTIVE[key[:3]] = dict(effective)
     _EXAMINED[key] = result
     return result
+
+
+#: How a card, the budget screen and ``preset list`` open the settings a run has that are not yet compared with CM1.
+NOT_COMPARED_LEAD = "Runs, not yet compared with CM1:"
+
+
+def not_compared_words(sentences: Sequence[str]) -> str | None:
+    """"Runs, not yet compared with CM1: ..." for a preset's unchecked settings, or None when it has none."""
+
+    said = [str(sentence).strip() for sentence in sentences if str(sentence).strip()]
+    return f"{NOT_COMPARED_LEAD} {' '.join(said)}" if said else None
 
 
 def _lower_first(text: str) -> str:
@@ -546,17 +564,42 @@ def facts(effective: Mapping[str, Any]) -> dict[str, Any]:
         "ptype": ptype,
         "repeating_sides": periodic,
         "words": grid_words(nx, ny, dx, timax),
+        **stretched_levels(effective),
     }
+
+
+def stretched_levels(effective: Mapping[str, Any]) -> dict[str, Any]:
+    """The thinnest and thickest level of a stretched column (CM1's ``stretch_z = 1``: ``dz_bot`` at the ground
+    to ``dz_top`` aloft), so a screen can say "59 levels, 50 m at the bottom to 500 m aloft" and not "59 x 500 m".
+    Empty for an even column, so every other storm's facts are what they were."""
+
+    try:
+        if int(float(effective.get("stretch_z", 0) or 0)) != 1:
+            return {}
+        bottom, top = float(effective["dz_bot"]), float(effective["dz_top"])
+    except (KeyError, TypeError, ValueError):
+        return {}
+    if not (bottom > 0.0 and top > 0.0):
+        return {}
+    return {"stretch_z": 1, "dz_bottom_m": bottom, "dz_top_m": top}
 
 
 def spacing_words(dx_m: float) -> str:
     return f"{dx_m / 1000.0:g} km" if dx_m >= 1000.0 else f"{dx_m:g} m"
 
 
+#: A storm time this long or longer is said in days ("4 days", "3 days 12 h"), not in hours.
+DAYS_FROM_S = 172800.0
+
+
 def hours_words(seconds: float) -> str:
     hours = seconds / 3600.0
     if abs(hours - round(hours)) < 1e-9:
-        return f"{int(round(hours))} h"
+        whole = int(round(hours))
+        if seconds >= DAYS_FROM_S:
+            days, rest = divmod(whole, 24)
+            return f"{days} days" if rest == 0 else f"{days} days {rest} h"
+        return f"{whole} h"
     minutes = int(round(seconds / 60.0))
     return f"{minutes // 60} h {minutes % 60} min" if minutes >= 60 else f"{minutes} min"
 
@@ -616,6 +659,9 @@ def summary_record(preset: Preset, presets: Mapping[str, Preset] | None = None, 
         "budget_words": BUDGET_BUTTONS[preset.budget],
         "offered": None if examined is None else examined["offered"],
         "why_not": None if examined is None else examined["why_not"],
+        # Settings this storm runs that are not yet compared with CM1 (the card's honest note), in plain sentences.
+        "not_compared": [] if examined is None else list(examined["not_compared"]),
+        "storm_kind": preset.record.get("storm_kind"),
         "facts": None if examined is None else examined["facts"],
         "picture": {key: value for key, value in shown_picture.items() if key != "path"},
         "source": preset.record.get("source"),
@@ -724,10 +770,15 @@ def fit_record(preset: Preset, result: "FitResult", *, command: str) -> dict[str
     })
     # What the user changed (Customize), apart from what the fit changed to fit ("changes").
     record["customized"] = [dict(change) for change in preset.record.get("customized") or []]
+    # The settings of this fitted storm (the preset's and the user's own choices) not yet compared with CM1.
+    record["not_compared"] = list(examine(preset).get("not_compared") or [])
     record["pinned"] = list(preset.record.get("pinned") or [])
     record["reason_kind"] = reason_kind(preset, result)
     if record["reason_kind"] == "drift":
         record["reason"] = _drift_reason(preset, str(record.get("reason") or ""))
+    elif record["reason_kind"] in FLOOR_KINDS and preset.record.get("floors_why"):
+        # A storm with its own floors (a hurricane's area and storm time) says why it is not made smaller.
+        record["reason"] = f"{str(record.get('reason') or '').rstrip()} {preset.record['floors_why']}".strip()
     follow = (preset.sounding_given or {}).get("follow")
     if follow:
         record["changes"] = [dict(follow), *record.get("changes", [])]
@@ -743,6 +794,8 @@ def fit_record(preset: Preset, result: "FitResult", *, command: str) -> dict[str
     return record
 
 
+#: The kinds of "does not fit" a smaller area or a shorter storm would cure, where a preset's floors forbid it.
+FLOOR_KINDS = ("time", "gpu", "host", "disk", "limits")
 #: Why a preset is not offered, by kind (fit.json ``reason_kind``; the budget screen's badge and its remedies).
 REASON_KINDS = ("time", "gpu", "host", "disk", "edge", "limits", "unpriced", "drift", "withheld", "check")
 
@@ -806,6 +859,9 @@ def _fitted_facts(preset: Preset, result: "FitResult") -> dict[str, Any]:
         "steps": estimate.steps,
         # The area simulated, said exactly: "67 m grid, 59.0 × 59.0 km, 880 × 880 cells".
         "exact": exact_words(grid["nx"], grid["ny"], grid["dx_m"]),
+        # The fit never changes a stretched column's levels, so the preset's own speak for the fitted storm.
+        **(stretched_levels(_EFFECTIVE.get((str(preset.folder), preset.namelist_sha256, preset.sounding_sha256))
+                            or _stretch_words_of(preset)) if grid.get("stretch_z") else {}),
     }
 
 
@@ -814,6 +870,20 @@ def exact_words(nx: int, ny: int, dx_m: float) -> str:
 
     width, depth = nx * dx_m / 1000.0, ny * dx_m / 1000.0
     return f"{spacing_words(dx_m)} grid, {width:.1f} × {depth:.1f} km, {nx} × {ny} cells"
+
+
+def _stretch_words_of(preset: Preset) -> dict[str, Any]:
+    """stretch_z, dz_bot and dz_top as the preset's namelist text states them (a customized preset is not in the
+    examined cache)."""
+
+    import re
+
+    found: dict[str, Any] = {}
+    for key in ("stretch_z", "dz_bot", "dz_top"):
+        match = re.search(rf"^\s*{key}\s*=\s*([-+0-9.eEdD]+)", preset.namelist_text, re.M)
+        if match:
+            found[key] = match.group(1).replace("d", "e").replace("D", "e")
+    return found
 
 
 # ------------------------------------------------------------------ a new run directory
@@ -921,7 +991,7 @@ def new_run(preset: Preset, budget: str, root: Path, name: str, *, gpu_index: in
     if code != 0 or guided.get("offered") is False:
         why = guided.get("why_not") or payload.get("verdict_text") or f"the import exited {code}"
         raise PresetError(
-            f"the fitted namelist does not import as a run GM1 runs as CM1 does ({why}); "
+            f"the fitted namelist does not import as a run guided mode offers ({why}); "
             f"the report is in {rundir / 'import-report.txt'}")
     return {
         "schema": NEW_SCHEMA, "ok": True, "created": True, "run": str(rundir), "name": name,
@@ -978,6 +1048,9 @@ def _mark_run(rundir: Path, preset: Preset, result: "FitResult") -> None:
     record["preset"] = preset.id
     record["case"] = preset.name
     record["guided"] = {"preset": preset.id, "budget": result.budget, "fit": FIT_JSON}
+    if preset.record.get("storm_kind"):
+        # What kind of storm this is (a hurricane), so Watching and Results use its words and looks.
+        record["guided"]["storm_kind"] = str(preset.record["storm_kind"])
     customized = preset.record.get("customized") or []
     if customized:
         record["case"] = case_words(preset.name, customized)
@@ -993,7 +1066,7 @@ def add_preset_parser(commands: Any) -> None:
         "preset",
         help="the guided presets: list them, fit one to this GPU and a time budget, or make its run folder",
         description=(
-            "Guided presets are CM1 r21.1 namelists GM1 runs as CM1 does. 'fit' sizes one to this GPU's free "
+            "Guided presets are CM1 r21.1 namelists GM1 runs. 'fit' sizes one to this GPU's free "
             "memory, the RAM, the free disk and a time budget; 'new' writes the fitted run folder, which "
             "gpuwm-cm1 run then runs."
         ),
@@ -1123,8 +1196,12 @@ def _door(arguments: argparse.Namespace, importer: Importer | None = None) -> in
 def _given_sounding(preset: Preset, arguments: argparse.Namespace) -> Preset:
     """The preset with its --custom and --set choices first, then its --sounding or made environment."""
 
-    from .customize import CustomError, apply, parse, parse_sets
+    from .customize import HURRICANE_AIR, CustomError, apply, parse, parse_sets
 
+    if preset.record.get("storm_kind") == "hurricane" and any(
+            getattr(arguments, name, None) is not None for name in ("sounding", "instability", "shear")):
+        # Said before anything is made: a made sounding stops far below a hurricane's 25 km top.
+        raise PresetError(HURRICANE_AIR)
     try:
         preset = apply(preset, parse(getattr(arguments, "custom", None) or ()),
                        parse_sets(getattr(arguments, "set_values", None) or ()))
@@ -1196,16 +1273,29 @@ def _options_text(record: Mapping[str, Any]) -> str:
         return f"{value:g}" if isinstance(value, float) else str(value)
 
     lines = [f"Settings of {record['preset']} (gpuwm-cm1 preset fit|new {record['preset']} --custom KNOB=VALUE):"]
+    # A hurricane's storm time and picture interval are days and hours: said so, with the minutes --custom takes.
+    long_times = record.get("storm_kind") == "hurricane"
     for knob in record["knobs"]:
         unit = f" {knob['unit']}" if knob.get("unit") else ""
+        if long_times and knob.get("unit") == "min":
+            from .customize import minutes_words
+
+            shown = ", ".join(
+                f"{minutes_words(float(choice['value']))} ({said(choice['value'])}"
+                + (f", {choice['note']}" if choice.get("note") else "") + ")"
+                for choice in knob["choices"])
+            lines.append(f"  {knob['id']:<9} now {minutes_words(float(knob['default']))} "
+                         f"({said(knob['default'])} min); {shown}")
+            continue
         if knob["id"] == "area":
             shown = (f"{knob['min_km']:g} to {knob['max_km']:g} km in steps of {knob['step_cells']} cells "
                      "(another width is rounded to the nearest step)")
-        elif knob["id"] == "grid":
+        elif knob["id"] == "grid" and "max_m" in knob:
+            # Any spacing (a hurricane keeps its own grid choices, listed below).
             shown = (f"any spacing up to {knob['max_m']:g} m (grid=67); the area keeps its size, rounded up to whole "
                      "cells, and the time step follows. Quick picks: "
                      + ", ".join(said(choice["value"]) for choice in knob["choices"]))
-        elif knob["id"] == "levels":
+        elif knob["id"] == "levels" and "levels_range" in knob:
             low, high = knob["levels_range"]
             shown = (f"any height from {knob['min_m']:g} to {knob['max_m']:g} m ({high} to {low} levels up to "
                      f"{knob['top_m']:g} m; the top moves by less than half a level when the height does not divide "
@@ -1213,8 +1303,11 @@ def _options_text(record: Mapping[str, Any]) -> str:
         else:
             shown = ", ".join(("seed:N" if knob["id"] == "bumps" and choice["value"] == "seed" else said(choice["value"]))
                               + ("" if choice.get("available", True) else " (not offered here)")
+                              + (f" ({choice['note']})" if choice.get("note") else "")
                               for choice in knob["choices"])
         lines.append(f"  {knob['id']:<9} now {said(knob['default'])}{unit}; {shown}")
+    if long_times:
+        lines.append("  The number in brackets is the value in minutes, which --custom takes (time=5760 is 4 days).")
     air = record.get("air") or {}
     lines.append("  air       " + ("--instability 0..1 --shear 0..1 --hodograph curved|straight" if air.get("available")
                                    else str(air.get("why") or "not offered")))
@@ -1231,6 +1324,9 @@ def _list_text(record: Mapping[str, Any]) -> str:
         if facts:
             lines.append(f"  {'':<20} {facts['words']}; {facts['scheme']}; opens on {row['budget_words'].lower()}")
         lines.append(f"  {'':<20} {state}")
+        noted = not_compared_words(row.get("not_compared") or [])
+        if noted:
+            lines.append(f"  {'':<20} {noted}")
     return "\n".join(lines)
 
 
@@ -1239,6 +1335,9 @@ def _show_text(record: Mapping[str, Any]) -> str:
     if record.get("facts"):
         lines.append(f"  {record['facts']['words']}; {record['facts']['scheme']}")
     lines.append("  " + ("Offered" if record.get("offered") else (record.get("why_not") or "Not offered")))
+    noted = not_compared_words(record.get("not_compared") or [])
+    if noted:
+        lines.append(f"  {noted}")
     source = record.get("source") or {}
     if source:
         lines.append(f"  From {source.get('file')} (sha256 {str(source.get('sha256'))[:12]}...), changed:")
@@ -1262,6 +1361,9 @@ def _fit_text(record: Mapping[str, Any]) -> str:
         exact = (record.get("facts") or {}).get("exact")
         if exact and record.get("customized"):
             lines.append(f"  {exact}; time step {(record.get('facts') or {}).get('dt_s')!r} s")
+        noted = not_compared_words(record.get("not_compared") or [])
+        if noted:
+            lines.append(f"  {noted}")
         lines += _changes_lines(record)
         lines += _warning_lines(record)
     else:
@@ -1334,6 +1436,7 @@ __all__ = [
     "load_all",
     "new_args",
     "new_run",
+    "not_compared_words",
     "picture",
     "preset_door",
     "presets_root",

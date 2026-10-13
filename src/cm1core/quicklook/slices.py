@@ -234,7 +234,7 @@ def horizontal(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out_di
     title = f"{name} at the surface" if z_here is None else f"{name} at {S.fmt_height(z_here)}"
     ov.title(title + (", section line" if line_km is not None else ""),
              S.data_line(facts.name, f"{fld.description} ({units})", where))
-    ov.clock(qf.t)
+    ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
     ox, oy = facts.origin_m(qf.nx, qf.ny)
     ov.footer(facts.footer(t=qf.t, level=(f"level {S.fmt_height(z_here)}" if z_here is not None else "surface"),
                            wind=short_frame,
@@ -364,7 +364,7 @@ def vertical(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out: Pat
              S.data_line(facts.name, f"{fld.description} ({units})",
                          f"A ({S.fmt_num(a_km[0], 1)}, {S.fmt_num(a_km[1], 1)}) km to B ({S.fmt_num(b_km[0], 1)}, "
                          f"{S.fmt_num(b_km[1], 1)}) km", f"vertical scale {stretch:.1f} × horizontal"))
-    ov.clock(qf.t)
+    ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
     ov.footer(facts.footer(t=qf.t, level=f"ground to {S.fmt_height(top)}",
                            wind=frame_words.split(" (")[0] if frame_words else "",
                            notes=S.data_line(f"cm1out's {name}", how, "bilinear between levels and columns",

@@ -3,13 +3,20 @@
 // command it runs; the time series; the files and their copy lines; the receipt, the disk, the segments and the
 // log. Guided mode draws the same pieces with fewer of them shown, in plain words.
 
-import { h, num, clock, bytes, button, readout, meter, table, copyline, kv, status as statusChip, parseClock } from "../core.js";
+import { h, num, clock, stormClock, bytes, button, readout, meter, table, copyline, kv, status as statusChip, parseClock } from "../core.js";
 import * as api from "../api.js";
 import { notice } from "../router.js";
 import { showCommand, liveCommand } from "../command.js";
 import { chartGrid } from "../chart.js";
 
 export const FAVOURITES = ["reflectivity", "spin-near-ground", "updraft-5km", "swath"];
+// A hurricane run's favourites: its reflectivity, its wind and its pressure. The spin near the ground, the updraft
+// at 5 km and the wind swath are made for one thunderstorm and are not drawn for it.
+export const HURRICANE_FAVOURITES = ["reflectivity", "wind-lowest", "pressure-lowest"];
+// run: the quick-looks' own facts of the run (results' quicklook_run, the live view's run).
+export function favouritesOf(run) {
+  return run && run.storm_kind === "hurricane" ? HURRICANE_FAVOURITES : FAVOURITES;
+}
 export const LIVE_STATES = ["running", "waiting"];
 
 // A run with no saved frame that will draw none on its own: "not_started" (imported or ready) or "ended"
@@ -60,11 +67,11 @@ export function ago(seconds) {
 // ---- the header clock (T+), right of the title
 
 export function headerClock(label = "storm time") {
-  const el = h("div", { class: "clock", id: "clock" }, clock(0), h("small", {}, label));
+  const el = h("div", { class: "clock", id: "clock" }, stormClock(0), h("small", {}, label));
   const right = document.querySelector(".head .right");
   if (right) right.prepend(el);
   el.set = (seconds, sub) => {
-    el.firstChild.textContent = clock(seconds || 0);
+    el.firstChild.textContent = stormClock(seconds || 0);
     if (sub !== undefined) el.lastChild.textContent = sub;
   };
   return el;
@@ -197,15 +204,15 @@ export function viewer(opts = {}) {
     if (img.getAttribute("src") !== f.url) img.setAttribute("src", f.url);
     link.href = f.url;
     const look = looks.find((l) => l.id === lookId) || {};
-    img.alt = `${look.title || lookId} at ${clock(f.time_s || 0)}`;
+    img.alt = `${look.title || lookId} at ${stormClock(f.time_s || 0)}`;
     caption.replaceChildren(...(opts.caption ? [opts.caption(look, f)].flat() :
-      [h("b", {}, look.title || lookId), h("span", {}, clock(f.time_s || 0))]));
+      [h("b", {}, look.title || lookId), h("span", {}, stormClock(f.time_s || 0))]));
     put(noteBox, opts.note ? opts.note(look, f) : null);
     const counted = f.time_s === null || f.time_s === undefined;
-    timeEl.textContent = counted ? `${index + 1} / ${list.length}` : clock(f.time_s || 0);
+    timeEl.textContent = counted ? `${index + 1} / ${list.length}` : stormClock(f.time_s || 0);
     ticks.replaceChildren(...(list.length > 1 ? [list[0], list[list.length - 1]] : list).map((row, n) =>
       h("span", {}, row.time_s === null || row.time_s === undefined ? String(n ? list.length : 1) :
-        clock(row.time_s || 0))));
+        stormClock(row.time_s || 0))));
     if (opts.onTime) opts.onTime(f.time_s || 0, f, look);
   }
   let lastLook = null;
@@ -252,6 +259,8 @@ export function viewer(opts = {}) {
     if (!playing) paint(keepPlace && sameLook && !atEnd);
   };
   box.select = (id) => { stopPlaying(); lookId = id; paint(false); };
+  // Another order and other tabs (a hurricane run's favourites, known once its first picture is drawn).
+  box.setOrder = (order, tabIds) => { opts.order = order; if (opts.tabIds) opts.tabIds = tabIds || order; };
   // The words shown where a picture would be, when there is none.
   box.setEmpty = (text) => { if (text && text !== opts.empty) { opts.empty = text; paintFrame(true); } };
   box.tabs = tabs;
@@ -306,6 +315,11 @@ export async function runExists(id) {
 // A storm time span in words: "2 h", "1 h 30 min", "5 min", "45 s".
 export function spanWords(seconds) {
   const s = Math.round(Number(seconds) || 0);
+  if (s >= 172800 && s % 3600 === 0) {
+    // Two days or more is said in days: "4 days", "3 days 12 h".
+    const days = Math.floor(s / 86400), rest = (s % 86400) / 3600;
+    return rest ? `${days} days ${rest} h` : `${days} days`;
+  }
   if (s >= 3600 && s % 3600 === 0) return `${s / 3600} h`;
   if (s >= 3600) return `${Math.floor(s / 3600)} h ${Math.round((s % 3600) / 60)} min`;
   if (s >= 60 && s % 60 === 0) return `${s / 60} min`;
@@ -325,7 +339,7 @@ export function stormLine(frame) {
 export function pictureWords(pictures, { model, total, left, going }, words) {
   if (!pictures || !going || pictures.next_s === null || pictures.next_s === undefined) return "";
   const next = Number(pictures.next_s);
-  const at = clock(next);
+  const at = stormClock(next);
   const interval = spanWords(pictures.interval_s);
   const wall = left !== null && left !== undefined && total > model && next > model
     ? wallWords(Math.max(1, Number(left) * (next - model) / (total - model))) : null;
@@ -361,7 +375,7 @@ export function progressBlock(words) {
     fill.style.width = `${shown.toFixed(1)}%`;
     bar.setAttribute("aria-valuenow", shown.toFixed(0));
     bar.setAttribute("aria-label", words.percent(Math.round(shown)));
-    put(done, h("b", {}, clock(model || 0)), total ? h("small", {}, ` ${words.of(clock(total))}`) : null,
+    put(done, h("b", {}, stormClock(model || 0)), total ? h("small", {}, ` ${words.of(stormClock(total))}`) : null,
       h("small", { class: "rp-pc" }, ` · ${words.percent(Math.round(shown))}`));
     left.textContent = running ? (leftS !== null && leftS !== undefined ? words.left(wallWords(leftS)) : words.leftUnknown)
       : "";
@@ -386,12 +400,12 @@ export function advancedReadouts(live, st, p) {
   const lw = live.last_write;
   const lwText = lw ? (lw.kind === "frame" ? `frame ${lw.index ?? lw.number}` : `restart ${lw.number}`) : "none yet";
   const lwSub = lw ? [lw.bytes ? bytes(lw.bytes) : null, lw.age_s != null ? ago(lw.age_s) : null,
-    clock(lw.model_time_s || 0)].filter(Boolean).join(" · ") : "";
+    stormClock(lw.model_time_s || 0)].filter(Boolean).join(" · ") : "";
   const model = p.model_time_s ?? st.model_time_s;
   const total = p.duration_s ?? st.duration_s;
   const going = LIVE_STATES.includes(st.state);
   const rows = [
-    ["Model time", model != null ? clock(model) : "", null, total ? `of ${clock(total)}` : null],
+    ["Model time", model != null ? stormClock(model) : "", null, total ? `of ${stormClock(total)}` : null],
     ["Time left", st.state === "running" && (p.eta_s ?? st.eta_s) != null ? wallWords(p.eta_s ?? st.eta_s) : "",
       null, going && p.phase && p.phase !== "stepping" ? p.phase.replace(/-/g, " ") : null],
     // The unit is shown only beside a number.
@@ -473,7 +487,7 @@ export function segmentsTable(segments) {
     segments.map((s) => h("tr", {},
       h("td", { class: "mono" }, s.segment),
       h("td", {}, s.kind || "", s.resumed_from ? h("span", { class: "sub" }, resumedWords(s.resumed_from)) : null),
-      h("td", { class: "num" }, s.model_time_s != null ? clock(s.model_time_s) : ""),
+      h("td", { class: "num" }, s.model_time_s != null ? stormClock(s.model_time_s) : ""),
       h("td", { class: "num" }, s.wall_s != null ? wallWords(s.wall_s) : ""),
       h("td", {}, s.reason || (s.ended_utc ? "ended" : "")),
       h("td", {}, s.host || ""))), { compact: true, stack: true });

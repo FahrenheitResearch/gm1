@@ -194,6 +194,25 @@ RAMPS: dict[str, Ramp] = {
                     value_stops(((0.0, "#03050a"), (1.0, "#0b1d3a"), (2.0, "#1d4f8f"), (4.0, "#3b8fd9"),
                                  (6.0, "#8fd3ff"), (8.0, "#eaf8ff"))),
                     0.0, 8.0, "cm", "sequential", "accumulated rain"),
+    # A hurricane's looks (quicklook.products): each rises in lightness, so the strongest part is the brightest.
+    # Wind, 0 to 80 m/s: blue from 10 m/s, violet through gale force, red at hurricane force (33 m/s), then
+    # orange, yellow and white for the eyewall.
+    "hurricane_wind": Ramp("hurricane_wind",
+                           value_stops(((0.0, "#04060c"), (5.0, "#0a1230"), (10.0, "#12296b"), (17.0, "#1f4fb8"),
+                                        (25.0, "#6a4fd8"), (33.0, "#d0408a"), (42.0, "#f0603a"),
+                                        (52.0, "#f79a2e"), (62.0, "#fbd24a"), (72.0, "#fff1a8"),
+                                        (80.0, "#ffffff"))),
+                           0.0, 80.0, "m/s", "sequential", "a hurricane's wind at the lowest level"),
+    # Rain over days, placed logarithmically (1 mm to 400 cm): blue, teal, green, yellow, cream.
+    "hurricane_rain": Ramp("hurricane_rain",
+                           ((0.00, "#0b1740"), (0.20, "#14389a"), (0.40, "#1c78c8"), (0.58, "#22aab0"),
+                            (0.74, "#5fcf72"), (0.88, "#e4e05a"), (1.00, "#fffbe0")),
+                           0.0, 1.0, "", "sequential", "a hurricane's accumulated rain, logarithmic"),
+    # Pressure below the area's edge, placed by its square root: night violet to lavender to white.
+    "hurricane_pressure": Ramp("hurricane_pressure",
+                               ((0.00, "#06060e"), (0.15, "#141138"), (0.32, "#2c2382"), (0.50, "#5a45c8"),
+                                (0.68, "#8f7df0"), (0.84, "#c9bfff"), (1.00, "#fbf8ff")),
+                               0.0, 1.0, "", "sequential", "a hurricane's pressure drop, square root"),
 }
 
 # NWS base reflectivity, 5 dBZ bins from 5 dBZ; below 5 dBZ nothing is drawn.
@@ -378,6 +397,17 @@ def fmt_clock(model_time_s: float, *, prefix: str = "T+") -> str:
 
     total = max(0, int(round(model_time_s)))
     return f"{prefix}{total // 3600}:{total % 3600 // 60:02d}:{total % 60:02d}"
+
+
+def fmt_long_clock(model_time_s: float) -> str:
+    """A hurricane's storm time as Watching and Results say it (gui/static/js/core.js stormClock for a long run):
+    ``T+81 h (3 d 9 h)``, ``T+36 h (1 d 12 h)``, ``T+6 h``; a time between whole hours keeps one decimal."""
+
+    s = max(0, int(round(model_time_s)))
+    whole = s // 3600
+    shown = str(whole) if s % 3600 == 0 else f"{s / 3600:.1f}"
+    days = whole // 24
+    return f"T+{shown} h ({days} d {whole % 24} h)" if days else f"T+{shown} h"
 
 
 def fmt_km(m: float) -> str:
@@ -786,6 +816,6 @@ def fig_to_rgb(fig) -> np.ndarray:
 __all__ = [
     "BANNED_WORDS", "DOT", "MINUS", "NWS_REFLECTIVITY", "Overlay", "PALETTE", "PER_S", "PRIME", "RAMPS", "Ramp",
     "SEP", "SIMULATED", "apply_matplotlib", "has_glyphs", "upper", "colours", "data_line", "dbz_colours", "fig_to_rgb", "figure", "finish",
-    "fmt_clock", "fmt_grid", "fmt_height", "fmt_km", "fmt_num", "font_path", "hex_rgb", "lint", "mpl_fontprops",
+    "fmt_clock", "fmt_grid", "fmt_long_clock", "fmt_height", "fmt_km", "fmt_num", "font_path", "hex_rgb", "lint", "mpl_fontprops",
     "rgb8", "to8", "token", "value_stops",
 ]

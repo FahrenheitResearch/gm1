@@ -257,7 +257,7 @@ def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict
     ov = S.Overlay((P.W, P.H))
     ov.title(title, S.data_line(L.facts.name, f"{S.fmt_grid(f.dx)} grid",
                                 f"on the ground, {lx / 1000:g} × {ly / 1000:g} km", f"strongest {since}"))
-    ov.clock(f.t)
+    ov.clock((getattr(L.facts, "clock", None) or S.fmt_clock)(f.t))
     ov.footer(L.facts.footer(t=f.t, level=f"lowest level {S.fmt_height(z0)}", wind="",
                              notes=S.data_line(track.method, "dim box: the domain at the start, grey box: now",
                                                extra)))

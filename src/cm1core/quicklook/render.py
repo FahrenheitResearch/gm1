@@ -229,9 +229,15 @@ class Renderer:
                 if pid in record["products"] and "file" in record["products"][pid] \
                         and (self.out / record["products"][pid]["file"]).is_file():
                     continue      # drawn before from this very frame (a pass that adds looks draws only those)
+                if pid in P.HURRICANE_ONLY and not looks.hurricane:
+                    # A hurricane run's own look: left out of every other run (and of its index), not "not drawn".
+                    record["products"][pid] = {"skipped": "a look for hurricane runs"}
+                    continue
                 file = self.out / pid / f"{tag}.png"
                 begun = _time.perf_counter()
                 try:
+                    if looks.hurricane and pid in P.THUNDERSTORM_ONLY:
+                        raise P.NotDrawn(P.THUNDERSTORM_ONLY_WHY)
                     if pid == "swath":
                         self.swath.catch_up(before, self._open)
                         self.swath.add(qf)
@@ -369,15 +375,22 @@ class Renderer:
     # -- index and series ---------------------------------------------------------
     def write_index(self, lineage: list[tuple[float, str, Path, int]] | None = None) -> dict[str, Any]:
         rows = sorted(((float(k), v) for k, v in self.state["frames"].items()), key=lambda kv: kv[0])
+        # A hurricane's index says its times as its pictures and pages do (hours and days); any other run's H:MM:SS.
+        hurricane = bool(rows) and (rows[-1][1].get("facts") or {}).get("storm_kind") == "hurricane"
+        clock = S.fmt_long_clock if hurricane else S.fmt_clock
         products = []
         for pid, title in P.PRODUCTS:
             frames, not_drawn = [], {}
+            skipped = False
             for ordinal, (t, row) in enumerate(rows):
                 pic = (row.get("products") or {}).get(pid)
                 if not pic:
                     continue
+                if "skipped" in pic:
+                    skipped = True      # a look this kind of run does not have: it is not listed at all
+                    continue
                 if "file" in pic:
-                    frames.append({"index": ordinal, "time_s": t, "clock": S.fmt_clock(t), "file": pic["file"],
+                    frames.append({"index": ordinal, "time_s": t, "clock": clock(t), "file": pic["file"],
                                    "thumb": pic["thumb"], "facts": pic.get("facts") or {},
                                    "segment": row.get("segment"), "frame": row.get("frame")})
                 else:
@@ -385,7 +398,7 @@ class Renderer:
             entry: dict[str, Any] = {"id": pid, "title": title, "frames": frames}
             if not_drawn:
                 entry["not_drawn"] = [{"reason": reason, "times_s": times} for reason, times in not_drawn.items()]
-            if pid in self.products or frames or not_drawn:
+            if frames or not_drawn or (pid in self.products and not skipped and pid not in P.HURRICANE_ONLY):
                 products.append(entry)
         for pid, title in ONCE:
             row = (self.state.get("once") or {}).get(pid)
@@ -393,7 +406,7 @@ class Renderer:
                 continue
             entry = {"id": pid, "title": title, "once": True, "frames": []}
             if "file" in row:
-                entry["frames"].append({"index": 0, "time_s": row["time"], "clock": S.fmt_clock(row["time"]),
+                entry["frames"].append({"index": 0, "time_s": row["time"], "clock": clock(row["time"]),
                                         "file": row["file"], "thumb": row["thumb"], "facts": row.get("facts") or {}})
             else:
                 entry["not_drawn"] = [{"reason": row.get("not_drawn") or row.get("error") or "not drawn",
@@ -416,7 +429,7 @@ class Renderer:
             "run": run,
             "products": products,
             "series": series,
-            "frames": [{"index": i, "time_s": t, "clock": S.fmt_clock(t), "segment": row.get("segment"),
+            "frames": [{"index": i, "time_s": t, "clock": clock(t), "segment": row.get("segment"),
                         "frame": row.get("frame")} for i, (t, row) in enumerate(rows)],
             "run_ended": ended,
             "end_reason": self.summary.end_reason,
@@ -439,7 +452,8 @@ class Renderer:
                 timax = None
         z0 = float(run.get("lowest_level_m") or 0.0)
         name = str(run.get("name") or "this run")
-        doc = SE.series_document(stats, z0=z0, name=name, reference=reference, t_end=timax)
+        doc = SE.series_document(stats, z0=z0, name=name, reference=reference, t_end=timax,
+                                 kind=str(run.get("storm_kind") or ""))
         if reference is None:
             doc["cm1_reference"] = why
         _write_json(self.out / "series.json", doc)
@@ -449,7 +463,7 @@ class Renderer:
         footer = [S.data_line(S.SIMULATED, f"GM1 {facts.get('gm1_version', '')}",
                               f"{facts.get('microphysics', '')}, {facts.get('checked', '')}",
                               f"dx {S.fmt_grid(float(facts.get('dx_m') or 0))}",
-                              f"lowest level {S.fmt_height(z0)}", "wind ground-relative", S.fmt_clock(t_now))]
+                              f"lowest level {S.fmt_height(z0)}", "wind ground-relative", SE.clock_words(doc, t_now))]
         try:
             SE.render_png(doc, self.out / "timeseries.png", t_now=t_now, footer=footer)
             out.update({"picture": "timeseries.png", "time_s": t_now})

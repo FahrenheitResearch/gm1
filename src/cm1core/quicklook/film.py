@@ -276,7 +276,7 @@ def swirl_picture(state: Swirl, fields: dict[str, Any], dt_s: float, facts: Any,
     ov.title("Swirl near the ground", S.data_line(facts.name, f"{S.fmt_grid(dx)} grid",
                                                   f"spin at {S.fmt_height(height_m)}",
                                                   f"streaks: the wind {frame_words}"))
-    ov.clock(fields["t"])
+    ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(fields["t"]))
     every = f" (every {interval:g} s)" if interval else ""
     ov.footer(facts.footer(t=fields["t"], level=f"lowest level {S.fmt_height(height_m)}",
                            wind="domain-relative" if moving else "ground-relative",

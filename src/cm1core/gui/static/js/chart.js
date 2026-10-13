@@ -3,7 +3,7 @@
 // shown, and a hover cursor with both values. The data is the quick-look worker's series.json
 // (gm1.quicklook-series/v1): domain extremes at every saved frame.
 
-import { h, esc, num, clock } from "./core.js";
+import { h, esc, num, stormClock } from "./core.js";
 
 const W = 320, H = 150, L = 38, R = 36, T = 8, B = 20;
 
@@ -14,12 +14,13 @@ function niceStep(span, n) {
   return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p;
 }
 
-function extent(series) {
+// fromZero false: the value axis keeps to the data (a pressure near 1000 hPa), not stretched down to zero.
+function extent(series, fromZero = true) {
   let lo = Infinity, hi = -Infinity;
   for (const s of series) for (const [, v] of s) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
   if (!Number.isFinite(lo)) { lo = 0; hi = 1; }
-  if (lo > 0) lo = 0;
-  if (hi < 0) hi = 0;
+  if (fromZero && lo > 0) lo = 0;
+  if (fromZero && hi < 0) hi = 0;
   const step = niceStep(hi - lo || 1, 4);
   return { lo: Math.floor(lo / step) * step, hi: Math.ceil(hi / step) * step, step };
 }
@@ -34,18 +35,24 @@ function minuteStep(tmax) {
   return 720;
 }
 
+// Hours between labelled ticks, for a long run charted in hours.
+function hourStep(tmax) {
+  for (const hr of [6, 12, 24, 48]) if (tmax / 3600 / hr <= 5) return hr;
+  return 96;
+}
+
 export function legend(labelA, labelB) {
   return h("div", { class: "legend" },
     h("span", {}, h("span", { class: "sw a" }), labelA),
     labelB ? h("span", {}, h("span", { class: "sw b" }), labelB) : null);
 }
 
-// spec: {label, unit, gm1: [[t, v]], cm1: [[t, v]]}; opts: {tmax, now, labelA, labelB}
+// spec: {label, unit, gm1: [[t, v]], cm1: [[t, v]], zero}; opts: {tmax, now, labelA, labelB, hours}
 export function lineChart(spec, opts = {}) {
   const a = spec.gm1 || [], b = spec.cm1 || [];
   const last = Math.max(0, ...a.map(([t]) => t), ...b.map(([t]) => t), opts.now || 0);
   const tmax = Math.max(60, opts.tmax || 0, last);
-  const { lo, hi, step } = extent([a, b]);
+  const { lo, hi, step } = extent([a, b], spec.zero !== false);
   const nd = digits(step);
   const x = (t) => L + (W - L - R) * (t / tmax);
   const y = (v) => T + (H - T - B) * (1 - (v - lo) / (hi - lo || 1));
@@ -54,9 +61,10 @@ export function lineChart(spec, opts = {}) {
     parts.push(`<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}"/>`);
     parts.push(`<text x="${L - 5}" y="${(y(v) + 3).toFixed(1)}" text-anchor="end">${esc(num(v, nd))}</text>`);
   }
-  const every = minuteStep(tmax) * 60;
+  // A long run's time axis is in hours (series.time_unit "h"); any other in minutes.
+  const every = opts.hours ? hourStep(tmax) * 3600 : minuteStep(tmax) * 60;
   for (let t = 0; t <= tmax + 1e-6; t += every) {
-    parts.push(`<text x="${x(t).toFixed(1)}" y="${H - 5}" text-anchor="middle">${Math.round(t / 60)}</text>`);
+    parts.push(`<text x="${x(t).toFixed(1)}" y="${H - 5}" text-anchor="middle">${Math.round(t / (opts.hours ? 3600 : 60))}</text>`);
   }
   parts.push(`<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>`);
   const path = (s) => s.map(([t, v], i) => `${i ? "L" : "M"}${x(t).toFixed(1)},${y(v).toFixed(1)}`).join("");
@@ -101,7 +109,7 @@ export function lineChart(spec, opts = {}) {
     cursor.setAttribute("x1", x(t).toFixed(1));
     cursor.setAttribute("x2", x(t).toFixed(1));
     cursor.setAttribute("visibility", "visible");
-    tip.textContent = `${clock(t)}   ${opts.labelA || "GM1"} ${at(a, t)}` +
+    tip.textContent = `${stormClock(t, opts.hours ? 172800 : 0)}   ${opts.labelA || "GM1"} ${at(a, t)}` +
       (b.length ? `   ${opts.labelB || "CM1"} ${at(b, t)}` : "") + ` ${spec.unit}`;
     tip.style.display = "block";
     const left = (x(t) / W) * r.width;
@@ -116,10 +124,11 @@ export function lineChart(spec, opts = {}) {
 export function chartGrid(series, opts = {}) {
   const charts = (series.charts || []).slice(0, opts.limit || 9);
   const hasCm1 = charts.some((c) => (c.cm1 || []).length);
+  const hours = series.time_unit === "h";
   const note = hasCm1 ? series.provenance : (series.cm1_reference ? `No CM1 curve: ${series.cm1_reference}.` : "");
   return h("div", {},
     legend(series.gm1_label || "GM1", hasCm1 ? series.cm1_label : null),
-    h("div", { class: "charts" }, charts.map((c) => lineChart(c, { ...opts, labelA: "GM1", labelB: "CM1" }))),
+    h("div", { class: "charts" }, charts.map((c) => lineChart(c, { ...opts, hours, labelA: "GM1", labelB: "CM1" }))),
     h("p", { class: "note" }, note ? `${String(note).replace(/[.\s]*$/, "")}. ` : "",
-      "Minutes since the start on the horizontal axis."));
+      hours ? "Hours since the start on the horizontal axis." : "Minutes since the start on the horizontal axis."));
 }

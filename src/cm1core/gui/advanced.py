@@ -320,6 +320,8 @@ class AdvancedApi:
             state = status.get("state")
             if state in ("running", "waiting", "stale"):
                 why_not = "The run is still going. Continue or extend is offered once it has ended."
+            elif status.get("no_resume_why"):
+                why_not = str(status["no_resume_why"])
             elif not rows:
                 why_not = ("No restart has been saved yet. GM1 saves one at every rstfrq, and one at the end when "
                            "rstfrq is not positive, so a run stopped before then starts again from the beginning.")

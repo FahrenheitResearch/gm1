@@ -55,7 +55,7 @@ def load_copy() -> dict[str, Any]:
 #: parcels (quicklook.film.DERIVED).  Written out here so the server never imports numpy; a test holds the two
 #: lists equal.
 FILM_LOOKS = ("reflectivity", "spin-near-ground", "updraft-5km", "swath", "surface", "rain", "clouds-from-above",
-              "updraft-slice", "hail-track", "spin-track", "swirl", "parcels")
+              "updraft-slice", "hail-track", "spin-track", "wind-lowest", "pressure-lowest", "swirl", "parcels")
 #: quicklook.film.DEFAULT_FPS, for the same reason.
 FILM_FPS = {"default": 6, "swirl": 18, "parcels": 12}
 
@@ -180,6 +180,11 @@ def films(run_id: str, rundir: Path) -> dict[str, Any]:
     return out
 
 
+#: The looks made for one thunderstorm that a hurricane run does not draw (quicklook.products.THUNDERSTORM_ONLY,
+#: kept here so this module does not load the picture code; a test holds the two equal).
+THUNDERSTORM_ONLY = ("spin-near-ground", "updraft-5km", "swath", "surface", "hail-track", "spin-track")
+
+
 def more_looks(run_id: str, rundir: Path, index: Mapping[str, Any] | None, status: Mapping[str, Any],
                films_now: Mapping[str, Any] | None = None) -> list[dict[str, Any]]:
     """Every look after the four favourites, in the More looks row's order, as the Results screen shows it."""
@@ -195,12 +200,21 @@ def more_looks(run_id: str, rundir: Path, index: Mapping[str, Any] | None, statu
     films_now = films_now if films_now is not None else films(run_id, rundir)
     moves = domain_moves(rundir)
     drawn_before = frames_seen > 0 and not any(look in products for look in NEW_LOOKS)
+    shown = (index or {}).get("run") if isinstance((index or {}).get("run"), Mapping) else {}
+    hurricane = shown.get("storm_kind") == "hurricane"
     rows = []
     for look in copy.get("more_looks") or []:
         lid = look["id"]
         product = products.get(lid) or {}
         count = len([f for f in product.get("frames") or [] if isinstance(f, dict) and f.get("file")])
-        text = _fill(look.get("text", ""), values, look.get("clause_if"))
+        if hurricane and (lid in THUNDERSTORM_ONLY or (lid == "parcels" and count == 0)):
+            # Made for one thunderstorm and not drawn for a hurricane: the row leaves them out rather than
+            # offering buttons that only say so.  So is a hurricane's parcel look when it followed none: its
+            # Customize has no parcel choice, so the usual "turn on Follow air parcels" would not be true.
+            continue
+        # A hurricane run's own words for a look every run has.
+        words = look.get("text_hurricane") if hurricane and look.get("text_hurricane") else look.get("text", "")
+        text = _fill(words, values, look.get("clause_if"))
         notes = [_fill(look.get("note", ""), values)]
         last = (product.get("frames") or [{}])[-1] if product.get("frames") else {}
         if look.get("note_sampled") and (last.get("facts") or {}).get("source") == "frames":

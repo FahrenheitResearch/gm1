@@ -30,7 +30,13 @@ The knobs (``KNOB=VALUE``):
     another draw from GM1's.
 ``rotation=off|on``         Earth's rotation (icor; fcor stays the preset's).
 ``parcels=off|on``          follow air parcels (iprcl, nparcels = CM1's 60 x 60 x 10 parcel grid).
-``scheme=morrison|wsm6|thompson`` and ``friction=off|on``  shown greyed with the guided check's reason.
+``scheme=morrison|wsm6|thompson``  the other two schemes are shown greyed with the guided check's reason.
+``friction=off|on``         ground friction (bbc = 3, sfcmodel = 1, cecd = 1); it runs, and the card says it is not
+    yet compared with CM1 in a storm.
+``sea=C``                   a hurricane's sea surface temperature in degrees Celsius (tsk0), 26 to 31.
+
+A hurricane preset (``"storm_kind": "hurricane"``) offers only what makes sense for it (:func:`_hurricane_options`):
+its own grid, 3 to 6 days of storm time, a picture every 1 to 12 hours and the sea surface temperature.
 
 A setting the user changes is *pinned*: the fit never changes it (``fit.PresetSpec.pinned``).  The air is not a
 knob here: it is the Make-your-own-environment flags (``--instability --shear --hodograph``), which
@@ -58,7 +64,7 @@ OPTIONS_SCHEMA = "gpuwm-cm1.preset-options/v1"
 #: Every knob, in the panel's order, with its group.
 KNOBS: tuple[tuple[str, str], ...] = (
     ("grid", "size"), ("levels", "size"), ("area", "size"), ("time", "size"), ("pictures", "size"),
-    ("push", "storm"), ("bubble", "storm"), ("bumps", "storm"),
+    ("push", "storm"), ("bubble", "storm"), ("bumps", "storm"), ("sea", "storm"),
     ("scheme", "physics"), ("friction", "physics"), ("rotation", "physics"),
     ("parcels", "extras"),
 )
@@ -122,8 +128,66 @@ GREYED: Mapping[tuple[str, str], str] = {
     ("scheme", "wsm6"): ("Rain and hail: WSM6. GM1 solves WSM6 with slightly different equations from CM1's, and on "
                          "CM1's own storm GM1's run comes out stronger than CM1's (measured)."),
     ("scheme", "thompson"): "Rain and hail: Thompson. It has been checked only in a single column, not in a storm.",
-    ("friction", "on"): "The ground-friction setup has not been checked against CM1 in a storm.",
 }
+#: A hurricane's choices (CM1's hurricane case, ``"storm_kind": "hurricane"``): storm time in days, a picture every
+#: so many hours, and the sea surface temperature in degrees Celsius (CM1's file has 28).
+HURRICANE_DAYS = (3.0, 4.0, 5.0, 6.0)
+HURRICANE_PICTURES_H = (1.0, 3.0, 6.0, 12.0)
+#: What a storm time longer than any run of the preset says beside it (``ran_to_s`` in ``preset.json``).
+NOT_RUN_YET = "not run yet"
+#: Why a hurricane preset does not take CM1's adaptive time step, with the numbers (records/GM1-HURRICANE-RUNS.json,
+#: "adaptive_step"), and where it can still be tried.
+HURRICANE_ADVANCED = ("The hurricane presets run a fixed 7.5 s step. To try the adaptive step anyway, use Advanced: "
+                      "import the namelist with 'gpuwm-cm1 import' and set adapt_dt there; its import report lists "
+                      "the time step under \"Runs differently\".")
+
+
+def hurricane_adaptive_why() -> str:
+    """Why ``--set adapt_dt=1`` is refused for a hurricane: the measured known issue (records/GM1-HURRICANE-RUNS.json,
+    ``words.known_issue_adaptive_step``) and the Advanced route."""
+
+    from importlib import resources
+    import json
+
+    try:
+        words = json.loads(resources.files("cm1core.records").joinpath("GM1-HURRICANE-RUNS.json")
+                           .read_text(encoding="utf-8"))["words"]["known_issue_adaptive_step"]
+    except (OSError, KeyError, ValueError):  # pragma: no cover - the record ships with the package
+        words = ("With CM1's own setting (adapt_dt = 1) GM1's hurricane stops early or makes a much weaker storm, a "
+                 "known issue (measured).")
+    return f"--set adapt_dt is not taken for a hurricane. {words} {HURRICANE_ADVANCED}"
+
+
+HURRICANE_STEP_WHY = (
+    "--set dtl is not taken for a hurricane: the fixed 7.5 s time step is the one the storm was run with, and a "
+    "hurricane preset has no other grid or levels to take a different one from.")
+SEA_C = (26.0, 27.0, 28.0, 29.0, 30.0, 31.0)
+KELVIN = 273.15
+#: CM1's words for a hurricane's levels: ``--set`` does not take them on a hurricane preset (only the preset's own
+#: column has been run), and says where another column can still be tried.
+HURRICANE_LEVEL_WORDS = ("stretch_z", "ztop", "dz_bot", "dz_top", "str_bot", "str_top")
+#: Why a hurricane preset takes no other air (``--sounding``, ``--instability``, ``--shear``), and what it does take.
+HURRICANE_AIR = ("A hurricane preset runs on CM1's own moist tropical sounding, and --sounding, --instability and "
+                 "--shear are not taken for it. Its sea surface temperature can be changed with --custom sea=C. To "
+                 "try another sounding, use Advanced: import the namelist with 'gpuwm-cm1 import NAMELIST --sounding "
+                 "FILE'.")
+
+
+def hurricane_sea_why() -> str:
+    """Why ``--set tsk0`` is refused for a hurricane: the sea knob owns it, with its range and the Advanced route."""
+
+    return (f"--set tsk0 is not taken for a hurricane: the sea surface temperature is the sea setting, "
+            f"{SEA_C[0]:g} to {SEA_C[-1]:g} °C, so use --custom sea=C (tsk0 is in kelvin: 28 °C is "
+            f"{28.0 + KELVIN:g}). To try a sea outside that range, use Advanced: import the namelist with "
+            "'gpuwm-cm1 import' and set tsk0 there.")
+
+
+def hurricane_levels_why(key: str) -> str:
+    """Why ``--set`` of a levels word is refused for a hurricane: only the preset's column has been run."""
+
+    return (f"--set {key} is not taken for a hurricane: only these levels have been run (59 levels, 50 m at the "
+            "bottom to 500 m aloft, up to 25 km). To try other levels, use Advanced: import the namelist with "
+            f"'gpuwm-cm1 import' and set {key} there.")
 #: Why the air cannot be changed on a preset, in words.
 AIR_FAMOUS = "A famous day runs on that day's real weather balloon; that air is the point of it."
 AIR_WIND = "This storm's wind is not one the two air settings can make."
@@ -459,6 +523,8 @@ def options(preset: "Preset", effective: Mapping[str, Any] | None = None) -> dic
     """
 
     effective = dict(effective) if effective is not None else _effective(preset)
+    if preset.record.get("storm_kind") == "hurricane":
+        return _hurricane_options(preset, effective)
     nx, ny = _sides(effective)
     nz = _int(effective, "nz")
     dx, dz = _float(effective, "dx"), _float(effective, "dz")
@@ -527,8 +593,9 @@ def options(preset: "Preset", effective: Mapping[str, Any] | None = None) -> dic
                     why=None if name == scheme else GREYED.get(("scheme", name)))
             for name in SCHEMES])
     friction = "on" if all(_int(effective, key) == value for key, value in FRICTION.items()) else "off"
-    knob("friction", friction, [_choice("off"), _choice("on", available=friction == "on",
-                                                        why=None if friction == "on" else GREYED[("friction", "on")])])
+    # Ground friction runs (CM1's supercell with it was run on a GPU and compared with CM1's); the guided check
+    # no longer turns it down, and the card says it is not yet compared with CM1 in a storm.
+    knob("friction", friction, [_choice("off"), _choice("on")])
     knob("rotation", "on" if _int(effective, "icor") == 1 else "off", [_choice("off"), _choice("on")])
     # The parcel grid needs 120 km: a storm whose area cannot be that large shows On greyed, with why.
     area_cap = max(long_km, min(2.0 * long_km, AREA_MAX_KM)) * aspect
@@ -551,6 +618,78 @@ def options(preset: "Preset", effective: Mapping[str, Any] | None = None) -> dic
                  "cadence_s": CADENCE_S, "usual_times_s": list(_USUAL_TIMES_S)},
         "command": f"gpuwm-cm1 preset options {preset.id} --json",
     }
+
+
+def _hurricane_options(preset: "Preset", effective: Mapping[str, Any]) -> dict[str, Any]:
+    """The knobs of a hurricane preset: the ones that make sense for it, and no thunderstorm ones.
+
+    The grid is the preset's own (no other spacing has been run), the area is not a choice (the starting swirl
+    is 500 km in radius, so the area is never smaller than the preset's 1024 km), and the starting push, the
+    bubble, the bumps, the scheme, ground friction, Earth's rotation and the parcel grid are left out: a
+    hurricane needs its ocean surface and the rotation, and CM1 keeps the swirl's strength in its code
+    (init3d.F), where GM1 has no setting for it.
+    """
+
+    nx, ny = _sides(effective)
+    nz = _int(effective, "nz")
+    dx, dz = _float(effective, "dx"), _float(effective, "dz")
+    dt = _float(effective, "dtl")
+    timax, tapfrq = _float(effective, "timax"), _float(effective, "tapfrq")
+    sea = round(_float(effective, "tsk0") - KELVIN, 2)
+    floor_s = float(preset.record.get("min_duration_s", 3600.0))
+    times = sorted({days * 1440.0 for days in HURRICANE_DAYS if days * 86400.0 >= floor_s - 1e-6}
+                   | {round(timax / 60.0, 6)})
+    pictures = sorted({hours * 60.0 for hours in HURRICANE_PICTURES_H} | {round(tapfrq / 60.0, 6)})
+    # A storm time longer than any run of this preset is still a choice, and says "not run yet" beside it.
+    ran_s = _ran_to_s(preset)
+
+    def time_choice(minutes: float) -> dict[str, Any]:
+        choice = _choice(minutes)
+        if ran_s and minutes * 60.0 > ran_s + 1e-6:
+            choice["note"] = NOT_RUN_YET
+        return choice
+
+    time_knob: dict[str, Any] = {"id": "time", "group": "size", "default": round(timax / 60.0, 6),
+                                 "choices": [time_choice(value) for value in times], "unit": "min"}
+    if any(choice.get("note") for choice in time_knob["choices"]):
+        time_knob["ran_to_min"] = ran_s / 60.0
+        time_knob["note"] = _ran_words(ran_s)
+    knobs = [
+        {"id": "grid", "group": "size", "default": dx, "choices": [_choice(dx)], "unit": "m"},
+        time_knob,
+        {"id": "pictures", "group": "size", "default": round(tapfrq / 60.0, 6),
+         "choices": [_choice(value) for value in pictures
+                     if value * 60.0 <= timax + 1e-6 and _whole(timax / (value * 60.0)) and _whole(value * 60.0 / dt)],
+         "unit": "min", "all": pictures},
+        {"id": "sea", "group": "storm", "default": sea,
+         "choices": [_choice(value) for value in sorted(set(SEA_C) | {sea})], "unit": "°C"},
+    ]
+    return {
+        "schema": OPTIONS_SCHEMA,
+        "preset": preset.id,
+        "groups": list(GROUP_ORDER),
+        "knobs": knobs,
+        "air": {"available": False, "why": AIR_FIXED},
+        "grid": {"dx_m": dx, "dz_m": dz, "nz": nz, "dt_s": dt, "top_m": _float(effective, "ztop", nz * dz),
+                 "nx": nx, "ny": ny},
+        # The listing says a hurricane's times in hours and days (:func:`presets._options_text`).
+        "storm_kind": "hurricane",
+        "command": f"gpuwm-cm1 preset options {preset.id} --json",
+    }
+
+
+def _ran_to_s(preset: "Preset") -> float:
+    """The storm time (s) the preset has been run to in GM1 (``ran_to_s`` in ``preset.json``), or 0 if not stated."""
+
+    try:
+        return float(preset.record.get("ran_to_s") or 0.0)
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _ran_words(ran_s: float) -> str:
+    return (f"GM1 has run this storm for {_words_min(ran_s / 60.0)}. A longer storm time is offered, and is "
+            f"{NOT_RUN_YET}.")
 
 
 # ------------------------------------------------------------------ reading choices
@@ -603,7 +742,7 @@ def parse(items: Iterable[str]) -> dict[str, Any]:
         if name not in KNOB_IDS:
             raise CustomError(f"There is no setting called {name}; the settings are {', '.join(KNOB_IDS)}")
         text = text.strip()
-        if name in ("grid", "levels", "area", "time", "pictures", "push", "bubble"):
+        if name in ("grid", "levels", "area", "time", "pictures", "push", "bubble", "sea"):
             out[name] = _number(name, text)
         elif name == "bumps":
             out[name] = _bumps(text)
@@ -670,6 +809,20 @@ def _words_m(value_m: float) -> str:
     return f"{value_m / 1000.0:g} km" if value_m >= 1000.0 else f"{value_m:g} m"
 
 
+def article(words: str) -> str:
+    """"A" or "An" before a number as it is said aloud (:func:`cm1core.cm1run.fit.article`)."""
+
+    from .fit import article as said
+
+    return said(words)
+
+
+def _a_m(value_m: float) -> str:
+    """A length with its article: "an 82.9 m" as "An 82.9 m", "a 100 m" as "A 100 m"."""
+
+    return f"{article(_words_m(value_m))} {_words_m(value_m)}"
+
+
 def _words_exact_m(value_m: float, other_m: float) -> str:
     """``value_m`` in words that differ from ``other_m``'s: 1000.0001 m beside 1 km is "1.0000001 km", not a second
     "1 km"."""
@@ -689,10 +842,20 @@ def _words_s(seconds: float) -> str:
     return f"{text} s" if len(text) <= 10 else f"{seconds:g} s"
 
 
+def minutes_words(minutes: float) -> str:
+    """A number of minutes in plain words ("45 min", "3 h", "4 days"), as the Customize sentences say it."""
+
+    return _words_min(minutes)
+
+
 def _words_min(minutes: float) -> str:
     whole = int(round(minutes))
     if abs(minutes - whole) > 1e-6:
         return f"{minutes:g} min"
+    if whole >= 2880 and whole % 60 == 0:
+        # Two days or more is said in days: "4 days", "3 days 12 h".
+        days, rest = divmod(whole // 60, 24)
+        return f"{days} days" if rest == 0 else f"{days} days {rest} h"
     if whole >= 60 and whole % 60 == 0:
         return f"{whole // 60} h"
     if whole > 60:
@@ -713,7 +876,7 @@ def _grid_value(knob: Mapping[str, Any], dx_m: float) -> None:
         raise CustomError(f"The grid spacing is a length in metres above zero, not {dx_m:g}")
     limit = float(knob.get("max_m") or 0.0)
     if limit and dx_m > limit + 1e-6:
-        raise CustomError(f"A {_words_m(dx_m)} grid leaves fewer than {MIN_CELLS} cells across this storm's area, too "
+        raise CustomError(f"{_a_m(dx_m)} grid leaves fewer than {MIN_CELLS} cells across this storm's area, too "
                           f"few to be a grid; the coarsest grid here is {_words_m(limit)}.",
                           suggest={"grid": math.floor(limit)})
 
@@ -745,10 +908,10 @@ def spacing_notes(dx_m: float, dx0_m: float) -> list[str]:
         return []
     low, high = PRESET_SPACINGS_M
     if dx_m < low - 1e-6:
-        return [f"A {_words_m(dx_m)} grid is finer than any storm GM1 ships ({_words_m(low)}), and finer than anything "
+        return [f"{_a_m(dx_m)} grid is finer than any storm GM1 ships ({_words_m(low)}), and finer than anything "
                 "compared with CM1 (that comparison is at 1 km)."]
     if dx_m > high + 1e-6:
-        return [f"A {_words_m(dx_m)} grid is coarser than any storm GM1 ships ({_words_m(high)}): a storm is only a "
+        return [f"{_a_m(dx_m)} grid is coarser than any storm GM1 ships ({_words_m(high)}): a storm is only a "
                 "few cells wide, so expect a weaker, smoother one."]
     return []
 
@@ -787,6 +950,8 @@ def apply(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any] |
     for knob in custom:
         if knob not in by_id:
             raise CustomError(f"{preset.name} has no {knob} setting to change")
+    if preset.record.get("storm_kind") == "hurricane":
+        return _apply_hurricane(preset, custom, sets, effective, by_id)
     nx0, ny0 = _sides(effective)
     nz0 = _int(effective, "nz")
     dx0, dz0, dt0 = _float(effective, "dx"), _float(effective, "dz"), _float(effective, "dtl")
@@ -847,7 +1012,7 @@ def apply(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any] |
         least_km = float(by_id["area"]["floor_km"])
         finest = math.ceil(least_km * 1000.0 * math.sqrt(nz / START_CELLS_MAX))
         raise CustomError(
-            f"A {_words_m(dx)} grid over the smallest area a storm starts in ({least_km:g} km) is far more cells "
+            f"{_a_m(dx)} grid over the smallest area a storm starts in ({least_km:g} km) is far more cells "
             f"than one restart file holds (about {START_CELLS_MAX // 1_000_000} million); the finest grid here is "
             f"about {finest:g} m.", suggest={"grid": float(finest)})
     dt = dt0
@@ -927,7 +1092,7 @@ def apply(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any] |
                 suggest={"area": round(fits * dx / 1000.0, 3)})
         finest = math.ceil(floor_km * 1000.0 * math.sqrt(nz * aspect / START_CELLS_MAX) / (aspect or 1.0))
         raise CustomError(
-            f"A {_words_m(dx)} grid over the smallest area a storm starts in ({floor_km:g} km) is more cells with "
+            f"{_a_m(dx)} grid over the smallest area a storm starts in ({floor_km:g} km) is more cells with "
             f"these levels than one restart file holds (about {START_CELLS_MAX // 1_000_000} million); the finest "
             f"grid here is about {finest:g} m.", suggest={"grid": float(finest)})
     # A fine grid over the preset's whole area can be more cells than one saved frame holds: the area then starts
@@ -950,7 +1115,7 @@ def apply(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any] |
             cells = side_x / dx * (side_y / dx) * nz
             many = f"{cells / 1e6:,.0f} million" if math.isfinite(cells) and cells < 1e15 else "far more"
             raise CustomError(
-                f"A {_words_m(dx)} grid over the smallest area a storm starts in ({floor_km:g} km) is "
+                f"{_a_m(dx)} grid over the smallest area a storm starts in ({floor_km:g} km) is "
                 f"{many} cells with these levels, and one restart file holds about "
                 f"{START_CELLS_MAX // 1_000_000} million; the finest grid here is about {finest:g} m.",
                 suggest={"grid": float(finest)})
@@ -1124,6 +1289,84 @@ def apply(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any] |
     return changed
 
 
+def _apply_hurricane(preset: "Preset", custom: Mapping[str, Any], sets: Mapping[str, Any],
+                     effective: Mapping[str, Any], by_id: Mapping[str, Mapping[str, Any]]) -> "Preset":
+    """:func:`apply` for a hurricane preset: the storm time, the picture interval and the sea surface temperature."""
+
+    record = dict(preset.record)
+    customized: list[dict[str, Any]] = list(record.get("customized") or [])
+    pinned = set(record.get("pinned") or [])
+    values: dict[str, Any] = {}
+    dt = _float(effective, "dtl")
+    timax0, tapfrq0 = _float(effective, "timax"), _float(effective, "tapfrq")
+
+    def note(knob: str, keys: Mapping[str, Sequence[Any]], sentence: str) -> None:
+        customized.append({"knob": knob, "keys": {key: list(pair) for key, pair in keys.items()}, "sentence": sentence})
+
+    if "grid" in custom:
+        _offered_value(by_id["grid"], float(custom["grid"]), f"{_a_m(float(custom['grid']))} grid")
+        pinned.add("grid")
+    timax = timax0
+    if "time" in custom:
+        minutes = float(custom["time"])
+        _offered_value(by_id["time"], minutes, f"{_words_min(minutes)} of storm time")
+        timax = minutes * 60.0
+        pinned.add("time")
+        if not math.isclose(timax, timax0):
+            values["timax"] = timax
+            ran_s = _ran_to_s(preset)
+            beyond = (f" GM1 has run this storm for {_words_min(ran_s / 60.0)}; the time after that is "
+                      f"{NOT_RUN_YET}." if ran_s and timax > ran_s + 1e-6 else "")
+            note("time", {"timax": [timax0, timax]},
+                 f"{_words_min(timax / 60.0)} of storm time instead of {_words_min(timax0 / 60.0)}.{beyond}")
+    tapfrq = tapfrq0
+    if "pictures" in custom:
+        tapfrq = float(custom["pictures"]) * 60.0
+        if not float(custom["pictures"]) in [float(v) for v in by_id["pictures"]["all"]]:
+            raise CustomError(f"A picture every {_words_min(float(custom['pictures']))} is not one of the choices")
+        pinned.add("pictures")
+        if not math.isclose(tapfrq, tapfrq0):
+            values["tapfrq"] = tapfrq
+            note("pictures", {"tapfrq": [tapfrq0, tapfrq]},
+                 f"A saved picture every {_words_min(tapfrq / 60.0)} instead of every {_words_min(tapfrq0 / 60.0)}.")
+    if not _whole(timax / tapfrq):
+        raise CustomError(f"A picture every {_words_min(tapfrq / 60.0)} does not split {_words_min(timax / 60.0)} of "
+                          "storm time into whole pictures; pick another picture interval")
+    if not _whole(tapfrq / dt):
+        raise CustomError(f"A picture every {_words_min(tapfrq / 60.0)} does not land on a whole number of "
+                          f"{dt:g} s time steps; pick another picture interval")
+    if "sea" in custom:
+        celsius = float(custom["sea"])
+        _offered_value(by_id["sea"], celsius, f"A sea surface at {celsius:g} °C")
+        was_k = _float(effective, "tsk0")
+        now_k = round(celsius + KELVIN, 2)
+        if not math.isclose(now_k, was_k, abs_tol=1e-6):
+            values["tsk0"] = now_k
+            note("sea", {"tsk0": [was_k, now_k]},
+                 f"A sea surface at {celsius:g} °C instead of {was_k - KELVIN:g} °C. Warmer water feeds a stronger "
+                 "storm and cooler water a weaker one; the air above it is the preset's own.")
+    for key, value in sets.items():
+        refuse_set(key, preset.id, hurricane=True, value=value)
+    for key, value in sets.items():
+        before = effective.get(key)
+        values[key] = value
+        note("set", {key: [before, value]}, f"Set {key} = {value} by hand.")
+    from .fit import set_namelist_values
+
+    try:
+        text = set_namelist_values(preset.namelist_text, values) if values else preset.namelist_text
+    except ValueError as error:
+        raise CustomError(str(error)) from error
+    folder = _scratch()
+    (folder / "namelist.input").write_text(text, encoding="ascii")
+    record["customized"] = customized
+    record["pinned"] = sorted(pinned)
+    record["custom"] = {**dict(record.get("custom") or {}), **dict(custom)}
+    record["custom_sets"] = {**dict(record.get("custom_sets") or {}), **sets}
+    return replace(preset, record=record, namelist_text=text, namelist_file=folder / "namelist.input",
+                   namelist_original=preset.namelist_original_text)
+
+
 def rotation_sentence(timax_s: float) -> str:
     """What turning on Earth's rotation does over a storm this long, in words."""
 
@@ -1133,10 +1376,36 @@ def rotation_sentence(timax_s: float) -> str:
             "in 2 hours, as it does in CM1.")
 
 
-def refuse_set(key: str, preset_id: str) -> None:
-    """``--set KEY=VALUE`` on a word the knobs or the fit own is refused, naming the ``--custom`` knob to use."""
+def refuse_set(key: str, preset_id: str, *, hurricane: bool = False, value: Any = None) -> None:
+    """``--set KEY=VALUE`` on a word the knobs or the fit own is refused, naming the ``--custom`` knob to use.
+
+    A hurricane preset also refuses CM1's adaptive time step (``adapt_dt`` other than 0), the setting measured to
+    stop early or make a much weaker storm, with the numbers and the Advanced route; the sea surface temperature
+    by its CM1 word (``tsk0``: the sea knob owns it, 26 to 31 degrees Celsius) and CM1's words for the levels
+    (only the preset's column has been run), each with the Advanced route; and its refusals name only the knobs
+    a hurricane has.
+    """
 
     key = key.strip().lower()
+    if hurricane:
+        if key == "adapt_dt":
+            try:
+                off = float(value) == 0.0
+            except (TypeError, ValueError):
+                off = False
+            if not off:
+                raise CustomError(hurricane_adaptive_why())
+            return
+        if key == "dtl":
+            raise CustomError(HURRICANE_STEP_WHY)
+        if key == "tsk0":
+            raise CustomError(hurricane_sea_why())
+        if key in HURRICANE_LEVEL_WORDS:
+            raise CustomError(hurricane_levels_why(key))
+        if key in FIT_OWNED and FIT_OWNED[key][0] not in ("time", "pictures"):
+            raise CustomError(f"--set {key} is not taken: a hurricane preset keeps its {FIT_OWNED[key][1]} (its "
+                              "starting swirl needs the whole area, and only this grid and these levels have been "
+                              f"run); 'gpuwm-cm1 preset options {preset_id}' lists what it offers.")
     if key == "dtl":
         raise CustomError("--set dtl is not taken: the time step follows the grid spacing and the levels (CM1's own "
                           "6 s per 1 km across and per 500 m up, made to land on the output times), so use "
@@ -1201,8 +1470,9 @@ def pinned_words(pinned: Iterable[str]) -> str:
     return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]
 
 
-__all__ = ["CustomError", "FIT_OWNED", "GREYED", "KNOBS", "KNOB_IDS", "OPTIONS_SCHEMA", "PINNABLE", "apply",
+__all__ = ["CustomError", "FIT_OWNED", "GREYED", "HURRICANE_ADVANCED", "HURRICANE_AIR", "HURRICANE_LEVEL_WORDS",
+           "HURRICANE_STEP_WHY", "hurricane_levels_why", "hurricane_sea_why", "minutes_words", "NOT_RUN_YET", "KNOBS", "KNOB_IDS", "OPTIONS_SCHEMA", "PINNABLE", "apply",
            "custom_args", "is_customized", "made_air", "options", "parse", "parse_sets", "pinned_words",
-           "refuse_set", "rotation_sentence", "time_step", "snap_time_step", "snapped_time_step", "binary_steps",
-           "cells_across",
+           "hurricane_adaptive_why", "refuse_set", "rotation_sentence", "time_step", "snap_time_step", "snapped_time_step",
+           "binary_steps", "cells_across",
            "levels_for", "lands", "hard_floor_km", "spacing_notes"]

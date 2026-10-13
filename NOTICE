@@ -51,6 +51,12 @@ under src/cm1core/.
   * 21 modified copies of those two namelists, the presets' namelists
     (cm1core/presets/*/namelist.input). Each preset's preset.json names the
     file it was made from, that file's sha256 and every setting changed;
+  * two modified copies of run/config_files/hurricane_3d_cpm/namelist.input,
+    the hurricane presets' namelists (cm1core/presets/hurricane-8km/ and
+    cm1core/presets/hurricane-4km/, each namelist.input), and
+    run/config_files/hurricane_3d_cpm/input_sounding, unchanged, beside each
+    (input_sounding in the same two folders). Each preset's preset.json
+    names both files, their sha256 and every setting changed;
   * the values of run/LANDUSE.TBL (the 33 land-use categories in two seasons
     that CM1's getlanduse reads), transcribed to JSON as
     cm1core/records/CM1-LANDUSE-TBL.json, which records the sha256 of the
@@ -64,6 +70,10 @@ under src/cm1core/.
     beside a run (cm1core/records/CM1-STOCK-SUPERCELL-SERIES.json) and the
     mature-phase means GM1 is compared against
     (cm1core/records/GM1-STOCK-DECK-RATIOS.json);
+  * output of CM1 r21.1 itself on its hurricane namelist with the 8 km
+    hurricane preset's changed settings, reduced to numbers: its lowest
+    pressure, fastest wind, radius of maximum wind and warm core every 3
+    hours, beside GM1's (cm1core/records/GM1-HURRICANE-RUNS.json);
   * in the source distribution and the public source snapshot only (not in
     the wheel): CM1 r21.1's base-state columns at model time zero (th0, qv0,
     qc0 and qi0 for each analytic sounding, as binary32 words) written by
@@ -71,7 +81,9 @@ under src/cm1core/.
     test of the Rust crate compares its initial states against;
   * in the public source snapshot only (tests/ is not in the sdist or the
     wheel): run/namelist.input, unchanged, and second copies of the supercell
-    and squall_line namelists, as the namelist importer's test fixtures
+    and squall_line namelists, as the namelist importer's test fixtures, and
+    run/config_files/hurricane_3d_cpm/namelist.input and input_sounding,
+    unchanged, which the preset generator reads
     (tests/data/cm1import/); the importer's translation of the supercell
     namelist (tests/data/decks/stock-imported.gpuwm-cm1.toml); and output
     written by CM1 r21.1 itself on that namelist at 24 x 24 x 40 (one history

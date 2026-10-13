@@ -163,13 +163,15 @@ uninstalling, the exact tested versions (`constraints-gpu-cu13.txt`), uv, cluste
 - **Downscale** a WRF or ArWen run: `chain` makes a finer flat GM1 domain driven on its four sides by the saved
   history, and `sounding from-wrf` makes a CM1 `input_sounding` from one of its columns.
 - **Reproduce**: `reproduce` writes a run's inputs, receipts, versions and commands as one bundle.
-- **The GUI** (`gpuwm-cm1 gui`, on 127.0.0.1 with a token): guided presets fitted to your GPU and a time budget,
+- **The GUI** (`gpuwm-cm1 gui`, on 127.0.0.1 with a token): guided presets fitted to your GPU and a time budget
+  (thunderstorms, and two hurricanes at 8 km and 4 km made from CM1's own hurricane case),
   each one adjustable in guided mode ("Customize this storm": grid spacing, levels, area, storm time, picture
   interval, the air, the starting push, random bumps, Earth's rotation, air parcels; `preset ... --custom KNOB=VALUE`
   from a terminal) with the estimate updating as you change it, the live view and results on four quick-looks; or, in advanced mode, the namelist editor, the coverage report, every
   setting, the estimator's numbers, resume and job scripts, with "Show command" beside every action.
 
-Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode takes any grid spacing you pick or type), and
+Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode takes any grid spacing you pick or type
+for a thunderstorm, and runs its hurricanes at 8 km and 4 km), and
 through GM1's own decks also stretched near-ground levels and storm-following nests ("Beyond the GUI", above); Morrison (`ptype = 5`) and WSM6 (`ptype = 7`)
 microphysics, Thompson (`ptype = 3`) after an acknowledgment (CM1's own file also needs `nt_c = 100.0` for it). What
 is refused and why is in the release notes.
@@ -219,7 +221,8 @@ The release notes list them in full ([`docs/RELEASE-NOTES.md`](docs/RELEASE-NOTE
 short: some guided presets are greyed with their measured reason (the squall lines); `gpuwm-cm1 run` and the GUI do not check whether another
 program is already using the GPU, so run on a card with enough free memory; the first run on a machine compiles GPU
 kernels (about 10 s) without a notice; an imported namelist's surface drag runs with `cecd = 1` only; NSSL and other unported microphysics
-schemes are refused by name; 21 of CM1's 23 shipped namelists are refused (the supercell and squall line run); job
+schemes are refused by name; 21 of CM1's 23 shipped namelists are refused as CM1 ships them (the supercell and squall
+line run, and the 3-D hurricane once ten of its settings are replaced with what GM1 has); job
 scripts for Slurm and PBS have not yet run on a real cluster; and the GPU path has been tested on RTX-class cards
 only. On ArWen 2.8.9, GM1 has run on an RTX 4090 and an RTX 3080 (no RTX 50-series card), and Thompson's
 storm, which changed with the engine's corrected table read, has not been compared with CM1.

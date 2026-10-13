@@ -14,15 +14,26 @@ step launches.  A measured point on this GPU replaces whichever of the two
 terms it measured:
 a point whose cells put it on the floor measures the floor, one well above the
 crossover measures the per-cell rate.  A deck with the same number of cells as
-a measured point is priced at that point's own step time, whatever the
-regime: a run of that very grid on this card is the best estimate there is,
-and the crossover band, where a point measures neither term cleanly, is
-priced that way too.  When the grid has been run more than once, the fastest
-of its recent runs prices it: other work on the card during a run can only
-slow it, so a run made beside other work would otherwise make every later
-estimate of that storm too long (measured: an 8 km hurricane grid at 0.038 s
-a step alone and 0.067 to 0.099 s beside other work, whose median shortened
-the next fit of the same storm).
+a measured point (within 0.5 %) is priced at that point's own step time,
+whatever the regime: a run of that very grid on this card is the best estimate
+there is, and the crossover band, where a point measures neither term cleanly,
+is priced that way too.  When the grid has been run more than once, the
+fastest of its recent runs prices it: other work on the card during a run can
+only slow it, so a run made beside other work would otherwise make every later
+estimate of that storm too long.  Measured on one RTX 4090: the 8 km hurricane
+grid had run at 0.038 s a step, and at 0.067 to 0.099 s while other work
+shared the card; the median of those runs priced the next 4 days at 58 minutes
+and so cut them to 3 days 9 h for a 1 hour budget, where the fastest run
+prices them at about 15 minutes.
+
+The record can carry such points too (a card's ``grid_points``: a grid's
+measured step time on that card, with its receipt), so a computer that has
+never run a storm prices that grid on that card at the measured speed and not
+from the two-term model.  A grid whose step sits below the model's floor is
+the case: the floor is the reference computer's, and a faster host steps a
+small grid faster (measured: the 8 km hurricane grid on an RTX 4090, 0.0198 s
+a step with the card to itself against a floor of 0.0476 s).  This machine's
+own run of the grid, once there is one, replaces the record's point.
 """
 
 from __future__ import annotations
@@ -56,6 +67,8 @@ REGIME_MARGIN = 1.5
 SAME_GRID_REL = 0.005
 #: How many of the most recent same-grid points are looked at; the fastest of them prices the grid.
 SAME_GRID_POINTS = 5
+#: The ``source`` of a grid point that comes from the record (a card's ``grid_points``), not from this machine.
+RECORD_SOURCE = "record"
 #: A receipt with fewer measured steps than this is not learned: its mean
 #: would carry the first steps' one-off costs (lazy module loads, the first
 #: pool growth) at a weight the rate cannot absorb.
@@ -128,14 +141,22 @@ class StepModel:
     tile_receipts: tuple[str, ...] = ()
 
     def same_grid(self, cells: int, tiles: int = 1) -> list[Mapping[str, Any]]:
-        """The most recent measured points of this deck's size and tiling on this card."""
+        """The most recent measured points of this deck's size and tiling on this card: this machine's own
+        when it has any, else the record's for this card."""
 
         same = [
             point for point in self.grid_points
             if abs(int(point["cells"]) - cells) <= SAME_GRID_REL * max(cells, 1)
             and point.get("tiles") in (None, tiles)
         ]
-        return same[-SAME_GRID_POINTS:]
+        here = [point for point in same if point.get("source") != RECORD_SOURCE]
+        return (here or same)[-SAME_GRID_POINTS:]
+
+    def _from_record(self, cells: int, tiles: int = 1) -> bool:
+        """Whether the points that price this grid are the record's, not this machine's."""
+
+        same = self.same_grid(cells, tiles)
+        return bool(same) and all(point.get("source") == RECORD_SOURCE for point in same)
 
     def host_s(self, tiles: int = 1) -> float:
         return self.floor_s + max(0, int(tiles) - 1) * self.tile_s
@@ -160,7 +181,7 @@ class StepModel:
     def label_for(self, cells: int, tiles: int = 1) -> str:
         regime = self.regime(cells, tiles)
         if regime == "this-grid":
-            return "measured-here"
+            return "measured" if self._from_record(cells, tiles) else "measured-here"
         if regime == "tiles":
             return self.tile_label
         return self.floor_label if regime == "floor" else self.label
@@ -171,6 +192,15 @@ class StepModel:
         regime = self.regime(cells, tiles)
         if regime == "this-grid":
             same = self.same_grid(cells, tiles)
+            if self._from_record(cells, tiles):
+                return (
+                    f"measured on this kind of card at this grid's size (on one computer; this machine's own run "
+                    f"of it replaces this): fastest of {len(same)} run(s), "
+                    + ", ".join(
+                        f"{float(point['seconds_per_step']):.4f} s/step at {int(point['cells']) / 1e6:.2f} M cells"
+                        for point in same
+                    )
+                )
             return (
                 f"measured on this machine at this grid's size: fastest of {len(same)} run(s), "
                 + ", ".join(
@@ -280,6 +310,7 @@ def table_model(gpu_name: str | None, component: str) -> StepModel:
                 band=float(record["step_model"].get(f"band_{label}", 0.5)),
                 basis=basis, floor_basis=row.get("floor_basis", ""),
                 receipts=tuple(row.get("receipts", ())), floor_receipts=tuple(row.get("floor_receipts", ())),
+                grid_points=_record_points(row) if used == component else (),
                 **_tile_terms(row, reference, component, record, own=True),
             )
     # An unmeasured card: the RTX 3080's measured rate scaled by bandwidth.
@@ -310,6 +341,21 @@ def table_model(gpu_name: str | None, component: str) -> StepModel:
         receipts=tuple(row.get("receipts", ())), floor_receipts=tuple(row.get("floor_receipts", ())),
         **_tile_terms(row, reference, component, record, own=False),
     )
+
+
+def _record_points(row: Mapping[str, Any]) -> tuple[Mapping[str, Any], ...]:
+    """A card and component's ``grid_points`` of the record, in the shape of this machine's own points."""
+
+    points = []
+    for point in row.get("grid_points") or ():
+        nx, ny, nz = int(point["nx"]), int(point["ny"]), int(point["nz"])
+        points.append({
+            "cells": nx * ny * nz, "nx": nx, "ny": ny, "nz": nz,
+            "tiles": None if point.get("tiles") is None else int(point["tiles"]),
+            "seconds_per_step": float(point["seconds_per_step"]), "steps": int(point.get("steps", 0)),
+            "receipt": str(point.get("receipt", "")), "source": RECORD_SOURCE,
+        })
+    return tuple(points)
 
 
 def _tile_terms(
@@ -548,7 +594,8 @@ def step_model(
     mine = [p for p in points if normalize_gpu_name(p.gpu_name) == key and p.component == component]
     if not mine:
         return base
-    grid_points = tuple(p.record() for p in mine)
+    # The record's points for this card stay behind this machine's own (same_grid prefers the machine's).
+    grid_points = tuple(base.grid_points) + tuple(p.record() for p in mine)
     floor_points, rate_points = [], []
     for point in mine:
         per_cell = base.device_s(point.cells)
@@ -617,6 +664,7 @@ __all__ = [
     "MIN_LEARN_STEPS",
     "MeasuredPoint",
     "RATES_RECORD",
+    "RECORD_SOURCE",
     "ReceiptError",
     "StepModel",
     "band_for_label",

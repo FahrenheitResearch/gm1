@@ -514,6 +514,9 @@ def read_status(rundir: Path, *, now: float | None = None, host: str | None = No
             # A segment stopped before its first restart is still continued from
             # an earlier segment's (cm1run: the restarts on the run's lineage).
             detail["restartable"] = _lineage_restartable(rundir)
+        if state in ("paused", "stopped", "finished") and not view_only and adaptive_timestep(rundir):
+            # An ended run on the adaptive time step: no Continue, and the pages say why.
+            detail["no_resume_why"] = ADAPTIVE_NO_CONTINUE
         detail["actions"] = [] if view_only else _actions(state, detail)
         return RunStatus(state, label, None if percent is None else round(percent, 1), detail)
 
@@ -598,6 +601,29 @@ def read_status(rundir: Path, *, now: float | None = None, host: str | None = No
     return finish("running", f"Running {percent:.0f}%")
 
 
+#: Why a run on CM1's adaptive time step (adapt_dt = 1, as CM1's hurricane namelist has it) is never offered Continue or
+#: "Run it longer": the runtime refuses to resume one (gm1_runtime: the completed steps of a varying dt do not
+#: determine the storm time, and the restart does not carry it), so the pages say so in place of a button that
+#: would fail.
+ADAPTIVE_NO_CONTINUE = ("This run's time step changes with the storm, and a saved point does not keep the storm "
+                        "time of such a run, so it cannot be continued or run longer. Start it again from the "
+                        "beginning.")
+
+
+def adaptive_timestep(rundir: Path) -> bool:
+    """Whether the run's deck takes CM1's adaptive large step (``dynamics.adaptive_timestep`` in ``deck.toml``)."""
+
+    try:
+        import tomllib
+
+        with (rundir / "deck.toml").open("rb") as handle:
+            deck = tomllib.load(handle)
+    except (OSError, ValueError):
+        return False
+    dynamics = deck.get("dynamics")
+    return isinstance(dynamics, dict) and dynamics.get("adaptive_timestep") is True
+
+
 def _lineage_restartable(rundir: Path) -> bool:
     """Whether ``gpuwm-cm1 resume`` finds a restart on the run's lineage (cm1run.rundir)."""
 
@@ -621,7 +647,7 @@ def _actions(state: str, detail: dict[str, Any]) -> list[str]:
             actions += ["force-stop"]
     if state == "stale":
         actions += ["stop"]
-    if state in ("paused", "stopped", "finished") and (
+    if state in ("paused", "stopped", "finished") and not detail.get("no_resume_why") and (
             detail.get("last_restart") is not None or detail.get("restartable")):
         actions += ["resume"]
     if detail.get("last_frame") is not None:

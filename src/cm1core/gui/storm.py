@@ -18,6 +18,12 @@ not a moment of the storm and gets no line.
 
 A preset whose storm forms at a known time says so (``storm_appears`` in its ``preset.json``, measured); every
 other run gets the general line.  The words are guided mode's copy (``copy/guided.json``, ``storm.*``).
+
+A hurricane (``"storm_kind": "hurricane"`` in ``preset.json``) starts from a swirl that is there from the first
+picture, so "No storm yet" would be wrong for it.  Its lines are its own (``storm.hurricane.*``): the swirl has
+no rain yet; rain cells are forming and the swirl looks ragged, with the time the eye is usually clear by
+(``eye_forms`` in ``preset.json``, with its basis); and, for a run that ended with no rain at all, that no rain
+formed.  Once the eye's usual time has passed the pictures speak for themselves and get no line.
 """
 
 from __future__ import annotations
@@ -110,6 +116,78 @@ def appears(preset_id: Any, presets: Path) -> tuple[float, float] | None:
     return start, end
 
 
+def storm_kind(preset_id: Any, presets: Path) -> str | None:
+    """The preset's ``storm_kind`` (``"hurricane"``), or None for a thunderstorm preset or an unknown one."""
+
+    record = _preset_record(preset_id, presets)
+    kind = record.get("storm_kind") if record else None
+    return str(kind) if isinstance(kind, str) and kind else None
+
+
+def eye_forms(preset_id: Any, presets: Path) -> float | None:
+    """The storm time (s) by which a hurricane preset's eye is usually clear (``eye_forms.to_s``), if recorded."""
+
+    record = _preset_record(preset_id, presets)
+    window = record.get("eye_forms") if record else None
+    end = _number(window.get("to_s")) if isinstance(window, Mapping) else None
+    return end if end is not None and end > 0.0 else None
+
+
+def _preset_record(preset_id: Any, presets: Path) -> Mapping[str, Any] | None:
+    if not isinstance(preset_id, str) or not preset_id or "/" in preset_id or preset_id.startswith("."):
+        return None
+    try:
+        record = json.loads((presets / preset_id / "preset.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    return record if isinstance(record, Mapping) else None
+
+
+def day_words(seconds: float) -> str:
+    """A long storm time in words: "hour 48 (the end of day 2)", "hour 30"."""
+
+    hours = int(round(float(seconds) / 3600.0))
+    if hours >= 24 and hours % 24 == 0:
+        return f"hour {hours} (the end of day {hours // 24})"
+    return f"hour {hours}"
+
+
+def hurricane_notes(index: Mapping[str, Any] | None, eye_s: float | None, strings: Mapping[str, Any],
+                    ended: bool) -> dict[float, str]:
+    """A hurricane run's line for every saved time that has one (see the module)."""
+
+    def text(key: str) -> str:
+        entry = strings.get(key) or {}
+        return str(entry.get("text") if isinstance(entry, Mapping) else entry or "")
+
+    seen = signals(index)
+    rained = any(row.get("dbz_1km", -math.inf) >= ECHO_DBZ or row.get("dbz_column", -math.inf) >= ECHO_DBZ
+                 for row in seen.values())
+    out: dict[float, str] = {}
+    for time_s, row in sorted(seen.items()):
+        if "dbz_1km" not in row and "dbz_column" not in row:
+            continue
+        echo = row.get("dbz_1km", -math.inf) >= ECHO_DBZ or row.get("dbz_column", -math.inf) >= ECHO_DBZ
+        if not echo:
+            line = text("storm.hurricane.none_ended") if ended and not rained else text("storm.hurricane.none")
+        elif eye_s is not None and time_s < eye_s - 1e-6:
+            line = text("storm.hurricane.ragged").replace("{eye}", day_words(eye_s))
+        else:
+            line = ""
+        if line:
+            out[time_s] = line
+    return out
+
+
+def shows_storm(line: str | None, strings: Mapping[str, Any]) -> bool:
+    """Whether a picture's line is said beside a storm that is in the picture (a hurricane's ragged first day),
+    not in place of one ("No storm yet", "no rain yet"): such a picture still has a strongest value to say."""
+
+    entry = strings.get("storm.hurricane.ragged") or {}
+    lead = str(entry.get("text") if isinstance(entry, Mapping) else entry or "").split("{eye}")[0]
+    return bool(line) and bool(lead) and str(line).startswith(lead)
+
+
 def words(state: str, window: tuple[float, float] | None, strings: Mapping[str, Any],
           ended_s: float | None = None) -> str | None:
     """The line for one picture, from guided mode's copy (``strings`` is its ``strings`` table).  ``state``
@@ -140,6 +218,10 @@ def notes(run: Mapping[str, Any] | None, index: Mapping[str, Any] | None, preset
           strings: Mapping[str, Any]) -> dict[float, str]:
     """The line for every saved time that has one, keyed by the time (seconds, rounded to 1 ms)."""
 
+    preset_id = (run or {}).get("preset") if isinstance(run, Mapping) else None
+    if storm_kind(preset_id, presets) == "hurricane":
+        ended = bool(isinstance(index, Mapping) and index.get("run_ended"))
+        return hurricane_notes(index, eye_forms(preset_id, presets), strings, ended)
     found = states(index)
     if not found:
         return {}
@@ -217,5 +299,5 @@ def schedule(admitted: Mapping[str, Any] | None, status: Mapping[str, Any] | Non
             "duration_s": duration}
 
 
-__all__ = ["ECHO_DBZ", "UPDRAFT_M_S", "appears", "clock", "note_for", "notes", "run_notes", "schedule", "signals",
-           "states", "words"]
+__all__ = ["ECHO_DBZ", "UPDRAFT_M_S", "appears", "clock", "day_words", "eye_forms", "hurricane_notes", "note_for",
+           "notes", "run_notes", "schedule", "shows_storm", "signals", "states", "storm_kind", "words"]

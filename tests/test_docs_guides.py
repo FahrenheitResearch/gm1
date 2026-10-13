@@ -93,7 +93,7 @@ PRESET_FIXTURES = ("rtx3080-wsl2-desktop-4p8.json", "rtx4080-16gb-headless.json"
 def test_preset_fit_runs_for_every_preset_and_budget(fixture: str) -> None:
     presets = sorted(path.name for path in (ROOT / "src" / "cm1core" / "presets").iterdir()
                      if (path / "preset.json").is_file())
-    assert len(presets) == 21  # the five first presets and the sixteen that followed
+    assert len(presets) == 23  # the five first presets, the sixteen that followed, and the two hurricanes
     env = {**os.environ, "PYTHONPATH": str(ROOT / "src"),
            "GPUWM_CM1_NVIDIA_SMI": str(GPUINFO / "fake_nvidia_smi.py"),
            "FAKE_NVIDIA_SMI_FIXTURE": str(GPUINFO / fixture),

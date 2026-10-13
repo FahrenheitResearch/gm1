@@ -478,6 +478,7 @@ class CartesianTornadoDiagnostics:
                         allocate=self._allocate_transient,
                         release=self._release_transient,
                         out={name: self.carriers[name] for name in ("xvort", "yvort", "zvort")},
+                        surface_znt=_closure_roughness(self.runtime),
                     )
                     vertical_vorticity_level(
                         self.cp, u=u, v=v, level=0, rdx=self.rdx, rdy=self.rdy,
@@ -589,6 +590,14 @@ class CartesianTornadoDiagnostics:
                     swaths=self.swaths, grid=g, column=self.column, lower=self.lower
                 )
         return row
+
+
+def _closure_roughness(runtime: Any) -> Any:
+    """The closure's whole-domain ``znt`` after this step's ``getcecd``, or ``None`` (a free-slip run has none)."""
+
+    closure = getattr(runtime, "closure", None)
+    state = getattr(closure, "surface_state", None) or {}
+    return state.get("znt")
 
 
 __all__ = (

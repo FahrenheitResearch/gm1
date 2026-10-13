@@ -4,7 +4,7 @@
   "strings": {
     "nav.storms": {"text": "New storm"},
     "gallery.title": {"text": "Pick a storm"},
-    "gallery.data": {"text": "Each one is a CM1 case that GM1 runs as CM1 does. Pick one, then pick how long it may run."},
+    "gallery.data": {"text": "Each one is a CM1 case that GM1 runs. Pick one, then pick how long it may run."},
     "gallery.checking": {"text": "Checking your GPU..."},
     "gallery.about": {"text": "About {wall} on your {gpu}"},
     "gallery.about_nogpu": {"text": "About {wall} on an RTX 3080 (no GPU found here)"},
@@ -14,7 +14,9 @@
     "gallery.not_offered": {"text": "Not offered on this computer"},
     "gallery.picture_none": {"text": "No picture yet"},
     "gallery.empty": {"text": "No presets are installed. Reinstall gpuwm-cm1."},
-    "gallery.why_offered": {"text": "Only storms GM1 runs as CM1 does are offered. A greyed card says why it is not offered here."},
+    "gallery.why_offered": {"text": "Only storms GM1 runs are offered. A card says so when one of its settings has not yet been compared with CM1. A greyed card says why it is not offered here."},
+    "gallery.not_compared": {"text": "Runs, not yet compared with CM1:"},
+    "gallery.needs_budget": {"text": "Too long for {own} on your GPU, so it opens on {budget}."},
     "gallery.own_namelist": {"text": "Have your own CM1 namelist? Switch to Advanced at the top."},
     "gallery.no_gpu": {"text": "No NVIDIA GPU answered on this computer, so no storm can run here."},
     "gallery.no_gpu_fix": {"text": "Open System, on the left, or run gpuwm-cm1 doctor --plain in a terminal; it says what is missing and how to fix it."},
@@ -28,7 +30,7 @@
     "gallery.group.explore": {"text": "Explore"},
     "gallery.group.explore_line": {"text": "Change the air and see which kind of storm it makes."},
     "gallery.group.other": {"text": "Other storm types"},
-    "gallery.group.other_line": {"text": "Lines of storms, a gust front, and a single growing cloud."},
+    "gallery.group.other_line": {"text": "A hurricane, lines of storms, a gust front, and a single growing cloud."},
     "gallery.show_all": {"text": "Show all {n}"},
     "gallery.show_fewer": {"text": "Show fewer"},
     "gallery.famous_note": {"text": "This day's sounding in an idealized storm, not a reconstruction of that day's storms."},
@@ -54,6 +56,7 @@
     "budget.cells": {"text": "{nx} × {ny} cells"},
     "budget.fitting": {"text": "Fitting the storm to your GPU..."},
     "budget.you_get": {"text": "What you get"},
+    "budget.levels_stretched": {"text": "{count} levels, {bottom} at the bottom to {top} aloft"},
     "budget.changes": {"text": "What was changed to fit"},
     "budget.nothing_changed": {"text": "Nothing: it runs as the preset is."},
     "budget.nothing_else": {"text": "Nothing else: your choices fit as they are."},
@@ -164,6 +167,11 @@
     "custom.what.rotation": {"text": "Earth's rotation"},
     "custom.what.parcels": {"text": "air parcels"},
     "custom.what.air": {"text": "the air"},
+    "custom.what.sea": {"text": "sea temperature"},
+    "custom.what.friction": {"text": "ground friction"},
+    "custom.sea_note": {"text": "CM1's hurricane case has 28 °C. Warmer water feeds a stronger storm and cooler water a weaker one. Only 28 °C has been run, in GM1 and in CM1."},
+    "custom.friction_note": {"text": "It runs. CM1's supercell with ground friction was compared with CM1 on an RTX 4090: nine statistics are 0.986 to 1.018 of CM1's and the strongest spin is 1.072 of CM1's (measured). It has not been compared with CM1 in any other storm or on any other card."},
+    "custom.caption_storm_sea": {"text": "A different sea temperature makes a different storm, so yours will look different."},
 
     "watch.title": {"text": "Watching"},
     "watch.storm_time": {"text": "Storm time", "hint": "model time"},
@@ -202,6 +210,9 @@
     "storm.forming": {"text": "The storm is starting to form higher up. The reflectivity picture at 1 km shows it once its rain falls that far."},
     "storm.none_ended": {"text": "No storm formed in this run: this air did not make one in the storm time it ran."},
     "storm.none_stopped": {"text": "No storm yet: the run ended at {clock}, before this storm usually appears ({from} to {to})."},
+    "storm.hurricane.none": {"text": "The starting swirl has no rain yet. Rain cells usually appear around it by about hour 6."},
+    "storm.hurricane.ragged": {"text": "Rain cells are forming around the swirl. It looks ragged at first, then tightens: in GM1's own run of this storm the eye is clear by {eye}."},
+    "storm.hurricane.none_ended": {"text": "No rain had formed around the swirl when this run ended."},
 
     "results.title": {"text": "Results"},
     "results.what": {"text": "What am I looking at"},
@@ -221,6 +232,7 @@
     "results.not_started": {"text": "This run has not started yet, so it has no pictures or files. Its Ready to start page starts it."},
     "results.no_files_not_started": {"text": "No files: this run has not started yet."},
     "results.run_longer": {"text": "Run it 1 hour longer"},
+    "results.run_longer_day": {"text": "Run it 1 day longer"},
     "results.run_longer_about": {"text": "About {wall} more on this GPU (estimated)."},
     "results.run_longer_started": {"text": "Running on from where it stopped."},
     "results.run_longer_later": {"text": "Offered once the run ends."},
@@ -253,6 +265,7 @@
     "bumps": {"text": "Random bumps at the start", "hint": "irandp"},
     "friction": {"text": "Ground friction", "hint": "bbc, sfcmodel, cecd"},
     "rotation": {"text": "Earth's rotation", "hint": "icor"},
-    "parcels": {"text": "Follow air parcels", "hint": "iprcl, nparcels"}
+    "parcels": {"text": "Follow air parcels", "hint": "iprcl, nparcels"},
+    "sea": {"text": "Sea surface temperature", "hint": "tsk0"}
   }
 }

@@ -52,6 +52,10 @@ def parser_tool(monkeypatch):
     monkeypatch.setenv("GM1_CM1_R21_NAMELIST", os.fspath(namelist_tool()))
 
 
+#: The per-frame looks of a thunderstorm run: every look but the two drawn only for a hurricane run.
+THUNDERSTORM_LOOKS = [pid for pid, _ in P.PRODUCTS if pid not in P.HURRICANE_ONLY]
+
+
 @pytest.fixture()
 def pictures(monkeypatch):
     """Every Overlay a product saves, with its words."""
@@ -90,7 +94,7 @@ def test_every_quick_look_draws_from_a_cm1_storm(tmp_path, pictures):
     index = json.loads((run / "quicklook" / "index.json").read_text())
     assert index["schema"] == "gm1.quicklook-index/v1"
     # The per-frame looks, then the environment (drawn once per run; this storm has no parcel track)
-    assert [p["id"] for p in index["products"]] == [pid for pid, _ in P.PRODUCTS] + ["environment"]
+    assert [p["id"] for p in index["products"]] == THUNDERSTORM_LOOKS + ["environment"]
     assert [p["id"] for p in index["products"]][:4] == ["reflectivity", "spin-near-ground", "updraft-5km", "swath"]
     for product in [p for p in index["products"] if not p.get("once")]:
         assert [f["time_s"] for f in product["frames"]] == [900.0, 1200.0, 1500.0], product["id"]
@@ -117,7 +121,7 @@ def test_every_quick_look_draws_from_a_cm1_storm(tmp_path, pictures):
 def test_footers_carry_the_plan_facts_and_pass_the_lint(tmp_path, pictures):
     run = run_directory(tmp_path)
     _render(run, only=None)
-    assert len(pictures) == 3 * len(P.PRODUCTS) + 1        # every per-frame look at 3 frames, the environment once
+    assert len(pictures) == 3 * len(THUNDERSTORM_LOOKS) + 1   # every per-frame look at 3 frames, the environment once
     for name, ov in pictures:
         assert ov.check() == [], name
         assert ov.footer_cut == [], (name, ov.footer_cut)
@@ -144,7 +148,7 @@ def test_a_domain_fixed_to_the_ground_draws_every_look(tmp_path, pictures):
     summary = _render(run)
     assert summary.problems == [], summary.problems
     index = json.loads((run / "quicklook" / "index.json").read_text())
-    assert {p["id"]: len(p["frames"]) for p in index["products"]} == {**{pid: 3 for pid, _ in P.PRODUCTS},
+    assert {p["id"]: len(p["frames"]) for p in index["products"]} == {**{pid: 3 for pid in THUNDERSTORM_LOOKS},
                                                                        "environment": 1}
     assert index["products"][3]["frames"][-1]["facts"]["source"] == "model"          # CM1's sws, ground-fixed
     for name, ov in pictures:

@@ -174,8 +174,84 @@ ahead and read the pictures near the edges with that in mind.
 top divided by 256 is 78 m. The message names the thinnest levels that fit. Levels thicker than about 2.7 km are
 refused too: the model needs at least 8 of them.
 
-**The squall lines are greyed.** They are not offered yet on any computer: how they treat the sides of their area
-has not been fully checked against CM1 yet.
+**The squall lines are greyed.** They are not offered yet on any computer: nobody has run them on a GPU as they
+are set up here. Each card also says which of its settings have not yet been compared with CM1 (the sides of the
+area that repeat, for one); those settings run, and no longer hold a storm back by themselves. The hurricanes say
+the same and are offered: they have been run.
+
+**My hurricane looks ragged for the first day.** That is what this storm does. It starts from a weak, wide swirl
+with no rain. During the first day scattered rain cells form around it and the swirl weakens and loses its shape;
+it then tightens, and an eye usually appears on the second day: GM1's run of the 8 km card and CM1 r21.1's run of
+the same changed settings (CM1 on its own adaptive time step) both have a clear eye and eyewall by hour 48
+(measured). Watching and Results say so beside each early picture. If there is still no eye after three days, look
+at the wind and the pressure at the lowest level: a storm that is slowly deepening is only late. At 8 km the
+eyewall is a few grid cells wide, so it is drawn wider and weaker than a finer grid would show.
+
+<!-- hurricane-runs:tightening -->
+In both runs the radius of maximum wind is 20 km or less from hour 21: in GM1's run to the end (hour 96), in CM1's
+to hour 90, then 28 km (both measured, from the 3-hourly frames).
+<!-- /hurricane-runs -->
+
+**How close is GM1's hurricane to CM1's?** What was compared, and what the two runs did:
+
+<!-- hurricane-runs:card_8km_measured -->
+GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9), on a fixed 7.5 s time step, is compared with
+a CM1 r21.1 run with the same changed settings but its own adaptive time step (from 10 s, as CM1's file has it).
+Through hour 54 the two stay within about 6 hPa and 7 m/s ground-relative at the lowest level. GM1 reaches 951.2 hPa
+at hour 90, with its fastest wind, 62.9 m/s ground-relative, at hour 93; CM1 reaches 954.9 hPa and
+62.0 m/s ground-relative at hour 81. GM1's storm holds near its peak after it: 954.0 hPa and
+58.8 m/s ground-relative at hour 96; CM1's storm weakens after it: 971.7 hPa and 50.7 m/s ground-relative at hour 96
+(all measured).
+<!-- /hurricane-runs -->
+
+<!-- hurricane-runs:hours_81_to_96 -->
+From hour 81 to hour 96 GM1's storm goes from 954.6 hPa and 61.4 m/s ground-relative to 954.0 hPa and
+58.8 m/s ground-relative (in those hours its lowest pressure is 951.2 hPa, its fastest wind
+62.9 m/s ground-relative, its radius of maximum wind 20 km throughout); CM1's goes from 954.9 hPa and
+62.0 m/s ground-relative to 971.7 hPa and 50.7 m/s ground-relative (radius of maximum wind 20 to 28 km). So GM1's
+storm holds its strength through the last 15 hours while CM1's weakens (measured).
+<!-- /hurricane-runs -->
+
+<!-- hurricane-runs:guide_8km -->
+| Hour | GM1, ArWen 2.8.9 (gpuwm 2.8.9), fixed 7.5 s step: hPa, m/s ground-relative, radius of maximum wind km, warm core K at its height km | CM1 r21.1, adaptive step from 10 s: hPa, m/s ground-relative, radius of maximum wind km, warm core K at its height km |
+|---|---|---|
+| 0 | 1006.0, 14.9, 84, 1.7 at 0.0 | 1006.0, 14.9, 84, 1.7 at 0.0 |
+| 12 | 1006.5, 13.2, 92, 5.3 at 15.3 | 1007.0, 14.6, 132, 5.6 at 16.2 |
+| 24 | 1005.6, 15.8, 12, 4.0 at 10.3 | 1004.8, 17.7, 12, 4.0 at 10.3 |
+| 36 | 996.1, 29.0, 20, 4.6 at 8.2 | 999.1, 24.3, 20, 4.3 at 14.8 |
+| 48 | 979.0, 47.0, 20, 7.8 at 8.8 | 983.9, 41.1, 20, 6.0 at 9.2 |
+| 60 | 975.0, 51.0, 20, 9.5 at 7.8 | 970.1, 51.8, 20, 9.3 at 8.8 |
+| 69 | 961.9, 59.6, 20, 10.0 at 7.8 | 965.4, 56.3, 20, 9.6 at 8.2 |
+| 72 | 962.7, 55.8, 20, 10.0 at 7.8 | 963.4, 55.5, 20, 9.8 at 8.2 |
+| 81 | 954.6, 61.4, 20, 10.7 at 15.3 | 954.9, 62.0, 20, 10.8 at 13.3 |
+| 84 | 952.3, 62.6, 20, 11.0 at 13.3 | 956.5, 60.8, 20, 12.3 at 15.3 |
+| 87 | 951.6, 61.8, 20, 13.9 at 15.3 | 958.2, 59.6, 20, 11.6 at 15.3 |
+| 90 | 951.2, 61.8, 20, 13.6 at 15.3 | 961.0, 57.5, 20, 12.3 at 15.3 |
+| 93 | 952.0, 62.9, 20, 15.1 at 15.3 | 968.6, 49.4, 28, 10.3 at 15.8 |
+| 96 | 954.0, 58.8, 20, 16.5 at 15.3 | 971.7, 50.7, 28, 8.6 at 13.8 |
+<!-- /hurricane-runs -->
+
+<!-- hurricane-runs:warm_core -->
+Warm core: how much warmer the centre is than its surroundings, as potential temperature: the mean within 40 km of
+the centre (the mean of the averages around each ring one grid cell wide) minus the average of the 300 to 450 km
+ring, at the height where that difference is largest, and that height. The height is not the same all through a run:
+from hour 39 in GM1's run it is 7.8 to 8.8 km up through hour 78 and 13.3 to 15.3 km up from hour 81, and in CM1's
+run it is 8.2 to 9.2 km up through hour 72 and 11.8 to 15.8 km up from hour 75. A number from the middle of the
+storm and one from near its top are two different layers, so these numbers are not one curve: read a rise or a fall
+only between hours at about the same height.
+<!-- /hurricane-runs -->
+
+**My own hurricane namelist stopped early, or its import report lists the time step.** CM1's hurricane file
+lets the time step change with the storm (`adapt_dt = 1`). The import report says so under "Runs differently";
+the hurricane cards use a fixed 7.5 s step (`adapt_dt = 0`, `dtl = 7.5`), and so can you. In guided mode
+`--set adapt_dt=1` on a hurricane card is refused with the reason, and Advanced can still run it.
+
+<!-- hurricane-runs:known_issue_adaptive_step -->
+With CM1's own adaptive setting GM1's hurricane stops early or makes a much weaker storm, a known issue: 8 km runs
+on it stopped at hour 20.8 and at hour 29.1, and the one that ran to the end reached 995 hPa and
+35 m/s ground-relative where CM1 reaches 955 hPa and 62 m/s ground-relative (measured with ArWen 2.8.0 (gpuwm
+2.8.0)).
+<!-- /hurricane-runs -->
 
 **The pictures are blank at first.** A storm takes 20 to 30 minutes of storm time to grow from its first bubble of
 rising air, and the first 10 to 60 seconds of a run are spent preparing the graphics card. Until then there is

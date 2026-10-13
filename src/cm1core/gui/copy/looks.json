@@ -1,12 +1,13 @@
 {
   "schema": "gpuwm-cm1.gui-looks/v1",
-  "about": "The looks guided Results opens on and the More looks row, with their 'What am I looking at' panels. {name} fields are filled with the run's own numbers; a clause whose number is unknown is left out (clause_if).",
+  "about": "The looks guided Results opens on and the More looks row, with their 'What am I looking at' panels. {name} fields are filled with the run's own numbers; a clause whose number is unknown is left out (clause_if). A look with text_hurricane says that instead for a hurricane run.",
   "looks": [
     {
       "id": "reflectivity",
       "title": "Reflectivity",
       "short": "What a weather radar would see",
       "text": "What a weather radar would see 1 km above the ground: rain and hail, heaviest in red and purple. A hook-shaped tail at the back of the storm marks where its rotation wraps rain around the updraft. Colours follow the National Weather Service scale. At {dx} grid spacing, details smaller than about {six_dx}, such as a thin hook, are smoothed out. Simulated, not observed.",
+      "text_hurricane": "What a weather radar would see 1 km above the sea: rain, heaviest in red and purple. Early on, scattered rain cells ring the swirl. Once the storm has an eye, the heaviest rain forms a ring around it (the eyewall), with bands of rain spiralling outside. Colours follow the National Weather Service scale. The left panel is the whole area; the right panel is the part inside the square, around the middle of the area. At {dx} grid spacing, details smaller than about {six_dx} are smoothed out, so the eye and the rain bands are drawn wider than a finer grid would show. Simulated, not observed.",
       "unit": "dBZ"
     },
     {
@@ -32,6 +33,22 @@
       "short": "The strongest near-ground wind so far",
       "text": "The strongest near-ground wind each place has had since the start, so it grows as the storm moves. It shows the storm's track and where its strongest gusts went. At {dx} grid spacing, gusts smaller than about {six_dx} are smoothed out, so the strongest local gusts are missing.",
       "unit": "metres per second, ground-relative"
+    },
+    {
+      "id": "wind-lowest",
+      "title": "Wind at the lowest level",
+      "short": "How fast the wind blows near the sea",
+      "text": "How fast the wind blows at the lowest model level ({height} m above the sea), with the wind drawn as streaks that circle the centre. The left panel is the whole area; the right panel is the part inside the square, around the middle of the area. The colours run from calm to 80 m/s ground-relative: blue from about 10 m/s, red at hurricane force, yellow and white in the eyewall; a faster wind is drawn in the last colour. The white line is hurricane force (33 m/s ground-relative), and the gold ring marks the fastest wind, which sits in the eyewall once the storm has an eye. At {dx} grid spacing, features smaller than about {six_dx} are smoothed out, so the eyewall is drawn wider and its fastest wind lower than a finer grid would show. Drawn for a hurricane run.",
+      "clause_if": {"height": " ({height} m above the sea)"},
+      "unit": "metres per second, ground-relative"
+    },
+    {
+      "id": "pressure-lowest",
+      "title": "Pressure at the lowest level",
+      "short": "How low the pressure falls in the centre",
+      "text": "How far the pressure at the lowest model level ({height} m above the sea) is below the pressure at the edge of the area. The left panel is the whole area; the right panel is the part inside the square, around the middle of the area. The deeper the hole in the middle, the stronger the hurricane; the colours run to 70 hPa below the edge, spread so that the wide shallow low around the storm shows as well as its centre (the scale under the picture gives the numbers). The lines join places with the same pressure, one every 4 hPa; where they would crowd together, in the eyewall, and far out where the pressure is nearly flat, they are left out. The gold ring marks the lowest pressure. This is the pressure at the lowest model level, not at sea level, where it is a few hPa higher. At {dx} grid spacing, features smaller than about {six_dx} are smoothed out, so the lowest pressure is not as low as a finer grid would show. Drawn for a hurricane run.",
+      "clause_if": {"height": " ({height} m above the sea)"},
+      "unit": "hPa"
     }
   ],
   "this_run": "This run: {dx} grid spacing, a {width} × {depth} km area, {duration} of storm time, a saved time every {interval}.",
@@ -54,6 +71,7 @@
       "title": "Rain so far",
       "short": "Rain on the ground since the start",
       "text": "How much rain has reached the ground since the start, in centimetres. The heaviest rain falls beside the updraft, and the grey line marks 1 mm.",
+      "text_hurricane": "How much rain has reached the sea since the start, in centimetres. The left panel is the whole area; the right panel is the part inside the square, around the middle of the area. The heaviest rain falls under the eyewall and the rain bands. For a hurricane the colours start at 1 mm and run to 400 cm in tenfold steps (the scale under the picture gives the numbers), so the light rain of the outer bands shows beside the metres of rain under the eyewall.",
       "note": "Each grid cell ({dx} across) holds the rain that fell into it since the start.",
       "note_moving": "This run's domain moves with the storm, so its cells move too: this is not a map of rain on the ground (the wind swath is)."
     },
@@ -63,6 +81,7 @@
       "title": "Clouds seen from above",
       "short": "A picture made from the model's clouds",
       "text": "The storm as a camera high above it might see it, made from the model's cloud water, ice, snow, hail and rain, lit by a low sun from the west-south-west. The wide flat top is the anvil; bumps on it are where the updraft punches through. Long shadows fall to the east-north-east. Simulated, not satellite data.",
+      "text_hurricane": "The hurricane as a camera high above it might see it, made from the model's cloud water, ice, snow and rain, lit by a low sun from the west-south-west. The wide cloud shield is the air flowing out at the top of the storm; a hole in its middle is the eye. Simulated, not satellite data.",
       "note": "At {dx}, small cumulus clouds are missing and cloud edges are blocky."
     },
     {
@@ -71,6 +90,7 @@
       "title": "Slice through the strongest updraft",
       "short": "The updraft cut open, west to east and south to north",
       "text": "Two cuts straight down through the column with the strongest rising air 5 km up: one from west to east, one from south to north, from the ground to 16 km. Amber is air going up, blue is air coming down, in metres per second. The silver line is the cloud's edge and the yellow line is where a radar would see 40 dBZ.",
+      "text_hurricane": "Two cuts straight down through the column with the strongest rising air 5 km up: one from west to east, one from south to north, from the sea to 16 km. Amber is air going up, blue is air coming down, in metres per second. In a hurricane the strongest rising air is in the eyewall or in a rain band, and its colour range is smaller than a thunderstorm's. The silver line is the cloud's edge and the yellow line is where a radar would see 40 dBZ.",
       "note": "The slices move with the strongest updraft at each saved time. Drafts narrower than about 6 grid spacings ({six_dx}) are smoothed out."
     },
     {
@@ -97,6 +117,7 @@
       "title": "The storm's environment",
       "short": "The air the storm starts in",
       "text": "The air the storm grows in, as a weather balloon would measure it. Left: temperature (red) and dewpoint (green) with height; where they are close together the air is moist. Middle: how the wind changes with height (the hodograph); a long, curved line means the wind turns and strengthens with height, which lets storms rotate. Right: the energy for rising air (CAPE), the lid on it (CIN), the cloud base, the wind shear and the helicity, as the run computed them before it started.",
+      "text_hurricane": "The air the hurricane starts in, as a weather balloon would measure it: CM1's moist tropical sounding, with no wind of its own (the swirl is added to it). Left: temperature (red) and dewpoint (green) with height; where they are close together the air is moist. Middle: the wind with height in the corners of the area, far from the swirl; it is weak there, so the shear and the helicity are near zero, and the storm-motion marks made for thunderstorms say little. Right: the energy for rising air (CAPE), the lid on it (CIN) and the cloud base, as the run computed them before it started.",
       "note": "The air the storm starts in, the same everywhere in the domain.",
       "note_varies": "This run starts from a weather model's 3D state, so the air differs from place to place: the curves are the south-west corner of the domain at the start, and the numbers are for the domain's average sounding."
     },
@@ -114,6 +135,7 @@
       "title": "Swirl near the ground",
       "short": "The spin near the ground, moving",
       "text": "The spin look set in motion: the lowest-level wind drawn as streaks that flow with the air, coloured by spin, red one way and blue the other. Watch the air wrap around the storm's rotation and the gust fronts sweep outward.",
+      "text_hurricane": "The wind at the lowest model level set in motion: streaks that flow with the air, coloured by spin, red one way and blue the other. Watch the air spiral in towards the eyewall and circle the eye.",
       "note": "Between saved times (every {interval}) the picture is blended, not computed. At {dx}, the swirl shows the storm's broad circulation, not small vortices."
     }
   ],

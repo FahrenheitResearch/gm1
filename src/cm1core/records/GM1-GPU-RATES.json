@@ -127,6 +127,18 @@
       "tree": "post-closure-fix",
       "receipt": "kept",
       "sha256_uncompressed": "cff2b98ebcfa671926dbc78f59faaaf757bee523f7192b466bc37178e08dc48b"
+    },
+    "rtx4090-128x128x59-morrison-hurricane": {
+      "what": "the 8 km hurricane preset (128 x 128 x 59, stretched levels) with Morrison, 46080 steps; other work used the card until step 10755, and the rate is from the run's event log after it",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "07d04bf3674961c436150b15eedf07d3cd0fec2247ab0ddd68a3002209bcc9b8"
+    },
+    "rtx4090-256x256x59-morrison-hurricane": {
+      "what": "the 4 km hurricane preset (256 x 256 x 59, stretched levels) with Morrison, 46080 steps, the card to itself; the rate is from the run's event log",
+      "tree": "post-closure-fix",
+      "receipt": "kept",
+      "sha256_uncompressed": "a13c37ff6e8578bbc79997e4b2042ef6f14984b43abf2c82246af507c6ca2ff2"
     }
   },
   "step_model": {
@@ -260,7 +272,32 @@
           ],
           "floor_s": 0.0476,
           "floor_label": "rough",
-          "floor_basis": "the RTX 3080 reference card's Morrison floor"
+          "floor_basis": "the RTX 3080 reference card's Morrison floor",
+          "grid_points": [
+            {
+              "nx": 128,
+              "ny": 128,
+              "nz": 59,
+              "tiles": 1,
+              "seconds_per_step": 0.0198,
+              "steps": 35169,
+              "receipt": "rtx4090-128x128x59-morrison-hurricane",
+              "label": "measured",
+              "basis": "steps 10755 to 45924 of the run, when the card was its own (the whole run's mean, 0.0311 s, includes the shared part)"
+            },
+            {
+              "nx": 256,
+              "ny": 256,
+              "nz": 59,
+              "tiles": 1,
+              "seconds_per_step": 0.0642,
+              "steps": 45856,
+              "receipt": "rtx4090-256x256x59-morrison-hurricane",
+              "label": "measured",
+              "basis": "steps 158 to 46014 of the run, the card to itself"
+            }
+          ],
+          "grid_points_why": "a grid this card has been timed on is priced at that time, not from the two terms: the 8 km grid steps faster than the floor (the floor is the reference computer's), and the 4 km grid faster than the estimated per-cell rate"
         }
       }
     }

@@ -292,7 +292,7 @@ async function render(body, args, page) {
   const holder = h("div", {});
   body.append(holder);
   const session = await api.session();
-  page.setData(guided ? "each storm is a CM1 setup that GM1 runs as CM1 does" : `from a CM1 namelist, or from an example · runs folder ${session.root}`);
+  page.setData(guided ? "each storm is a CM1 setup that GM1 runs" : `from a CM1 namelist, or from an example · runs folder ${session.root}`);
   if (!guided) {
     // Everything is drawn at once; the presets, the WRF panel and the examples' prices fill in as they arrive.
     // From a WRF or ArWen run sits after the two starts, before CM1's examples.

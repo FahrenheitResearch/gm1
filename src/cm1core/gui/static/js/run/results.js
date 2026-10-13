@@ -13,14 +13,14 @@
 // A plain gpuwm-cm1 cartesian output folder opens view-only: its pictures and slices, and the commands that
 // convert it, with no button that changes it.
 
-import { h, num, clock, parseClock, bytes, button, copyline, panel, table } from "../core.js";
+import { h, num, clock, stormClock, setLongRun, parseClock, bytes, button, copyline, panel, table } from "../core.js";
 import * as api from "../api.js";
 import { register, go, notice, runRoute } from "../router.js";
 import { showCommand } from "../command.js";
 import { folderLine } from "../folder.js";
 import { ready as copyReady, t, looks as favouriteCopy } from "../../guided/copy.js";
 import {
-  FAVOURITES, LIVE_STATES, actionButton, continueClock, runExists, runNotFound, untilProblem, diskPanel, filesPanel, filmBar, filmLook,
+  FAVOURITES, favouritesOf, LIVE_STATES, actionButton, continueClock, runExists, runNotFound, untilProblem, diskPanel, filesPanel, filmBar, filmLook,
   gridWords,
   headerClock, moreLookRows, moreLooksRow, noFrames, put, receiptPanel, segmentsTable, seriesPanel, stormLine, viewer,
   wallWords, words,
@@ -47,12 +47,16 @@ async function guidedResults(body, id, page) {
   // A picture with no storm in it yet says so here too, in place of its strongest value (which would be a number
   // from quiet air).
   const noStorm = h("p", { class: "nostorm", role: "note", hidden: true });
-  let lookNow = FAVOURITES[0];
+  // A hurricane run has its own favourites (its wind and pressure in place of the thunderstorm looks).
+  let favourites = favouritesOf(data.quicklook_run);
+  const totalOf = () => (data.status || {}).duration_s || (((data.guided || {}).facts) || {}).duration_s || 0;
+  setLongRun(totalOf());
+  let lookNow = favourites[0];
   const moreSlot = h("div", { class: "more-looks-slot" });
   const filmSlot = h("div", { class: "film-slot" });
   const moreRow = (id) => (data.more_looks || []).find((row) => row.id === id) || null;
   const view = viewer({
-    order: [...FAVOURITES, ...(data.more_looks || []).map((row) => row.id)], tabIds: FAVOURITES, slider: true,
+    order: [...favourites, ...(data.more_looks || []).map((row) => row.id)], tabIds: favourites, slider: true,
     empty: t("results.no_pictures"),
     emptyFor: (look) => { const row = moreRow(look.id); return row && row.why_not ? row.why_not : null; },
     caption: (look) => [h("span", {}, look.footer || "")],
@@ -62,7 +66,8 @@ async function guidedResults(body, id, page) {
       const quiet = frame && frame.storm ? frame.storm : "";
       noStorm.textContent = quiet;
       noStorm.hidden = !quiet;
-      strongest.textContent = frame && frame.strongest && !quiet ? t("results.strongest", { value: frame.strongest }) : "";
+      // A hurricane's early pictures carry a line beside a storm that is there (storm_showing): they keep their value.
+      strongest.textContent = frame && frame.strongest && (!quiet || frame.storm_showing) ? t("results.strongest", { value: frame.strongest }) : "";
       if (look && look.id !== lookNow) { lookNow = look.id; paintWhat(); paintMore(); }
     },
     onLook: (look) => { if (look && look.id !== lookNow) { lookNow = look.id; paintWhat(); paintMore(); } },
@@ -81,7 +86,7 @@ async function guidedResults(body, id, page) {
   const drawingNote = h("p", { class: "note", role: "status", hidden: true });
   body.append(h("div", { class: "grid cols-main" }, h("section", { class: "panel" }, drawingNote, view), whatBox), lower);
 
-  const looksOf = () => [...(data.looks || []).filter((l) => FAVOURITES.includes(l.id))
+  const looksOf = () => [...(data.looks || []).filter((l) => favourites.includes(l.id))
     .map((l) => ({ ...l, title: titles[l.id] || l.title })), ...moreLookRows(data)];
 
   function paintWhat() {
@@ -121,7 +126,9 @@ async function guidedResults(body, id, page) {
       : [folder, trimmed || h("p", { class: "muted" }, t({ ended: "results.no_files_ended", not_started: "results.no_files_not_started" }[
         noFrames(data)] || "results.no_files"))];
     const longer = g.run_longer;
-    const longerButton = button(t("results.run_longer"), {});
+    // A storm of days (a hurricane) is run on by a day, not by an hour.
+    const longerWords = t(longer && longer.span_s >= 86400 ? "results.run_longer_day" : "results.run_longer");
+    const longerButton = button(longerWords, {});
     const st = data.status || {};
     const actions = new Set(st.actions || []);
     longerButton.disabled = !longer || !actions.has("resume");
@@ -131,6 +138,8 @@ async function guidedResults(body, id, page) {
     if (longer && longerButton.disabled) {
       if (data.trimmed) longerWhy = t("results.run_longer_trimmed");
       else if ([...LIVE_STATES, "stale"].includes(st.state)) longerWhy = t("results.run_longer_later");
+      // A run whose time step adapts (a hurricane) cannot be run on from a saved point: the server says why.
+      else if (st.no_resume_why) longerWhy = st.no_resume_why;
       else if (["stopped", "failed"].includes(st.state)) longerWhy = t("results.run_longer_none");
     }
     longerButton.addEventListener("click", async () => {
@@ -151,8 +160,9 @@ async function guidedResults(body, id, page) {
     });
     put(lower,
       panel(t("results.open_files"), filesBody),
-      panel(t("results.run_longer"),
+      panel(longerWords,
         longer && longer.about && !longerWhy ? h("p", { class: "note" }, t("results.run_longer_about", { wall: longer.about })) : null,
+        longer && longer.note && !longerWhy ? h("p", { class: "note" }, longer.note) : null,
         longerWhy ? h("p", { class: "note" }, longerWhy) : null,
         h("div", { class: "btns" }, longerButton),
         longer ? showCommand(longer.command, { always: true }) : null),
@@ -172,6 +182,9 @@ async function guidedResults(body, id, page) {
     drawingNote.hidden = !(behind && behind.behind > 0);
     drawingNote.textContent = drawingNote.hidden ? "" : t("watch.drawing",
       { drawn: behind.drawn, saved: behind.saved, wall: wallWords(behind.about_s) });
+    favourites = favouritesOf(data.quicklook_run);
+    view.setOrder([...favourites, ...(data.more_looks || []).map((row) => row.id)], favourites);
+    setLongRun(totalOf());
     view.update(looksOf(), keep);
     paintWhat();
     paintMore();
@@ -269,7 +282,7 @@ function slicesPanel(id, getTime) {
       if (img.parentElement.tagName === "A") img.parentElement.href = reply.picture_url;
       fig.hidden = false;
       const r = reply.result || {};
-      cap.replaceChildren(h("b", {}, label(r)), h("span", {}, clock(r.time_s || 0)));
+      cap.replaceChildren(h("b", {}, label(r)), h("span", {}, stormClock(r.time_s || 0)));
       return r;
     } catch (err) {
       if (err.command) cmd.replaceChildren(showCommand(err.command) || "");
@@ -342,7 +355,7 @@ async function advancedResults(body, id, page) {
   const view = viewer({ slider: true, thumbs: false, empty: "No quick-looks yet: they are drawn as frames land.",
     emptyFor: (look) => { const row = (data.more_looks || []).find((r) => r.id === look.id); return row ? row.why_not : null; },
     caption: (look, f) => [h("b", {}, look.title || look.id), h("span", {}, f.time_s === null || f.time_s === undefined ?
-      "a film picture · a click opens it" : `${clock(f.time_s || 0)} · a click opens the full picture`)],
+      "a film picture · a click opens it" : `${stormClock(f.time_s || 0)} · a click opens the full picture`)],
     note: (look, f) => stormLine(f),
     onTime: (time, f) => {
       if (f && f.time_s !== null && f.time_s !== undefined) { shownTime = time; clockEl.set(time, frameWords()); }
@@ -387,7 +400,7 @@ async function advancedResults(body, id, page) {
     const restartSel = h("select", { class: "input", style: "width:auto", "aria-label": "Continue from" },
       h("option", { value: "" }, "the last restart"),
       (data.restarts || []).map((r) => h("option", { value: String(r.number) },
-        `restart ${r.number} (${clock(r.model_time_s || 0)}, segment ${String(r.segment).padStart(3, "0")})`)));
+        `restart ${r.number} (${stormClock(r.model_time_s || 0)}, segment ${String(r.segment).padStart(3, "0")})`)));
     const until = h("input", { class: "input num", style: "width:100px", placeholder: "T+2:30:00",
       "aria-label": "to (storm time, T+H:MM:SS)", value: continueClock(st) });
     const resume = actionButton(id, "resume", "Continue", {
@@ -404,7 +417,7 @@ async function advancedResults(body, id, page) {
     });
     resume.button.disabled = !actions.has("resume");
     resume.button.title = actions.has("resume") ? "" : (LIVE_STATES.includes(st.state) ? "offered once the run ends" :
-      "no restart to continue from: this run stopped before its first restart");
+      (st.no_resume_why || "no restart to continue from: this run stopped before its first restart"));
     const formatSel = h("select", { class: "input", style: "width:auto", "aria-label": "Format" },
       h("option", { value: "" }, "as the namelist asks"), h("option", { value: "nc" }, "netCDF"),
       h("option", { value: "grads" }, "GrADS"));
@@ -450,6 +463,7 @@ async function advancedResults(body, id, page) {
   function paintAll(keep) {
     const st = data.status || {};
     const run = data.quicklook_run || {};
+    setLongRun(st.duration_s || 0);
     page.setData([id, run.grid || gridWords(st.grid), st.label].filter(Boolean).join(" · "));
     viewOnly.replaceChildren();
     if (data.view_only) {

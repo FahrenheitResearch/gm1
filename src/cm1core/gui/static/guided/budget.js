@@ -99,7 +99,11 @@ function youGet(fit, p) {
   if (f.domain_km) {
     rows.push(row("area", `${km(f.domain_km[0])} × ${km(f.domain_km[1])} km (${t("budget.cells", { nx: f.nx, ny: f.ny })})`, `${f.nx}, ${f.ny}`));
   }
-  if (f.nz) rows.push(row("levels", `${f.nz} × ${metres(f.dz_m)}`, `${f.nz}, ${real(f.dz_m)}`));
+  // A stretched column has no one spacing: it says its thinnest and thickest level.
+  if (f.nz && f.stretch_z && f.dz_bottom_m && f.dz_top_m) {
+    rows.push(row("levels", t("budget.levels_stretched", { count: f.nz, bottom: metres(f.dz_bottom_m), top: metres(f.dz_top_m) }),
+      `${f.nz}, ${f.dz_bottom_m}, ${f.dz_top_m}`));
+  } else if (f.nz) rows.push(row("levels", `${f.nz} × ${metres(f.dz_m)}`, `${f.nz}, ${real(f.dz_m)}`));
   if (f.dt_s) rows.push(row("time_step", `${Number(Number(f.dt_s).toPrecision(7))} s`, Number(Number(f.dt_s).toPrecision(7))));
   if (f.duration_s) rows.push(row("storm_time", spanWords(f.duration_s), f.duration_s));
   if (f.output_interval_s) rows.push(row("picture_every", spanWords(f.output_interval_s), f.output_interval_s));
@@ -209,6 +213,8 @@ export async function budget(body, args) {
     fitNow();
   }
   const summary = h("p", { class: "g-summary text", tabindex: "-1" });
+  // The settings of the fitted storm (the preset's and the user's own) that are not yet compared with CM1.
+  const unchecked = h("p", { class: "note g-unchecked", hidden: true });
   const help = h("div", { class: "g-cz-help" });
   const got = h("div", {});
   // What an offered run should be read with (the storm near the edge, an untried size or spacing): it still runs.
@@ -248,7 +254,7 @@ export async function budget(body, args) {
     },
   }) : null;
 
-  const left = h("section", { class: "panel" }, choice, panel ? panel.el : null, summary, notes, help, got,
+  const left = h("section", { class: "panel" }, choice, panel ? panel.el : null, summary, notes, unchecked, help, got,
     yours, changesHead, changes,
     h("div", { class: "btns g-go" }, start, h("a", { href: "#/guided" }, t("budget.back"))), cmd,
     h("p", { class: "note" }, t("budget.estimated")));
@@ -273,7 +279,10 @@ export async function budget(body, args) {
     const what = changedWords(state.custom, own ? null : state.environment, knobsById);
     if (!what) { caption.textContent = base; return; }
     let text = t("custom.caption", { name: p.name, what });
-    if (changesStorm(state.custom, own ? null : state.environment, knobsById)) text += ` ${t("custom.caption_storm")}`;
+    if (changesStorm(state.custom, own ? null : state.environment, knobsById)) {
+      // A hurricane has no air or push to change: its one storm setting is the sea temperature.
+      text += ` ${t(knobsById.sea ? "custom.caption_storm_sea" : "custom.caption_storm")}`;
+    }
     caption.textContent = text;
   }
 
@@ -418,6 +427,7 @@ export async function budget(body, args) {
     hold();
     try {
       summary.textContent = t("budget.fitting");
+      unchecked.hidden = true;
       help.replaceChildren();
       notes.replaceChildren();
       got.replaceChildren();
@@ -482,6 +492,9 @@ export async function budget(body, args) {
         });
         notes.replaceChildren(h("h2", { class: "cap" }, t("budget.notes")), h("ul", { class: "g-changes g-notes-list" }, items));
       }
+      const notCompared = fit.not_compared || [];
+      unchecked.textContent = notCompared.length ? `${t("gallery.not_compared")} ${notCompared.join(" ")}` : "";
+      unchecked.hidden = !notCompared.length;
       got.replaceChildren(h("h2", { class: "cap" }, t("budget.you_get")), youGet(fit, p));
       const sentences = fit.sentences || [];
       changesHead.hidden = false;

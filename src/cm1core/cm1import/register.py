@@ -323,6 +323,29 @@ def run_rows(builder: "_Builder", component: str) -> list[Row]:
             evidence="records/CM1-CADENCE-MAP.md",
             stage="register",
         ))
+    # CM1's adaptive large step on a stretched column.  Measured on CM1's hurricane case (59 stretched levels,
+    # 50 m at the bottom, 8 km across): with adapt_dt = 1 GM1's storm parts from CM1's once rain forms, runs
+    # stopped early (hours 20.8 and 29.1) and the one that ended made a far weaker storm; with adapt_dt = 0 at
+    # 7.5 s it stays close to CM1's until the last day (records/GM1-HURRICANE-RUNS.json).
+    # A uniform column with adapt_dt = 1 has not shown this and gets no row.
+    if _int(effective, "adapt_dt") == 1 and _int(effective, "stretch_z") >= 1 and "adapt_dt" in builder.stated:
+        rows.append(Row(
+            category="differs",
+            keys=("adapt_dt",),
+            value=builder.written("adapt_dt"),
+            text=(
+                "CM1's adaptive time step on stretched levels. On CM1's hurricane case GM1's storm parts from "
+                "CM1's once rain forms (rain an hour early, much colder air near the sea, a far weaker storm) "
+                "and runs stopped early; with a fixed step (adapt_dt = 0, dtl = 7.5) GM1's storm stays close to "
+                "the one CM1 makes on its own adaptive step until the last day, when GM1's holds its strength "
+                "and CM1's weakens (measured; the numbers are in the evidence record)"
+            ),
+            fix="set adapt_dt = 0 and a dtl the storm's fastest wind allows (the hurricane presets use 7.5 s)",
+            plain=("The time step that changes with the storm runs differently from CM1's on stretched levels: "
+                   "on the hurricane case it stopped early or made a much weaker storm (measured)."),
+            evidence="records/GM1-HURRICANE-RUNS.json",
+            stage="register",
+        ))
     seed = builder.settings.get("initialization", {}).get("random_seed")
     # With no seed the run draws CM1's own random numbers (random_generator =
     # "cm1"), which match CM1 word for word; only a chosen seed differs.
@@ -485,11 +508,14 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
             keys=keys,
             value=builder.values(keys),
             text=(
-                "The semi-slip bottom with the surface layer (bbc = 3, sfcmodel = 1) has not been "
-                "compared with CM1 in a storm; the 15-minute 100 m bubble check at these settings is "
-                "still to run"
+                "The semi-slip bottom with the surface layer (bbc = 3, sfcmodel = 1) has been compared with "
+                "CM1 in one storm on one card: CM1's supercell with cecd = 1 on an RTX 4090, where nine "
+                "mature-phase statistics are 0.986 to 1.018 of CM1's and max vertical vorticity is 1.072 "
+                "(measured). It has not been compared in any other storm or on any other card, and the "
+                "15-minute 100 m bubble check at these settings is still to run"
             ),
-            plain="The ground-friction setup has not been checked against CM1 in a storm.",
+            plain=("Ground friction has been compared with CM1 in one storm on one card only: CM1's supercell "
+                   "on an RTX 4090 (measured)."),
             evidence="records/CM1-SUPPORT-MATRIX.csv",
             stage="register",
         ))

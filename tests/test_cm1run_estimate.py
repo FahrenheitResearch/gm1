@@ -647,6 +647,75 @@ def test_a_run_that_shared_the_card_does_not_make_the_next_estimate_longer(monke
     assert price(deck, gpu, host=HOST).step["seconds_per_step"] == pytest.approx(0.151)
 
 
+def test_the_record_times_the_hurricane_grids_on_an_rtx_4090_until_this_machine_has_run_them() -> None:
+    """A computer that has run nothing prices a grid the record has timed on its card at that time, not from the
+    two-term model: the 8 km hurricane grid steps faster on an RTX 4090 than the reference computer's floor, and
+    the 4 km grid faster than the estimated per-cell rate.  This machine's own run of the grid replaces it."""
+
+    card, component = "NVIDIA GeForce RTX 4090", "morrison-mp10"
+    model = rates.step_model(card, component, cache=[])
+    row = rates.load_record()["cards"]["rtx 4090"]["rates"][component]
+    receipts = rates.load_record()["receipts"]
+    assert [(p["nx"], p["ny"], p["nz"], p["seconds_per_step"]) for p in row["grid_points"]] == [
+        (128, 128, 59, 0.0198), (256, 256, 59, 0.0642)]
+    for point in row["grid_points"]:
+        cells = point["nx"] * point["ny"] * point["nz"]
+        assert receipts[point["receipt"]]["receipt"] == "kept" and point["label"] == "measured"
+        assert model.regime(cells, 1) == "this-grid"
+        assert model.seconds_per_step(cells, 1) == pytest.approx(point["seconds_per_step"])
+        assert model.label_for(cells, 1) == "measured" and model.band_for(cells, 1) == pytest.approx(0.25)
+        basis = model.basis_for(cells, 1)
+        assert "measured on this kind of card at this grid's size" in basis and "on one computer" in basis
+        assert "this machine" in basis and f"{point['seconds_per_step']:.4f} s/step" in basis
+        priced = model.record(cells, 1)
+        assert priced["receipts"] == [point["receipt"]] and priced["label_used"] == "measured"
+        # The two-term model would say otherwise: the floor for the small grid, the estimated rate for the large.
+        assert max(model.host_s(1), model.device_s(cells)) > 1.3 * point["seconds_per_step"]
+    # The 8 km run shared the card at first: the point is its quiet part, faster than the whole run's mean.
+    assert "0.0311 s" in row["grid_points"][0]["basis"] and row["grid_points"][0]["steps"] < 46080
+    # Any other grid on that card is priced from the two terms as before, and so is every other card.
+    stock = 120 * 120 * 40
+    assert model.regime(stock, 1) == "floor" and model.seconds_per_step(stock, 1) == pytest.approx(model.floor_s)
+    assert model.regime(128 * 128 * 59, 4) != "this-grid"
+    for other in ("NVIDIA GeForce RTX 3080", "NVIDIA GeForce RTX 5090", "NVIDIA GeForce RTX 4060"):
+        assert rates.step_model(other, component, cache=[]).same_grid(128 * 128 * 59, 1) == []
+    assert rates.step_model(card, "wsm6-mp6", cache=[]).same_grid(128 * 128 * 59, 1) == []
+    # This machine's own run of the grid replaces the record's point, even when it is slower.
+    own = rates.MeasuredPoint.from_record({
+        "gpu_name": card, "component": component, "cells": 128 * 128 * 59, "nx": 128, "ny": 128, "nz": 59,
+        "seconds_per_step": 0.031, "steps": 46080, "receipt": "mine", "tiles": 1})
+    mine = rates.step_model(card, component, cache=[own])
+    assert mine.seconds_per_step(128 * 128 * 59, 1) == pytest.approx(0.031)
+    assert mine.label_for(128 * 128 * 59, 1) == "measured-here"
+    assert "measured on this machine at this grid's size" in mine.basis_for(128 * 128 * 59, 1)
+    # ... and the grid it has not run keeps the record's.
+    assert mine.seconds_per_step(256 * 256 * 59, 1) == pytest.approx(0.0642)
+    assert mine.label_for(256 * 256 * 59, 1) == "measured"
+
+
+def test_the_hurricane_points_are_the_quiet_part_of_the_kept_event_logs() -> None:
+    """The record's two hurricane step times, read again from the runs' kept event logs."""
+
+    from dev_records import RATES_RECEIPT_FILES  # absent from the public snapshot
+
+    row = rates.load_record()["cards"]["rtx 4090"]["rates"]["morrison-mp10"]
+    for point, first in zip(row["grid_points"], (10755, 158)):
+        raw = gzip.decompress(RATES_RECEIPT_FILES[point["receipt"]]["events"].read_bytes()).decode("utf-8")
+        progress = [json.loads(line) for line in raw.splitlines()]
+        progress = [r for r in progress
+                    if r.get("kind") == "progress" and r.get("phase") == "stepping" and r.get("step")]
+        start = next(r for r in progress if r["step"] == first)
+        end = progress[-1]
+        seconds = (end["elapsed_s"] - start["elapsed_s"]) / (end["step"] - start["step"])
+        assert round(seconds, 4) == point["seconds_per_step"] and end["step"] - start["step"] == point["steps"]
+        # From that step on nothing else was on the card (its memory in use is this run's own).
+        assert all(r["gpu"]["memory_used_bytes"] < 5e9 for r in progress if r["step"] >= first)
+        receipt = json.loads(gzip.decompress(RATES_RECEIPT_FILES[point["receipt"]]["path"].read_bytes()))
+        grid = receipt["runtime_benchmark"]["config"]["grid"]
+        assert (grid["nx"], grid["ny"], grid["nz"]) == (point["nx"], point["ny"], point["nz"])
+        assert receipt["runtime_benchmark"]["gpu_name"] == "NVIDIA GeForce RTX 4090"
+
+
 def test_measure_speed_gives_the_harness_the_budget_its_own_peak_needs(tmp_path, monkeypatch) -> None:
     """A 600 x 600 x 80 deck prices well over 8 GB of registry; the importer's
     8192 MiB would have refused the measurement on a 32 GB card."""

@@ -192,8 +192,9 @@ def test_each_setup_screen_endpoint_answers_its_contract(mixed):
     assert supercell["exit"] == 0 and supercell["guided"]["offered"] is True
     assert supercell["grid"] == {"nx": 120, "ny": 120, "nz": 40, "dx": 1000.0, "dy": 1000.0, "dz": 500.0}
     assert supercell["estimate"]["fits"] is True and supercell["estimate"]["smallest_card_gb"] == 8
-    # Guided mode offers only what GM1 runs as CM1 does, and says why when not (the repeating sides).
-    assert squall["guided"]["offered"] is False and "Repeating sides" in squall["guided"]["why_not"]
+    # The squall line's repeating sides no longer hold it back; guided mode still greys it, as it greys the
+    # preset made from this namelist, because nobody has run it on a GPU yet.
+    assert squall["guided"]["offered"] is False and "not run yet" in squall["guided"]["why_not"]
     assert supercell["commands"]["import"].startswith("gpuwm-cm1 import ")
     contracts["GET /api/examples"] = _shape({**ex, "examples": ex["examples"][:1]})
 
@@ -506,12 +507,15 @@ def test_cm1s_two_examples_are_packaged_with_their_digests():
     # The rows whose source is not one file: the defaults table and CM1's own output (two).
     rows_by_path = {row["path"]: row["source_path"] for row in authority["redistribution"]["bundled"]}
     assert bundled == {"run/config_files/supercell/namelist.input", "run/config_files/squall_line/namelist.input",
+                       "run/config_files/hurricane_3d_cpm/namelist.input",
+                       "run/config_files/hurricane_3d_cpm/input_sounding",
                        "run/LANDUSE.TBL", "run/namelist.input", rows_by_path["src/cm1core/records/CM1-R21-NAMELIST-DEFAULTS.json"],
                        rows_by_path["tests/data/cm1-ref-24x24/"],
                        rows_by_path["rust/cm1-state/evidence/cm1-base-columns.txt"],
                        rows_by_path["src/cm1core/records/CM1-R22-NEW-KEYS.json"],
                        rows_by_path["src/cm1core/records/CM1-KEY-ALIASES.json"],
-                       rows_by_path["src/cm1core/records/CM1-STOCK-SUPERCELL-SERIES.json"]}
+                       rows_by_path["src/cm1core/records/CM1-STOCK-SUPERCELL-SERIES.json"],
+                       rows_by_path["src/cm1core/records/GM1-HURRICANE-RUNS.json"]}
     in_the_package = {row["path"] for row in authority["redistribution"]["bundled"]
                       if row["path"].startswith("src/cm1core/data/")}
     assert in_the_package == {"src/cm1core/data/cm1r21.1-supercell-namelist.input",

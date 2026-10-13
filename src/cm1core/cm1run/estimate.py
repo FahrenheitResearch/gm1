@@ -280,16 +280,23 @@ def storm_track(
             "spans origin_km to origin_km + domain_km"
         ),
     }
+    #: CM1's hurricane start (iinit = 7, init3d.F): a swirl centred on the area in air with no background wind.
+    swirl = selection.iinit == 7
     if not any(sides):
         return {
             **base, "status": "not-evaluated-doubly-periodic",
-            "reason": "Every side repeats (wbc = ebc = sbc = nbc = 1), so a storm cannot leave the area.",
+            "reason": "Every side repeats (wbc = ebc = sbc = nbc = 1), so a storm cannot leave the area."
+            + (" The run starts from a swirl at the centre of the area with no background wind, so the storm "
+               "stays near the centre." if swirl else ""),
             "meets_edge_rule": True,
         }
     if selection.iinit != 1:
         return {
             **base, "status": "not-evaluated-not-a-warm-bubble",
             "reason": (
+                "The run starts from a swirl at the centre of the area (iinit = 7) with no background wind, so "
+                "the storm stays near the centre; the track model for a warm bubble does not apply."
+                if swirl else
                 f"The track model follows CM1's warm bubble (iinit = 1); iinit = {selection.iinit} "
                 "starts the storm another way, whose motion it does not describe."
             ),
@@ -660,6 +667,10 @@ def duration_words(seconds: float) -> str:
     if minutes < 90:
         return f"{minutes:.0f} min" if minutes >= 10 or abs(minutes - round(minutes)) < 0.05 else f"{minutes:.1f} min"
     hours = minutes / 60.0
+    if hours >= 48.0 and abs(hours - round(hours)) < 0.05:
+        # Two days or more is said in days: "4 days", "3 days 15 h".
+        days, rest = divmod(int(round(hours)), 24)
+        return f"{days} days" if rest == 0 else f"{days} days {rest} h"
     if abs(hours - round(hours)) < 0.05:
         return f"{round(hours):.0f} h"
     return f"{hours:.1f} h"
@@ -719,6 +730,27 @@ def device_need(priced_peak: int, cells: int, component: str) -> tuple[float, st
     """
 
     return _device_need(priced_peak, cells, component)
+
+
+#: CM1's adaptive large step (adapt_dt = 1) starts at dtl and may grow to twice dtl (misclibs.F:654).  Measured
+#: on GM1's two hurricane runs (4 days each, dtl = 7.5 s, RTX 4090): 23128 steps at 8 km and 24621 at 4 km, a
+#: mean step of 1.99 and 1.87 times dtl.  Only a run started from CM1's hurricane swirl (iinit = 7) is priced
+#: with it: a thunderstorm's updraft holds the step down, and no adaptive thunderstorm run has been measured.
+ADAPTIVE_HURRICANE_STEP_OF_DTL = 1.85
+
+
+def _adaptive_hurricane(config: Any) -> bool:
+    """Whether the run takes CM1's adaptive large step from CM1's hurricane swirl (the one measured case)."""
+
+    try:
+        if not bool(config.dynamics.adaptive_timestep):
+            return False
+        from .. import cartesian_door as door
+
+        selection, _ = door.require_initializer_selection(config)
+        return int(selection.iinit) == 7
+    except Exception:  # noqa: BLE001 - a deck the door cannot read is priced at its declared step
+        return False
 
 
 def _counts(config: Any) -> tuple[int, int, int]:
@@ -931,7 +963,10 @@ def price(
     startup_model = record["startup"]
     io = record["io"]
     startup = float(startup_model["fixed_s"]) + float(startup_model["per_cell_s"]) * cells
-    stepping = steps * step_s
+    # A hurricane on the adaptive step takes fewer, longer steps than timax / dtl (see the constant).
+    adaptive = _adaptive_hurricane(config)
+    priced_steps = int(math.ceil(steps / ADAPTIVE_HURRICANE_STEP_OF_DTL)) if adaptive else steps
+    stepping = priced_steps * step_s
     writes = (
         frames * (frame_bytes / (float(io["snapshot_gb_s"]) * GB) + float(io["field_scan_s"]))
         + max(0, restarts - 1) * restart_bytes / (float(io["snapshot_gb_s"]) * GB)
@@ -941,10 +976,15 @@ def price(
     wall = Quantity(
         wall_s, "estimated",
         (
-            f"start-up {startup:.0f} s + {steps} steps x {step_s:.4f} s ({model.regime(cells, tiles)} regime: "
+            f"start-up {startup:.0f} s + {priced_steps} steps x {step_s:.4f} s ({model.regime(cells, tiles)} regime: "
             f"{model.basis_for(cells, tiles)}) + writes {writes:.0f} s"
+            + (f"; the time step adapts (adapt_dt = 1), so the {steps} steps of {config.run.dt_s:g} s are priced "
+               f"as {priced_steps} longer ones: on GM1's hurricane runs the step averaged "
+               f"{ADAPTIVE_HURRICANE_STEP_OF_DTL:g} times dtl or more (measured)" if adaptive else "")
         ),
-        low=wall_s * (1 - step_band), high=wall_s * (1 + step_band), unit="s",
+        low=wall_s * (1 - step_band),
+        # Should the storm hold the step at dtl for the whole run, it takes every declared step.
+        high=(startup + steps * step_s + writes if adaptive else wall_s) * (1 + step_band), unit="s",
         basis_label=step_label,
     )
     step_record = model.record(cells, tiles)

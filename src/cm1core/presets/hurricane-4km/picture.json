@@ -1,0 +1,30 @@
+{
+  "schema": "gpuwm-cm1.preset-picture/v1",
+  "caption": "Wind at the lowest level, T+90 h (3 d 18 h), from a run at 4 km on an RTX 4090. Simulated.",
+  "run": {
+    "name": "hurricane-4km-20261012-0250",
+    "preset": "hurricane-4km",
+    "budget": "overnight",
+    "grid": {
+      "nx": 256,
+      "ny": 256,
+      "nz": 59,
+      "dx_m": 4000.0,
+      "dz_m": 500.0,
+      "duration_s": 345600.0
+    },
+    "gpu": "NVIDIA GeForce RTX 4090",
+    "gm1_version": "0.1.2",
+    "gm1_commit": null,
+    "model_time_s": 324000.0,
+    "look": "wind-lowest",
+    "quicklook_sha256": "26e994d3e10bb8a8634632e5b6db7fca8e5fa968f9f01eec12ec9954b4b802ce",
+    "renderer": "gpuwm-cm1 quicklook, drawn on the CPU from the run frames",
+    "made_utc": "2026-10-12T02:50:04.357+00:00"
+  },
+  "size": [
+    960,
+    540
+  ],
+  "palette": "octree"
+}

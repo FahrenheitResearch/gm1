@@ -319,27 +319,44 @@ class CoverageReport:
     def guided(self) -> dict[str, Any]:
         """What guided mode needs: whether a beginner may be offered this run, and why not.
 
-        Guided mode offers only what GM1 runs as CM1 does: no
-        refusal, nothing to acknowledge, nothing not yet checked against CM1,
-        and no microphysics that measurably runs differently from CM1's (the
-        "Runs differently" row that carries the stock-deck ratios: WSM6, or
-        Morrison should a ratio leave its release band; the 5 % target is
-        printed, not a gate).  The other "Runs
-        differently" rows (output words, statistics cadence, the random
-        stream) do not change the storm a beginner sees and do not block.
-        ``why_not`` holds the plain sentences, most important first; the
-        gallery card shows the first.
+        Guided mode offers what GM1 runs: no refusal, nothing to
+        acknowledge, and no microphysics that measurably runs differently
+        from CM1's (the "Runs differently" row that carries the stock-deck
+        ratios: WSM6, or Morrison should a ratio leave its release band; the 5 % target
+        is printed, not a gate).
+        The other "Runs differently" rows (output words, statistics cadence,
+        the random stream) do not change the storm a beginner sees and do
+        not block.  ``why_not`` holds the plain sentences, most important
+        first; the gallery card shows the first.
+
+        A setting that runs but has not yet been compared with CM1 (a "Not
+        yet checked against CM1" row) does not block: the run is offered,
+        and ``not_compared`` lists those rows' plain sentences so the card
+        and the budget screen can say "Runs, not yet compared with CM1: ...".
+        Such a row still blocks while it asks for an acknowledgment that has
+        not been given (Thompson's limited checking).  A report with no such
+        row has no ``not_compared`` key, so it is byte for byte what it was.
         """
 
         reasons: list[str] = []
+        not_compared: list[str] = []
+        missing = self.missing_acknowledgments
         for category in ("refused", "not_read", "not_checked", "differs"):
             for row in self.category(category):
                 if category == "differs" and row.expand != "ratios":
                     continue
                 text = row.plain or row.text
-                if text and text not in reasons:
-                    reasons.append(text)
-        return {"offered": not reasons, "why_not": reasons[0] if reasons else None, "reasons": reasons}
+                if not text:
+                    continue
+                runs_unchecked = category == "not_checked" and row.acknowledge not in missing
+                target = not_compared if runs_unchecked else reasons
+                if text not in target:
+                    target.append(text)
+        guided: dict[str, Any] = {"offered": not reasons, "why_not": reasons[0] if reasons else None,
+                                  "reasons": reasons}
+        if not_compared:
+            guided["not_compared"] = not_compared
+        return guided
 
     @property
     def not_r21_summary(self) -> str:

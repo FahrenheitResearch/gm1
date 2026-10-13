@@ -86,7 +86,7 @@ export async function presetPanel() {
     },
   });
   panel.append(
-    h("p", { class: "note", style: "margin-top:0" }, "A preset is a CM1 r21.1 namelist GM1 runs as CM1 does. It is ",
+    h("p", { class: "note", style: "margin-top:0" }, "A preset is a CM1 r21.1 namelist GM1 runs. It is ",
       "fitted to this GPU's free memory and the time picked (a smaller area, then a coarser grid, then a shorter ",
       "storm time), and every change is written to fit.json. The run folder opens in the namelist editor."),
     form, about,

@@ -42,9 +42,13 @@ GALLERY = {
     "famous": ["oun-2013-05-20", "oun-1999-05-03", "oun-2011-05-24", "bmx-2011-04-27", "oun-2019-05-20",
                "dnr-2015-06-01", "iln-2012-06-29", "tlh-2004-09-15", "jan-2014-06-30"],
     "explore": ["your-environment", "split-straight", "multicell-wk", "pulse-calm"],
-    "other": ["line-open", "gust-front", "bubble-cloud-250m", "squall-line-1km", "squall-line-250m"],
+    # The two hurricanes lead their group, so both show in its first row, before "Show all".
+    "other": ["hurricane-8km", "hurricane-4km", "line-open", "gust-front", "bubble-cloud-250m", "squall-line-1km",
+              "squall-line-250m"],
 }
-NEW = [pid for group in ("famous", "explore", "other") for pid in GALLERY[group] if not pid.startswith("squall")]
+#: The cards that carry a picture of their own run; the squall lines and the hurricanes have their own tests.
+NEW = [pid for group in ("famous", "explore", "other") for pid in GALLERY[group]
+       if not pid.startswith(("squall", "hurricane"))]
 
 
 def _library():

@@ -76,5 +76,7 @@
   },
   "min_duration_s": 7200,
   "shrink": "repeating-first",
+  "offered": false,
+  "not_offered_reason": "Not offered yet: not run yet. Nobody has run this storm on a GPU as it is set up here.",
   "min_along_repeating_km": 30
 }

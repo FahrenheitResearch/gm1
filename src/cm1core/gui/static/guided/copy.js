@@ -60,6 +60,11 @@ export function wallWords(seconds) {
 
 export function spanWords(seconds) {
   const s = Math.round(seconds);
+  if (s >= 172800 && s % 3600 === 0) {
+    // Two days or more is said in days: "4 days", "3 days 12 h".
+    const days = Math.floor(s / 86400), rest = (s % 86400) / 3600;
+    return rest ? `${days} days ${rest} h` : `${days} days`;
+  }
   if (s % 3600 === 0) return `${s / 3600} h`;
   if (s >= 3600) return `${Math.floor(s / 3600)} h ${Math.round((s % 3600) / 60)} min`;
   if (s % 60 === 0) return `${s / 60} min`;

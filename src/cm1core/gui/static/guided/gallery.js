@@ -2,7 +2,8 @@
 // Other storm types and Famous environments (last while its cards are all greyed), each of the last three
 // showing one row and "Show all N" until it is opened, in place. A card per preset: its picture from a real run, a plain name, one line of what it makes,
 // and "About N min on your GPU" from the fit. A preset GM1 cannot offer here stays, greyed, with one line saying
-// why. A card that is not a preset folder (the WRF or ArWen column) joins through registerCard.
+// why. A storm with a setting not yet compared with CM1 runs and says so on its card ("Runs, not yet compared with
+// CM1: ..."). A card that is not a preset folder (the WRF or ArWen column) joins through registerCard.
 
 import { h } from "../js/core.js";
 import * as api from "../js/api.js";
@@ -51,11 +52,15 @@ export async function fitCard(p, extraBody = {}) {
   return last;
 }
 
-// Say what a fit reply means on a card: About N min, or greyed with the reason.
-export function showFit(card, fitLine, why, choose, reply) {
+// Say what a fit reply means on a card: About N min, or greyed with the reason. own: the time the card opens on
+// by itself; when the storm only fits a longer one here, the card says which one it opens on.
+export function showFit(card, fitLine, why, choose, reply, own) {
   const fit = reply.fit || {};
   if (reply.offered) {
     fitLine.textContent = aboutLine(fit);
+    // Its own line under the time: the card opens on a longer time than its own, and says which.
+    why.textContent = own && fit.budget && fit.budget !== own.budget && fit.budget_words
+      ? t("gallery.needs_budget", { own: String(own.budget_words || "").toLowerCase(), budget: fit.budget_words }) : "";
     card.classList.remove("off");
     choose.disabled = false;
     return fit.budget;
@@ -71,6 +76,9 @@ export function showFit(card, fitLine, why, choose, reply) {
 function presetCard(p, alive) {
   const fitLine = h("p", { class: "g-fit" }, p.offered ? t("gallery.checking") : "");
   const why = h("p", { class: "g-why" }, p.offered ? "" : (p.why_not || t("gallery.not_offered")));
+  // The settings this storm runs that are not yet compared with CM1, in the guided check's own sentences.
+  const unchecked = (p.not_compared || []).length
+    ? h("p", { class: "note g-unchecked" }, `${t("gallery.not_compared")} ${p.not_compared.join(" ")}`) : null;
   const choose = h("button", { class: "btn primary", type: "button", disabled: true }, t("gallery.choose"));
   // "Customize": the same budget screen with its Customize this storm panel open (not on a withheld storm: nothing
   // in the panel could make it offered).
@@ -82,7 +90,7 @@ function presetCard(p, alive) {
       h("p", { class: "g-line" }, p.line),
       p.group === "famous" ? h("p", { class: "g-idealized" }, t("gallery.famous_note")) : null,
       p.facts ? h("p", { class: "g-facts" }, `${p.facts.words} · ${p.facts.scheme}`) : null,
-      fitLine, why,
+      fitLine, why, unchecked,
       h("div", { class: "btns" }, choose, customize)));
   let budget = p.budget;
   choose.addEventListener("click", () => go(`guided/fit/${encodeURIComponent(p.id)}/${budget}`));
@@ -93,7 +101,7 @@ function presetCard(p, alive) {
     card.fitted = true;
     fitCard(p).then((reply) => {
       if (!alive() || !reply) return;
-      const got = showFit(card, fitLine, why, choose, reply);
+      const got = showFit(card, fitLine, why, choose, reply, p);
       if (got) budget = got;
       if (customize) customize.disabled = choose.disabled;
     }).catch((err) => {

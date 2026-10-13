@@ -1207,13 +1207,24 @@ def _changes(
     return changes
 
 
+def article(words: str) -> str:
+    """"A" or "An" before a number as it is said aloud: an 8 km grid, an 82.9 m grid, an 11 km area, a 100 m grid."""
+
+    whole = re.match(r"\d*", words.strip()).group(0)
+    vowel = whole.startswith("8") or (whole[:2] in ("11", "18") and len(whole) % 3 == 2)
+    return "An" if vowel else "A"
+
+
 def _summary(candidate: Candidate, estimate: Estimate, gpu: GpuInfo | None) -> str:
     width = candidate.nx * candidate.dx_m / 1000.0
     depth = candidate.ny * candidate.dx_m / 1000.0
     area = f"A {width:.0f} × {depth:.0f} km area" if abs(width - depth) > 0.5 else f"A {width:.0f} × {width:.0f} km area"
-    if abs(width - round(width)) > 0.05 or abs(depth - round(depth)) > 0.05:
-        # An area that is not a whole number of km (a grid spacing of the user's own) is said exactly, with its cells.
-        area = f"A {width:.1f} × {depth:.1f} km area ({candidate.nx} × {candidate.ny} cells)"
+    odd_spacing = abs(candidate.dx_m / 50.0 - round(candidate.dx_m / 50.0)) > 1e-6
+    if odd_spacing or abs(width - round(width)) > 0.05 or abs(depth - round(depth)) > 0.05:
+        # A spacing of the user's own that is not a round number (67 m, 82.9 m), or an area that is not a whole
+        # number of km, is said exactly, with its cells, whether or not the area comes out whole.
+        size = f"{width:.1f} × {depth:.1f}"
+        area = f"{article(size)} {size} km area ({candidate.nx} × {candidate.ny} cells)"
     card = "an RTX 3080 (no GPU found here)" if gpu is None else f"your {_short_name(gpu.name)}"
     wall = duration_words(estimate.wall_s)
     return (

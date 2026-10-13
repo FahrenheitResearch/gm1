@@ -10,14 +10,14 @@ import { h } from "../js/core.js";
 import { t, term, metres, spanWords } from "./copy.js";
 
 // The knobs the route keeps, in the panel's order (#/guided/fit/ID/BUDGET?grid=500&area=96&...).
-export const KNOB_QUERY = ["grid", "levels", "area", "time", "pictures", "push", "bubble", "bumps", "rotation", "parcels"];
+export const KNOB_QUERY = ["grid", "levels", "area", "time", "pictures", "push", "bubble", "bumps", "sea", "friction", "rotation", "parcels"];
 const PINNABLE = ["grid", "area", "time", "pictures"];
 // The choices guided mode greys that "All settings (Advanced)" can still carry into the run folder.
-const TO_ADVANCED = ["scheme", "friction"];
+const TO_ADVANCED = ["scheme"];
 const TERM = {
   grid: "grid_spacing", levels: "levels", area: "area", time: "storm_time", pictures: "picture_every",
   bubble: "bubble_size", bumps: "bumps", scheme: "scheme", friction: "friction", rotation: "rotation",
-  parcels: "parcels",
+  parcels: "parcels", sea: "sea",
 };
 const AIR_STEPS = 20;
 
@@ -94,6 +94,7 @@ function valueWords(knob, value) {
     case "pictures": return t("custom.every", { value: minutesWords(value) });
     case "push": return knob.kind === "bubble" ? `${value} K` : `${value} m/s`;
     case "bubble": return `${value} km`;
+    case "sea": return `${value} °C`;
     case "scheme": return { morrison: "Morrison", wsm6: "WSM6", thompson: "Thompson" }[value] || String(value);
     default:
       if (value === "on") return t("custom.on");
@@ -119,7 +120,7 @@ export function changedWords(custom, environment, knobs) {
 // Changes that make another storm (so the preset's picture is only a likeness).
 export function changesStorm(custom, environment, knobs) {
   const changed = changedKnobs(custom, knobs);
-  return Boolean(environment) || changed.includes("push") || changed.includes("bubble");
+  return Boolean(environment) || changed.includes("push") || changed.includes("bubble") || changed.includes("sea");
 }
 
 // A row of buttons, one pressed. Pressing the pressed one does nothing (no redraw, no refit).
@@ -330,7 +331,9 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     for (const v of values) {
       // The preset's own value is "As the preset" (or, for the fit's own levers, kept as a choice to hold it).
       if (v === knob.default && !pinnable) continue;
-      select.append(h("option", { value: String(v) }, valueWords(knob, v)));
+      // A choice with a note of its own says it beside the value ("5 days (not run yet)").
+      const noted = (knob.choices || []).find((c) => same(c.value, v) && c.note);
+      select.append(h("option", { value: String(v) }, noted ? `${valueWords(knob, v)} (${noted.note})` : valueWords(knob, v)));
     }
     select.value = state.custom[knob.id] !== undefined ? String(state.custom[knob.id]) : "";
     select.addEventListener("change", () => {
@@ -485,7 +488,7 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     const whyRows = greyed.map((c) => {
       if (!TO_ADVANCED.includes(knob.id)) return h("p", { class: "note g-cz-why" }, c.why);
       // Still a choice: "All settings (Advanced)" makes the folder with it set, one click.
-      const words = knob.id === "friction" ? t("custom.greyed_go_on") : t("custom.greyed_go", { what: valueWords(knob, c.value) });
+      const words = t("custom.greyed_go", { what: valueWords(knob, c.value) });
       const go = h("button", { type: "button", class: "linkbtn g-cz-adv" }, words);
       go.addEventListener("click", () => toAdvanced(go, { [knob.id]: c.value }));
       return h("p", { class: "note g-cz-why" }, `${c.why} `, go);
@@ -577,17 +580,21 @@ export function customizePanel(p, opts, state, { onChange, onAdvanced, onSeeWhy 
     const y = window.scrollY;
     const groups = {};
     const add = (group, rowEl) => { (groups[group] = groups[group] || []).push(rowEl); };
-    if (knobs.grid) add("size", gridRow(knobs.grid));
+    // Any spacing for the thunderstorms; a hurricane keeps its own grid choices (no slider, no typed value).
+    if (knobs.grid) add("size", knobs.grid.free ? gridRow(knobs.grid) : choiceRow(knobs.grid, knobs.grid.choices.map((c) => c.value)));
     if (knobs.levels) add("size", levelsRow(knobs.levels));
     if (knobs.area) add("size", areaRow(knobs.area));
-    if (knobs.time) add("size", choiceRow(knobs.time, knobs.time.choices.map((c) => c.value)));
+    if (knobs.time) add("size", choiceRow(knobs.time, knobs.time.choices.map((c) => c.value),
+      knobs.time.note ? h("p", { class: "note" }, knobs.time.note) : undefined));
     if (knobs.pictures) add("size", choiceRow(knobs.pictures, pictureChoices()));
     add("storm", airRow());
     if (knobs.push) add("storm", choiceRow(knobs.push, knobs.push.choices.map((c) => c.value)));
     if (knobs.bubble) add("storm", choiceRow(knobs.bubble, knobs.bubble.choices.map((c) => c.value)));
     if (knobs.bumps) add("storm", bumpsRow(knobs.bumps));
+    // A hurricane's sea surface temperature (its only storm setting: CM1 keeps the starting swirl in its code).
+    if (knobs.sea) add("storm", choiceRow(knobs.sea, knobs.sea.choices.map((c) => c.value), h("p", { class: "note" }, t("custom.sea_note"))));
     if (knobs.scheme) add("physics", switchRow(knobs.scheme));
-    if (knobs.friction) add("physics", switchRow(knobs.friction));
+    if (knobs.friction) add("physics", switchRow(knobs.friction, t("custom.friction_note")));
     if (knobs.rotation) {
       add("physics", switchRow(knobs.rotation, t(timeNow() < 60 ? "custom.rotation_note_short" : "custom.rotation_note")));
     }

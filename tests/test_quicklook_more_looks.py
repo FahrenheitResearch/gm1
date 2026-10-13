@@ -79,7 +79,9 @@ def test_the_more_looks_copy_lists_every_look_after_the_four_once():
     ids = [row["id"] for row in copy["more_looks"]]
     assert len(ids) == len(set(ids))
     assert not set(ids) & set(FAVOURITES)
-    assert set(ids) == (set(RD.LOOK_IDS) - set(FAVOURITES)) | {"swirl"}
+    # A hurricane run's own two looks are its favourites (copy "looks"), not More looks.
+    assert set(ids) == (set(RD.LOOK_IDS) - set(FAVOURITES) - set(P.HURRICANE_ONLY)) | {"swirl"}
+    assert [row["id"] for row in copy["looks"]] == FAVOURITES + list(P.HURRICANE_ONLY)
     for row in copy["more_looks"]:
         assert row["title"] and row["text"] and row["note"], row["id"]
 

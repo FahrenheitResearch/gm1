@@ -1,0 +1,175 @@
+{
+  "schema": "gpuwm-cm1.preset/v1",
+  "id": "hurricane-8km",
+  "order": 38,
+  "group": "other",
+  "name": "Hurricane, quick look, 8 km",
+  "line": "CM1's hurricane case run with GM1's own physics choices, not CM1's stock hurricane: a weak swirl over warm ocean grows into a hurricane over four days of storm time.",
+  "budget": "1h",
+  "note": "This is CM1's hurricane case run with GM1's physics choices, not CM1's stock hurricane: an even 8 km grid over 1024 km in place of CM1's stretched one, GM1's turbulence scheme in place of a boundary layer scheme, a constant ocean drag, and 250 cloud droplets per cubic centimetre. What you will see: rain cells form around the swirl from about hour 6 and the swirl looks ragged for the first day, then tightens; the eye is clear by hour 48. GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9), on a fixed 7.5 s time step, is compared with a CM1 r21.1 run with the same changed settings but its own adaptive time step (from 10 s, as CM1's file has it). Through hour 54 the two stay within about 6 hPa and 7 m/s ground-relative at the lowest level. GM1 reaches 951.2 hPa at hour 90, with its fastest wind, 62.9 m/s ground-relative, at hour 93; CM1 reaches 954.9 hPa and 62.0 m/s ground-relative at hour 81. GM1's storm holds near its peak after it: 954.0 hPa and 58.8 m/s ground-relative at hour 96; CM1's storm weakens after it: 971.7 hPa and 50.7 m/s ground-relative at hour 96 (all measured). The time step is a fixed 7.5 s where CM1's file has one that changes with the storm. With CM1's own adaptive setting GM1's hurricane stops early or makes a much weaker storm, a known issue: 8 km runs on it stopped at hour 20.8 and at hour 29.1, and the one that ran to the end reached 995 hPa and 35 m/s ground-relative where CM1 reaches 955 hPa and 62 m/s ground-relative (measured with ArWen 2.8.0 (gpuwm 2.8.0)).",
+  "source": {
+    "file": "CM1 r21.1 run/config_files/hurricane_3d_cpm/namelist.input",
+    "sha256": "575eee874d8aeb8244ba733ce189f5bdfa3637f4fb73ed25c7c56210e18f4d9d",
+    "changes": [
+      {
+        "key": "nx",
+        "from": 384,
+        "to": 128,
+        "why": "a 1024 km area at 8 km"
+      },
+      {
+        "key": "ny",
+        "from": 384,
+        "to": 128,
+        "why": "a 1024 km area at 8 km"
+      },
+      {
+        "key": "dx",
+        "from": 4000.0,
+        "to": 8000.0,
+        "why": "8 km grid spacing, for a quick look"
+      },
+      {
+        "key": "dy",
+        "from": 4000.0,
+        "to": 8000.0,
+        "why": "8 km grid spacing, for a quick look"
+      },
+      {
+        "key": "stretch_x",
+        "from": 1,
+        "to": 0,
+        "why": "an even grid: GM1 has no horizontal grid stretching (CM1's file: 4 km inside, 16 km outside, 3000 km wide)"
+      },
+      {
+        "key": "stretch_y",
+        "from": 1,
+        "to": 0,
+        "why": "an even grid: GM1 has no horizontal grid stretching"
+      },
+      {
+        "key": "timax",
+        "from": 691200.0,
+        "to": 345600.0,
+        "why": "4 days of storm time (CM1's file: 8 days)"
+      },
+      {
+        "key": "adapt_dt",
+        "from": 1,
+        "to": 0,
+        "why": "a fixed time step: with CM1's time step that changes with the storm, GM1's hurricane stops early or makes a much weaker storm (measured)"
+      },
+      {
+        "key": "dtl",
+        "from": 10.0,
+        "to": 7.5,
+        "why": "the fixed time step the storm was run with in GM1; CM1's own step starts at 10 s and ranges up to 20 s"
+      },
+      {
+        "key": "tapfrq",
+        "from": 86400.0,
+        "to": 10800.0,
+        "why": "a picture every 3 hours"
+      },
+      {
+        "key": "rstfrq",
+        "from": 345600.0,
+        "to": -345600.0,
+        "why": "no restart files along the way; the run keeps one saved point at its end, whatever storm time it is fitted to"
+      },
+      {
+        "key": "cm1setup",
+        "from": 2,
+        "to": 1,
+        "why": "GM1 always runs its storm turbulence scheme (CM1's file: the mesoscale setup with a boundary layer scheme)"
+      },
+      {
+        "key": "ipbl",
+        "from": 2,
+        "to": 0,
+        "why": "GM1 has no boundary layer scheme to couple"
+      },
+      {
+        "key": "sgsmodel",
+        "from": 0,
+        "to": 1,
+        "why": "GM1's turbulence scheme"
+      },
+      {
+        "key": "tconfig",
+        "from": 2,
+        "to": 1,
+        "why": "one mixing length in every direction (GM1 has no separate horizontal and vertical lengths)"
+      },
+      {
+        "key": "horizturb",
+        "from": 1,
+        "to": 0,
+        "why": "no separate horizontal mixing length in GM1"
+      },
+      {
+        "key": "ndcnst",
+        "from": 100.0,
+        "to": 250.0,
+        "why": "GM1's Morrison has a fixed 250 cloud droplets per cubic centimetre"
+      },
+      {
+        "key": "cecd",
+        "from": 3,
+        "to": 1,
+        "why": "a constant ocean drag (CM1's file: drag that grows with the wind)"
+      },
+      {
+        "key": "cnstcd",
+        "from": 0.001,
+        "to": 0.0024,
+        "why": "the drag CM1's wind-dependent formula gives above 25 m/s"
+      },
+      {
+        "key": "cnstce",
+        "from": 0.001,
+        "to": 0.0012,
+        "why": "the heat and moisture exchange CM1's wind-dependent setting uses"
+      },
+      {
+        "key": "str_bot",
+        "from": 0.0,
+        "to": 150.0,
+        "why": "the lowest three levels equally spaced at 50 m, which GM1 needs"
+      },
+      {
+        "key": "str_top",
+        "from": 5500.0,
+        "to": 4000.0,
+        "why": "keeps CM1's 59 levels, 50 m at the bottom to 500 m aloft"
+      },
+      {
+        "key": "output_format",
+        "from": 1,
+        "to": 2,
+        "why": "netCDF, which ncview, xarray and most tools read (CM1's file asks for GrADS)"
+      }
+    ]
+  },
+  "ladder_m": [],
+  "min_width_km": {
+    "default": 1000
+  },
+  "min_duration_s": 259200,
+  "shrink": "both",
+  "picture_look": "wind-lowest",
+  "storm_kind": "hurricane",
+  "floors_why": "A hurricane is not made smaller than 1000 km across, because its starting swirl is 500 km in radius, or shorter than 3 days, because its eye is not clear before the end of the second day.",
+  "eye_forms": {
+    "from_s": 108000.0,
+    "to_s": 172800.0,
+    "basis": "GM1's run of this preset on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9) has a clear eye and eyewall by hour 48, as a CM1 r21.1 run with the same changed settings but its own adaptive time step (from 10 s, as CM1's file has it) has (both measured)"
+  },
+  "ran_to_s": 345600.0,
+  "sounding": {
+    "file": "input_sounding",
+    "sha256": "295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5",
+    "source": "CM1 r21.1 run/config_files/hurricane_3d_cpm/input_sounding",
+    "rights": "Dunion's (2011) moist tropical sounding, as CM1 r21.1 ships it beside its hurricane namelist, unchanged, under the CM1 release terms quoted in NOTICE"
+  }
+}

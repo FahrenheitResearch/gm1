@@ -1,4 +1,4 @@
-# Installing gpuwm-cm1 0.1.4
+# Installing gpuwm-cm1 0.1.5
 
 This is an alpha release. Read `docs/RELEASE-NOTES.md` for what it runs, how closely it
 matches CM1 and what it does not do yet. The first storm is in `docs/QUICKSTART.md`; CM1 users with their own
@@ -13,7 +13,7 @@ problems with their fixes.
 | GPU | One NVIDIA GPU of compute capability 7.5 or newer with at least 8 GB of memory. GM1 has run on the RTX 3080, 4090, 5070 Ti and 5090; other cards of 7.5 and newer (RTX 20 series, A100, H100) should work but have not been tried. Older cards (GTX 10 series and before) cannot run CUDA 13. A Windows desktop keeps 4-5 GB of the card for itself, so a card that also drives your screens has less free. |
 | Driver | NVIDIA driver R580 or newer. Under WSL2 this is the Windows driver; install nothing GPU-related inside WSL2. |
 | Python | None with the installers: they bring their own Python 3.12. With pip: 3.12, 3.13 or 3.14 (3.12 and 3.14 are tested) |
-| Disk | About 2.5 GB for the install with the installers, about 4 GB with pip (1.4 GB of it is pip's download cache: `pip cache purge` frees it). Then the storms: about 4 GB for the first guided storm (the 1 km supercell), up to about 120 GB for the 250 m supercell (2 h, a picture every 5 min); Ready to start says how much before you press Start. On Windows add about 2 GB for Ubuntu, all on drive C:. |
+| Disk | About 2.5 GB for the install with the installers, about 4 GB with pip (1.4 GB of it is pip's download cache: `pip cache purge` frees it). Then the storms: about 4 GB for the first guided storm (the 1 km supercell), about 120 GB for the 250 m supercell and up to about 190 GB for the 100 m one (2 h, a picture every 5 min), and for the hurricanes (4 days, a picture every 3 h) about 7.5 GB at 8 km and 30 GB at 4 km, or about 22 GB and 85 GB with a picture every hour. A grid spacing of your own can need more; Ready to start says how much before you press Start. On Windows add about 2 GB for Ubuntu, all on drive C:. |
 
 You do **not** need a compiler, MPI, a netCDF library, the CM1 source, a CUDA toolkit or `CUDA_PATH`. The kernels are
 compiled on your GPU at the start of each run by NVIDIA's NVRTC, which the install brings.
@@ -56,7 +56,7 @@ It checks the computer (x86-64, glibc, the NVIDIA driver), installs [uv](https:/
 (`uv tool install`, never the system's Python), with the exact versions of the release's `constraints-gpu-cu13.txt`
 when it can download them (it says so when it cannot), adds the film add-on for MP4 films, puts `~/.local/bin` on
 `PATH` for new terminals, and runs `gpuwm-cm1 doctor --plain`. Nothing needs sudo. Open a new terminal afterwards, so
-it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.4` (a given release),
+it finds `gpuwm-cm1`. Settings, as environment variables before `sh`: `GM1_VERSION=0.1.5` (a given release),
 `GM1_WHEEL=FILE.whl` (a wheel file), `GM1_FIND_LINKS=FOLDER`, `GM1_CONSTRAINTS=FILE`, `GM1_REINSTALL=1` (repairs a
 damaged install), `GM1_NO_MODIFY_PATH=1` and `GM1_SKIP_DOCTOR=1`.
 
@@ -91,7 +91,7 @@ user-space versions every GM1 check ran with (CuPy 14.2.0, NVRTC 13.3.33 and the
 `constraints-gpu-cu13.txt` from the GitHub release and pass it:
 
 ```sh install
-pip install "gpuwm-cm1==0.1.4" -c constraints-gpu-cu13.txt
+pip install "gpuwm-cm1==0.1.5" -c constraints-gpu-cu13.txt
 ```
 
 The Linux installer does this by itself.
@@ -103,7 +103,7 @@ The Linux installer does this by itself.
 ```sh install
 uv venv -p 3.12 ~/gm1
 . ~/gm1/bin/activate
-uv pip install "gpuwm-cm1==0.1.4" -c constraints-gpu-cu13.txt
+uv pip install "gpuwm-cm1==0.1.5" -c constraints-gpu-cu13.txt
 gpuwm-cm1 doctor --plain
 ```
 
@@ -116,7 +116,7 @@ then install the wheel file. Each file you downloaded must say OK:
 
 ```sh install
 sha256sum -c --ignore-missing SHA256SUMS
-pip install "./gpuwm_cm1-0.1.4-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
+pip install "./gpuwm_cm1-0.1.5-py3-none-manylinux_2_28_x86_64.whl" -c constraints-gpu-cu13.txt
 ```
 
 ## Check the computer and start

@@ -22,6 +22,21 @@ Products (id, title):
                       and the updraft-helicity track (:mod:`.swath`)
 ``surface``           Lowest level θ′ and wind: the cold pool, ground-relative streaks, gust fronts (convergence)
 ``rain``              Accumulated rain
+
+A hurricane run (:attr:`.facts.RunFacts.storm_kind`, CM1's swirl start) is drawn with its own looks and ranges:
+
+``wind-lowest``       Wind at the lowest level: the ground-relative wind speed, 0 to 80 m/s, with streaks and a
+                      line at hurricane force (33 m/s)
+``pressure-lowest``   Pressure at the lowest level: how far it is below the pressure at the area's edge, 0 to
+                      70 hPa on a square-root scale, with a line every 4 hPa (the lowest model level, not sea
+                      level, and it says so)
+
+These two, the reflectivity and the rain (1 mm to 400 cm on a logarithmic scale) each show the whole area and,
+beside it, the inner 500 km around the area's middle (:func:`hurricane_frame`); the slice through the strongest
+updraft is drawn on a +-10 m/s range.  The looks made for a single
+thunderstorm (:data:`THUNDERSTORM_ONLY`: the spin near the ground, the updraft at 5 km with its updraft helicity,
+the wind swath, the cold pool, the hail and spin tracks) are not drawn for a hurricane, with one plain reason;
+the two hurricane looks are not drawn for any other run.
 """
 
 from __future__ import annotations
@@ -30,7 +45,7 @@ from functools import cached_property
 import math
 import os
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Sequence
 
 import numpy as np
 
@@ -53,8 +68,39 @@ PRODUCTS: tuple[tuple[str, str], ...] = (
     ("updraft-slice", "Slice through the strongest updraft"),
     ("hail-track", "Hail near the ground so far"),
     ("spin-track", "Strongest near-ground spin so far"),
+    # A hurricane run's own looks (not drawn for any other run)
+    ("wind-lowest", "Wind at the lowest level"),
+    ("pressure-lowest", "Pressure at the lowest level"),
 )
 TITLES = dict(PRODUCTS)
+#: Looks drawn only for a hurricane run, and the looks made for one thunderstorm that a hurricane run leaves out.
+HURRICANE_ONLY = ("wind-lowest", "pressure-lowest")
+THUNDERSTORM_ONLY = ("spin-near-ground", "updraft-5km", "swath", "surface", "hail-track", "spin-track")
+THUNDERSTORM_ONLY_WHY = ("This look is made for thunderstorms. For a hurricane, see the wind and the pressure at "
+                         "the lowest level.")
+#: A hurricane's fixed, stated ranges.  They hold GM1's and CM1's runs of the hurricane presets
+#: (records/GM1-HURRICANE-RUNS.json; measured): at most 70 m/s (GM1's 4 km run), 61 hPa below the area's edge
+#: and 366 cm of rain in one cell (GM1's 8 km run over its 4 days).  A value above a range is drawn in the
+#: range's last colour and the readout beside the picture says the number.
+HURRICANE_WIND_RANGE = 80.0      # m/s, ground-relative, at the lowest level
+HURRICANE_PRESSURE_RANGE = 70.0  # hPa below the pressure at the area's edge
+HURRICANE_RAIN_RANGE = 400.0     # cm
+HURRICANE_RAIN_FLOOR = 0.1       # cm (1 mm): where a hurricane's rain colours begin, on a logarithmic scale
+HURRICANE_PRESSURE_LINES = 4.0   # hPa between the lines of the pressure picture
+#: A pressure line is drawn where it lies less than this far (m) from the next one; farther out the pressure is
+#: nearly flat and a line would wander with every ripple.
+HURRICANE_LINES_APART = 110_000.0
+#: The wind speed from which a storm is called a hurricane (64 knots, 33 m/s), marked on the wind picture.
+HURRICANE_FORCE = 33.0
+#: The width of a hurricane picture's inner panel, m (the eyewall and the inner rain bands).
+HURRICANE_INNER = 500_000.0
+#: The slice through the strongest updraft, m/s.  A grown hurricane's eyewall rises at 4 to 10 m/s at 5 km (GM1's
+#: runs from hour 54 on, measured), which a thunderstorm's range of 50 or one of 20 draws nearly black; the
+#: stronger bursts of the first two days (up to 41 m/s at 4 km) are drawn in the last colour, and the readout
+#: beside the slice says their number.
+HURRICANE_W_RANGE = 10.0
+#: How many cells in from each side count as the area's edge (the far field the pressure is compared with).
+EDGE_CELLS = 4
 
 # Fixed, stated ranges (the same on every run of a grid spacing, so pictures compare).
 SPIN_RANGE = 0.05       # 1/s, vertical vorticity at the lowest level at 250 m (spin_range scales it with dx)
@@ -310,6 +356,31 @@ class Looks:
     def z0(self) -> float:
         return float(self.f.zh[0])
 
+    @property
+    def hurricane(self) -> bool:
+        """Whether this is a hurricane run (CM1's swirl start), which has its own looks and ranges."""
+
+        return self.facts.storm_kind == "hurricane"
+
+    @cached_property
+    def pressure0_hpa(self) -> np.ndarray | None:
+        """Pressure at the lowest model level, hPa, or None when the frame carries no pressure."""
+
+        prs = self.f.pressure_level(0)
+        return None if prs is None else (prs / np.float32(100.0)).astype(np.float32)
+
+    @cached_property
+    def pressure_edge_hpa(self) -> float | None:
+        """The mean pressure at the lowest level over the area's outer :data:`EDGE_CELLS` cells (the far field)."""
+
+        p = self.pressure0_hpa
+        if p is None:
+            return None
+        n = max(1, min(EDGE_CELLS, min(p.shape) // 4))
+        edge = np.ones(p.shape, dtype=bool)
+        edge[n:-n, n:-n] = False
+        return float(p[edge].mean(dtype=np.float64))
+
     # -- shared fields --------------------------------------------------------------
     @cached_property
     def reflectivity(self) -> R.Reflectivity:
@@ -384,6 +455,9 @@ class Looks:
         }
         if self.f.has("rain"):
             row["rain_max_cm"] = float(self.f.get("rain").max())
+        if self.hurricane and self.pressure0_hpa is not None:
+            # A hurricane's time series leads with its lowest pressure (at the lowest model level, not sea level).
+            row["prs_sfc_min_hpa"] = float(self.pressure0_hpa.min())
         if "reflectivity" in self.__dict__ and self.reflectivity.available:
             row["dbz_max"] = float(self.dbz_column.max())
         return row
@@ -414,6 +488,10 @@ def save(ov: S.Overlay, base: np.ndarray, path: Path) -> tuple[Path, Path]:
     return path, thumb
 
 
+#: A hurricane picture's clock (hours and days, as Watching and Results say it).
+long_clock = S.fmt_long_clock
+
+
 def overlay(L: Looks, product: str, data: str, *, level: str, wind: str, notes: str,
             notes_vertical: bool = False) -> S.Overlay:
     """The frame grammar of one look.  ``notes_vertical``: the notes' speeds are vertical velocities (the lint's
@@ -421,7 +499,8 @@ def overlay(L: Looks, product: str, data: str, *, level: str, wind: str, notes: 
 
     ov = S.Overlay((W, H))
     ov.title(TITLES[product], data)
-    ov.clock(L.f.t)
+    # A hurricane picture's clock reads as the page around it does (hours and days); every other run's is H:MM:SS.
+    ov.clock(long_clock(L.f.t) if L.hurricane else L.f.t)
     ov.footer(L.facts.footer(t=L.f.t, level=level, wind=wind, notes=notes), vertical=[notes] if notes_vertical else ())
     ov.mark()
     return ov
@@ -444,6 +523,8 @@ def product_reflectivity(L: Looks, out: Path) -> dict[str, Any]:
     refl = L.reflectivity
     if not refl.available:
         raise NotDrawn(refl.reason or "no reflectivity for this microphysics")
+    if L.hurricane:
+        return _reflectivity_hurricane(L, out)
     one, (lo, hi) = L.dbz_1km
     col = L.dbz_column
     b1, b2 = dual_boxes(f.extent)
@@ -660,6 +741,8 @@ def product_rain(L: Looks, out: Path) -> dict[str, Any]:
     if not f.has("rain"):
         raise NotDrawn("This run did not save the rain that reached the ground.")   # CM1 output_rain = 0
     rain = f.get("rain")
+    if L.hurricane:
+        return _rain_hurricane(L, out, rain)
     box = single_box(f.extent)
     rs = sample(rain, box, f.dx, f.dy)
     rgb = S.colours("rain_cm", rs, 0.0, RAIN_RANGE)
@@ -690,6 +773,338 @@ def product_rain(L: Looks, out: Path) -> dict[str, Any]:
     return {"rain_max_cm": float(rain.max()), "rain_area_km2": area, "domain_moves": bool(f.domain_moves)}
 
 
+# ----------------------------------------------------------------------------------------------- hurricane looks
+def hurricane_boxes(extent: tuple[float, float]) -> tuple[Box, Box, float]:
+    """A hurricane look's two panels: the whole area, and beside it the inner part around the area's middle.
+
+    The inner panel is :data:`HURRICANE_INNER` across (500 km), or half the area's shorter side on a smaller area;
+    it is fixed to the middle of the area, not to the storm, so pictures of different times compare.  Returns the
+    two boxes and the inner panel's width in metres."""
+
+    whole, second = dual_boxes(extent)
+    inner = min(HURRICANE_INNER, 0.5 * min(extent))
+    zoom = Box(second.x, second.y, second.w, 0.5 * (extent[0] - inner),
+               0.5 * (extent[1] - inner * second.h / second.w), inner, h=second.h)
+    return whole, zoom, inner
+
+
+def line_alpha(field: np.ndarray, level: float | None = None, *, every: float | None = None,
+               width: float = 1.4, far: float = 240.0) -> np.ndarray:
+    """How strongly a contour line covers each pixel (0..1) of a field already sampled onto a panel's pixels.
+
+    ``level``: one line where the field crosses that value.  ``every``: a line at each multiple of it.  The
+    distance to the nearest line is the difference divided by the field's slope, so the line is ``width`` pixels
+    wide with soft edges.  Lines every ``every`` fade out where they would be closer than a few pixels (a steep
+    eyewall), so they never merge into a block, and where they would be more than ``far`` pixels apart (the
+    nearly flat far field, where a line wanders with every small ripple)."""
+
+    v = np.asarray(field, dtype=np.float64)
+    gy, gx = np.gradient(v)
+    slope = np.hypot(gx, gy)
+    safe = np.maximum(slope, 1e-12)
+    if every is None:
+        distance = np.abs(v - float(level)) / safe
+        alpha = np.clip(0.5 + 0.5 * width - distance, 0.0, 1.0)
+    else:
+        distance = np.abs(v / every - np.rint(v / every)) * every / safe
+        apart = every / safe
+        alpha = (np.clip(0.5 + 0.5 * width - distance, 0.0, 1.0) * np.clip((apart - 3.0) / 4.0, 0.0, 1.0)
+                 * np.clip((far - apart) / (0.4 * far), 0.0, 1.0))
+    alpha[slope * max(v.shape) < 1e-3 * (every or 1.0)] = 0.0
+    return alpha.astype(np.float32)
+
+
+def blend(img: np.ndarray, alpha: np.ndarray, colour: str, strength: float = 1.0) -> np.ndarray:
+    """``img`` (uint8) with ``colour`` laid over it where ``alpha`` says."""
+
+    a = (np.clip(alpha, 0.0, 1.0) * strength)[..., None]
+    return (img.astype(np.float32) * (1.0 - a) + np.array(S.rgb8(colour), np.float32) * a + 0.5).astype(np.uint8)
+
+
+def frame_mark(cv: np.ndarray, whole: Box, zoom: Box) -> np.ndarray:
+    """The inner panel's area marked on the whole-area panel with a thin square."""
+
+    from PIL import Image, ImageDraw
+
+    x0, y1 = whole.to_px(zoom.mx0, zoom.my0)
+    x1, y0 = whole.to_px(zoom.mx0 + zoom.span, zoom.my0 + zoom.span_y)
+    im = Image.fromarray(cv)
+    ImageDraw.Draw(im).rectangle((int(round(x0)), int(round(y0)), int(round(x1)), int(round(y1))),
+                                 outline=S.rgb8("muted"), width=1)
+    return np.asarray(im).copy()
+
+
+def hurricane_bar(ov: S.Overlay, ramp: str, zoom: Box, ticks: Sequence[tuple[float, str]], what: str) -> None:
+    """The colour bar under the inner panel, with what it measures to its left; ``ticks`` are (position 0..1
+    along the bar, label)."""
+
+    by = zoom.y + zoom.h + ov.U(12)
+    x0 = zoom.x + zoom.w - ov.U(330)
+    ov.ramp_bar(ramp, (x0, by, zoom.x + zoom.w, by + max(3, ov.U(8))), vmin=0.0, vmax=1.0, ticks=ticks)
+    ov.text((x0 - ov.U(12), by + ov.U(9)), what, "micro", colour="data", anchor="rs", halo=False)
+
+
+def hurricane_frame(L: Looks, product: str, draw: Callable[[Box], np.ndarray], *, level: str, wind: str,
+                    notes: str, left: str, right: str | None, lines: Sequence[tuple[str, str]],
+                    data: str | None = None) -> tuple[S.Overlay, np.ndarray, Box, Box, float]:
+    """The shared grammar of a hurricane look: the whole area and the inner part side by side, a label and one
+    number over each, a scale bar under each, and up to two small lines of explanation under the whole area.
+
+    ``draw(box)`` returns the uint8 picture of one panel.  ``lines`` are (text, colour token)."""
+
+    f = L.f
+    whole, zoom, inner = hurricane_boxes(f.extent)
+    cv = canvas()
+    spacings = []
+    for box in (whole, zoom):
+        img, spacing = ground_ticks(draw(box), box, f.domainlocx, f.domainlocy)
+        spacings.append(spacing)
+        paste(cv, img, box)
+    cv = frame_mark(outline(outline(cv, whole), zoom), whole, zoom)
+    plus = f"+ every {S.fmt_km(spacings[0])} (whole area) and {S.fmt_km(spacings[1])} (inner)"
+    ov = overlay(L, product, data or L.data_line(), level=level, wind=wind,
+                 notes=S.data_line(notes, L.frame_words(), plus))
+    panel_label(ov, whole, "whole area", left)
+    panel_label(ov, zoom, f"inner {S.fmt_km(inner)} (the square on the left)", right)
+    scale_bar(ov, whole.x, whole.y + whole.h + ov.U(16), whole)
+    scale_bar(ov, zoom.x, zoom.y + zoom.h + ov.U(16), zoom)
+    ms = ov.px("micro")
+    for n, (text, colour) in enumerate(lines[:2]):
+        ov.text((whole.x + whole.w, whole.y + whole.h + ov.U(12) + ms + n * int(ms * 1.55)), text, "micro",
+                colour=colour, anchor="rs", halo=False)
+    return ov, cv, whole, zoom, inner
+
+
+def rain_position(cm: np.ndarray | float) -> np.ndarray:
+    """Where an amount of rain sits on a hurricane's rain colours, 0..1: logarithmic from 1 mm to the range's
+    top, so a tenfold step in rain is the same step in colour."""
+
+    lo, hi = HURRICANE_RAIN_FLOOR, HURRICANE_RAIN_RANGE
+    v = np.maximum(np.asarray(cm, dtype=np.float64), 1e-9)
+    return np.clip(np.log(v / lo) / math.log(hi / lo), 0.0, 1.0)
+
+
+def pressure_position(hpa: np.ndarray | float) -> np.ndarray:
+    """Where a pressure drop sits on a hurricane's pressure colours, 0..1: the square root of its share of the
+    range, so the broad shallow low around the storm shows as well as the deep centre."""
+
+    return np.sqrt(np.clip(np.asarray(hpa, dtype=np.float64) / HURRICANE_PRESSURE_RANGE, 0.0, 1.0))
+
+
+def _rain_hurricane(L: Looks, out: Path, rain: np.ndarray) -> dict[str, Any]:
+    """The rain of a hurricane run: days of rain, from 1 mm to 400 cm on a logarithmic colour scale, over the
+    whole area and over its inner part."""
+
+    f = L.f
+    top, floor = HURRICANE_RAIN_RANGE, HURRICANE_RAIN_FLOOR
+    void = np.array(S.hex_rgb("void"), np.float32)
+
+    def draw(box: Box) -> np.ndarray:
+        rs = sample(rain, box, f.dx, f.dy)
+        rgb = S.colours("hurricane_rain", rain_position(rs), 0.0, 1.0)
+        rgb[rs < floor] = void
+        return S.to8(rgb)
+
+    area = float((rain >= floor).sum() * L.cell_km2())
+    most = float(rain.max())
+    j, i = np.unravel_index(int(np.argmax(rain)), rain.shape)
+    east, north = _centre_km(L, int(i), int(j))
+    ov, cv, whole, zoom, inner = hurricane_frame(
+        L, "rain", draw, level="surface", wind="",
+        notes=S.data_line(f"rain since the start, {floor * 10:g} mm to {top:g} cm fixed for a hurricane run",
+                          "logarithmic colours"),
+        data=L.data_line("since the start"),
+        left=f"above 1 mm: {area:,.0f} km²", right=f"most in one cell {most:.0f} cm",
+        lines=[(f"most rain: {_from_centre(east, north)}", "data"),
+               ("no colour: less than 1 mm", "muted")])
+    hurricane_bar(ov, "hurricane_rain", zoom,
+                  [(float(rain_position(v)), label) for v, label in
+                   ((floor, "1 mm"), (1.0, "1 cm"), (10.0, "10 cm"), (100.0, "1 m"), (top, f"{top / 100.0:g} m"))],
+                  "rain since the start")
+    save(ov, cv, out)
+    return {"rain_max_cm": most, "rain_area_km2": area, "domain_moves": bool(f.domain_moves), "range_cm": top,
+            "floor_cm": floor, "scale": "logarithmic", "inner_km": inner / 1000.0}
+
+
+def _reflectivity_hurricane(L: Looks, out: Path) -> dict[str, Any]:
+    """A hurricane run's reflectivity at 1 km: the whole area, and its inner part where the eyewall and the rain
+    bands are."""
+
+    f = L.f
+    refl = L.reflectivity
+    one, (lo, hi) = L.dbz_1km
+    col = L.dbz_column
+    dense = (f.config.get("dense_ice") or {}).get("category")
+    dense = dense if dense in ("hail", "graupel") else "graupel"
+    ov, cv, whole, zoom, inner = hurricane_frame(
+        L, "reflectivity", lambda box: dbz_image(sample(one, box, f.dx, f.dy)),
+        level="1 km above the sea", wind="",
+        notes=S.data_line(f"1 km: linear in Z between the {S.fmt_height(lo)} and {S.fmt_height(hi)} levels",
+                          f"from the model's rain, snow and {dense}, not a radar"),
+        data=L.data_line(refl.operator),
+        left=dbz_max_text(one), right=f"anywhere in the column: {dbz_max_text(col)}",
+        lines=[("both panels: 1 km above the sea", "data"),
+               (f"features smaller than about {S.fmt_km(6 * f.dx)} are not resolved", "muted")])
+    dbz_legend(ov, zoom.x + zoom.w - ov.U(300), zoom.y + zoom.h + ov.U(12), ov.U(300))
+    save(ov, cv, out)
+    return {"dbz_max_1km": float(one.max()), "dbz_max_column": float(col.max()), "operator": refl.operator,
+            "levels_m": [lo, hi], "inner_km": inner / 1000.0}
+
+
+def _centre_km(L: Looks, i: int, j: int) -> tuple[float, float]:
+    """Where cell (j, i) is from the middle of the area, km east and km north."""
+
+    f = L.f
+    return ((i + 0.5) * f.dx - 0.5 * f.extent[0]) / 1000.0, ((j + 0.5) * f.dy - 0.5 * f.extent[1]) / 1000.0
+
+
+#: The eight compass words, counter-clockwise from east (every 45 degrees).
+COMPASS = ("east", "north-east", "north", "north-west", "west", "south-west", "south", "south-east")
+
+
+def _from_centre(east_km: float, north_km: float, of: str = "the middle of the area") -> str:
+    """"30 km south-east of the middle of the area" (or of ``of``, such as the pressure centre) for a place in a
+    hurricane picture, short enough for one small line."""
+
+    distance = math.hypot(east_km, north_km)
+    if distance < 0.5:
+        return f"at {of}"
+    octant = int(round(math.degrees(math.atan2(north_km, east_km)) / 45.0)) % 8
+    return f"{distance:.0f} km {COMPASS[octant]} of {of}"
+
+
+def _ring(ov: S.Overlay, box: Box, x_m: float, y_m: float, dx: float) -> None:
+    """The gold ring around one place, when it lies inside the panel."""
+
+    px, py = box.to_px(x_m, y_m)
+    if box.x <= px <= box.x + box.w and box.y <= py <= box.y + box.h:
+        ov.ring((px, py), max(8.0, 0.75 * dx / box.mpp) + 3)
+
+
+def product_wind_lowest(L: Looks, out: Path) -> dict[str, Any]:
+    """A hurricane run's wind at the lowest model level: the ground-relative speed on its fixed range, with
+    streaks and a line at hurricane force, over the whole area and over its inner part."""
+
+    if not L.hurricane:
+        raise NotDrawn("This look is drawn for a hurricane run.")
+    f = L.f
+    u, v = L.uv0_ground
+    top = HURRICANE_WIND_RANGE
+    force = HURRICANE_FORCE
+
+    def draw(box: Box) -> np.ndarray:
+        us, vs = sample(u, box, f.dx, f.dy), sample(v, box, f.dx, f.dy)
+        speed = np.hypot(us, vs)
+        base = S.colours("hurricane_wind", speed, 0.0, top)
+        tx, _ = streaks(us, vs, box, seed=5)
+        # The streaks lighten and darken the colour a little along the wind; they carry no value of their own.
+        shade = 1.0 + 0.22 * np.clip(tx, -1.5, 1.5)[..., None] * np.clip(speed / 8.0, 0.25, 1.0)[..., None]
+        img = S.to8(np.clip(base * shade + 0.02 * np.clip(tx, 0.0, 1.5)[..., None], 0.0, 1.0))
+        return blend(img, line_alpha(speed, force, width=1.6), "title", 0.9)
+
+    z0 = L.z0
+    wind0 = L.wind0
+    j, i = np.unravel_index(int(np.argmax(wind0)), wind0.shape)
+    fastest = float(wind0.max())
+    east, north = _centre_km(L, int(i), int(j))
+    lowest = float(L.pressure0_hpa.min()) if L.pressure0_hpa is not None else None
+    # The fastest wind is placed from the storm's centre (the lowest pressure), not from the middle of the area,
+    # which the storm leaves as it drifts; without pressure in the frames it is placed from the middle.
+    where = _from_centre(east, north)
+    from_low = None
+    if L.pressure0_hpa is not None:
+        pj, pi = np.unravel_index(int(np.argmin(L.pressure0_hpa)), L.pressure0_hpa.shape)
+        low_east, low_north = _centre_km(L, int(pi), int(pj))
+        from_low = [east - low_east, north - low_north]
+        where = _from_centre(from_low[0], from_low[1], "the pressure centre")
+    area = float((wind0 >= force).sum() * L.cell_km2())
+    ov, cv, whole, zoom, inner = hurricane_frame(
+        L, "wind-lowest", draw, level=f"lowest level {S.fmt_height(z0)}", wind="ground-relative",
+        notes=S.data_line(f"wind speed at {S.fmt_height(z0)}, ground-relative, 0–{top:g} m/s fixed",
+                          "streaks: the direction the wind blows"),
+        data=L.data_line(f"lowest model level, {S.fmt_height(z0)} above the sea"),
+        left=f"fastest {fastest:.0f} m/s ground-relative",
+        right=f"lowest pressure {lowest:.0f} hPa" if lowest is not None else None,
+        lines=[(f"gold ring: the fastest wind, {where}", "gold"),
+               (f"white line: hurricane force, {force:g} m/s ground-relative", "data")])
+    _ring(ov, zoom, (i + 0.5) * f.dx, (j + 0.5) * f.dy, f.dx)
+    hurricane_bar(ov, "hurricane_wind", zoom,
+                  [(value / top, label) for value, label in
+                   ((0.0, "0"), (10.0, "10"), (20.0, "20"), (force, f"{force:g}"), (50.0, "50"), (65.0, "65"),
+                    (top, f"{top:g}"))],
+                  "wind, ground-relative, m/s")
+    save(ov, cv, out)
+    facts: dict[str, Any] = {"height_m": z0, "dx_m": f.dx, "resolved_m": 6.0 * f.dx,
+                             "wind_max_ground_relative": fastest, "range_m_s": top,
+                             "hurricane_force_m_s": force, "hurricane_force_area_km2": area,
+                             "wind_max_xy_m": [float((i + 0.5) * f.dx), float((j + 0.5) * f.dy)],
+                             "wind_max_from_centre_km": [east, north], "inner_km": inner / 1000.0}
+    if lowest is not None:
+        facts["p_min_hpa"] = lowest
+    if from_low is not None:
+        facts["wind_max_from_pressure_centre_km"] = from_low
+    return facts
+
+
+def product_pressure_lowest(L: Looks, out: Path) -> dict[str, Any]:
+    """A hurricane run's pressure at the lowest model level, as hPa below the pressure at the area's edge, with
+    a line every :data:`HURRICANE_PRESSURE_LINES` hPa, over the whole area and over its inner part.
+
+    GM1 saves no sea-level pressure, so this is the pressure at the lowest model level and the picture says so;
+    in CM1's run of the hurricane preset the two differ by about 3 hPa (25 m of air).
+    """
+
+    if not L.hurricane:
+        raise NotDrawn("This look is drawn for a hurricane run.")
+    p = L.pressure0_hpa
+    far = L.pressure_edge_hpa
+    if p is None or far is None:
+        raise NotDrawn("This run's saved frames carry no pressure.")
+    f = L.f
+    top = HURRICANE_PRESSURE_RANGE
+    every = HURRICANE_PRESSURE_LINES
+    drop = (np.float32(far) - p).astype(np.float32)
+
+    def draw(box: Box) -> np.ndarray:
+        ds = sample(drop, box, f.dx, f.dy)
+        img = S.to8(S.colours("hurricane_pressure", pressure_position(ds), 0.0, 1.0))
+        # The same lines in both panels: one is drawn where the pressure falls steeply enough on the ground
+        # (lines less than HURRICANE_LINES_APART apart), whatever the panel's scale.
+        return blend(img, line_alpha(sample(p, box, f.dx, f.dy), every=every, width=1.3,
+                                     far=HURRICANE_LINES_APART / box.mpp), "title", 0.55)
+
+    z0 = L.z0
+    j, i = np.unravel_index(int(np.argmin(p)), p.shape)
+    lowest = float(p.min())
+    deepest = float(drop.max())
+    east, north = _centre_km(L, int(i), int(j))
+    ov, cv, whole, zoom, inner = hurricane_frame(
+        L, "pressure-lowest", draw, level=f"lowest level {S.fmt_height(z0)}", wind="",
+        notes=S.data_line(f"pressure at the lowest model level ({S.fmt_height(z0)}), not sea level",
+                          f"colours: hPa below the mean at the area's edge ({far:.0f} hPa), 0–{top:g} hPa fixed"),
+        data=L.data_line(f"lowest model level, {S.fmt_height(z0)} above the sea"),
+        left=f"lowest {lowest:.0f} hPa", right=f"{deepest:.0f} hPa below the area's edge",
+        lines=[(f"gold ring: the lowest pressure, {_from_centre(east, north)}", "gold"),
+               (f"lines: every {every:g} hPa, left out where they would touch or lie more than "
+                f"{HURRICANE_LINES_APART / 1000.0:g} km apart", "data")])
+    _ring(ov, zoom, (i + 0.5) * f.dx, (j + 0.5) * f.dy, f.dx)
+    hurricane_bar(ov, "hurricane_pressure", zoom,
+                  [(float(pressure_position(value)), label) for value, label in
+                   ((0.0, "0"), (5.0, "5"), (15.0, "15"), (35.0, "35"), (top, f"{top:g} hPa"))],
+                  "below the area's edge")
+    save(ov, cv, out)
+    return {"height_m": z0, "p_min_hpa": lowest, "p_edge_hpa": far, "p_drop_max_hpa": deepest, "range_hpa": top,
+            "lines_every_hpa": every, "scale": "square root",
+            "p_min_xy_m": [float((i + 0.5) * f.dx), float((j + 0.5) * f.dy)],
+            "p_min_from_centre_km": [east, north], "inner_km": inner / 1000.0}
+
+
+def w_range(L: "Looks") -> float:
+    """The updraft slice's fixed range, m/s: a hurricane's drafts are a few m/s, a thunderstorm's tens."""
+
+    return HURRICANE_W_RANGE if L.hurricane else W_RANGE
+
+
 class NotDrawn(Exception):
     """This product cannot be drawn for this run; the message says why, in plain words."""
 
@@ -714,8 +1129,11 @@ RENDERERS: dict[str, Callable[..., dict[str, Any]]] = {
     "rain": product_rain,
     "clouds-from-above": _clouds_from_above,
     "updraft-slice": _updraft_slice,
+    "wind-lowest": product_wind_lowest,
+    "pressure-lowest": product_pressure_lowest,
 }
 
 
-__all__ = ["Box", "LintError", "bilinear", "Looks", "NotDrawn", "PRODUCTS", "RENDERERS", "THUMB", "TITLES",
-           "product_swath", "sample", "save"]
+__all__ = ["Box", "HURRICANE_ONLY", "LintError", "bilinear", "Looks", "NotDrawn", "PRODUCTS", "RENDERERS",
+           "THUMB", "THUNDERSTORM_ONLY", "THUNDERSTORM_ONLY_WHY", "TITLES", "product_pressure_lowest",
+           "product_swath", "product_wind_lowest", "sample", "save", "w_range"]

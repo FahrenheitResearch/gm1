@@ -210,6 +210,42 @@
         "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
       },
       {
+        "path": "src/cm1core/presets/hurricane-8km/namelist.input",
+        "source_path": "run/config_files/hurricane_3d_cpm/namelist.input",
+        "source_sha256": "575eee874d8aeb8244ba733ce189f5bdfa3637f4fb73ed25c7c56210e18f4d9d",
+        "sha256": "902df86b52a53d33d8f6ad52683cb1a547e74f0780150b46e9e8c14177e4c536",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (23: nx, ny, dx, dy, stretch_x, stretch_y, timax, adapt_dt, dtl, tapfrq, rstfrq, cm1setup, ipbl, sgsmodel, tconfig, horizturb, ndcnst, cecd, cnstcd, cnstce, str_bot, str_top, output_format) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's 8 km hurricane, made from CM1's 3-D hurricane example namelist",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/hurricane-4km/namelist.input",
+        "source_path": "run/config_files/hurricane_3d_cpm/namelist.input",
+        "source_sha256": "575eee874d8aeb8244ba733ce189f5bdfa3637f4fb73ed25c7c56210e18f4d9d",
+        "sha256": "71562a66c539e3e5359bec7c46c8eef412cfd8f549c89f74ce38d3de982e78a7",
+        "form": "a modified copy: the settings listed under source.changes in the preset's preset.json (21: nx, ny, stretch_x, stretch_y, timax, adapt_dt, dtl, tapfrq, rstfrq, cm1setup, ipbl, sgsmodel, tconfig, horizturb, ndcnst, cecd, cnstcd, cnstce, str_bot, str_top, output_format) differ from the source file",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the GUI's and gpuwm-cm1 preset's 4 km hurricane, made from CM1's 3-D hurricane example namelist",
+        "review": "a modification of a text configuration file under the root release grant, which permits modifying and redistributing it with the notice; not one of the blockers above"
+      },
+      {
+        "path": "src/cm1core/presets/hurricane-4km/input_sounding",
+        "source_path": "run/config_files/hurricane_3d_cpm/input_sounding",
+        "sha256": "295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the sounding CM1's hurricane namelist reads (isnd = 7), shipped unchanged beside the 4 km hurricane preset",
+        "review": "a text data file under the root release grant (a sounding: one surface line and 14 levels), not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "src/cm1core/presets/hurricane-8km/input_sounding",
+        "source_path": "run/config_files/hurricane_3d_cpm/input_sounding",
+        "sha256": "295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the sounding CM1's hurricane namelist reads (isnd = 7), shipped unchanged beside the hurricane preset",
+        "review": "a text data file under the root release grant (a sounding: one surface line and 14 levels), not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
         "path": "src/cm1core/presets/iln-2012-06-29/namelist.input",
         "source_path": "run/config_files/squall_line/namelist.input",
         "source_sha256": "2f75792a569cf497d76d9df2186692f81a296028e85c162c65cd19df8dfdf5b8",
@@ -407,6 +443,24 @@
         "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
       },
       {
+        "path": "tests/data/cm1import/r21.1-hurricane_3d_cpm.namelist.input",
+        "source_path": "run/config_files/hurricane_3d_cpm/namelist.input",
+        "sha256": "575eee874d8aeb8244ba733ce189f5bdfa3637f4fb73ed25c7c56210e18f4d9d",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the byte copy the preset generator makes the two hurricane presets from",
+        "review": "a text configuration file under the root release grant, not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
+        "path": "tests/data/cm1import/r21.1-hurricane_3d_cpm.input_sounding",
+        "source_path": "run/config_files/hurricane_3d_cpm/input_sounding",
+        "sha256": "295bf8d89fa4624676e8b0d90ce232cd5b053587c699f23700fd22df5feec6a5",
+        "distribution": "the public source snapshot only: tests/ is not in the sdist or the wheel",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the byte copy the preset generator ships beside each hurricane preset",
+        "review": "a text data file under the root release grant (a sounding: one surface line and 14 levels), not one of the blockers above; its digest is the one tools/authority/cm1r21.1-content-sha256.tsv records"
+      },
+      {
         "path": "src/cm1core/records/CM1-R22-NEW-KEYS.json",
         "source_path": "CM1 r22.0 (cm1r22.0.tar.gz): README.namelist, CHANGES, run/config_files/supercell/namelist.input and the namelist declarations in src/",
         "form": "every namelist key CM1 r22.0 declares that r21.1 does not, with its default, type and file:line citations; each citation quotes the short source line it rests on (76 lines of r22.0's CHANGES, README.namelist and src/module_mp_nssl_2mom.F, and 18 of r21.1's); not any file's bytes (the record's release block names each file's sha256)",
@@ -436,6 +490,14 @@
         "form": "mature-phase means of CM1 r21.1's domain statistics (and of its twin runs) on its stock supercell, beside GM1's, as ratios",
         "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
         "why": "the release notes and doctor state how close GM1 comes to CM1 on CM1's own example",
+        "review": "numbers derived from data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
+      },
+      {
+        "path": "src/cm1core/records/GM1-HURRICANE-RUNS.json",
+        "source_path": "output of CM1 r21.1 built from the release, on run/config_files/hurricane_3d_cpm/namelist.input with the 8 km hurricane preset's changed settings and CM1's own adaptive time step",
+        "form": "CM1 r21.1's lowest pressure, fastest wind, radius of maximum wind and warm core at the lowest model level every 3 hours of its 4 days, computed from the history file CM1 wrote, beside the same numbers from GM1's runs of the hurricane presets, by tools/generate_hurricane_runs.py",
+        "notice": "NOTICE, section CM1 attribution (the CM1 r21.1 release grant)",
+        "why": "the hurricane cards, the guides and the import report say how GM1's hurricane compares with CM1's, and with what settings",
         "review": "numbers derived from data produced by running the release, not source; no RRTMG table, lfoice.F or tar-only asset"
       }
     ],

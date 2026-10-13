@@ -56,6 +56,8 @@ LIST_TTL_S = 300.0
 FIT_TTL_S = 20.0
 #: "Run it longer" adds this much storm time.
 RUN_LONGER_S = 3600.0
+#: A storm of days (a hurricane) is run on by a day.
+RUN_LONGER_DAY_S = 86400.0
 #: The largest file a sounding may be (a balloon with 7000 levels is about 400 kB).
 SOUNDING_MAX_BYTES = 4 * 1024 * 1024
 #: The oldest NVIDIA driver branch GM1's CUDA 13 runtime runs on (R580+).
@@ -94,6 +96,10 @@ def duration_words(seconds: float) -> str:
     if minutes < 90:
         return f"{minutes:.0f} min"
     hours = seconds / 3600.0
+    if hours >= 48.0 and abs(hours - round(hours)) < 0.05:
+        # Two days or more is said in days: "4 days", "3 days 15 h".
+        days, rest = divmod(int(round(hours)), 24)
+        return f"{days} days" if rest == 0 else f"{days} days {rest} h"
     if abs(hours - round(hours)) < 0.05:
         return f"{round(hours):.0f} h"
     whole = int(hours)
@@ -166,6 +172,12 @@ def run_facts(rundir: Path, index: Mapping[str, Any] | None = None) -> dict[str,
                              "interval_s": interval, "lowest_level_m": None, "lowest_level_basis": None}
     # The quick-looks' index states the real height of the level they drew (its "run" block).
     index = index if isinstance(index, Mapping) else {}
+    # What kind of storm the run is (a hurricane): the pictures' own record, else the preset it was made from.
+    drawn = index.get("run") if isinstance(index.get("run"), Mapping) else {}
+    made_as = run.get("guided") if isinstance(run.get("guided"), Mapping) else {}
+    kind = drawn.get("storm_kind") or made_as.get("storm_kind")
+    if kind:
+        facts["storm_kind"] = str(kind)
     shown = next((block for block in (index.get("run"), index.get("facts"))
                   if isinstance(block, Mapping) and _number(block.get("lowest_level_m"))), None)
     if shown is not None:
@@ -202,12 +214,15 @@ def panels(facts: Mapping[str, Any], looks_copy: Mapping[str, Any]) -> dict[str,
         "height": None if height is None else f"{height:.0f}",
     }
     out: dict[str, Any] = {}
+    hurricane = facts.get("storm_kind") == "hurricane"
     for look in looks_copy.get("looks", []):
+        # A hurricane run's own words for a look every run has (the reflectivity has no hook to point at).
+        words = look.get("text_hurricane") if hurricane and look.get("text_hurricane") else look["text"]
         out[look["id"]] = {
             "id": look["id"],
             "title": look["title"],
             "short": look.get("short", ""),
-            "text": _fill(look["text"], values, look.get("clause_if")),
+            "text": _fill(words, values, look.get("clause_if")),
             "unit": look.get("unit", ""),
         }
     this_run = None
@@ -228,6 +243,9 @@ STRONGEST = {
     "spin-near-ground": (("zeta_max", "zeta_min"), "{value:.3f} per second"),
     "updraft-5km": (("w_max",), "{value:.0f} metres per second upward"),
     "swath": (("wind_max_ground_relative",), "{value:.0f} m/s ground-relative"),
+    # A hurricane run's looks: its fastest wind, and its lowest pressure (the strongest is the lowest).
+    "wind-lowest": (("wind_max_ground_relative",), "{value:.0f} m/s ground-relative"),
+    "pressure-lowest": (("p_min_hpa",), "a lowest pressure of {value:.0f} hPa"),
 }
 #: Looks whose strongest value is the largest of either sign (spin one way or the other).  For the others the
 #: largest value is said as it is: a reflectivity of -35 dBZ is no echo at all, not 35 dBZ.
@@ -569,15 +587,34 @@ class Guided:
                                                           "sentences", "facts", "customized")}
         end = _number(status.get("model_time_s")) or facts.get("duration_s")
         if end:
-            until = float(end) + RUN_LONGER_S
+            hurricane = facts.get("storm_kind") == "hurricane"
+            span = RUN_LONGER_DAY_S if hurricane else RUN_LONGER_S
+            until = float(end) + span
             about = None
             estimate = (fit or {}).get("estimate") if isinstance(fit, dict) else None
             if isinstance(estimate, dict) and _number(estimate.get("wall_s")) and facts.get("duration_s"):
-                about = duration_words(float(estimate["wall_s"]) * RUN_LONGER_S / float(facts["duration_s"]))
+                about = duration_words(float(estimate["wall_s"]) * span / float(facts["duration_s"]))
             extra["run_longer"] = {"until_s": until,
                                    "command": C.display(C.resume_args(rundir, None, until, self.api.native)),
                                    "about": about}
+            if hurricane:
+                # The button says a day, and the panel says when that day is past what GM1 has run of this storm.
+                extra["run_longer"]["span_s"] = span
+                ran = self._ran_to_s(run.get("preset"))
+                if ran and until > ran + 1e-6:
+                    extra["run_longer"]["note"] = (f"GM1 has run this storm for {duration_words(ran)}; the time "
+                                                   "after that is not run yet.")
         return extra
+
+    def _ran_to_s(self, preset_id: Any) -> float:
+        """The storm time (s) GM1 has run a preset to (``ran_to_s`` in its ``preset.json``), or 0 if not stated."""
+
+        from ..cm1run import presets as P
+
+        try:
+            return float(P.load(str(preset_id)).record.get("ran_to_s") or 0.0)
+        except (P.PresetError, OSError, TypeError, ValueError):
+            return 0.0
 
 
 def _suggest(result: Any) -> dict[str, Any]:
