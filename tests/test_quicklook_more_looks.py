@@ -79,9 +79,13 @@ def test_the_more_looks_copy_lists_every_look_after_the_four_once():
     ids = [row["id"] for row in copy["more_looks"]]
     assert len(ids) == len(set(ids))
     assert not set(ids) & set(FAVOURITES)
-    # A hurricane run's own two looks are its favourites (copy "looks"), not More looks.
-    assert set(ids) == (set(RD.LOOK_IDS) - set(FAVOURITES) - set(P.HURRICANE_ONLY)) | {"swirl"}
-    assert [row["id"] for row in copy["looks"]] == FAVOURITES + list(P.HURRICANE_ONLY)
+    # A hurricane run's own wind and pressure looks are its favourites (copy "looks"), not More looks; its looks
+    # by radius and height are More looks rows marked hurricane_only.
+    rows = [row["id"] for row in copy["more_looks"] if row.get("hurricane_only")]
+    assert rows == ["swirl-by-radius", "warm-core"]
+    favourites = [look for look in P.HURRICANE_ONLY if look not in rows]
+    assert set(ids) == (set(RD.LOOK_IDS) - set(FAVOURITES) - set(favourites)) | {"swirl"}
+    assert [row["id"] for row in copy["looks"]] == FAVOURITES + favourites
     for row in copy["more_looks"]:
         assert row["title"] and row["text"] and row["note"], row["id"]
 
@@ -182,7 +186,7 @@ def test_the_environment_is_drawn_once_and_a_run_without_parcels_has_no_parcel_r
     _render(run)
     index = _index(run)
     once = {p["id"]: p for p in index["products"] if p.get("once")}
-    assert set(once) == {"environment"}
+    assert set(once) == {"environment", "run-card", "updraft-time-height", "spin-time-height"}
     assert [f["time_s"] for f in once["environment"]["frames"]] == [900.0]
     facts = once["environment"]["frames"][0]["facts"]
     assert facts, "the environment look records the numbers it showed"
@@ -197,7 +201,9 @@ def test_the_more_looks_row_says_what_each_look_is_and_why_one_is_missing(tmp_pa
     index = _index(run)
     rows = GL.more_looks("storm", run, index, {"state": "finished"}, films_now={})
     by = {row["id"]: row for row in rows}
-    assert [row["id"] for row in rows] == [row["id"] for row in GL.load_copy()["more_looks"]]
+    # A thunderstorm run's row: every look after the four, but the hurricane's own looks by radius and height.
+    assert [row["id"] for row in rows] == [row["id"] for row in GL.load_copy()["more_looks"]
+                                           if not row.get("hurricane_only")]
     for lid in ("surface", "rain", "clouds-from-above", "updraft-slice", "hail-track", "spin-track"):
         assert by[lid]["available"] and by[lid]["count"] == 3 and by[lid]["why_not"] is None, lid
     assert by["environment"]["available"] and by["environment"]["count"] == 1
@@ -259,20 +265,50 @@ def test_the_server_lists_films_made_and_being_made(tmp_path, monkeypatch):
 def test_the_estimate_of_a_film_or_a_pass_scales_with_the_run():
     index = {"frames": [{}] * 25, "run": {"grid": "120 × 120 × 40, dx 1 km"}}
     assert GL.about_seconds(index, "swirl", 8) == round(24 * 9 * GL.SECONDS_PER_SWIRL_PICTURE)
-    assert GL.about_seconds(index, "all") >= 20   # 25 frames of the new looks at 0.87 s each (one core)
+    assert GL.about_seconds(index, "all") >= 40   # 25 frames of all eight new looks at 1.89 s each (one core)
     assert GL.about_seconds(None, "swath") == 2
     assert np.isfinite(GL.about_seconds({"frames": [{}], "run": {"grid": "junk"}}, "all"))
 
 
 def test_the_estimates_follow_the_measured_one_core_costs():
-    """The new looks were measured at 0.87 s per frame at 1 km and 1.28 s at 250 m (1.31 M cells) on one core:
-    the "about" figures land within 25 % of both, the swath film's (2.9 s for 25 pictures) within 1 s, and the
-    parcels film's scales with the parcel times the look found (22.7 s for 120)."""
+    """Drawing the new looks a run lacks was measured on one core over the 1 km run's 25 frames: 47.2 s for the first
+    five and the side view, water paths and rotation axis, 32.0 s for those three (a run drawn by 0.1.5 lacks them),
+    33.2 s for the first five alone; both radar looks at 2.93 s per frame at 1 km (25 saved times, Morrison) and
+    about 4.5 s at 250 m (18.4 M cells, 480 x 480 x 80): the "about" figures land within 25 % of each and grow with
+    the square root of the cells (the radar looks more slowly).  The swath film's (2.9 s for 25 pictures) lands
+    within 1 s, and the parcels film's scales with the parcel times the look found (22.7 s for 120)."""
 
     km = {"frames": [{}] * 25, "run": {"grid": "120 × 120 × 40, dx 1 km"}}
     fine = {"frames": [{}] * 13, "run": {"grid": "128 × 128 × 80, dx 250 m"}}
-    assert abs(GL.about_seconds(km, "all") - 25 * 0.871) <= 0.25 * 25 * 0.871
-    assert abs(GL.about_seconds(fine, "all") - 13 * 1.279) <= 0.25 * 13 * 1.279
+    big = {"frames": [{}] * 2, "run": {"grid": "480 × 480 × 80, dx 250 m"}}
+    first = ("clouds-from-above", "updraft-slice", "hail-track", "spin-track", "environment")
+    last = ("side-view", "water-paths", "rotation-axis")
+    radar = GL.RADAR_LOOKS
+    others = tuple(look for look in GL.NEW_LOOKS if look not in first + last)
+
+    def has(index, *looks):
+        return {**index, "products": [{"id": look} for look in looks]}
+
+    for index, measured in ((has(km, *others), 47.2), (has(km, "reflectivity", "swath", *first, *others), 32.0),
+                            (has(km, *last, *others), 33.2),
+                            (has(km, *first, *last, *(o for o in others if o not in radar)), 25 * 2.93)):
+        assert abs(GL.about_seconds(index, "all") - measured) <= 0.25 * measured, (index.get("products"), measured)
+    # a 250 m grid that has the radar and the flow near the ground: the rest grows with the square root of the cells
+    assert GL.about_seconds(has(fine, *radar, *GL.NEAR_GROUND), "all") == pytest.approx(
+        GL.about_seconds(has(km, *radar), "all") * 13 / 25 * (128 * 128 * 80 / 0.576e6) ** GL.CELLS_EXPONENT, abs=1.0)
+    assert abs(GL.about_seconds(km, "radar") - 25 * 2.93) <= 0.25 * 25 * 2.93
+    assert abs(GL.about_seconds(big, "radar") - 2 * 4.5) <= 0.25 * 2 * 4.5
+    # a run with none of them: every look a thunderstorm draws, not a hurricane's own; a hurricane's, not the looks
+    # made for one thunderstorm
+    thunderstorm = [look for look in GL.NEW_LOOKS if look not in GL.HURRICANE_ONLY]
+    assert GL.about_seconds(km, "all") == round(25 * (GL.SECONDS_PER_FRAME_PASS + sum(
+        GL.SECONDS_PER_FRAME_LOOK[look] for look in thunderstorm)))
+    hurricane = {**km, "run": {**km["run"], "storm_kind": "hurricane"}}
+    assert GL.about_seconds(hurricane, "all") == round(25 * (GL.SECONDS_PER_FRAME_PASS + sum(
+        GL.SECONDS_PER_FRAME_LOOK[look] for look in GL.NEW_LOOKS
+        if look not in GL.THUNDERSTORM_ONLY + GL.ONCE_THUNDERSTORM_ONLY)))
+    # every new look has its own measured cost (one added later needs measuring, not a guess)
+    assert set(GL.NEW_LOOKS) <= set(GL.SECONDS_PER_FRAME_LOOK)
     assert abs(GL.about_seconds(km, "swath") - 2.92) <= 1.0
     assert abs(GL.about_seconds(km, "swirl", 8) - 70.3) <= 0.25 * 70.3        # Linux, one core, 217 pictures
     assert abs(GL.about_seconds(fine, "swirl", 8) - 35.3) <= 0.25 * 35.3      # Linux, one core, 109 pictures

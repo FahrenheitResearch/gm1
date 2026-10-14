@@ -108,7 +108,13 @@ of the thunderstorm looks, the clouds seen from above with the eye in the middle
 and a chart of its lowest pressure. The wind, the pressure, the rain and the reflectivity each show the whole
 area and, beside it, the inner 500 km, where the eyewall and the rain bands are: the wind with a white line at
 hurricane force (33 m/s ground-relative), the pressure with a line every 4 hPa, the rain on a scale that steps
-tenfold from 1 mm to 400 cm. The card says about how long it takes on your card; on a card where the storm does
+tenfold from 1 mm to 400 cm. Under More looks, two pictures cut through the storm around its centre, by distance
+from the centre and height: how fast the air circles the centre (its swirling wind, averaged all the way round)
+and how much warmer the centre is than the air 300 to 450 km out (its warm core); the time series also charts the
+radius of maximum wind. On the 8 km card's settings, CM1 r21.1's own run of those settings is drawn with them: a
+dashed line on the charts of the lowest pressure, the fastest wind and the radius of maximum wind, and a second
+panel beside GM1's on the two pictures, at the same storm time. CM1 ran those settings on its own adaptive time
+step, and the pictures say so. The card says about how long it takes on your card; on a card where the storm does
 not fit about 1 hour it says so and opens on Overnight. Customize offers 3 to 6
 days of storm time (a time longer than GM1 has run says "not run yet"), a picture every 1 to 12 hours and the sea
 surface temperature (26 to 31 °C; CM1's case has 28, and only 28 has been run). On the command line a hurricane
@@ -253,12 +259,35 @@ Beside each picture, **What am I looking at** explains it with your storm's own 
 SIMULATED: it is a model, not an observation.
 
 Under the four tabs, **More looks** has the rest, drawn from the same run with no extra setup: cold air near the
-ground and gust fronts, rain so far, clouds seen from above, a slice through the strongest updraft, hail near the
-ground so far, the strongest near-ground spin so far, the storm's environment (its sounding's skew-T and hodograph,
-with CAPE and shear), air rising into the storm (when the run followed air parcels) and the swirl near the ground.
+ground and gust fronts, rain so far, two radar looks (what a weather radar near the storm would show on its lowest
+scan: the wind along the radar beam, with the storm's own motion taken out or left in, beside the reflectivity),
+clouds seen from above, clouds in visible and infrared (how cold the cloud tops are, simulated, not a satellite
+retrieval), a slice through the strongest updraft, hail near the ground so far, the strongest near-ground spin so
+far, the updraft and the spin over time (the whole run in one picture, height against time, following the storm's
+main updraft), the storm from the side (its cloud water, rain, ice and snow, and hail or graupel, through a slab
+and on a cut through the storm's core), the cloud, rain and ice overhead (how much of each is above each place),
+the rotation axis from the ground to 10 km (where the storm turns at each height, and how it leans), the wind's
+energy by size (which eddy sizes the grid holds), the storm's environment (its sounding's skew-T and hodograph, with
+CAPE and shear), how this storm was simulated (one card with the grid, the levels, the physics and the computing
+time, from the run's own receipt), air rising into the storm (when the run followed air parcels), the swirl near the
+ground and the storm in 3-D: the whole storm cut open through its core, drawn when you ask (**Draw it** for a
+picture of the latest saved time, **Make the orbit film** for one turn around it), on the computer's processor in
+seconds to a few minutes (each button says about how long). Under a radar picture you can move the radar and change
+its tilt once the run has ended. A hurricane's More looks have its own two as well: its swirling wind and its warm
+core by radius and height.
 Each has its own **What am I looking at**, with a line on what the grid spacing can and cannot show. **Save as
 film** under a picture makes a film of that look on the computer's processor: an animated picture always, and an
 MP4 when the film add-on is installed. The installers add it; with pip it is `pip install "gpuwm-cm1[film]"`.
+
+Lower down, **Compare with other runs** puts this storm beside up to five others from your Runs list: tick them and
+press **Draw the comparison**. You get each storm side by side at one storm time (radar picture, and the cold air
+and wind near the ground), in boxes of one size centred on each storm; every run on the same charts over time; and
+each run's sounding next to the storm it grew. Runs with another grid, area or save times are drawn as they are,
+and the pictures say so. It runs on the computer's processor and keeps the pictures in the run's folder.
+
+On a grid of 250 m or finer, **More looks** also shows the flow near the ground: the storm-relative flow at 0.5, 3
+and 10 km, the streamwise spin at about 100 m (when the levels near the ground are 100 m apart or closer), and the
+depth of the cold pool. On a coarser grid each says why it is not drawn.
 
 ## 9. Find the files
 

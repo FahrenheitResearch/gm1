@@ -1,6 +1,6 @@
 {
   "schema": "gpuwm-cm1.gui-looks/v1",
-  "about": "The looks guided Results opens on and the More looks row, with their 'What am I looking at' panels. {name} fields are filled with the run's own numbers; a clause whose number is unknown is left out (clause_if). A look with text_hurricane says that instead for a hurricane run.",
+  "about": "The looks guided Results opens on and the More looks row, with their 'What am I looking at' panels. {name} fields are filled with the run's own numbers; a clause whose number is unknown is left out (clause_if). A look with text_hurricane says that instead for a hurricane run. A More looks row with hurricane_only is shown for a hurricane run only.",
   "looks": [
     {
       "id": "reflectivity",
@@ -76,6 +76,41 @@
       "note_moving": "This run's domain moves with the storm, so its cells move too: this is not a map of rain on the ground (the wind swath is)."
     },
     {
+      "id": "swirl-by-radius",
+      "kind": "frames",
+      "hurricane_only": true,
+      "title": "Swirling wind by radius and height",
+      "short": "How fast the air circles the centre, from the sea up",
+      "text": "How fast the air circles the storm's centre, averaged all the way around it: across is the distance from the centre, out to 300 km, and up is the height, from the sea to 20 km. The centre is where the pressure at the lowest level is lowest. The brightest part is the eyewall: the fastest swirl sits a few tens of kilometres out and near the sea, and it weakens with height. High up and far out the air turns the other way (green), as the outflow at the top of a hurricane does. The gold ring marks the strongest swirl and the gold tick under the picture the radius of maximum wind at the lowest level, which the time series charts too. The colours run from 20 m/s ground-relative one way to 80 m/s ground-relative the other, with the same colours as the wind at the lowest level, and a line every 10 m/s. For a run with the 8 km hurricane card's settings, CM1's own run with those settings is drawn beside it at the same storm time.",
+      "note": "The rings around the centre are {dx} wide, one grid spacing, so an eyewall narrower than about {six_dx} is drawn wider than a finer grid would show it."
+    },
+    {
+      "id": "warm-core",
+      "kind": "frames",
+      "hurricane_only": true,
+      "title": "Warm core by radius and height",
+      "short": "How much warmer the centre is than the air far out",
+      "text": "How much warmer the air near the centre is than the air 300 to 450 km out at the same height, averaged all the way around the centre: across is the distance from the centre, up is the height. A hurricane is warmest in its middle, a few kilometres up at first and higher as it grows: air sinking in the eye warms as it is squeezed, and the rain in the eyewall gives off heat. Amber is warmer and violet colder, with a line every 2 K. The warm core's number is the mean within 40 km of the centre at its warmest height, marked with a gold bar. Early on, before the storm has warmed its middle, that warmest height can be at the top of the storm or above it, where the air is only a few degrees warmer than far out. It is potential temperature, the temperature air would have if brought down to 1000 hPa, so air at every height compares. For a run with the 8 km hurricane card's settings, CM1's own run with those settings is drawn beside it at the same storm time.",
+      "note": "The rings around the centre are {dx} wide, one grid spacing, so a warm eye narrower than about {six_dx} is drawn wider and cooler than a finer grid would show it."
+    },
+    {
+      "id": "radar-storm-relative",
+      "kind": "frames",
+      "title": "Radar velocity, storm-relative",
+      "short": "A simulated Doppler radar sees the storm turn",
+      "text": "What a weather radar near the storm would show on its lowest scan, made from the model's own wind and rain. Left: the reflectivity, how strongly the rain and hail would echo. Right: the wind along the radar beam with the storm's own motion taken out, green blowing toward the radar and red away from it. Where green and red sit side by side, the storm is turning there (a velocity couplet); a gold ring marks the pair when both sides are strong enough. The radar stands 40 km south-east of the storm, placed again in each picture as the storm moves, unless you fix it on the ground below.",
+      "note": "The model's wind along a simulated beam: no attenuation, clutter or velocity folding. The picture says how high the beam is at the storm and which storm motion is taken out: the domain's when it moves with the storm, else the Bunkers right mover of the starting air, or its 0-6 km mean wind when the wind changes too little with height for a storm to move off to the right. Features narrower than the beam (about 0.7 km at 40 km) or than about 6 grid spacings ({six_dx}) are smoothed out."
+    },
+    {
+      "id": "radar-velocity",
+      "kind": "frames",
+      "title": "Radar velocity, ground-relative",
+      "short": "The wind a Doppler radar would measure",
+      "text": "The same simulated radar scan, with the wind along the beam as a radar measures it: the storm's own motion is left in, so the whole storm leans toward green or red. Green blows toward the radar and red away from it. Left: the reflectivity on the same scan. A storm's turning shows best on Radar velocity, storm-relative.",
+      "text_hurricane": "What a weather radar near the eye (120 km away unless you move it) would show on its lowest scan, made from the model's own wind and rain. Right: the wind along the beam, green blowing toward the radar and red away from it. The fastest winds on either side of the eye blow straight along the beam, one side toward the radar and the other away, so the eye sits where green meets red. Left: the reflectivity on the same scan, with the eyewall and the rain bands. You can put the radar somewhere else below.",
+      "note": "The model's wind along a simulated beam: no attenuation, clutter or velocity folding. Features narrower than the beam (about 0.7 km at 40 km, 2 km at 120 km) or than about 6 grid spacings ({six_dx}) are smoothed out."
+    },
+    {
       "id": "clouds-from-above",
       "kind": "frames",
       "title": "Clouds seen from above",
@@ -83,6 +118,15 @@
       "text": "The storm as a camera high above it might see it, made from the model's cloud water, ice, snow, hail and rain, lit by a low sun from the west-south-west. The wide flat top is the anvil; bumps on it are where the updraft punches through. Long shadows fall to the east-north-east. Simulated, not satellite data.",
       "text_hurricane": "The hurricane as a camera high above it might see it, made from the model's cloud water, ice, snow and rain, lit by a low sun from the west-south-west. The wide cloud shield is the air flowing out at the top of the storm; a hole in its middle is the eye. Simulated, not satellite data.",
       "note": "At {dx}, small cumulus clouds are missing and cloud edges are blocky."
+    },
+    {
+      "id": "infrared",
+      "kind": "frames",
+      "title": "Clouds in visible and infrared",
+      "short": "How cold the cloud tops are",
+      "text": "The same clouds twice, seen from straight above. Left: as a camera would see them in low sunlight. Right: as an infrared satellite channel would see them, how cold each cloud top is in degrees Celsius. The tallest clouds have the coldest tops, so the coldest spot (the gold ring) is usually where the updraft punches up through the anvil. Grey is warmer than −30 °C; below that a new colour starts every 10 degrees, and the coldest tops, below −70 °C, are purple. The infrared picture sizes the cloud particles by this run's own rain and hail scheme; the visible one keeps the fixed sizes of Clouds seen from above. Each picture says which. Simulated from the model's clouds, not a satellite retrieval: there is no water vapour in it, so clear air shows the air near the ground.",
+      "text_hurricane": "The same clouds twice, seen from straight above. Left: as a camera would see them in low sunlight. Right: as an infrared satellite channel would see them, how cold each cloud top is in degrees Celsius. The hurricane's wide shield of high cloud is cold; once the storm has an eye, the eye shows as a warm hole ringed by the coldest tops of the eyewall. Grey is warmer than −30 °C; below that a new colour starts every 10 degrees, and the coldest tops, below −70 °C, are purple. The infrared picture sizes the cloud particles by this run's own rain and hail scheme; the visible one keeps the fixed sizes of Clouds seen from above. Each picture says which. Simulated from the model's clouds, not a satellite retrieval: there is no water vapour in it, so clear air shows the air near the sea.",
+      "note": "The model's top caps how cold a cloud top can get, and the picture says how high it is. At {dx}, clouds smaller than about {six_dx} are missing."
     },
     {
       "id": "updraft-slice",
@@ -112,6 +156,84 @@
       "note_sampled": "Sampled at each saved time ({interval}), so short bursts between them are missed."
     },
     {
+      "id": "spectra",
+      "kind": "frames",
+      "title": "Wind energy by size",
+      "short": "Which eddy sizes this grid can hold",
+      "text": "How the wind's energy is shared among eddies of different sizes, at a few heights (one line each): big swirls on the left, small ones on the right. The lines fall toward small sizes. Where they bend down steeply, the grid can no longer hold the eddies: that happens near 6 to 7 grid spacings, the gold band. With this run's {dx} grid, anything smaller than about {six_dx} in its other pictures is smoothed out. The dashed and dotted lines show two slopes often found in real winds, for comparison only.",
+      "note": "An eddy D across sits near a wavelength of 2 D, so a 1 km swirl shows near 2 km. Each picture is one saved time; the lines change as the storm grows."
+    },
+    {
+      "id": "updraft-time-height",
+      "kind": "once",
+      "title": "The updraft over time",
+      "short": "How high and how hard the air rose, through the whole run",
+      "text": "The whole run in one picture: time runs to the right and height goes up, one column for each saved time ({interval}). The top panel is the fastest rising air at each height inside a 5 km circle that follows the storm's main updraft; the panel under it is the speed the fastest tenth of that circle reaches, so one fast spot and a wide, strong updraft look different. The blue line is the cloud top, and the line at the bottom is the strongest spin at the lowest level ({height} m up) in the circle. A storm here is rising air of 3 metres per second or more on average from 2 to 6 km, smoothed over 3 km; the columns before one forms or after it is gone are dimmed, and a grey bar marks a storm at the domain's edge. When a run has several storms at least half as strong as the main one, as a line of storms does, each column is the whole domain's instead, and the picture says so.",
+      "text_hurricane": "The whole run in one picture: time runs to the right and height goes up, one column for each saved time ({interval}). The top panel is the fastest rising air at each height within 150 km of the hurricane's centre (where the pressure at the lowest level is lowest): the eyewall and the inner rain bands. The panel under it is the speed the fastest hundredth of that circle reaches. The blue line is the cloud top, and the line at the bottom is the fastest wind at the lowest level in the circle, measured against the ground.",
+      "clause_if": {"interval": " ({interval})", "height": " ({height} m up)"},
+      "note": "Each column is that saved time alone; nothing is drawn between saved times. Updrafts narrower than about {six_dx} are not resolved. Pulses rising through the updraft are traced only when a run saves every 60 seconds or closer."
+    },
+    {
+      "id": "spin-time-height",
+      "kind": "once",
+      "title": "The spin over time",
+      "short": "How the storm's rotation grew, height by height",
+      "text": "The whole run in one picture: time runs to the right and height goes up, with the lowest kilometres stretched so the spin near the ground has room. Each column is one saved time ({interval}): the strongest counter-clockwise spin at each height inside an 8 km circle around the storm's main updraft, wider than the updraft's own circle because the rotation near the ground sits on the updraft's flank. A rotating updraft shows as a bright band a few kilometres up; when the rotation builds towards the ground, the band reaches down to the bottom. The line under it is the 2 to 5 km updraft helicity in the circle. The colours are on a logarithmic scale fixed for this grid, from its spacing and the height of its lowest level.",
+      "clause_if": {"interval": " ({interval})"},
+      "note": "Spin narrower than about 6 grid spacings ({six_dx}) is not resolved, and each value is the strongest single cell, so it can be one small whirl rather than the storm's whole rotation. Each column is that saved time alone, so spin that comes and goes between saved times is missed. A storm here is rising air of 3 metres per second or more on average from 2 to 6 km, smoothed over 3 km; the columns without one are dimmed."
+    },
+    {
+      "id": "side-view",
+      "kind": "frames",
+      "title": "The storm from the side",
+      "short": "Cloud, rain, ice and hail, seen from the side",
+      "text": "The storm seen from the south, cut open from west to east through its strongest updraft. Top: the cloud water, rain, ice and snow, and hail (or graupel) in a 20 km slab around the updraft, added up through the slab. Bottom: how much of each is in the air on the cut itself. Each is a light of its own colour: white cloud water, blue rain, violet ice and snow, amber hail or graupel; where they mix, the colours add. The tall tower is the updraft, the wide flat top is the anvil, and the rain falls out below it. Heights are drawn to the same scale as distances.",
+      "text_hurricane": "The hurricane seen from the south, cut open from west to east through its centre: the 480 km around the centre, with the heights stretched so its 15 km depth shows. Top: the cloud water, rain, ice and snow, and graupel in a slab around the centre, added up through the slab. Bottom: how much of each is in the air on the cut itself. White is cloud water, blue rain, violet ice and snow, amber graupel. The towers on either side of the clear eye are the eyewall; above them the cloud spreads out from the top of the storm.",
+      "note": "Each grid column is {dx} wide, so clouds and rain shafts narrower than about {six_dx} are smoothed out. Each colour is on a fixed logarithmic scale: a faint glow is a little, a bright one a lot."
+    },
+    {
+      "id": "water-paths",
+      "kind": "frames",
+      "title": "Cloud, rain and ice overhead",
+      "short": "How much water and ice is above each place",
+      "text": "How much of each kind of water and ice is in the air above each place: cloud water, rain, cloud ice, snow and hail (or graupel), each in its own colour, and all of them together. 1 kg per square metre would make 1 mm of water if it all came down. All six maps share one logarithmic scale from 0.01 to 100 kg per square metre, so a thin anvil shows beside the heavy core. The dashed lines mark the slab of the side view.",
+      "text_hurricane": "How much of each kind of water and ice is in the air above each place, in the 480 km around the hurricane's centre: cloud water, rain, cloud ice, snow and graupel, each in its own colour, and all of them together. 1 kg per square metre would make 1 mm of water if it all came down. All six maps share one logarithmic scale from 0.01 to 100 kg per square metre. The rings around the clear eye are the eyewall; the spirals outside it are the rain bands.",
+      "note": "Each value is one {dx} grid column, so features narrower than about {six_dx} are smoothed out."
+    },
+    {
+      "id": "rotation-axis",
+      "kind": "frames",
+      "title": "Rotation axis, 0 to 10 km",
+      "short": "Where the storm turns, from the ground to 10 km",
+      "text": "Where the storm's rotation is at each height, from the lowest level to 10 km, drawn in 3-D over slices of the spin from the lowest level up to about 5 km, and seen from above. At each height the centre is the middle of the circle with the most turning in it, so the line shows how the rotating updraft leans. The line stops where the turning gets too weak, or where its centre jumps sideways further than the rule printed on the picture allows, and the picture says which. Right: how strong the turning is at each height. A storm that does not rotate gets no axis, and the picture says so.",
+      "text_hurricane": "Where the hurricane's centre is at each height, from the sea to 10 km: the middle of the circle with the lowest mean pressure, drawn in 3-D over slices of the spin and seen from above. The eye is often wider than the circle, and the most turning then sits in the eyewall, so the pressure, which is lowest in the middle of the eye, finds the centre; the ring of strong spin around it is the eyewall. A hurricane in still surroundings stands nearly upright: a lean of less than a grid cell or two is within what this way of finding the centre can tell. Right: how strong the turning is around the centre at each height.",
+      "note": "A picture tool's way of finding the centre, not CM1's: each centre is found to about one grid spacing ({dx}), and turning narrower than about {six_dx} is smoothed out."
+    },
+    {
+      "id": "storm-relative-flow",
+      "kind": "frames",
+      "title": "Storm-relative flow at three heights",
+      "short": "How the air moves past the storm",
+      "text": "The wind as the storm feels it: the storm's own motion is taken away, so the picture shows how air flows into, around and out of it. Three heights side by side, each a square of up to 40 km around the storm: 0.5 km (amber), where the air that feeds the storm comes in; 3 km (violet), where it wraps around the rotating updraft; and 10 km (cyan), where it streams out into the anvil. Brighter is faster, and the arrows show which way the air goes. The white line is where a radar would see 30 dBZ at 1 km, and the gold ring is the storm's updraft at 5 km.",
+      "note": "Drawn for grids of 250 m and finer. Features smaller than about {six_dx} are not resolved. The storm's motion comes from its own track: its updraft followed back over the last 30 minutes of saved times. Until it has one, the motion is the Bunkers estimate from the sounding. The picture says which."
+    },
+    {
+      "id": "streamwise-spin",
+      "kind": "frames",
+      "title": "Streamwise spin at about 100 m",
+      "short": "Spin near the ground that can turn into the storm's rotation",
+      "text": "How the air about 100 m up spins about a level axis, drawn as streaks along that axis, like iron filings. Amber is spin whose axis lies along the storm-relative wind (streamwise): when the updraft lifts air spinning this way, the spin turns upright and the updraft rotates. Violet points against the wind, blue-grey across it. Brighter is faster spin, on a log scale. The numbers say how much of the spin is streamwise near the storm's updraft, where the air flows toward it.",
+      "note": "Drawn for grids of 250 m and finer with model levels 100 m apart or closer near the ground. Features smaller than about {six_dx} are not resolved."
+    },
+    {
+      "id": "cold-pool-depth",
+      "kind": "frames",
+      "title": "Depth of the cold pool",
+      "short": "How deep the rain-cooled air is",
+      "text": "How deep the rain-cooled air near the ground is: from the ground up to where the air is no longer at least 1 K colder than the air around it at the same height (the middle value over the whole area). The deepest cold air is usually under the heaviest rain, and its edge is the gust front. Colder air higher up, above a warmer gap, is not counted. The picture shows the area around all the cold air so far: 40, 60, 80 or 120 km across and so on, and it only grows, so a film of it keeps one scale for long stretches. The colours run from 0 to 3 km on a square-root scale, with a white line every 500 m. A gold line says when the cold air reaches the edge of the domain.",
+      "note": "Drawn for grids of 250 m and finer. Features smaller than about {six_dx} are not resolved, and the depth is found between model levels, so where the levels are far apart it comes in steps."
+    },
+    {
       "id": "environment",
       "kind": "once",
       "title": "The storm's environment",
@@ -120,6 +242,14 @@
       "text_hurricane": "The air the hurricane starts in, as a weather balloon would measure it: CM1's moist tropical sounding, with no wind of its own (the swirl is added to it). Left: temperature (red) and dewpoint (green) with height; where they are close together the air is moist. Middle: the wind with height in the corners of the area, far from the swirl; it is weak there, so the shear and the helicity are near zero, and the storm-motion marks made for thunderstorms say little. Right: the energy for rising air (CAPE), the lid on it (CIN) and the cloud base, as the run computed them before it started.",
       "note": "The air the storm starts in, the same everywhere in the domain.",
       "note_varies": "This run starts from a weather model's 3D state, so the air differs from place to place: the curves are the south-west corner of the domain at the start, and the numbers are for the domain's average sounding."
+    },
+    {
+      "id": "run-card",
+      "kind": "once",
+      "title": "How this storm was simulated",
+      "short": "The grid, the levels, the physics and the computing time",
+      "text": "One card for the whole run, read from its own records (the receipt, and the namelist or the deck it ran from): the area and its grid with a map of the storm, the model levels drawn to scale, how long the storm ran against how long the computer took and where that time went, the GPU memory it used, and the physics in plain words. It is drawn when the first saved time lands, and again when each part of the run ends.",
+      "note": "Grid spacing {dx}: features smaller than about {six_dx} are not resolved. The computing time is split by the computer's own clock; the GPU's work is not split by physics."
     },
     {
       "id": "parcels",
@@ -137,6 +267,15 @@
       "text": "The spin look set in motion: the lowest-level wind drawn as streaks that flow with the air, coloured by spin, red one way and blue the other. Watch the air wrap around the storm's rotation and the gust fronts sweep outward.",
       "text_hurricane": "The wind at the lowest model level set in motion: streaks that flow with the air, coloured by spin, red one way and blue the other. Watch the air spiral in towards the eyewall and circle the eye.",
       "note": "Between saved times (every {interval}) the picture is blended, not computed. At {dx}, the swirl shows the storm's broad circulation, not small vortices."
+    },
+    {
+      "id": "storm3d",
+      "kind": "request",
+      "title": "The storm in 3-D",
+      "short": "The whole storm, cut open through its core",
+      "text": "The whole storm in three dimensions, cut open along an upright plane through its core so you can see inside. White is the cloud, drawn see-through; the coloured shells are where the reflectivity the model computes reaches 30, 45 and 60 dBZ (green, orange and red). The half nearer the camera is not drawn. Draw it makes a picture of the latest saved time; Make the orbit film turns once around the storm. Both are made on the computer's processor, in seconds to a few minutes; each button says about how long.",
+      "text_hurricane": "The middle of the hurricane in three dimensions, cut open through its centre so the eye and the eyewall show. White is the cloud, drawn see-through; the coloured shells are where the reflectivity reaches 30, 45 and 60 dBZ. A hurricane is hundreds of km across and only 16 km deep, so its heights are stretched (the picture says how much). Draw it makes a picture of the latest saved time; Make the orbit film turns once around it.",
+      "note": "A picture, not a measurement: the lighting is a choice. Features smaller than about {six_dx} are smoothed out; on a very fine grid the picture averages blocks of cells and says so."
     }
   ],
   "guided_titles": {
@@ -168,11 +307,24 @@
     "older_run": {
       "text": "This run's pictures were drawn before this look existed. Draw the new looks to add it."
     },
+    "frames_gone": {
+      "text": "This run's saved frames were deleted, so this look cannot be drawn for it: the new looks are drawn from the saved frames. The pictures it has are kept."
+    },
+    "near_ground_grid": {
+      "text": "This look is drawn for grids of 250 m and finer; this run's grid is {dx}."
+    },
+    "fine_levels": {
+      "text": "This look needs model levels 100 m apart or closer near the ground.",
+      "hint": "dz = 100"
+    },
     "film_first": {
       "text": "This look is a film. Make the film to watch it."
     },
     "film_needs_frames": {
       "text": "A film needs at least two saved times."
+    },
+    "draw_3d": {
+      "text": "Not drawn yet. Draw it to make the picture of the latest saved time."
     }
   },
   "ui": {
@@ -195,6 +347,28 @@
     "draw_new_about": "Draws the looks this run does not have yet on the computer's processor, not the graphics card. About {seconds} s.",
     "drawing": "Drawing the new looks…",
     "draw": "Draw it",
-    "film_about": "A film of every saved time, made on the computer's processor. About {seconds} s."
+    "film_about": "A film of every saved time, made on the computer's processor. About {seconds} s.",
+    "radar_site": "Radar",
+    "radar_beside": "beside the storm in each picture",
+    "radar_beside_eye": "beside the eye in each picture",
+    "radar_ground": "fixed on the ground at",
+    "radar_x": "x",
+    "radar_y": "y",
+    "radar_km": "km",
+    "radar_tilt": "tilt",
+    "radar_degrees": "degrees",
+    "radar_draw": "Draw the radar again",
+    "radar_about": "Draws both radar looks of every saved time again, on the computer's processor. About {seconds} s.",
+    "radar_about_one": "Draws the radar look of every saved time again, on the computer's processor. About {seconds} s.",
+    "radar_need_xy": "Type where the radar stands: x and y in km.",
+    "radar_need_tilt": "Type the tilt: 0.1 to 20 degrees.",
+    "radar_now": "In the newest radar picture the radar stands at x {x} km, y {y} km (the run's own x and y at the start).",
+    "radar_drawing": "Drawing the radar looks again…",
+    "radar_after_run": "The radar can be moved once the run has ended.",
+    "draw_3d": "Draw it at the latest saved time",
+    "draw_3d_about": "Draws the storm in 3-D on the computer's processor, not the graphics card. About {about}.",
+    "drawing_3d": "Drawing the storm in 3-D on the computer's processor…",
+    "make_orbit": "Make the orbit film",
+    "orbit_about": "One turn around the storm at the latest saved time, made on the computer's processor. About {about}."
   }
 }

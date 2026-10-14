@@ -15,7 +15,8 @@ and the same ``gm1.run-events/v1`` log, fast, with every number made up:
   under ``segments/NNN`` with frames, restarts, a receipt and the event log,
   honouring ``control/stop``, ``control/pause`` and SIGTERM as the runtime does.
 - ``cm1out RUNDIR [--follow]`` and ``quicklook RUNDIR [--follow]``: the sidecars,
-  writing placeholder files and small PNGs.
+  writing placeholder files and small PNGs.  ``quicklook`` of CM1 netCDF output (a folder of
+  ``cm1out_NNNNNN.nc`` or one ``cm1out.nc``, with ``--out``) gives each file a made-up saved time.
 - ``stop`` and ``pause`` are the real commands (:mod:`.control`).
 
 Every file it writes says ``fake_runner``.  Speed and outcome come from the
@@ -51,6 +52,7 @@ from .runstate import proc_start_ticks, read_status, segment_dirs, this_host, it
 
 COMMANDS = ("import", "edit", "check", "cartesian", "estimate", "status", "jobscript", "run", "resume", "stop",
             "pause", "cm1out", "quicklook", "preset", "doctor", "reproduce",
+            "render",  # the native renderer's picture of a restart: a placeholder here
             "sounding",  # the real sounding command (host-only; reads a WRF or ArWen history)
             "chain")  # the real chain command (host-only; reads a WRF or ArWen history, writes a run folder)
 FAKE = "fake runner: nothing here ran a model; every number is made up"
@@ -70,6 +72,8 @@ HURRICANE_PRODUCTS = (
     ("wind-lowest", "Wind at the lowest level"),
     ("pressure-lowest", "Pressure at the lowest level"),
     ("rain", "Accumulated rain"),
+    ("swirl-by-radius", "Swirling wind by radius and height"),
+    ("warm-core", "Warm core by radius and height"),
 )
 MICROPHYSICS = {5: "morrison-mp10", 7: "wsm6-mp6", 3: "thompson-mp8"}
 
@@ -1004,6 +1008,31 @@ def _frames(rundir: Path) -> list[tuple[Path, dict[str, Any]]]:
     return rows
 
 
+def _netcdf_times(target: Path) -> list[float] | None:
+    """CM1 netCDF output (one cm1out.nc, or cm1out_NNNNNN.nc files): made-up saved times, 300 s apart for one file
+    per time, or 0 and 3600 s for one file holding every time; None for anything else."""
+
+    from .files import CM1_HISTORY_NAME
+
+    if target.is_file():
+        names = [target.name] if target.suffix == ".nc" else []
+    elif target.is_dir() and not (target / "segments").is_dir() and not (target / "frames").is_dir():
+        names = sorted(p.name for p in target.iterdir() if CM1_HISTORY_NAME.match(p.name))
+    else:
+        names = []
+    if not names:
+        return None
+    if len(names) == 1:
+        return [0.0, 3600.0]
+    return [300.0 * n for n in range(len(names))]
+
+
+def _out(arguments: argparse.Namespace, rundir: Path) -> Path:
+    """Where the pictures go: --out, as the real command takes it, else RUNDIR/quicklook."""
+
+    return Path(arguments.out).resolve() if getattr(arguments, "out", None) else rundir / "quicklook"
+
+
 def _ended(rundir: Path) -> bool:
     segments = segment_dirs(rundir)
     if not segments:
@@ -1064,7 +1093,7 @@ def _fake_picture(arguments: argparse.Namespace) -> int:
     """quicklook --slice/--section/--column/--fields: one placeholder picture, and the real command's JSON shape."""
 
     rundir = Path(arguments.rundir).resolve()
-    times = [float(meta["model_time_s"]) for _path, meta in _frames(rundir)]
+    times = [float(meta["model_time_s"]) for _path, meta in _frames(rundir)] or _netcdf_times(rundir) or []
     if not times:
         # a folder of real published frames (attached, view-only): their clocks
         for path in sorted(rundir.glob("frames/frame-*")) + sorted(rundir.glob("segments/*/frames/frame-*")):
@@ -1076,15 +1105,20 @@ def _fake_picture(arguments: argparse.Namespace) -> int:
         return 2
     t = times[-1] if arguments.time is None else min(times, key=lambda v: abs(v - arguments.time))
     if arguments.fields:
-        print(json.dumps({"kind": "fields", "time_s": t, "fake_runner": True, "note": FAKE,
-                          "fields": [{"name": n, "grid": g, "units": u, "description": d, "levels_m": None}
-                                     for n, g, u, d in (("w", "w", "m/s", "vertical velocity"),
-                                                        ("dbz", "s", "dBZ", "reflectivity"),
-                                                        ("rain", "2", "cm", "accumulated surface rainfall"))]}))
+        record = {"kind": "fields", "time_s": t, "fake_runner": True, "note": FAKE,
+                  "fields": [{"name": n, "grid": g, "units": u, "description": d, "levels_m": None}
+                             for n, g, u, d in (("w", "w", "m/s", "vertical velocity"),
+                                                ("dbz", "s", "dBZ", "reflectivity"),
+                                                ("rain", "2", "cm", "accumulated surface rainfall"))]}
+        if _netcdf_times(rundir) is not None:
+            # as the real command says of CM1 netCDF output: its saved times and its grid (made up here)
+            record.update({"saved_times_s": [times[0], times[-1]], "saved_count": len(times),
+                           "grid": {"nx": 24, "ny": 24, "nz": 40, "dx_m": 1000.0}})
+        print(json.dumps(record))
         return 0
     kind, name = (("horizontal", f"slice-{arguments.slice}") if arguments.slice else
                   ("vertical", f"section-{arguments.section}") if arguments.section else ("column", "column"))
-    slices = rundir / "quicklook" / "slices"
+    slices = _out(arguments, rundir) / "slices"
     slices.mkdir(parents=True, exist_ok=True)
     file = f"{name}-t{int(round(t)):06d}.png"
     (slices / file).write_bytes(_png(96, 54, 7, (200, 160, 60)))
@@ -1093,22 +1127,45 @@ def _fake_picture(arguments: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_render(arguments: argparse.Namespace) -> int:
+    """render RUNDIR --product P: one placeholder picture in quicklook/native/ and the real command's JSON shape."""
+
+    rundir = Path(arguments.rundir).resolve()
+    restarts = sorted(rundir.glob("segments/*/restarts/restart-*"))
+    if not restarts:
+        print(json.dumps({"code": "CM1-RENDER-NO-RESTART", "reason": "no published restart checkpoint yet",
+                          "fake_runner": True}), file=sys.stderr)
+        return 2
+    native = rundir / "quicklook" / "native"
+    native.mkdir(parents=True, exist_ok=True)
+    file = f"{arguments.product}-fake.png"
+    (native / file).write_bytes(_png(96, 104, 11, (90, 170, 210)))
+    print(json.dumps({"schema": "gpuwm-cm1.render/v2", "status": "rendered", "source": "restart",
+                      "product": arguments.product, "file": f"native/{file}", "output": str(native / file),
+                      "value_range": [[0.0, 1.0]], "units": "", "fake_runner": True, "note": FAKE,
+                      "caveat": "Restart checkpoint, not a history frame"}))
+    return 0
+
+
 def _fake_film_or_look(arguments: argparse.Namespace) -> int:
     """quicklook --film LOOK / --look LOOK: placeholder pictures in the real command's layout and JSON shape."""
 
     rundir = Path(arguments.rundir).resolve()
-    out = rundir / "quicklook"
-    times = [float(meta["model_time_s"]) for _path, meta in _frames(rundir)]
+    out = _out(arguments, rundir)
+    nc_times = _netcdf_times(rundir)
+    times = [float(meta["model_time_s"]) for _path, meta in _frames(rundir)] or nc_times or []
     if not times:
         print(json.dumps({"status": "error", "reason": "no published frames yet", "fake_runner": True}), file=sys.stderr)
         return 2
     if arguments.look:
-        ended = _ended(rundir)
+        ended = _ended(rundir) or nc_times is not None
         if arguments.look == "parcels" and not (ended and _fake_setting(rundir, "iprcl") == "1"):
             reason = ("Parcels arrive when the run ends." if not ended else
                       "This run did not follow air parcels. To follow them, set CM1's iprcl = 1 for the next run: in Advanced, Namelist, or with gpuwm-cm1 edit RUNDIR --set iprcl=1 before it starts.")
             print(json.dumps({"status": "error", "reason": reason, "fake_runner": True}), file=sys.stderr)
             return 2
+        if arguments.look == "storm3d":
+            return _fake_storm3d(out, times)
         name = f"{arguments.look}/t{int(round(times[0])):06d}.png"
         (out / arguments.look).mkdir(parents=True, exist_ok=True)
         (out / name).write_bytes(_png(96, 54, 5, (120, 200, 160)))
@@ -1149,6 +1206,40 @@ def _fake_film_or_look(arguments: argparse.Namespace) -> int:
     progress.update({"state": "done", "message": f"{len(frames)} pictures"})
     write_json_atomic(folder / "progress.json", progress)
     print(json.dumps(record))
+    return 0
+
+
+def _fake_storm3d(out: Path, times: list[float]) -> int:
+    """quicklook --look storm3d: a placeholder still of the latest saved time, listed as the real one is
+    (``storm3d/drawn.json`` and the index's ``storm3d`` entry, drawn on request)."""
+
+    t = times[-1]
+    name = f"storm3d/t{int(round(t)):06d}.png"
+    (out / "storm3d" / "thumb").mkdir(parents=True, exist_ok=True)
+    (out / name).write_bytes(_png(96, 54, 7, (230, 140, 60)))
+    (out / "storm3d" / "thumb" / Path(name).name).write_bytes(_png(48, 27, 7, (230, 140, 60)))
+    record = {"frame": "fake", "time": t, "file": name, "thumb": f"storm3d/thumb/{Path(name).name}",
+              "facts": {"kind": "thunderstorm", "field": "reflectivity", "stride": 1, "fake_runner": True},
+              "seconds": 0.0}
+    try:
+        drawn = json.loads((out / "storm3d" / "drawn.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        drawn = {"schema": "gm1.quicklook-storm3d/v1", "stills": {}}
+    drawn.setdefault("stills", {})[repr(float(t))] = record
+    write_json_atomic(out / "storm3d" / "drawn.json", drawn)
+    try:
+        index = json.loads((out / "index.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        index = {"schema": "gm1.quicklook-index/v1", "fake_runner": True, "products": [], "frames": []}
+    products = [p for p in index.get("products") or [] if p.get("id") != "storm3d"]
+    stills = sorted(drawn["stills"].values(), key=lambda r: r["time"])
+    products.append({"id": "storm3d", "title": "The storm in 3-D", "on_request": True, "frames": [
+        {"index": n, "time_s": r["time"], "clock": r["time"], "file": r["file"], "thumb": r["thumb"],
+         "facts": r["facts"]} for n, r in enumerate(stills)]})
+    index["products"] = products
+    write_json_atomic(out / "index.json", index)
+    print(json.dumps({**record, "kind": "look", "look": "storm3d", "path": str(out / name), "fake_runner": True,
+                      "note": FAKE}))
     return 0
 
 
@@ -1230,14 +1321,114 @@ def _fake_setting(rundir: Path, key: str) -> str | None:
     return found.group(1) if found else None
 
 
+def _fake_radar(arguments: argparse.Namespace) -> int:
+    """quicklook --radar-site/--radar-tilt/--radar-motion: the settings file the real command keeps
+    (cm1core.quicklook.radar, gm1.quicklook-radar/v1) and its JSON shape; no picture is drawn again."""
+
+    rundir = Path(arguments.rundir).resolve()
+    out = rundir / "quicklook"
+    path = out / "radar.json"
+    try:
+        settings = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        settings = {}
+    if not isinstance(settings, dict) or settings.get("schema") != "gm1.quicklook-radar/v1":
+        settings = {"schema": "gm1.quicklook-radar/v1", "site_km": None, "tilt_deg": 0.5, "motion_m_s": None}
+    for key, values, word in (("site_km", arguments.radar_site, "storm"), ("motion_m_s", arguments.radar_motion,
+                                                                           "auto")):
+        if values is None:
+            continue
+        if len(values) == 1 and values[0] == word:
+            settings[key] = None
+        else:
+            try:
+                settings[key] = [float(v) for v in values]
+            except ValueError:
+                settings[key] = []
+            if len(settings[key]) != 2:
+                return _refuse("CM1-INPUT-ERROR", f"takes two numbers or the word {word}",
+                               "correct the named input and retry")
+    if arguments.radar_tilt is not None:
+        if not 0.1 <= arguments.radar_tilt <= 20.0:
+            return _refuse("CM1-INPUT-ERROR", "The radar tilt must be from 0.1 to 20 degrees.",
+                           "correct the named input and retry")
+        settings["tilt_deg"] = float(arguments.radar_tilt)
+    out.mkdir(parents=True, exist_ok=True)
+    write_json_atomic(path, settings)
+    print(json.dumps({"kind": "radar", "settings": settings, "pictures_redrawn": 0, "frames_drawn": 0,
+                      "problems": [], "fake_runner": True, "note": FAKE}))
+    return 0
+
+
+def _fake_compare(arguments: argparse.Namespace) -> int:
+    """quicklook --compare OTHER ...: placeholder pictures and compare.json in the real command's layout
+    (cm1core.quicklook.compare) and JSON shape."""
+
+    rundir = Path(arguments.rundir).resolve()
+    runs = [rundir, *[Path(o).resolve() for o in arguments.compare]]
+    digest = hashlib.sha256(" ".join(str(r) for r in runs).encode()).hexdigest()[:8]
+    folder = Path(arguments.out) if arguments.out else rundir / "quicklook" / "compare" / f"with-fake-{digest}"
+    (folder / "thumb").mkdir(parents=True, exist_ok=True)
+
+    def refuse(reason: str) -> int:
+        write_json_atomic(folder / "progress.json", {"schema": "gm1.quicklook-compare-progress/v1",
+                                                     "state": "failed", "done": 0, "total": 5, "step": "",
+                                                     "message": reason, "pid": os.getpid()})
+        print(json.dumps({"status": "error", "reason": reason, "fake_runner": True}), file=sys.stderr)
+        return 2
+
+    if len(runs) > 6:
+        return refuse("At most 6 runs can be compared at once.")
+    last = []
+    for run in runs:
+        times = [float(meta["model_time_s"]) for _path, meta in _frames(run)]
+        if not times:
+            return refuse(f"{run.name}: no saved frames and no quick-look pictures, so there is nothing of its storm "
+                          "to compare.")
+        last.append(max(times))
+    t = float(arguments.time) if arguments.time is not None else min(last)
+    tag = f"t{int(round(t)):06d}"
+    progress = {"schema": "gm1.quicklook-compare-progress/v1", "state": "running", "done": 0, "total": 5,
+                "step": "reading the runs", "message": "", "pid": os.getpid()}
+    write_json_atomic(folder / "progress.json", progress)
+    time.sleep(_env_float("GM1_FAKE_COMPARE_S", 0.0))
+    pictures: dict[str, Any] = {}
+    for key, name in (("storm-reflectivity", f"storm-reflectivity-{tag}.png"),
+                      ("storm-surface", f"storm-surface-{tag}.png"), ("series", "series.png")):
+        for where in (folder / name, folder / "thumb" / name):
+            where.write_bytes(_png(96, 54, 4, (90, 160, 230)))
+        pictures[key] = {"file": name, "facts": {"fake_runner": True}}
+    name = f"soundings-{tag}.png"
+    for where in (folder / name, folder / "thumb" / name):
+        where.write_bytes(_png(96, 54, 6, (230, 120, 80)))
+    letters = "ABCDEF"
+    pictures["soundings"] = [{"file": name, "runs": [letters[n] for n in range(len(runs))], "facts": {}}]
+    colours = ("#3987e5", "#d95926", "#199e70", "#c98500", "#d55181", "#008300")
+    record = {"schema": "gm1.quicklook-compare/v1", "made_utc": _utc(), "time_s": t, "box_m": 48000.0,
+              "kind": "thunderstorm", "folder": str(folder),
+              "runs": [{"letter": letters[n], "colour": colours[n], "name": run.name, "folder": str(run),
+                        "grid": "fake runner", "saved_frames": True, "time_s": t} for n, run in enumerate(runs)],
+              "differ": [], "settings_unread": [], "pictures": pictures, "not_drawn": {},
+              "looks": ["storm", "series", "soundings"], "fake_runner": True, "note": FAKE}
+    write_json_atomic(folder / "compare.json", record)
+    progress.update({"state": "done", "done": 5, "step": "", "message": "4 pictures"})
+    write_json_atomic(folder / "progress.json", progress)
+    print(json.dumps(record))
+    return 0
+
+
 def cmd_quicklook(arguments: argparse.Namespace) -> int:
+    if any(getattr(arguments, key, None) is not None for key in ("radar_site", "radar_tilt", "radar_motion")):
+        return _fake_radar(arguments)
+    if getattr(arguments, "compare", None):
+        return _fake_compare(arguments)
     if getattr(arguments, "film", None) or getattr(arguments, "look", None):
         return _fake_film_or_look(arguments)
     if arguments.slice or arguments.section or arguments.column or arguments.fields:
         return _fake_picture(arguments)
     rundir = Path(arguments.rundir).resolve()
-    out = rundir / "quicklook"
-    out.mkdir(exist_ok=True)
+    out = _out(arguments, rundir)
+    out.mkdir(parents=True, exist_ok=True)
     hues = ((250, 90, 60), (220, 60, 200), (240, 200, 90), (90, 200, 250), (150, 110, 240), (80, 220, 120))
     index_path = out / "index.json"
     # A hurricane run (CM1's swirl start) has its own looks, facts, clock and charts, as the real quick-looks do.
@@ -1301,6 +1492,12 @@ def cmd_quicklook(arguments: argparse.Namespace) -> int:
         write_json_atomic(out / "series.json", {"schema": "gm1.quicklook-series/v1", "gm1_label": "GM1, fake runner",
                                                 "note": FAKE, "charts": charts})
 
+    nc_times = _netcdf_times(rundir)
+    if nc_times is not None:
+        # CM1 netCDF output: every saved time at once, as the real command draws files that are all there
+        for index, t in enumerate(nc_times):
+            convert(index, {"model_time_s": t})
+        return 0
     return _follow(rundir, arguments.follow, convert)
 
 
@@ -1445,11 +1642,31 @@ def build_parser() -> argparse.ArgumentParser:
             command.add_argument("--time", type=float)
             command.add_argument("--json", action="store_true")
             # Films and the looks drawn once per run
+            command.add_argument("--radar-site", nargs="+")
+            command.add_argument("--radar-tilt", type=float)
+            command.add_argument("--radar-motion", nargs="+")
             command.add_argument("--film")
-            command.add_argument("--look", choices=("environment", "parcels"))
+            command.add_argument("--look", choices=("environment", "parcels", "run-card", "updraft-time-height",
+                                                    "spin-time-height", "storm3d"))
+            command.add_argument("--bearing", type=float)
+            command.add_argument("--size")
+            command.add_argument("--orbit-frames", type=int)
             command.add_argument("--fps", type=float)
             command.add_argument("--between", type=int)
+            # Compare with other runs
+            command.add_argument("--compare", nargs="+")
+            command.add_argument("--box", type=float)
         command.set_defaults(handler=handler)
+    command = commands.add_parser("render")
+    command.add_argument("rundir")
+    command.add_argument("--product", required=True)
+    command.add_argument("--restart")
+    command.add_argument("--field", action="append", default=[])
+    command.add_argument("--height", type=float)
+    command.add_argument("--level", type=int)
+    command.add_argument("--output")
+    command.add_argument("--json", action="store_true")
+    command.set_defaults(handler=cmd_render)
     control.add_commands(commands)
     # The System screen's check and the reproduce bundle read files and nvidia-smi only, so the fake runner runs
     # the real ones (a test points GPUWM_CM1_NVIDIA_SMI at a fixture).

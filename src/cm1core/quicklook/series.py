@@ -9,6 +9,13 @@ The CM1 reference (``records/CM1-STOCK-SUPERCELL-SERIES.json``) is CM1 r21.1 its
 measured on a Linux workstation.  It is drawn only when the run's namelist is that namelist in every setting that changes the
 storm: output choices and the output, restart and statistics cadence may differ, and a shorter run shows the
 reference up to its own end.
+
+A hurricane run's reference is CM1 r21.1's run with the 8 km hurricane preset's settings and its own adaptive time
+step (``records/GM1-HURRICANE-RUNS.json``, ``runs.cm1-8km``, every 3 hours to hour 96): its lowest pressure and
+fastest wind at the lowest level and its radius of maximum wind, read from its saved frames as GM1's are.  It is
+drawn only when the run's settings are that preset's in every setting that changes the storm
+(:func:`.facts.hurricane_checked`, the test the pictures' footers use): never on the 4 km preset or any changed
+setting, and the series says why there is no CM1 curve.
 """
 
 from __future__ import annotations
@@ -42,6 +49,7 @@ CHARTS: tuple[tuple[str, str, str], ...] = (
 HURRICANE_CHARTS: tuple[tuple[str, str, str], ...] = (
     ("prs_sfc_min_hpa", "lowest pressure at {z0} (not sea level)", "hPa"),
     ("wind_sfc_max", "fastest wind at {z0}, ground-relative", "m/s"),
+    ("rmw_km", "radius of maximum wind at {z0}, ring mean", "km"),
     ("wmax", "strongest updraft", "m/s"),
     ("rain_max_cm", "most rain in one cell", "cm"),
     ("dbz_max", "highest reflectivity", "dBZ"),
@@ -100,9 +108,51 @@ def record() -> Mapping[str, Any]:
     return payload
 
 
-def reference_for(settings: Any) -> tuple[Mapping[str, Any] | None, str]:
-    """(the CM1 reference for this run, why there is none): only for a namelist equal to the reference's."""
+#: CM1's hurricane run: the record, the run in it, and the column each chart's curve is read from.
+HURRICANE_RECORD = "GM1-HURRICANE-RUNS.json"
+HURRICANE_RUN = "cm1-8km"
+HURRICANE_COLUMNS = {"prs_sfc_min_hpa": "pressure_hpa", "wind_sfc_max": "wind_m_s",
+                     "rmw_km": "radius_of_maximum_wind_km"}
+HURRICANE_LABEL = "CM1 r21.1, same settings, its own time step"
+HURRICANE_PROVENANCE = ("dashed: CM1 r21.1 run with the 8 km hurricane preset's settings but its own adaptive time "
+                        "step (from 10 s), read every 3 hours as GM1's are (measured)")
 
+
+@lru_cache(maxsize=1)
+def hurricane_record() -> Mapping[str, Any]:
+    text = resources.files("cm1core.records").joinpath(HURRICANE_RECORD).read_text(encoding="utf-8")
+    payload = json.loads(text)
+    if payload.get("schema") != "gpuwm-cm1.hurricane-runs/v1":
+        raise ValueError(f"{HURRICANE_RECORD} has an unknown schema")
+    return payload
+
+
+def hurricane_reference(settings: Any) -> tuple[Mapping[str, Any] | None, str]:
+    """(CM1's hurricane run as a reference, why there is none): only for the 8 km hurricane preset's settings."""
+
+    from .facts import HURRICANE_CHECKED, hurricane_checked
+
+    if settings is None:
+        return None, "no CM1 settings to compare with CM1's hurricane run"
+    if hurricane_checked(settings) != HURRICANE_CHECKED:
+        # Plain words (the guided pages show them); facts.hurricane_differences names the settings.
+        return None, ("CM1 r21.1 has been run with the 8 km hurricane preset's settings only, and this run's "
+                      "settings differ")
+    run = hurricane_record()["runs"][HURRICANE_RUN]
+    columns = list(run["columns"])
+    series = {key: [[float(row[0]) * 3600.0, float(row[columns.index(column)])] for row in run["series"]]
+              for key, column in HURRICANE_COLUMNS.items()}
+    return {"id": f"{HURRICANE_RUN}", "label": HURRICANE_LABEL, "provenance": HURRICANE_PROVENANCE,
+            "series": series}, ""
+
+
+def reference_for(settings: Any, kind: str = "") -> tuple[Mapping[str, Any] | None, str]:
+    """(the CM1 reference for this run, why there is none): only for a namelist equal to the reference's.
+
+    ``kind == "hurricane"``: CM1's hurricane run (:func:`hurricane_reference`)."""
+
+    if kind == "hurricane":
+        return hurricane_reference(settings)
     if settings is None or getattr(settings, "source", "") != "namelist":
         return None, "no CM1 namelist to compare with CM1's stock storm"
     mine = storm_settings(settings.values)
@@ -115,14 +165,21 @@ def reference_for(settings: Any) -> tuple[Mapping[str, Any] | None, str]:
 
 
 def series_document(rows: Sequence[tuple[float, Mapping[str, float]]], *, z0: float, name: str,
-                    reference: Mapping[str, Any] | None, t_end: float | None, kind: str = "") -> dict[str, Any]:
-    """``kind``: ``"hurricane"`` charts :data:`HURRICANE_CHARTS`; any other run charts :data:`CHARTS`."""
+                    reference: Mapping[str, Any] | None, t_end: float | None, kind: str = "",
+                    model: str = "GM1") -> dict[str, Any]:
+    """``kind``: ``"hurricane"`` charts :data:`HURRICANE_CHARTS`; any other run charts :data:`CHARTS`.
+    ``model``: the model that simulated the storm (``"CM1"`` for a picture of CM1's own netCDF output)."""
 
     charts = []
     for key, label, unit in (HURRICANE_CHARTS if kind == "hurricane" else CHARTS):
         points = [[t, round(float(r[key]), 6)] for t, r in rows if key in r]
         if not points:
             continue
+        if key == "dbz_max" and model != "GM1":
+            # CM1's own dbz is 0 before its first step and its floor (about -35 dBZ) where nothing falls: both are
+            # no echo, drawn at 0 dBZ so the chart's axis is the storm's, not CM1's floor
+            points = [[t, max(v, 0.0)] for t, v in points]
+            label = f"{label}, no echo at 0"
         chart: dict[str, Any] = {"key": key, "label": label.format(z0=S.fmt_height(z0)), "unit": unit,
                                  "gm1": points}
         if key in NOT_FROM_ZERO:
@@ -132,7 +189,8 @@ def series_document(rows: Sequence[tuple[float, Mapping[str, float]]], *, z0: fl
         charts.append(chart)
     doc: dict[str, Any] = {
         "schema": SERIES_SCHEMA,
-        "gm1_label": f"GM1, {name}",
+        # A picture of another model's output names the run as its facts do ("NAME, CM1 output").
+        "gm1_label": f"{model}, {name}" if model == "GM1" else name,
         "note": "domain extremes at every saved frame; minutes since the start on the horizontal axis",
         "charts": charts,
     }
@@ -215,7 +273,12 @@ def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequ
     lines = list(footer)
     if has_cm1:
         lines = [lines[0], doc["provenance"]]
-    ov.footer(lines[:2])
+    elif (doc.get("storm_kind") == "hurricane" and doc.get("cm1_reference")
+          and getattr(footer, "mark_word", S.SIMULATED) == S.SIMULATED):
+        # A GM1 hurricane says why its charts carry no CM1 curve (CM1 has been run with one hurricane's settings).
+        lines = [lines[0], f"no CM1 curve: {doc['cm1_reference']}"]
+    # the mark's word travels with the footer (style.Footer): "simulated", or "picture" for CM1's own output
+    ov.footer(S.Footer(lines[:2], getattr(footer, "mark_word", S.SIMULATED)))
     ov.mark()
     problems = ov.check()
     if problems:
@@ -231,5 +294,5 @@ def render_png(doc: Mapping[str, Any], path: Path, *, t_now: float, footer: Sequ
     return path
 
 
-__all__ = ["CHARTS", "HURRICANE_CHARTS", "SERIES_SCHEMA", "reference_for", "record", "render_png", "series_document",
-           "storm_settings"]
+__all__ = ["CHARTS", "HURRICANE_CHARTS", "HURRICANE_COLUMNS", "SERIES_SCHEMA", "hurricane_record",
+           "hurricane_reference", "reference_for", "record", "render_png", "series_document", "storm_settings"]

@@ -129,10 +129,15 @@ def volume(qf: QuickFrame) -> Reflectivity:
     component = str(qf.config.get("microphysics") or "")
     scheme = PLAIN_SCHEME.get(component, component or "this microphysics")
     if qf.has("dbz") and tuple(qf.frame.carriers["dbz"].shape) == (qf.nz, qf.ny, qf.nx):
-        return Reflectivity(qf.get("dbz"), f"{scheme}'s own reflectivity, computed in the model")
+        # a CM1 netCDF file says where its own dbz came from (quicklook.ncread)
+        words = getattr(qf.frame, "dbz_words", None) or f"{scheme}'s own reflectivity, computed in the model"
+        return Reflectivity(qf.get("dbz"), words)
     if component in MORRISON:
         calc, where = _calc_function()
         if calc is not None:
+            if getattr(qf.frame, "missing", None) is not None:
+                # a CM1 netCDF file (quicklook.ncread): what the operator needs may not be there, and is said
+                return _from_file(qf, calc)
             return Reflectivity(morrison_volume(qf, calc), "CM1's calc_refl10cm (Morrison, 10 cm) on the CPU")
         return Reflectivity(None, "", "This build has no CPU reflectivity operator for Morrison yet; it comes with "
                                       "the cm1out writer's reflectivity step.")
@@ -146,11 +151,35 @@ def volume(qf: QuickFrame) -> Reflectivity:
                                   "no reflectivity picture is drawn.")
 
 
+def _from_file(qf: QuickFrame, calc: Callable[..., Any]) -> Reflectivity:
+    """calc_refl10cm from a CM1 netCDF file without ``dbz``, or why not: the namelist beside the files gives
+    ihail, and the file the species, numbers, rho and θ it reads (each named with its CM1 switch)."""
+
+    from .frame import FieldMissing
+
+    if _ihail_unknown(qf):
+        return Reflectivity(None, "", "Without the run's namelist.input beside the files, GM1 does not know CM1's "
+                                      "ihail (whether the dense ice is graupel or hail), so it cannot work the "
+                                      "reflectivity out.")
+    try:
+        return Reflectivity(morrison_volume(qf, calc), "CM1's calc_refl10cm (Morrison, 10 cm) on the CPU")
+    except FieldMissing as missing:
+        return Reflectivity(None, "", str(missing))
+
+
+def _ihail_unknown(qf: QuickFrame) -> bool:
+    """Whether the frame does not record CM1's ihail (a CM1 file read without its namelist)."""
+
+    return (qf.config.get("dense_ice") or {}).get("ihail") not in (0, 1)
+
+
 def possible(qf: QuickFrame) -> bool:
     """Whether :func:`volume` can give reflectivity for this frame, without computing it."""
 
     if qf.has("dbz") and tuple(qf.frame.carriers["dbz"].shape) == (qf.nz, qf.ny, qf.nx):
         return True
+    if getattr(qf.frame, "missing", None) is not None and _ihail_unknown(qf):
+        return False      # a CM1 file without its namelist: ihail is not known
     return str(qf.config.get("microphysics") or "") in MORRISON and _calc_function()[0] is not None
 
 

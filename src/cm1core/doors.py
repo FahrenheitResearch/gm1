@@ -426,9 +426,50 @@ def _envelope_dimensions(header: dict, fields: list[str]) -> dict[str, int | Non
     return implied
 
 
+def _restart_route(arguments: argparse.Namespace) -> bool:
+    """Whether a render request is for a run folder's restart (render_restart) rather than one envelope.
+
+    A folder (a run folder or one restart's folder), the run-folder options, or a published restart.cm1fcp given
+    without --field go to the run-folder route; a .cm1fhs/.cm1fcp file with --field is the envelope route as it
+    always was.  Without --field or --format, a path that does not exist (a mistyped run name, the commonest slip)
+    or a file that is not an envelope (run.json) goes to the run-folder route too, whose refusal names the
+    problem."""
+
+    from .render_restart import PUBLICATION
+
+    target = Path(arguments.history).expanduser()
+    if target.is_dir():
+        return True
+    if getattr(arguments, "restart", None) is not None or getattr(arguments, "list", False) \
+            or getattr(arguments, "list_fields", False) or getattr(arguments, "height", None) is not None:
+        return True
+    envelope_words = bool(arguments.field) or getattr(arguments, "history_format", None) is not None
+    if not target.exists():
+        return not envelope_words
+    if target.is_file() and not envelope_words and target.suffix.lower() not in (".cm1fhs", ".cm1fcp"):
+        return True
+    return target.is_file() and not arguments.field and (target.parent / PUBLICATION).is_file()
+
+
 def render_door(arguments: argparse.Namespace) -> int:
     from .errors import refuse
     from .rust_tools import NativeToolError, verify_native_tools
+
+    if _restart_route(arguments):
+        from .render_restart import door as restart_door
+
+        return restart_door(arguments)
+    if getattr(arguments, "output", None) is None:
+        refuse(
+            code="CM1-RENDER-OUTPUT",
+            gate="rust-io-render",
+            reason="an envelope is drawn to the --output file named; there is no run folder to put it in",
+            remedy="pass --output PICTURE.png, or give the run folder to draw its restart",
+            option="output",
+            value=None,
+        )
+    if arguments.level is None:
+        arguments.level = 0
 
     try:
         history = Path(arguments.history).expanduser().resolve(strict=True)
@@ -748,11 +789,38 @@ def render_door(arguments: argparse.Namespace) -> int:
         "status": "rendered",
         "visualization": "bilinear cell-center reconstruction with 2x2 supersampling; visualization-only; source arrays unchanged",
     }
+    ranges = _png_finite_ranges(payload)
+    if ranges is not None:
+        receipt["value_range"] = ranges
     if arguments.json:
         print(json.dumps(receipt, indent=2, sort_keys=True))
     else:
         print(f"rendered {len(payload)} bytes to {output}")
+        for field, value in zip(fields, ranges or []):
+            print(f"  {field}: " + ("no finite value" if value is None else f"{value[0]:.6g} to {value[1]:.6g}"))
     return 0
+
+
+def _png_finite_ranges(payload: bytes) -> list[list[float] | None] | None:
+    """The drawn planes' lowest and highest values, from the FiniteRanges text the renderer writes into its PNG."""
+
+    offset = 8
+    while offset + 8 <= len(payload):
+        length = int.from_bytes(payload[offset:offset + 4], "big")
+        kind = payload[offset + 4:offset + 8]
+        body = payload[offset + 8:offset + 8 + length]
+        if kind == b"tEXt":
+            key, _, value = body.partition(b"\0")
+            if key == b"FiniteRanges":
+                text = value.decode("latin-1")
+                out: list[list[float] | None] = []
+                for item in re.findall(r"Some\(\(([^,()]+), ([^,()]+)\)\)|None", text):
+                    out.append([float(item[0]), float(item[1])] if item[0] else None)
+                return out
+        if kind == b"IDAT":
+            return None
+        offset += 12 + length
+    return None
 
 
 def records_door(arguments: argparse.Namespace) -> int:

@@ -136,6 +136,29 @@ class Summary:
         return lines
 
 
+def converted_lost(lost: int, converted: int, why: str) -> str:
+    """Convert again (``--force``) on a run some of whose converted times have lost their saved frames."""
+
+    return (f"{lost} of this run's {converted} converted times have lost their saved frames, so their files cannot "
+            f"be written again: {why} would delete them. Nothing was deleted; its files are kept. Without --force, "
+            "a pass converts only the frames not converted yet.")
+
+
+def record_lost(lost: int, held: int, unread: list[str]) -> str:
+    """A pass over a folder whose record of what was converted is missing or unreadable, while its files hold times
+    whose saved frames are gone (or files that cannot be read)."""
+
+    if lost:
+        which = "has lost its saved frame" if lost == 1 else "have lost their saved frames"
+        what = f"the files there hold {held} converted times, {lost} of which {which} and could not be written again"
+    else:
+        what = (f"{', '.join(unread[:3])}{' and more' if len(unread) > 3 else ''} cannot be read, so what the files "
+                "there hold is not known")
+    return (f"This folder's record of what was converted ({STATE_FILENAME}, or {STATE_FILENAMES['grads']} for "
+            f"GrADS) is missing or cannot be read, and {what}: converting without the record could write over "
+            "them. Nothing was changed; the files are kept. Convert into a new folder with --out.")
+
+
 def _producer() -> str:
     from .._version import __version__
 
@@ -239,14 +262,29 @@ class Converter:
         self.reflectivity = _reflectivity_reader()
         self.out.mkdir(parents=True, exist_ok=True)
         self.state_path = self.out / STATE_FILENAMES[self.format]
-        state = {} if force else _load_state(self.state_path)
+        previous = _load_state(self.state_path)
+        if not previous:
+            # No record of what was converted (deleted, or torn), but the folder may hold this format's files: what
+            # they hold is read from them.  A time whose frame is gone could not be written again, and converting
+            # without the record would write over it, or write the statistics from fewer times.
+            held, unread = self._held()
+            lost = self._held_lost(held) if held else []
+            if lost or unread:
+                raise Cm1outError(record_lost(len(lost), len(held), unread))
+        state = {} if force else previous
+        why = "converting every frame again"
         if state and (state.get("format") != self.format or state.get("output_filetype") != self.filetype
                       or state.get("deflate", 0) != self.deflate):
             # Another layout or compression: the files the old state wrote
             # would sit beside the new ones (or be appended to), so they go.
             state = {}
             force = True
+            why = "writing them in another layout or compression"
         if force:
+            # A converted time whose frame is gone cannot be written again: its file is all that is left of it.
+            lost = self._lost(previous.get("frames") or {})
+            if lost:
+                raise Cm1outError(converted_lost(len(lost), len(previous.get("frames") or {}), why))
             self._remove_previous()
         self.state: dict[str, Any] = state or self._fresh_state()
         self.geometry: _settings.Geometry | None = None
@@ -303,8 +341,8 @@ class Converter:
         if self.state_path.is_file():
             self.state_path.unlink()
 
-    def _pending(self) -> list[tuple[float, str, Path]]:
-        """Published frames not yet converted, by model time (a later segment wins)."""
+    def _latest(self) -> dict[float, tuple[str, Path]]:
+        """The run's published frames by model time (a later segment wins): (key, path)."""
 
         latest: dict[float, tuple[str, Path]] = {}
         for segment, path in self.layout.frames():
@@ -315,7 +353,125 @@ class Converter:
                 time_s = _frames.open_frame(path).model_time_s
             key = _netcdf._relative(path, self.layout.root)
             latest[time_s] = (key, path)
-        self._drop_left_branches({key for key, _path in latest.values()})
+        return latest
+
+    def _left(self, rows: Mapping[str, Any], latest: Mapping[float, tuple[str, Path]]) -> list[str]:
+        """The converted times of ``rows`` that belong to a branch the run has left, as its run.json says (a resume
+        from an earlier restart, or a start over), in a run that still has saved frames.  A time whose frame was
+        only deleted (by hand, or with its segment's folder) is not one of them."""
+
+        run = self.layout.run_directory()
+        if run is None or not self.layout.lineage_settled() or not self._has_frames():
+            return []
+        from ..cm1run.rundir import off_the_line
+
+        line = run.recorded_line()
+        keys = {key for key, _path in latest.values()}
+        return [time_key for time_key, row in rows.items()
+                if isinstance(row, Mapping) and row.get("frame") not in keys and off_the_line(line, row, time_key)]
+
+    def _has_frames(self) -> bool:
+        return any(_frames.published_frames(segment.frames_root) for segment in self.layout.segments)
+
+    def _lost(self, rows: Mapping[str, Any], latest: Mapping[float, tuple[str, Path]] | None = None) -> list[str]:
+        """The converted times of ``rows`` whose saved frame is gone though the run never left them: no frame of
+        the run is at their time, and its records do not put them on a branch it has left.  Their files are all
+        there is of them."""
+
+        latest = self._latest() if latest is None else latest
+        keys = {key for key, _path in latest.values()}
+        times = {round(float(t), 6) for t in latest}
+        left = set(self._left(rows, latest))
+        lost = []
+        for time_key, row in rows.items():
+            if not isinstance(row, Mapping) or not row.get("frame") or row.get("frame") in keys or time_key in left:
+                continue
+            try:
+                t = float(row["time"] if row.get("time") is not None else time_key)
+            except (TypeError, ValueError):
+                continue
+            if round(t, 6) not in times:
+                lost.append(time_key)
+        return lost
+
+    def _held(self) -> tuple[dict[str, dict[str, Any]], list[str]]:
+        """What this format's converted files in the folder hold, read from the files themselves (for a record that
+        is missing or cannot be read): ``({key: {"frame", "time", "file"}}, the files that cannot be read)``.  A
+        netCDF file says its times, and a file of one time the frame it came from; GrADS files are named in
+        ``cm1out_gm1.json`` by their frames alone."""
+
+        import math
+
+        held: dict[str, dict[str, Any]] = {}
+        unread: list[str] = []
+        if self.format == "nc":
+            names = sorted(p.name for p in self.out.glob("cm1out*.nc")
+                           if p.is_file() and p.name != _pdata.NETCDF_FILENAME)
+            if not names:
+                return held, unread
+            try:
+                import netCDF4
+                import numpy as np
+            except ImportError:
+                return held, names
+            for name in names:
+                try:
+                    with netCDF4.Dataset(self.out / name, "r") as ds:
+                        values = ds.variables["time"][:] if "time" in ds.variables else []
+                        times = [float(t) for t in np.ma.filled(np.ma.asarray(values, dtype=np.float64),
+                                                                np.nan).ravel()]
+                        keys = str(ds.getncattr("gm1_frames")).split() if "gm1_frames" in ds.ncattrs() else []
+                except (OSError, RuntimeError, ValueError, KeyError, TypeError):
+                    unread.append(name)
+                    continue
+                for t in times:
+                    if not math.isfinite(t):
+                        continue
+                    row = held.setdefault(repr(t), {"frame": None, "time": t, "file": name})
+                    if len(times) == 1 and len(keys) == 1 and not row["frame"]:
+                        row["frame"] = keys[0]
+            return held, unread
+        fixed = {_grads.STATS_DAT, _grads.METADATA_DAT, _pdata.GRADS_DAT}
+        data = sorted(p.name for p in self.out.glob("cm1out*.dat") if p.is_file() and p.name not in fixed)
+        if not data:
+            return held, unread
+        try:
+            notes = json.loads((self.out / NOTES_FILENAME).read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            notes = None
+        frames = notes.get("frames") if isinstance(notes, dict) else None
+        if not isinstance(frames, list):
+            return held, data
+        for key in frames:
+            if isinstance(key, str) and key:
+                held[f"frame:{key}"] = {"frame": key, "time": None, "file": ""}
+        return held, unread
+
+    def _held_lost(self, held: Mapping[str, Any]) -> list[str]:
+        """The times of ``held`` (:meth:`_held`) whose saved frame is gone though the run's records do not put them
+        on a branch it has left.  A time no file names a frame for is lost when no frame of the run is at it; a
+        frame named without its time (GrADS), when its folder is gone."""
+
+        latest = self._latest()
+        keys = {key for key, _path in latest.values()}
+        times = {round(float(t), 6) for t in latest}
+        left = set(self._left({name: row for name, row in held.items() if row.get("frame")}, latest))
+        lost = []
+        for name, row in held.items():
+            if name in left or (row.get("frame") and row["frame"] in keys):
+                continue
+            if row.get("time") is None:
+                if row.get("frame") and not (Path(self.layout.root) / str(row["frame"])).is_dir():
+                    lost.append(name)
+            elif round(float(row["time"]), 6) not in times:
+                lost.append(name)
+        return lost
+
+    def _pending(self) -> list[tuple[float, str, Path]]:
+        """Published frames not yet converted, by model time (a later segment wins)."""
+
+        latest = self._latest()
+        self._drop_left_branches(latest)
         self.summary.frames_total = len(latest)
         pending = []
         done = self.state["frames"]
@@ -326,22 +482,31 @@ class Converter:
             pending.append((time_s, key, path))
         return pending
 
-    def _drop_left_branches(self, keys: set[str]) -> None:
-        """Remove what was converted from frames the run no longer has.
+    def _drop_left_branches(self, latest: Mapping[float, tuple[str, Path]]) -> None:
+        """Remove what was converted from frames of a branch the run has left.
 
         In a ``gpuwm-cm1 run`` directory a resume from an earlier restart, or
         a start over, leaves the old branch's frames behind; its converted
-        times would otherwise sit beside the new branch's.  One file per time
-        (output_filetype 2 or 3) loses just those files; a single cm1out.nc
-        (output_filetype 1) cannot drop a time, so it is written again.
+        times would otherwise sit beside the new branch's.  Only the run's
+        records say so (:meth:`_left`): a converted time whose frame was only
+        deleted keeps its file.  One file per time (output_filetype 2 or 3)
+        loses just the left branch's files; a single cm1out.nc
+        (output_filetype 1) cannot drop a time, so it is written again, unless
+        it also holds times whose frames are gone, which could not be written
+        again: then nothing is changed and the pass stops and says why.
         """
 
-        if self.layout.run_directory() is None or not self.layout.lineage_settled():
-            return
-        stale = [time_key for time_key, row in self.state["frames"].items() if row.get("frame") not in keys]
+        stale = self._left(self.state["frames"], latest)
         if not stale:
             return
         if self.filetype == 1:
+            lost = self._lost(self.state["frames"], latest)
+            if lost:
+                raise Cm1outError(
+                    f"The run has left the branch {len(stale)} converted time(s) came from, and cm1out.nc, which "
+                    f"holds every time in one file, would be written again without them; but {len(lost)} of its "
+                    "times have lost their saved frames and could not be written again. Nothing was changed; "
+                    "cm1out.nc is kept. Convert into a new folder with --out, or with output_filetype 2.")
             self.log(f"the run has left the branch {len(stale)} converted time(s) came from; "
                      "writing cm1out.nc again")
             self._remove_previous()
@@ -529,6 +694,10 @@ class Converter:
             return
         previous = self.state.get("pdata") or None
         if merged is None or not merged.rows:
+            if previous and not self._track_left():
+                # The track was deleted (it is kept beside the saved frames): the parcel file is all that is
+                # left of it, and is kept.
+                return
             if previous:
                 for name in previous.get("files") or []:
                     self._unlink_named(name)
@@ -539,6 +708,11 @@ class Converter:
         files = previous.get("files") if previous else None
         if (previous and previous.get("signature") == signature and previous.get("format") == self.format
                 and files and all((self.out / name).is_file() for name in files)):
+            return
+        if previous and files and previous.get("signature") != signature and self._lost(self.state["frames"]):
+            # Some saved frames, and the track parts beside them, are gone: written again, the parcel file could
+            # hold less than it does.
+            self.log("parcels: some of the run's saved frames were deleted, so its parcel file is kept as it is")
             return
         if self.format == "grads":
             files = _pdata.write_grads(self.out, merged)
@@ -559,6 +733,11 @@ class Converter:
         if self.format == "grads":
             self._write_notes()
         _save_state(self.state_path, self.state)
+
+    def _track_left(self) -> bool:
+        """Whether a parcel track is still on disk in any of the run's segments (one on a branch it has left)."""
+
+        return any((Path(segment.frames_root) / _pdata.TRACK_DIRECTORY).is_dir() for segment in self.layout.segments)
 
     def _merge_specs(self, result: Any, geometry: Any, species: Any) -> None:
         # Every statistic any frame produced, in setup_stat_vars' order.
@@ -790,4 +969,4 @@ def _convert(target: Path | str, *, follow: bool, poll_s: float, should_stop: Ca
 
 
 __all__ = ["Cm1outError", "Converter", "FORMATS", "NOTES_FILENAME", "STATE_FILENAME", "STATE_FILENAMES",
-           "Summary", "convert", "run_output_choices"]
+           "Summary", "convert", "converted_lost", "run_output_choices"]

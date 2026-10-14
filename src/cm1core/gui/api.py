@@ -18,6 +18,7 @@ GET  /api/runs/RUN/events          Server-Sent Events (served by :mod:`.server`)
 POST /api/import                   {"name", "folder"?, "namelist": {"path"}|{"text"}, "sounding"?, ...}
 POST /api/runs/RUN/{check,geometry,estimate,start,resume,stop,pause,force-stop}
 POST /api/runs/RUN/{fields,slice,section,column}   one picture of one frame (gpuwm-cm1 quicklook)
+POST /api/runs/RUN/render                           a native picture of the run's restart (gpuwm-cm1 render)
 POST /api/runs/RUN/{film,look}     a film of a look, a look drawn on request (:mod:`.looks`)
 GET  /api/copy, /api/presets, /api/presets/ID/picture; POST /api/fit, /api/guided/start
                                    guided mode (:mod:`.guided`)
@@ -36,6 +37,15 @@ POST /api/runs/RUN/delete          {"keep_pictures"?: bool} removes the run fold
                                    refused while the run is going or GM1 is still working on it
 POST /api/open-folder              {"run"?: RUN} shows the runs folder, or one run's, in the file manager
                                    (File Explorer under WSL2, xdg-open on a Linux desktop)
+
+One POST opens CM1's own netCDF output for pictures, with nothing to run (it is in the API table):
+
+POST /api/cm1-output               {"path", "name", "folder"?}: checks that PATH (a folder of CM1 netCDF history
+                                   files, or one such file, anywhere on this computer) can be drawn, makes the
+                                   folder NAME holding cm1-output.json that names PATH, and draws every look into
+                                   NAME/quicklook/ on the CPU (``gpuwm-cm1 quicklook PATH --out NAME/quicklook``).
+                                   The files are read where they are; NAME opens view-only, its Results with the
+                                   pictures, films and slices.
 
 Under WSL2 ``/api/session``, ``/api/runs`` and ``/api/runs/RUN/results`` also name each folder as Windows
 sees it (``root_windows``, ``folder_windows``, ``cm1out_folder_windows``).
@@ -68,8 +78,9 @@ from . import commands as C
 from . import control
 from . import storm
 from .files import (
-    PathRefused, Root, is_run_dir, is_view_only, listing, read_json, require_name, safe_file,
-    stage_upload, tree_bytes, within, write_json_atomic,
+    CM1_OUTPUT_FILE, CM1_OUTPUT_SCHEMA, PathRefused, Root, cm1_output, converted_missing, frames_gone,
+    frames_missing, is_run_dir, is_view_only, listing, read_json, require_name, safe_file, stage_upload, tree_bytes,
+    within, write_json_atomic,
 )
 from .guided import Guided
 from .jobs import COMMANDS_LOG, DryRun, Jobs, Unavailable
@@ -232,6 +243,9 @@ class Api:
         from .looks import LooksApi
 
         self.looks = LooksApi(self)
+        from .compare import CompareApi
+
+        self.compare = CompareApi(self)
         from .wrf import WrfApi
 
         self.wrf = WrfApi(self)
@@ -358,6 +372,9 @@ class Api:
         found = self.looks.get(parts, query)
         if found is not None:
             return found
+        found = self.compare.get(parts, query)
+        if found is not None:
+            return found
         found = self.wrf.get(parts, query)
         if found is not None:
             return found
@@ -374,6 +391,8 @@ class Api:
             return Reply(body=self.set_mode(payload))
         if parts == ["open-folder"]:
             return self.open_folder(payload)
+        if parts == ["cm1-output"]:
+            return self.open_cm1_output(payload)
         if len(parts) == 3 and parts[0] == "runs" and parts[2] == "delete":
             return self.delete_run(parts[1], self.root.existing_run(parts[1]), payload)
         if parts == ["import"]:
@@ -396,11 +415,15 @@ class Api:
         if len(parts) == 3 and parts[0] == "runs":
             run_id, action = parts[1], parts[2]
             rundir = self.root.existing_run(run_id)
-            pictures = {"fields": self.fields, "slice": self.slice, "section": self.section, "column": self.column}
+            pictures = {"fields": self.fields, "slice": self.slice, "section": self.section, "column": self.column,
+                        "render": self.render}
             if action in pictures:
                 # Pictures of the frames change nothing in the run, so a view-only folder has them too.
                 return pictures[action](run_id, rundir, payload)
             found = self.looks.post(run_id, rundir, action, payload)
+            if found is not None:
+                return found
+            found = self.compare.post(run_id, rundir, action, payload)
             if found is not None:
                 return found
             if is_view_only(rundir):
@@ -501,6 +524,11 @@ class Api:
             row["url"] = run_url(run_id)
             row.update(self.views.row_extra(path, row))
             row["trimmed"] = (path / TRIMMED_FILE).is_file()
+            found = cm1_output(path)
+            if found is not None:
+                # CM1's own netCDF output, opened for pictures (no run controls)
+                row["cm1_output"] = {"source": str(found["source"]), "opened": found["opened"]}
+                row["case"] = row.get("case") or "CM1 output"
             rows.append(row)
         place = self.place()
         return {"root": str(self.root.path), "runs": rows, "host": host,
@@ -546,6 +574,9 @@ class Api:
         return {"report": report, "text": text}
 
     def results(self, run_id: str, rundir: Path, mode: str) -> dict[str, Any]:
+        from . import looks as LK
+        from .runview import convert_refused
+
         base = f"/api/runs/{run_url(run_id)}/files/"
         cm1out = rundir / "cm1out"
         files = listing(cm1out)
@@ -598,10 +629,15 @@ class Api:
         }
         disk["total_bytes"] = tree_bytes(rundir)
         status = self.status(run_id, rundir)
+        found = cm1_output(rundir)
         body = {
             "id": run_id,
             "mode": mode,
             "status": status,
+            "cm1_output": None if found is None else {
+                "source": str(found["source"]), "opened": found["opened"],
+                "drawing": bool([row for row in self.jobs.launched(run_id) if row.role in ("quicklook", "looks")]),
+                "draw": C.display(C.quicklook_pass_args(rundir))},
             "cm1out": files,
             "cm1out_folder": str(cm1out),
             "cm1out_folder_windows": self.windows_name(cm1out),
@@ -609,6 +645,14 @@ class Api:
             "folder_windows": self.windows_name(rundir),
             "can_open_folder": self.place()["can_open_folder"],
             "trimmed": read_json(rundir / TRIMMED_FILE, default=None),
+            # its saved frames were deleted (by hand, or by Keep pictures only): no picture can be drawn again
+            "frames_gone": frames_gone(rundir, index),
+            # how many of its drawn and converted times lost their saved frames, and what that keeps from being
+            # offered: drawing every picture again, converting every frame again (each would delete them)
+            "frames_missing": frames_missing(rundir, index),
+            "converted_missing": converted_missing(rundir),
+            "again_why_not": LK.again_refused(rundir, index if isinstance(index, dict) else None),
+            "convert_why_not": convert_refused(rundir, index),
             "looks": looks,
             "series": series,
             "quicklook_run": index.get("run") if isinstance(index, dict) else None,
@@ -643,7 +687,8 @@ class Api:
         line = "rm -r -- " + " ".join(shlex.quote(str(path)) for path in targets) if targets else ""
         # A refusal carries no command: nothing was run, and the page lists the commands it ran.
         extra = {"action": "delete"}
-        if is_view_only(rundir):
+        opened = cm1_output(rundir)
+        if is_view_only(rundir) and not (opened is not None and opened["opened"] and not keep):
             raise ApiError(409, "This folder was not made by a GM1 run command, so GM1 does not delete it.",
                            f"Delete it yourself: {rundir}", **extra)
         if rundir.is_symlink() or rundir.resolve() == self.root.path:
@@ -730,6 +775,92 @@ class Api:
             raise ApiError(500, f"The folder was not opened ({how}).", f"Open it yourself: {shown}", **extra)
         return Reply(200, {"ok": True, "run": run_id, "command": line, "message": f"Opened {shown}", "fix": "",
                            **extra})
+
+    # ------------------------------------------------------------ CM1's own output, for pictures
+
+    def open_cm1_output(self, payload: dict[str, Any]) -> Reply:
+        """Open CM1 netCDF output kept anywhere on this computer for pictures: check it can be drawn, make the
+        view-only folder that names it, and draw its looks in the background."""
+
+        name = require_name(str(payload.get("name") or ""), "name")
+        folder = str(payload.get("folder") or "").strip("/")
+        run_id = f"{folder}/{name}" if folder else name
+        rundir = self.root.run_path(run_id)
+        raw = payload.get("path")
+        if not isinstance(raw, str) or not raw.strip():
+            raise ApiError(400, "The path to the CM1 output is empty.",
+                           "Type the full path of the folder that holds the cm1out files, or of one file.")
+        source = self._local_path(raw.strip())
+        if not source.exists():
+            raise ApiError(400, f"There is nothing at {source}.",
+                           "Check the path; it must be a folder or a file on this computer.")
+        listed = self._listed_as(source if source.is_dir() else source.parent)
+        if listed is not None:
+            # only a folder the Runs list shows itself; a GM1 run's cm1out/ (inside its run folder) is not one
+            raise ApiError(409, f"{source} is already in the runs list, as {listed}.", "Open it from the Runs list.")
+        if rundir.exists():
+            raise ApiError(409, f"A run called {run_id!r} already exists.", "Pick another name.")
+        if folder and is_run_dir(rundir.parent):
+            raise ApiError(409, f"{folder!r} is a run folder; CM1 output cannot go inside a run.",
+                           "Pick another folder, or leave the folder empty.")
+        draw = ["quicklook", str(source), "--out", str(rundir / "quicklook"), "--label", name]
+        self.jobs.stop_if_dry(draw)
+        check = self.jobs.host(["quicklook", str(source), "--fields", "--json"])
+        if check.rc != 0:
+            fix = ""
+            try:
+                fix = str(json.loads(check.stderr).get("reason") or "")
+            except (ValueError, AttributeError):
+                fix = (check.stderr.strip().splitlines() or [""])[-1]
+            return Reply(400, {"ok": False, "action": "cm1-output", "command": check.command,
+                               "message": "GM1 cannot draw that as CM1 output.",
+                               "fix": fix or "It must be CM1 netCDF history files (cm1out.nc or cm1out_NNNNNN.nc).",
+                               "output": check.as_dict()})
+        rundir.mkdir(parents=True)
+        found = check.json if isinstance(check.json, dict) else {}
+        opened = {"schema": CM1_OUTPUT_SCHEMA, "source": str(source), "name": name,
+                  "opened_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                  "note": "CM1 netCDF output opened for pictures; the files stay where they are."}
+        # what the files hold (their grid and saved times), for the list and the header before the pictures are in
+        for key in ("grid", "saved_times_s", "saved_count"):
+            if found.get(key) is not None:
+                opened[key] = found[key]
+        write_json_atomic(rundir / CM1_OUTPUT_FILE, opened)
+        with self.jobs.run_lock(run_id):
+            self.jobs.require("quicklook")
+            launched = self.jobs.launch(run_id, rundir, draw, role="looks")
+        self._log(rundir, "cm1-output", C.sidecar_line(draw).removesuffix(" &"),
+                  "pictures of CM1 output, on the CPU")
+        record = check.json if isinstance(check.json, dict) else {}
+        return Reply(200, {"ok": True, "action": "cm1-output", "run": run_id, "url": run_url(run_id),
+                           "command": C.display(draw), "pid": launched.process.pid,
+                           "fields": len(record.get("fields") or []), "notes": record.get("notes") or [],
+                           "message": "Opened for pictures. The looks are being drawn on the computer's processor "
+                                      "(nice 19, no GPU).", "fix": ""})
+
+    def _listed_as(self, folder: Path) -> str | None:
+        """The run id the Runs list shows ``folder`` as, or None when the list does not show it (a folder outside
+        the runs folder, or one inside a run, such as a GM1 run's cm1out/)."""
+
+        if not within(self.root.path, folder) or not is_run_dir(folder):
+            return None
+        wanted = folder.resolve()
+        for path in self.root.iter_runs():
+            if path.resolve() == wanted:
+                return self.root.run_id(path)
+        return None
+
+    def _local_path(self, raw: str) -> Path:
+        """A path typed on this computer: a Windows path (C:\\...) under WSL2 is read where Linux sees it."""
+
+        found = re.match(r"^([A-Za-z]):[\\/](.*)$", raw)
+        if found and self.place()["wsl"]:
+            rest = found.group(2).replace("\\", "/")
+            return Path(f"/mnt/{found.group(1).lower()}/{rest}")
+        path = Path(raw).expanduser()
+        if not path.is_absolute():
+            path = self.root.path / path
+        return path.resolve()
 
     # ------------------------------------------------------------ actions
 
@@ -952,6 +1083,27 @@ class Api:
         args = C.column_args(rundir, self._point(payload, "at_km", 2, required=False),
                              self._number(payload, "time_s", low=0.0, high=1.0e9))
         return self._picture("column", run_id, rundir, args, "The skew-T of one column is drawn.")
+
+    def render(self, run_id: str, rundir: Path, payload: dict[str, Any]) -> Reply:
+        """Results' Native pictures: one product of the run's restart, drawn by the native renderer."""
+
+        from ..render_products import LEVEL_PRODUCTS, PRODUCTS
+
+        product = payload.get("product")
+        if product not in PRODUCTS:
+            raise ApiError(400, "product must be one of the native renderer's products.", ", ".join(PRODUCTS))
+        restart = payload.get("restart")
+        if restart is not None and (isinstance(restart, bool) or not isinstance(restart, int) or restart < 1):
+            raise ApiError(400, "restart must be a restart number from the run's list.", "Leave it out for the newest.")
+        field = None
+        if product == "scalar":
+            field = self._field(payload)
+        height = None
+        if product in LEVEL_PRODUCTS:
+            height = self._number(payload, "height_m", low=0.0, high=1.0e5)
+        args = C.render_args(rundir, product, restart=restart, field=field, height_m=height)
+        return self._picture("render", run_id, rundir, args,
+                             "Drawn from the run's restart checkpoint, not a history frame.")
 
     def _launch_engine(self, action: str, run_id: str, rundir: Path, args: list[str]) -> Reply:
         with self.jobs.run_lock(run_id):

@@ -303,8 +303,8 @@ export const NO_SUCH_RUN_STATUSES = [400, 404];
 
 export async function runExists(id) {
   try {
-    await api.get(`${api.runPath(id)}/status`);
-    return { ok: true };
+    const status = await api.get(`${api.runPath(id)}/status`);
+    return { ok: true, status };
   } catch (err) {
     return err && NO_SUCH_RUN_STATUSES.includes(err.status) ? { ok: false, err } : { ok: true };
   }
@@ -599,12 +599,29 @@ export function filmBar(id, data, lookId, opts = {}) {
         h("span", { class: "note" }, words(data, "draw_new_about", { seconds: (data.looks_about_s || {}).all || "" })),
         showCommand((data.look_commands || {}).all, { always: opts.always })));
     }
+  } else if (more && more.action === "look" && more.kind === "request") {
+    // The storm in 3-D: drawn when asked, in the background, at the latest saved time.
+    if (data.drawing_3d) {
+      bar.append(h("p", { class: "note", role: "status" }, words(data, "drawing_3d")));
+    } else {
+      const b = button(words(data, "draw_3d"), { small: true, kind: more.available ? "" : "primary" });
+      b.addEventListener("click", () => post("look", { look: lookId }, b));
+      const about = (data.looks_about_words || {}).storm3d_still;
+      bar.append(h("div", { class: "film-row" }, b,
+        about ? h("span", { class: "note" }, words(data, "draw_3d_about", { about })) : null,
+        showCommand((data.look_commands || {})[lookId], { always: opts.always })));
+    }
   } else if (more && more.action === "look") {
     const b = button(words(data, "draw"), { small: true });
     b.addEventListener("click", () => post("look", { look: lookId }, b));
     bar.append(h("div", { class: "film-row" }, b, showCommand((data.look_commands || {})[lookId], { always: opts.always })));
   }
-  const available = !more || more.available || more.action === "film";
+  // the radar row draws from the saved frames: a run whose frames were deleted keeps its radar pictures as they are
+  if (((data.radar || {}).looks || []).includes(lookId) && (!more || more.available) && !data.frames_gone) {
+    bar.append(keptRadarRow(id, data, post, opts));
+  }
+  // A look drawn on request offers its film beside it (the storm in 3-D: one turn around it) before it is drawn.
+  const available = !more || more.available || more.action === "film" || more.film_too;
   if (!filmable || !available) return bar;
   if (film.state === "running") {
     const p = film.progress || {};
@@ -622,12 +639,20 @@ export function filmBar(id, data, lookId, opts = {}) {
     bar.append(row);
     return bar;
   }
-  const label = lookId === "swirl" && !(film.frames || []).length ? words(data, "make_film") : words(data, "save_film");
-  const b = button(label, { small: true, kind: lookId === "swirl" && !(film.frames || []).length ? "primary" : "" });
+  if (more && more.film_why_not) {
+    // A film made from the saved frames that would show less made again: it is kept, and the row says why.
+    bar.append(h("p", { class: "note" }, more.film_why_not));
+  }
+  const orbit = Boolean(more && more.kind === "request");
+  const label = orbit ? words(data, "make_orbit") :
+    lookId === "swirl" && !(film.frames || []).length ? words(data, "make_film") : words(data, "save_film");
+  const b = button(label, { small: true, kind: lookId === "swirl" && !(film.frames || []).length ? "primary" : "",
+    disabled: (more && more.film_why_not) ? true : null, title: (more && more.film_why_not) || null });
   b.addEventListener("click", () => post("film", { look: lookId }, b));
-  const about = (data.looks_about_s || {})[lookId];
+  const about = orbit ? (data.looks_about_words || {})[lookId] : (data.looks_about_s || {})[lookId];
   bar.append(h("div", { class: "film-row" }, b,
-    about ? h("span", { class: "note" }, words(data, "film_about", { seconds: about })) : null,
+    about ? h("span", { class: "note" }, orbit ? words(data, "orbit_about", { about }) :
+      words(data, "film_about", { seconds: about })) : null,
     showCommand((data.film_commands || {})[lookId], { always: opts.always })));
   if (film.state === "failed" && film.progress && film.progress.message) {
     bar.append(h("p", { class: "note warn" }, words(data, "failed", { message: film.progress.message })));
@@ -646,6 +671,80 @@ export function filmBar(id, data, lookId, opts = {}) {
     if (!data.mp4_available && !urls.mp4) bar.append(h("p", { class: "note" }, words(data, "no_mp4")));
   }
   return bar;
+}
+
+// The Results screen builds the film bar again on every refresh (every few seconds), which would clear what is
+// being typed in the radar row: the row is kept, one per run (both radar looks share it), and built again only
+// when what it shows changes.
+const radarRows = new Map();
+function keptRadarRow(id, data, post, opts) {
+  const r = data.radar || {};
+  const live = LIVE_STATES.includes(((data.status || {}).state) || "");
+  const key = JSON.stringify([r.settings, r.now_km, r.hurricane, r.about_s, r.command, r.why_not, live,
+    Boolean(data.drawing_looks), Boolean(opts.always)]);
+  const kept = radarRows.get(id);
+  if (kept && kept.key === key) return kept.row;
+  const row = radarRow(data, post, opts);
+  radarRows.set(id, { key, row });
+  return row;
+}
+
+// The radar looks' own row: where the radar stands (beside the storm in each picture, or fixed on the ground at
+// x, y km) and the scan's tilt, with the button that draws both radar looks of every saved time again (the
+// command runs on the processor once the run has ended).
+function radarRow(data, post, opts) {
+  const r = data.radar || {};
+  const s = r.settings || {};
+  const fixed = Array.isArray(s.site_km);
+  const now = Array.isArray(r.now_km) ? r.now_km : null;
+  const start = fixed ? s.site_km : (now || ["", ""]);
+  const mode = h("select", { class: "input", style: "width:auto", "aria-label": words(data, "radar_site") },
+    h("option", { value: "storm", selected: fixed ? null : true }, words(data, r.hurricane ? "radar_beside_eye" : "radar_beside")),
+    h("option", { value: "ground", selected: fixed ? true : null }, words(data, "radar_ground")));
+  const field = (value, label) => h("input", { class: "input num", type: "number", step: "0.1", style: "width:90px",
+    value: value === "" ? null : String(value), "aria-label": label });
+  const x = field(start[0], `${words(data, "radar_x")} (${words(data, "radar_km")})`);
+  const y = field(start[1], `${words(data, "radar_y")} (${words(data, "radar_km")})`);
+  const tilt = h("input", { class: "input num", type: "number", min: "0.1", max: "20", step: "0.1", style: "width:70px",
+    value: String(s.tilt_deg ?? 0.5), "aria-label": `${words(data, "radar_tilt")} (${words(data, "radar_degrees")})` });
+  const place = h("span", { class: "radar-place" },
+    h("label", { class: "muted" }, `${words(data, "radar_x")} `, x, ` ${words(data, "radar_km")}`),
+    h("label", { class: "muted" }, `${words(data, "radar_y")} `, y, ` ${words(data, "radar_km")}`));
+  const show = () => { place.hidden = mode.value !== "ground"; };
+  mode.addEventListener("change", show);
+  show();
+  const live = LIVE_STATES.includes(((data.status || {}).state) || "");
+  // Some saved times lost their frames: the radar cannot scan them again, so it is not drawn again (r.why_not).
+  const b = button(words(data, "radar_draw"), { small: true,
+    disabled: live || Boolean(data.drawing_looks) || Boolean(r.why_not) || null, title: r.why_not || null });
+  // An empty or unreadable box is refused here: Number("") is 0, which would put the radar at x 0, y 0 and draw
+  // every radar picture again.
+  const warn = h("span", { class: "note warn radar-warn", role: "alert", hidden: true });
+  for (const input of [mode, x, y, tilt]) input.addEventListener("input", () => { warn.hidden = true; });
+  const typed = (input) => {
+    const text = String(input.value || "").trim();
+    const value = Number(text);
+    return text !== "" && Number.isFinite(value) ? value : null;
+  };
+  b.addEventListener("click", () => {
+    const at = mode.value === "storm" ? "storm" : [typed(x), typed(y)];
+    const t = typed(tilt);
+    const missing = at !== "storm" && at.includes(null) ? "radar_need_xy" : (t === null || t < 0.1 || t > 20) ? "radar_need_tilt" : "";
+    warn.textContent = missing ? words(data, missing) : "";
+    warn.hidden = !missing;
+    if (missing) return;
+    post("radar", { site: at, tilt: t }, b);
+  });
+  const row = h("div", { class: "film-row radar-row" },
+    h("label", { class: "muted" }, `${words(data, "radar_site")} `, mode), place,
+    h("label", { class: "muted" }, `${words(data, "radar_tilt")} `, tilt, ` ${words(data, "radar_degrees")}`), b, warn,
+    h("span", { class: "note" }, live ? words(data, "radar_after_run")
+      : r.why_not ? r.why_not
+      : data.drawing_looks ? words(data, "radar_drawing")
+      : words(data, r.hurricane ? "radar_about_one" : "radar_about", { seconds: r.about_s || "" })),
+    now ? h("p", { class: "note" }, words(data, "radar_now", { x: num(now[0], 1), y: num(now[1], 1) })) : null,
+    showCommand(r.command, { always: opts.always }));
+  return row;
 }
 
 // The More looks row under the four favourites' tabs (guided): one small button per look.

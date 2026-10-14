@@ -57,6 +57,8 @@ DOT = "·"
 SEP = f"  {DOT}  "
 PER_S = "s⁻¹"
 SIMULATED = "simulated"
+#: The smallest size (of the data size) a data line too long for one row is set at (:meth:`Overlay.title`).
+DATA_FLOOR = 0.75
 
 
 def hex_rgb(colour: str) -> tuple[float, float, float]:
@@ -213,6 +215,35 @@ RAMPS: dict[str, Ramp] = {
                                ((0.00, "#06060e"), (0.15, "#141138"), (0.32, "#2c2382"), (0.50, "#5a45c8"),
                                 (0.68, "#8f7df0"), (0.84, "#c9bfff"), (1.00, "#fbf8ff")),
                                0.0, 1.0, "", "sequential", "a hurricane's pressure drop, square root"),
+    # The ring-mean swirling wind by radius and height, -20 to 80 m/s: above zero the wind's own colours
+    # (hurricane_wind, so a speed is the same colour in both looks), below zero green for air turning the other way.
+    "hurricane_swirl": Ramp("hurricane_swirl",
+                            value_stops(((-20.0, "#d4f5c8"), (-12.0, "#6cc28a"), (-6.0, "#1f6b4a"),
+                                         (-2.0, "#0b2419"), (0.0, "#04060c"), (5.0, "#0a1230"), (10.0, "#12296b"),
+                                         (17.0, "#1f4fb8"), (25.0, "#6a4fd8"), (33.0, "#d0408a"),
+                                         (42.0, "#f0603a"), (52.0, "#f79a2e"), (62.0, "#fbd24a"),
+                                         (72.0, "#fff1a8"), (80.0, "#ffffff"))),
+                            -20.0, 80.0, "m/s", "diverging", "a hurricane's ring-mean swirling wind", centre=0.0),
+    # The warm core, -10 to +25 K: violet colder, black at 0, amber to cream warmer; the colours change faster near
+    # zero (stops closer together), so a warm core of a few kelvin shows beside one of twenty.
+    "hurricane_warm": Ramp("hurricane_warm",
+                           value_stops(((-10.0, "#a99bff"), (-6.0, "#6a55f0"), (-3.0, "#35259a"), (-1.0, "#120d36"),
+                                        (0.0, "#050609"), (1.0, "#2a1306"), (3.0, "#6e3410"), (6.0, "#b4561a"),
+                                        (10.0, "#e8862a"), (14.0, "#f7b84a"), (19.0, "#fde3a0"),
+                                        (25.0, "#fff8e6"))),
+                           -10.0, 25.0, "K", "diverging", "a hurricane's warm core", centre=0.0),
+    # Radial velocity on a simulated radar's scan (quicklook.radar), m/s, -70 to +70: the NWS base-velocity colours
+    # (green toward the radar, red away), dark grey at zero so a still gate differs from no echo, lighter with speed.
+    "radial_velocity": Ramp("radial_velocity",
+                            value_stops(((-70.0, "#f0fff8"), (-50.0, "#9dffe0"), (-40.0, "#00ffb4"),
+                                         (-32.0, "#00ff28"), (-25.0, "#00e600"), (-18.0, "#00c800"),
+                                         (-13.0, "#00aa00"), (-10.0, "#009400"), (-5.0, "#006e00"),
+                                         (-1.5, "#2f4a2f"), (0.0, "#2a2a2a"), (1.5, "#4c2c2c"), (5.0, "#7c0000"),
+                                         (10.0, "#a60000"), (13.0, "#bf0000"), (18.0, "#dc0000"),
+                                         (25.0, "#fa0000"), (32.0, "#ff4a4a"), (40.0, "#ff8cc6"),
+                                         (50.0, "#ffc8e8"), (70.0, "#fff4fa"))),
+                            -70.0, 70.0, "m/s", "diverging", "radial velocity, toward and away from a radar",
+                            centre=0.0),
 }
 
 # NWS base reflectivity, 5 dBZ bins from 5 dBZ; below 5 dBZ nothing is drawn.
@@ -437,6 +468,15 @@ def data_line(*parts: str) -> str:
     return SEP.join(p for p in parts if p)
 
 
+class Footer(list):
+    """A picture's footer lines, carrying the word the GM1 mark shows beside "GM1" (:meth:`Overlay.mark`):
+    "simulated" on GM1's own storms; a picture GM1 made of another model's output says "picture"."""
+
+    def __init__(self, lines: Iterable[str] = (), mark_word: str = SIMULATED) -> None:
+        super().__init__(lines)
+        self.mark_word = mark_word
+
+
 #: Marketing words and product names never appear on a picture.
 BANNED_WORDS = ("amazing", "stunning", "revolutionary", "breakthrough", "cutting-edge", "cutting edge",
                 "state-of-the-art", "state of the art", "blazing", "powerful", "world-class", "next-generation",
@@ -494,8 +534,13 @@ class Overlay:
         self.texts: list[str] = []
         self.vertical: list[str] = []
         self.footer_cut: list[str] = []
+        #: The word beside "GM1" in the mark (a :class:`Footer` given to :meth:`footer` may say another).
+        self.mark_word = SIMULATED
         self._title_baseline: int | None = None
         self._head_bottom = self.y0
+        #: How many rows the data line under the title took (:meth:`title`), and layout faults :meth:`check` reports.
+        self._head_rows = 0
+        self.layout_problems: list[str] = []
         self._rgba_cache = None
 
     def px(self, role: str) -> int:
@@ -599,11 +644,45 @@ class Overlay:
             dsz = self.px("data")
             y = baseline + int(self.px("title") * 0.35) + dsz
             self.texts.append(data)
-            for line in self.wrap(data, "data", self.x1 - self.x0 - self.U(260)):
-                self.text((self.x0, y), line, "data", colour="text", record=False)
-                self._head_bottom = y + int(dsz * 0.35)
-                y += int(dsz * 1.4)
+            room = self.x1 - self.x0 - self.U(260)
+            lines, px = self.wrap(data, "data", room), None
+            if len(lines) > 1:
+                # A second row would reach the panels' titles under the head: the line is set smaller instead.
+                lines, px = self._one_row(data, room)
+            self._head_rows = len(lines)
+            for line in lines:
+                self.text((self.x0, y), line, "data", colour="text", record=False, px=px)
+                self._head_bottom = y + int((px or dsz) * 0.35)
+                y += int((px or dsz) * 1.4)
         return self
+
+    def _one_row(self, data: str, room: int) -> tuple[list[str], int]:
+        """``data`` on one row of at most ``room`` px: in smaller type, down to :data:`DATA_FLOOR` of the data size;
+        below that the first clause (the run's name) gives way to an ellipsis.  Only a line that cannot be shortened
+        so (a first clause of a few letters) wraps, at the smallest size."""
+
+        size = self.px("data")
+        floor = max(10, int(size * DATA_FLOOR))
+        for px in range(size - 1, floor - 1, -1):
+            if self.font("data", px=px, text=data).getlength(data) <= room:
+                return [data], px
+        parts = data.split(SEP)
+        if len(parts) > 1:
+            head, rest = parts[0], SEP.join(parts[1:])
+            f = self.font("data", px=floor, text=data + "…")
+            while len(head) > 12:
+                head = head[:-1].rstrip(" ,")
+                trial = f"{head}…{SEP}{rest}"
+                if f.getlength(trial) <= room:
+                    return [trial], floor
+        return self.wrap(data, "data", room, px=floor), floor
+
+    def clear_of_head(self, top: float, what: str) -> None:
+        """A wrapped data line must end above ``top`` (the top of ``what``, drawn under the head): a picture where it
+        does not is refused by :meth:`check`."""
+
+        if self._head_rows > 1 and self._head_bottom > top:
+            self.layout_problems.append(f"the data line under the title runs into {what}")
 
     def clock(self, value: float | str) -> "Overlay":
         s = fmt_clock(value) if isinstance(value, (int, float)) else value
@@ -616,6 +695,7 @@ class Overlay:
 
         Lines listed in ``vertical`` state vertical velocities (exempt from the wind-frame rule, as ``text`` does)."""
 
+        self.mark_word = getattr(lines, "mark_word", self.mark_word)
         if isinstance(lines, str):
             lines = [lines]
         width = self.x1 - self.x0 - self.mark_width() - self.U(48)
@@ -649,10 +729,10 @@ class Overlay:
     def mark_width(self) -> int:
         size = self.px("mark")
         return int(size * 1.25 + size * 0.45 + self.measure("GM1", "mark")[0] + size * 0.5
-                   + self.measure(SIMULATED, "mark", style="book")[0])
+                   + self.measure(self.mark_word, "mark", style="book")[0])
 
     def mark(self, *, alpha: float = 0.85) -> "Overlay":
-        """The GM1 mark bottom-right: a small gold spiral, 'GM1' and 'simulated'."""
+        """The GM1 mark bottom-right: a small gold spiral, 'GM1' and 'simulated' (or :attr:`mark_word`)."""
 
         size = self.px("mark")
         _, desc = self.font("mark").getmetrics()
@@ -662,7 +742,7 @@ class Overlay:
         gx = x + glyph + int(size * 0.45)
         self.text((gx, base), "GM1", "mark", colour="text", alpha=alpha)
         sx = gx + self.measure("GM1", "mark")[0] + int(size * 0.5)
-        self.text((sx, base), SIMULATED, "mark", colour="muted", alpha=alpha, style="book")
+        self.text((sx, base), self.mark_word, "mark", colour="muted", alpha=alpha, style="book")
         return self
 
     def readout(self, xy: tuple[float, float], rows: Sequence[tuple[str, str]], *,
@@ -703,16 +783,24 @@ class Overlay:
         return self
 
     def ring(self, centre: tuple[float, float], radius: float, *, width: float = 2.0, colour: str = "gold",
-             alpha: float = 0.95) -> "Overlay":
+             alpha: float = 0.95, edge: str | None = None, edge_width: float = 1.5) -> "Overlay":
+        """A ring of outer radius ``radius`` (px).  ``edge``: a colour laid ``edge_width`` wider on both sides,
+        under the ring, so it stands out on a bright field as well as on a dark one."""
+
         from PIL import Image, ImageDraw
 
         ss = 4
         r = int(radius)
         lw = max(1, self.U(width))
-        size = 2 * (r + lw + 2)
+        e = max(1, self.U(edge_width)) if edge else 0
+        m = lw + 2 + e
+        size = 2 * (r + m)
         img = Image.new("RGBA", (size * ss, size * ss), (0, 0, 0, 0))
         d = ImageDraw.Draw(img)
-        bb = ((lw + 2) * ss, (lw + 2) * ss, (size - lw - 2) * ss, (size - lw - 2) * ss)
+        if edge:
+            d.ellipse(((m - e) * ss, (m - e) * ss, (size - m + e) * ss, (size - m + e) * ss),
+                      outline=rgb8(token(edge), alpha), width=(lw + 2 * e) * ss)
+        bb = (m * ss, m * ss, (size - m) * ss, (size - m) * ss)
         d.ellipse(bb, outline=rgb8(token(colour), alpha), width=lw * ss)
         self.draw_rgba(img.resize((size, size), Image.LANCZOS),
                        (int(centre[0]) - size // 2, int(centre[1]) - size // 2))
@@ -742,11 +830,11 @@ class Overlay:
         return (np.clip(b * (1 - a) + o[..., :3] * a, 0, 1) * 255 + 0.5).astype(np.uint8)
 
     def check(self) -> list[str]:
-        return lint(self.texts, vertical=self.vertical)
+        return lint(self.texts, vertical=self.vertical) + list(self.layout_problems)
 
-    def wrap(self, text: str, role: str, width: int) -> list[str]:
+    def wrap(self, text: str, role: str, width: int, *, px: int | None = None) -> list[str]:
         words, lines, cur = text.split(), [], ""
-        f = self.font(role, text=text)
+        f = self.font(role, text=text, px=px)
         for w in words:
             trial = f"{cur} {w}".strip()
             if cur and f.getlength(trial) > width:
@@ -815,7 +903,7 @@ def fig_to_rgb(fig) -> np.ndarray:
 
 __all__ = [
     "BANNED_WORDS", "DOT", "MINUS", "NWS_REFLECTIVITY", "Overlay", "PALETTE", "PER_S", "PRIME", "RAMPS", "Ramp",
-    "SEP", "SIMULATED", "apply_matplotlib", "has_glyphs", "upper", "colours", "data_line", "dbz_colours", "fig_to_rgb", "figure", "finish",
+    "Footer", "SEP", "SIMULATED", "apply_matplotlib", "has_glyphs", "upper", "colours", "data_line", "dbz_colours", "fig_to_rgb", "figure", "finish",
     "fmt_clock", "fmt_grid", "fmt_long_clock", "fmt_height", "fmt_km", "fmt_num", "font_path", "hex_rgb", "lint", "mpl_fontprops",
     "rgb8", "to8", "token", "value_stops",
 ]

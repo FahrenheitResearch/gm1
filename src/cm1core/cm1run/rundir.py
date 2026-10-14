@@ -534,6 +534,40 @@ def _number(value: Any) -> float | None:
     return float(value) if math.isfinite(float(value)) else None
 
 
+def segment_of(row: Mapping[str, Any]) -> int | None:
+    """The segment a drawn or converted time came from: its record's ``segment``, else the one its frame's key
+    (``segments/NNN/frames/frame-XXXXXX``) names; None when neither says."""
+
+    segment = row.get("segment")
+    if isinstance(segment, int) and not isinstance(segment, bool):
+        return segment
+    parts = str(row.get("frame") or "").split("/")
+    if len(parts) >= 2 and parts[0] == SEGMENTS and parts[1].isdigit():
+        return int(parts[1])
+    return None
+
+
+def off_the_line(line: Mapping[int, float | None], row: Mapping[str, Any], time_s: Any = None) -> bool:
+    """Whether a drawn or converted time (its frame's key, segment and time) belongs to a branch the run has left,
+    by the run's :meth:`RunDirectory.recorded_line`: its segment is not on the line, or it is past the time the
+    segment's descendant resumed from.  A row that names no segment or time is never taken to be off it."""
+
+    if not line:
+        return False
+    segment = segment_of(row)
+    value = row.get("time")
+    try:
+        t = float(time_s if value is None else value)
+    except (TypeError, ValueError):
+        return False
+    if segment is None or not math.isfinite(t):
+        return False
+    if segment not in line:
+        return True
+    until = line[segment]
+    return until is not None and t > until + 1e-6
+
+
 def _integer(value: Any) -> int | None:
     if isinstance(value, bool) or not isinstance(value, int):
         return None
@@ -705,11 +739,58 @@ class RunDirectory:
         chain.reverse()
         return chain
 
+    def recorded_line(self) -> dict[int, float | None]:
+        """The run's line as run.json records it: the newest segment it records and each one that segment resumed
+        from, by number, each with the model time its descendant resumed from (``None``: all of its frames).
+
+        Unlike :meth:`lineage`, a segment whose folder was deleted stays on the line: only the run's own records
+        say that it left a branch (a resume from an earlier restart, or a start over), never files that are
+        gone.  Empty when run.json records no segment.
+        """
+
+        try:
+            rows = self.load().get("segments") or []
+        except RunDirectoryError:
+            return {}
+        numbers = [_integer(row.get("number")) for row in rows if isinstance(row, dict)]
+        numbers = [number for number in numbers if number is not None]
+        if not numbers:
+            return {}
+        current = max(numbers)
+        line: dict[int, float | None] = {current: None}
+        while True:
+            record = self.segment_record(current) or Segment(self, current).state()
+            source = record.get("resumed_from") if isinstance(record, dict) else None
+            parent = _integer(source.get("segment")) if isinstance(source, dict) else None
+            if parent is None or parent in line:
+                break
+            line[parent] = _number(source.get("model_time_s"))
+            current = parent
+        return line
+
+    def frame_line(self) -> list[tuple[Segment, float | None]]:
+        """The segments whose frames (and parcel tracks) form the run, oldest first, each with the model time they
+        count up to (``None``: all of them): the line run.json records (:meth:`recorded_line`), each of its
+        segments whose folder is there.
+
+        A segment whose folder was deleted stays on that line, so the frames of a branch the run left are never
+        taken back for the run's own because the folder of the segment that replaced them is gone.  While the
+        newest segment's folder is not recorded yet (a start, for a moment), or when run.json records none, this
+        is :meth:`lineage`.
+        """
+
+        line = self.recorded_line()
+        latest = self.latest_segment()
+        if not line or (latest is not None and latest.number > max(line)):
+            return self.lineage()
+        return [(Segment(self, number), until) for number, until in sorted(line.items())
+                if Segment(self, number).path.is_dir()]
+
     def frames(self) -> list[FrameInfo]:
-        """The run's frames in model-time order, along the latest segment's lineage."""
+        """The run's frames in model-time order, along its line (:meth:`frame_line`)."""
 
         by_index: dict[int, FrameInfo] = {}
-        for segment, until in self.lineage():
+        for segment, until in self.frame_line():
             for frame in segment.frames():
                 if until is not None and frame.model_time_s is not None and frame.model_time_s > until:
                     continue
@@ -1153,9 +1234,11 @@ __all__ = [
     "import_summary",
     "is_run_directory",
     "local_process_alive",
+    "off_the_line",
     "process_identity",
     "process_start_ticks",
     "record_import",
+    "segment_of",
     "utc_now",
     "write_json_atomic",
 ]

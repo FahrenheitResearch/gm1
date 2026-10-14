@@ -297,17 +297,29 @@ def test_every_post_of_the_api_table_returns_its_command_and_replays_from_a_shel
 #: The actions each of the two replay walks covers; together they must be the whole API table (checked below).
 MIXED_WALK = {"import", "check", "geometry", "estimate", "edit", "recommended", "namelist", "acknowledge", "sounding",
               "jobscript", "measure", "fit", "preset-new", "guided-start", "mode"}
-FAKE_WALK = {"import", "start", "fields", "slice", "section", "column", "resume", "pause", "stop", "force-stop"}
+FAKE_WALK = {"import", "start", "fields", "slice", "section", "column", "render", "resume", "pause", "stop",
+             "force-stop"}
 #: The Results screen's actions (Convert again, Reproduce bundle), walked where the API table has them.
 RESULTS_WALK = {"convert", "reproduce"}
-#: Films and looks drawn on request (the fake walk).
-LOOKS_WALK = {"film", "look"}
+#: Films and looks drawn on request, the radar looks' radar moved, and Compare with other runs (the fake walk).
+LOOKS_WALK = {"film", "look", "radar", "compare"}
 #: The WRF column route (open, column, use), walked in tests/test_gui_wrf.py with the same Walk.
 WRF_WALK = {"wrf-open", "wrf-column", "wrf-use"}
 #: The Use my own sounding card (check, options), walked in tests/test_gui_own_sounding.py with the same Walk.
 SOUNDING_WALK = {"sounding-check", "sounding-options"}
 #: The Downscale (3D) screen (open, check, new), walked in tests/test_gui_chain.py with the same Walk.
 CHAIN_WALK = {"chain-open", "chain-check", "chain-new"}
+#: Runs: Open CM1 output (CM1's own netCDF output opened for pictures; the fake walk).
+CM1_OUTPUT_WALK = {"cm1-output"}
+
+
+def _same_pictures(got: Path, want: Path) -> None:
+    """CM1 output replayed: the same pictures (the folder's cm1-output.json and commands.log are the server's
+    record of where the files are and what it ran, not the command's output)."""
+
+    a = {k: v for k, v in _files(got).items() if k.startswith("quicklook/")}
+    b = {k: v for k, v in _files(want).items() if k.startswith("quicklook/")}
+    assert a and a == b, sorted(set(a) ^ set(b))
 
 
 def _posts() -> set[str]:
@@ -332,11 +344,31 @@ def test_the_run_control_and_picture_actions_return_their_command_and_replay(tmp
         walk.post("section", "/api/runs/r/section", {"field": "w", "from_km": [10.0, 60.0], "to_km": [110.0, 60.0]},
                   run="r")
         walk.post("column", "/api/runs/r/column", {"at_km": [60.0, 60.0]}, run="r")
+        # A native picture of the run's restart (Results: Native pictures)
+        walk.post("render", "/api/runs/r/render", {"product": "vorticity", "height_m": 250.0}, run="r")
+        assert walk.seen["render"]["command"].endswith("--product vorticity --height 250 --json")
+        assert walk.seen["render"]["picture_url"].endswith("/files/quicklook/native/vorticity-fake.png")
         # A film of a look, and a look drawn once per run, drawn now
         walk.post("film", "/api/runs/r/film", {"look": "swath", "fps": 8}, run="r")
         walk.post("look", "/api/runs/r/look", {"look": "environment"}, run="r")
+        # CM1's own output, opened for pictures from where it is kept
+        cm1 = tmp_path / "cm1-data"
+        cm1.mkdir()
+        shutil.copy(ROOT / "tests" / "data" / "cm1-ref-24x24" / "cm1out_000001.nc", cm1 / "cm1out_000001.nc")
+        walk.post("cm1-output", "/api/cm1-output", {"path": os.fspath(cm1), "name": "c"}, run="c",
+                  same=_same_pictures)
+        # Compare with other runs: a second run to compare with, then the comparison drawn in r's folder
+        import_supercell(client, "r2")
+        assert client.post("/api/runs/r2/start").json["ok"]
+        wait_for(lambda: client.get("/api/runs/r2/status").json["state"] == "finished", timeout=60)
+        wait_for(lambda: not server.jobs.launched("r2"), timeout=60)
+        walk.post("compare", "/api/runs/r/compare", {"with": ["r2"]}, run="r")
+        assert walk.seen["compare"]["command"].endswith(f"--compare {root / 'r2'} --json")
         restarts = client.get("/api/runs/r/restarts").json
         assert restarts["can_resume"] and [row["number"] for row in restarts["restarts"]][:1] == [4]
+        # The radar looks' radar, fixed on the ground once the run has ended
+        walk.post("radar", "/api/runs/r/radar", {"site": [60.0, 50.5], "tilt": 1.0}, run="r")
+        assert walk.seen["radar"]["command"].endswith("--radar-site 60 50.5 --radar-tilt 1 --json")
         walk.post("resume", "/api/runs/r/resume", {"from_restart": 2, "until_s": 5400.0}, run="r",
                   lines=_launch_lines, same=_same_run)
         assert walk.seen["resume"]["command"].endswith("--from-restart 2 --until 5400")
@@ -369,7 +401,7 @@ def test_the_run_control_and_picture_actions_return_their_command_and_replay(tmp
         wait_for(lambda: not server.jobs.launched("s"), timeout=60)
     finally:
         stop_server(server)
-    expected = FAKE_WALK | (RESULTS_WALK & _posts()) | LOOKS_WALK
+    expected = FAKE_WALK | (RESULTS_WALK & _posts()) | LOOKS_WALK | CM1_OUTPUT_WALK
     assert set(walk.seen) >= expected, sorted(expected - set(walk.seen))
 
 
@@ -378,7 +410,7 @@ def test_the_two_walks_cover_every_post_in_the_api_table():
 
     posts = _posts()
     walked = (MIXED_WALK | FAKE_WALK | (RESULTS_WALK & posts) | LOOKS_WALK | (WRF_WALK & posts) | (CHAIN_WALK & posts)
-              | (SOUNDING_WALK & posts))
+              | (SOUNDING_WALK & posts) | CM1_OUTPUT_WALK)
     assert posts == walked, sorted(posts ^ walked)
 
 

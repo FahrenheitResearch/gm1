@@ -167,15 +167,16 @@ def read_track(directory: Path | str) -> Track | None:
 def lineage_tracks(layout: Any) -> list[tuple[Track, float | None]]:
     """The run's tracks along its lineage, oldest first, each with the time it counts to.
 
-    In a ``gpuwm-cm1 run`` directory these are the tracks of the newest
-    segment's lineage (an ancestor counts up to the time its descendant
-    resumed from); elsewhere every segment's track, oldest first.
+    In a ``gpuwm-cm1 run`` directory these are the tracks of the run's line
+    as its frames follow it (``RunDirectory.frame_line``: an ancestor counts
+    up to the time its descendant resumed from); elsewhere every segment's
+    track, oldest first.
     """
 
     found: list[tuple[Track, float | None]] = []
     run = layout.run_directory()
     if run is not None:
-        for segment, until in run.lineage():
+        for segment, until in run.frame_line():
             track = read_track(segment.frames_dir / TRACK_DIRECTORY)
             if track is not None:
                 found.append((track, until))

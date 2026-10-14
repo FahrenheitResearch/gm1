@@ -54,6 +54,13 @@ def parser_tool(monkeypatch):
 
 #: The per-frame looks of a thunderstorm run: every look but the two drawn only for a hurricane run.
 THUNDERSTORM_LOOKS = [pid for pid, _ in P.PRODUCTS if pid not in P.HURRICANE_ONLY]
+#: The looks drawn once per run that this storm has (no parcel track): the environment, the run card, the storm over
+#: time.
+ONCE_LOOKS = ["environment", "run-card", "updraft-time-height", "spin-time-height"]
+#: The ones this 1 km storm gets: the flow near the ground is drawn for grids of 250 m and finer
+#: (test_quicklook_nearground.py draws it), and is listed here with its reason.
+DRAWN_AT_1KM = [pid for pid in THUNDERSTORM_LOOKS if pid not in P.NEAR_GROUND]
+NEAR_GROUND_WHY = "This look is drawn for grids of 250 m and finer; this run's grid is 1 km"
 
 
 @pytest.fixture()
@@ -93,10 +100,14 @@ def test_every_quick_look_draws_from_a_cm1_storm(tmp_path, pictures):
     assert summary.frames_drawn == 3 and summary.problems == []
     index = json.loads((run / "quicklook" / "index.json").read_text())
     assert index["schema"] == "gm1.quicklook-index/v1"
-    # The per-frame looks, then the environment (drawn once per run; this storm has no parcel track)
-    assert [p["id"] for p in index["products"]] == THUNDERSTORM_LOOKS + ["environment"]
+    # The per-frame looks, then the environment, the run card and the storm over time (drawn once per run; this storm
+    # has no parcel track)
+    assert [p["id"] for p in index["products"]] == THUNDERSTORM_LOOKS + ONCE_LOOKS
     assert [p["id"] for p in index["products"]][:4] == ["reflectivity", "spin-near-ground", "updraft-5km", "swath"]
     for product in [p for p in index["products"] if not p.get("once")]:
+        if product["id"] in P.NEAR_GROUND:
+            assert product["frames"] == [] and product["not_drawn"][0]["reason"].startswith(NEAR_GROUND_WHY)
+            continue
         assert [f["time_s"] for f in product["frames"]] == [900.0, 1200.0, 1500.0], product["id"]
         for frame in product["frames"]:
             assert _png_size(run / "quicklook" / frame["file"]) == (1920, 1080)
@@ -108,7 +119,7 @@ def test_every_quick_look_draws_from_a_cm1_storm(tmp_path, pictures):
     assert not list((run / "quicklook").rglob("*.partial"))
     # the numbers each picture showed are the frame's own
     state = np.load(ROOT / "tests" / "data" / "cm1-ref-24x24" / "stats-run-t1500.npz")
-    last = {p["id"]: p["frames"][-1]["facts"] for p in index["products"]}
+    last = {p["id"]: p["frames"][-1]["facts"] for p in index["products"] if p["frames"]}
     assert last["updraft-5km"]["w_max"] == pytest.approx(float(state["w"][10].max()))
     assert last["updraft-5km"]["level_m"] == 5000.0
     assert last["surface"]["theta_min"] == pytest.approx(float(state["thpert"][0].min()))
@@ -121,7 +132,8 @@ def test_every_quick_look_draws_from_a_cm1_storm(tmp_path, pictures):
 def test_footers_carry_the_plan_facts_and_pass_the_lint(tmp_path, pictures):
     run = run_directory(tmp_path)
     _render(run, only=None)
-    assert len(pictures) == 3 * len(THUNDERSTORM_LOOKS) + 1   # every per-frame look at 3 frames, the environment once
+    # every per-frame look at 3 frames, each look drawn once per run once
+    assert len(pictures) == 3 * len(DRAWN_AT_1KM) + len(ONCE_LOOKS)
     for name, ov in pictures:
         assert ov.check() == [], name
         assert ov.footer_cut == [], (name, ov.footer_cut)
@@ -148,14 +160,17 @@ def test_a_domain_fixed_to_the_ground_draws_every_look(tmp_path, pictures):
     summary = _render(run)
     assert summary.problems == [], summary.problems
     index = json.loads((run / "quicklook" / "index.json").read_text())
-    assert {p["id"]: len(p["frames"]) for p in index["products"]} == {**{pid: 3 for pid in THUNDERSTORM_LOOKS},
-                                                                       "environment": 1}
+    assert {p["id"]: len(p["frames"]) for p in index["products"]} == {**{pid: 3 for pid in DRAWN_AT_1KM},
+                                                                       **{pid: 0 for pid in P.NEAR_GROUND},
+                                                                       **{pid: 1 for pid in ONCE_LOOKS}}
     assert index["products"][3]["frames"][-1]["facts"]["source"] == "model"          # CM1's sws, ground-fixed
     for name, ov in pictures:
         assert ov.check() == [] and ov.footer_cut == [], name
-        # the ground tracks are on the ground and the environment is a column: they name no domain motion
+        # the ground tracks are on the ground and the environment is a column: they name no domain motion; nor does
+        # the wind's spectrum, from which the area's mean wind is removed (the frame's motion does not count)
         assert "domain fixed to the ground" in "\n".join(ov.texts) or name in (
-            "swath", "timeseries.png", "hail-track", "spin-track", "environment"), name
+            "swath", "timeseries.png", "hail-track", "spin-track", "spectra", "environment", "updraft-time-height",
+            "spin-time-height"), name
 
 
 def test_the_checked_state_comes_from_the_import_report_or_the_receipt(tmp_path):
@@ -490,7 +505,7 @@ def test_without_cm1s_uh_the_updraft_helicity_is_cm1s_calcuh_sum(tmp_path):
     try:
         assert not qf.has("uh")
         uh, source = qf.uh()
-        assert source == "CM1's calcuh sum on the frame's winds"
+        assert source == "CM1's calcuh sum"
         carriers, _frame = storm(1500.0)
         u, v, w = (np.asarray(carriers[n], np.float64) for n in ("u3d", "v3d", "w3d"))
         nz, ny, nx = w.shape[0] - 1, w.shape[1], w.shape[2]

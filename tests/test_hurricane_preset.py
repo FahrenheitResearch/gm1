@@ -829,7 +829,8 @@ def test_a_hurricane_run_draws_its_wind_and_pressure_and_leaves_out_the_thunders
 
     assert LK.THUNDERSTORM_ONLY == PR.THUNDERSTORM_ONLY
     in_row = {look["id"] for look in LK.load_copy()["more_looks"]} & set(PR.THUNDERSTORM_ONLY)
-    assert in_row == {"surface", "hail-track", "spin-track"}
+    assert in_row == {"surface", "hail-track", "spin-track", "radar-storm-relative", "storm-relative-flow",
+                      "streamwise-spin", "cold-pool-depth"}
     ended = {"state": "finished"}
     shown = [row["id"] for row in LK.more_looks(run.name, run, index, ended, films_now={})]
     assert "rain" in shown and not set(shown) & in_row, shown
@@ -971,7 +972,12 @@ def test_the_pages_know_a_hurricane_runs_looks_and_a_long_runs_clock():
     parts = (static / "js/run/parts.js").read_text(encoding="utf-8")
     assert 'export const HURRICANE_FAVOURITES = ["reflectivity", "wind-lowest", "pressure-lowest"];' in parts
     assert api.HURRICANE_LOOKS == ("reflectivity", "wind-lowest", "pressure-lowest")
-    assert set(PR.HURRICANE_ONLY) < set(api.HURRICANE_LOOKS) and set(PR.HURRICANE_ONLY) < set(looks.FILM_LOOKS)
+    # A hurricane run's own looks: its two favourites, and the More looks rows drawn for a hurricane only (its
+    # looks by radius and height); the server's list without numpy is the worker's, and each can be filmed.
+    rows = {row["id"] for row in looks.load_copy()["more_looks"] if row.get("hurricane_only")}
+    assert rows == {"swirl-by-radius", "warm-core"} and looks.HURRICANE_ONLY == PR.HURRICANE_ONLY
+    assert set(PR.HURRICANE_ONLY) == (set(api.HURRICANE_LOOKS) - {"reflectivity"}) | rows
+    assert set(PR.HURRICANE_ONLY) < set(looks.FILM_LOOKS)
     assert not set(api.HURRICANE_LOOKS) & set(PR.THUNDERSTORM_ONLY)
     core = (static / "js/core.js").read_text(encoding="utf-8")
     assert "export function stormClock(t, total)" in core and "const LONG_RUN_S = 172800;" in core
@@ -1145,7 +1151,8 @@ def test_the_fake_runner_gives_a_hurricane_run_its_own_looks_clock_and_charts(li
 
     for seconds in (0, 3600, 5400, 21600, 86400, 129600, 291600, 345600):
         assert F._long_clock(seconds) == S.fmt_long_clock(seconds), seconds
-    assert [look for look, _ in F.HURRICANE_PRODUCTS] == ["reflectivity", "wind-lowest", "pressure-lowest", "rain"]
+    assert [look for look, _ in F.HURRICANE_PRODUCTS] == ["reflectivity", "wind-lowest", "pressure-lowest", "rain",
+                                                          "swirl-by-radius", "warm-core"]
     assert not {look for look, _ in F.HURRICANE_PRODUCTS} & set(LK.THUNDERSTORM_ONLY)
     assert F._fake_hurricane_facts("wind-lowest", 345600.0)["wind_max_ground_relative"] == 59.0
     assert F._fake_hurricane_facts("pressure-lowest", 0.0)["p_min_hpa"] == 1006.0
@@ -1178,6 +1185,11 @@ def test_the_fake_runner_gives_a_hurricane_run_its_own_looks_clock_and_charts(li
     assert by["reflectivity"]["frames"][0]["storm"] == STRINGS["storm.hurricane.none"]["text"]
     assert "storm" not in by["reflectivity"]["frames"][-1]
     assert not {row["id"] for row in results["more_looks"]} & set(LK.THUNDERSTORM_ONLY)
+    # The film menu offers a hurricane's own looks, its looks by radius and height among them, and neither the
+    # looks made for one thunderstorm nor a parcel film this run did not follow parcels for.
+    assert {"wind-lowest", "pressure-lowest", "swirl-by-radius", "warm-core", "swirl"} <= set(results["film_looks"])
+    assert not set(results["film_looks"]) & (set(LK.THUNDERSTORM_ONLY) | {"parcels"})
+    assert set(results["film_commands"]) == set(results["film_looks"])
     assert "25 m above the sea" in results["guided"]["looks"]["wind-lowest"]["text"]
     series = json.loads((root / name / "quicklook" / "series.json").read_text(encoding="utf-8"))
     assert series["storm_kind"] == "hurricane" and series["time_unit"] == "h"

@@ -44,7 +44,7 @@ import threading
 import time
 from typing import Any, Callable, Iterable
 
-from .files import RUN_FILE, is_view_only, read_json
+from .files import RUN_FILE, cm1_output, is_view_only, read_json
 
 RUN_SCHEMA = "gm1.cm1-run/v1"
 EVENTS_NAME = "events.jsonl"
@@ -449,6 +449,12 @@ def read_status(rundir: Path, *, now: float | None = None, host: str | None = No
     }
     if view_only:
         detail["actions"] = []
+        if cm1_output(rundir) is not None:
+            # CM1's own netCDF output, opened for pictures: nothing runs here, and nothing is to come.  Its grid
+            # and its last saved time are what its pictures say (quicklook/index.json).
+            detail["cm1_output"] = True
+            detail.update(_cm1_output_detail(rundir))
+            return RunStatus("finished", "CM1 output", None, detail)
 
     digest = log_digest(log)
     admitted = None if digest is None else digest.admitted
@@ -696,6 +702,39 @@ class EventTail:
             return self.path.stat().st_size > self.offset
         except OSError:
             return False
+
+
+def _cm1_output_detail(rundir: Path) -> dict[str, Any]:
+    """The grid and the last saved time of CM1 output opened for pictures: what the files hold (cm1-output.json,
+    written when it was opened), else what its pictures' index says.  The last saved time is the files' own from
+    the start, not that of the last picture drawn so far."""
+
+    from .files import CM1_OUTPUT_FILE
+
+    out: dict[str, Any] = {}
+    opened = read_json(rundir / CM1_OUTPUT_FILE, default=None)
+    if isinstance(opened, dict):
+        grid = opened.get("grid")
+        if isinstance(grid, dict) and all(isinstance(grid.get(k), (int, float)) for k in ("nx", "ny", "nz", "dx_m")):
+            out["grid"] = {"nx": int(grid["nx"]), "ny": int(grid["ny"]), "nz": int(grid["nz"]),
+                           "dx_m": float(grid["dx_m"])}
+        saved = opened.get("saved_times_s")
+        if isinstance(saved, list) and saved and all(isinstance(t, (int, float)) for t in saved):
+            out["model_time_s"] = out["duration_s"] = float(max(saved))
+    index = read_json(rundir / "quicklook" / "index.json", default=None)
+    if not isinstance(index, dict):
+        return out
+    run = index.get("run") if isinstance(index.get("run"), dict) else {}
+    found = re.match(r"(\d+) × (\d+) × (\d+)", str(run.get("grid") or ""))
+    if found and isinstance(run.get("dx_m"), (int, float)):
+        out["grid"] = {"nx": int(found.group(1)), "ny": int(found.group(2)), "nz": int(found.group(3)),
+                       "dx_m": float(run["dx_m"])}
+    times = [f.get("time_s") for f in index.get("frames") or [] if isinstance(f, dict)]
+    times = [float(t) for t in times if isinstance(t, (int, float))]
+    if times:
+        out["model_time_s"] = out["duration_s"] = max(max(times), float(out.get("model_time_s") or 0.0))
+        out["frames"] = len(times)
+    return out
 
 
 def summarize(rundir: Path, status: RunStatus, run_id: str) -> dict[str, Any]:

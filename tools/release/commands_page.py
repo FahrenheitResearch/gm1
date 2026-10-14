@@ -39,13 +39,18 @@ WHERE = {
     "slice": "Results: a horizontal slice",
     "section": "Results: a vertical section along a drawn line",
     "column": "Results: click a column for its skew-T",
+    "render": "Results: Native pictures, Draw (advanced)",
     "convert": "Results: Convert again",
     "reproduce": "Results: Reproduce bundle",
     "fit": "Guided: How long can it run? (the four buttons)",
     "guided-start": "Guided: Start",
     "preset-new": "New run: Start from a preset; guided Customize: All settings (Advanced)",
     "film": "Results: Save as film, Make the film (and Stop)",
-    "look": "Results: More looks, a look drawn once per run (Draw the new looks)",
+    "cm1-output": "Runs: Open CM1 output (pictures only)",
+    "look": "Results: More looks, a look drawn once per run (Draw the new looks), The storm in 3-D (Draw it); Draw "
+            "every picture again; CM1 output: Draw the pictures",
+    "radar": "Results: a radar look, Draw the radar again",
+    "compare": "Results: Compare with other runs",
     "wrf-open": "New run: From a WRF or ArWen run, Read the file; guided: Use a sounding from my WRF or ArWen run",
     "wrf-column": "From a WRF or ArWen run: click the map, or Show this spot",
     "wrf-use": "From a WRF or ArWen run: Import and check; guided: Next: how long can it run?",
@@ -94,6 +99,8 @@ run ends; a cluster job script starts the same two on the GPU node:
 | `gpuwm-cm1 sounding convert IN [OUT] [--speed-unit kt\\|ms] [--extend-top --top-m M]` | Use your own sounding: check a sounding file in whichever layout it has, and write CM1's `input_sounding` (`docs/SOUNDINGS.md`) |
 | `gpuwm-cm1 preset new your-environment --budget B --root RUNS --sounding FILE --start auto\\|push\\|bubble` | A storm on your own sounding, started the way its moisture calls for |
 | `gpuwm-cm1 run RUNDIR [--until T] [--detach]` | Start a run from a terminal (the GUI's Start adds the two helpers) |
+| `gpuwm-cm1 quicklook RUNDIR --radar-motion U V\\|auto` | The storm motion the storm-relative radar look takes out (m/s east and north, ground-relative); auto: the run's own |
+| `gpuwm-cm1 quicklook CM1_OUTPUT [--namelist FILE] [--out DIR]` | Pictures of CM1 netCDF output, CM1's own or a GM1 run's cm1out folder (a cm1out.nc, or a folder of cm1out_NNNNNN.nc): every look, and --slice, --section, --column and --film, on the CPU |
 """
 
 

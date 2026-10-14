@@ -15,11 +15,12 @@ Products (id, title):
 
 ``reflectivity``      Reflectivity at 1 km: at 1 km above ground and the column maximum
 ``spin-near-ground``  Spin near the ground: vertical vorticity at the lowest model level (a range fixed for each
-                      grid spacing, +-0.05 1/s at 250 m: :func:`spin_range`), the ground-relative wind there drawn
-                      as streaks
+                      grid spacing, or for the lowest level's height when that is greater, +-0.05 1/s at 250 m:
+                      :func:`spin_range`), the ground-relative wind there drawn as streaks
 ``updraft-5km``       Updraft at 5 km: w on the w level nearest 5 km, and 2-5 km updraft helicity (CM1's uh)
 ``swath``             Wind swath since the start: the strongest lowest-level wind each place on the ground has had,
-                      and the updraft-helicity track (:mod:`.swath`)
+                      and the updraft-helicity track (:mod:`.swath`; from the saved frames, and said so, when the
+                      run saves no ``shs``)
 ``surface``           Lowest level θ′ and wind: the cold pool, ground-relative streaks, gust fronts (convergence)
 ``rain``              Accumulated rain
 
@@ -33,10 +34,16 @@ A hurricane run (:attr:`.facts.RunFacts.storm_kind`, CM1's swirl start) is drawn
 
 These two, the reflectivity and the rain (1 mm to 400 cm on a logarithmic scale) each show the whole area and,
 beside it, the inner 500 km around the area's middle (:func:`hurricane_frame`); the slice through the strongest
-updraft is drawn on a +-10 m/s range.  The looks made for a single
+updraft is drawn on a +-10 m/s range.  Two more are drawn by radius and height from rings around the pressure
+centre (:mod:`.rings`, :mod:`.azimuthal`), with CM1's own panel beside GM1's on the settings CM1 has been run with:
+
+``swirl-by-radius``   Swirling wind by radius and height: the ring-mean wind around the centre
+``warm-core``         Warm core by radius and height: the ring-mean potential temperature minus the far rings'
+
+The looks made for a single
 thunderstorm (:data:`THUNDERSTORM_ONLY`: the spin near the ground, the updraft at 5 km with its updraft helicity,
 the wind swath, the cold pool, the hail and spin tracks) are not drawn for a hurricane, with one plain reason;
-the two hurricane looks are not drawn for any other run.
+the hurricane looks are not drawn for any other run.
 """
 
 from __future__ import annotations
@@ -53,6 +60,8 @@ from . import reflectivity as R
 from . import style as S
 from .facts import RunFacts
 from .frame import QuickFrame
+from .swath import WINDOW_NOTE
+from .tracks import dense_word
 
 W, H = 1920, 1080
 THUMB = (480, 270)
@@ -65,17 +74,35 @@ PRODUCTS: tuple[tuple[str, str], ...] = (
     ("rain", "Accumulated rain"),
     # More looks, drawn by the same worker for each frame (their modules draw them with this style)
     ("clouds-from-above", "Clouds seen from above"),
+    ("infrared", "Clouds in visible and infrared"),
+    ("spectra", "Wind energy by size"),
     ("updraft-slice", "Slice through the strongest updraft"),
     ("hail-track", "Hail near the ground so far"),
     ("spin-track", "Strongest near-ground spin so far"),
     # A hurricane run's own looks (not drawn for any other run)
     ("wind-lowest", "Wind at the lowest level"),
     ("pressure-lowest", "Pressure at the lowest level"),
+    ("swirl-by-radius", "Swirling wind by radius and height"),
+    ("warm-core", "Warm core by radius and height"),
+    # A simulated radar's low scan (:mod:`.radar`): the wind along its beam beside the reflectivity it sees
+    ("radar-storm-relative", "Radar velocity, storm-relative"),
+    ("radar-velocity", "Radar velocity, ground-relative"),
+    # The storm from the side and its rotation axis (sideview.py, axis.py), for every kind of run
+    ("side-view", "Storm seen from the side"),
+    ("water-paths", "Water and ice in the column"),
+    ("rotation-axis", "Rotation axis, 0 to 10 km"),
+    # Flow near the ground, for grids of 250 m and finer (quicklook.nearground)
+    ("storm-relative-flow", "Storm-relative flow at three heights"),
+    ("streamwise-spin", "Streamwise spin at about 100 m"),
+    ("cold-pool-depth", "Depth of the cold pool"),
 )
 TITLES = dict(PRODUCTS)
+#: The flow-near-the-ground looks (quicklook.nearground): thunderstorm looks drawn on grids of 250 m and finer.
+NEAR_GROUND = ("storm-relative-flow", "streamwise-spin", "cold-pool-depth")
 #: Looks drawn only for a hurricane run, and the looks made for one thunderstorm that a hurricane run leaves out.
-HURRICANE_ONLY = ("wind-lowest", "pressure-lowest")
-THUNDERSTORM_ONLY = ("spin-near-ground", "updraft-5km", "swath", "surface", "hail-track", "spin-track")
+HURRICANE_ONLY = ("wind-lowest", "pressure-lowest", "swirl-by-radius", "warm-core")
+THUNDERSTORM_ONLY = ("spin-near-ground", "updraft-5km", "swath", "surface", "hail-track", "spin-track",
+                     "radar-storm-relative") + NEAR_GROUND
 THUNDERSTORM_ONLY_WHY = ("This look is made for thunderstorms. For a hurricane, see the wind and the pressure at "
                          "the lowest level.")
 #: A hurricane's fixed, stated ranges.  They hold GM1's and CM1's runs of the hurricane presets
@@ -115,16 +142,66 @@ SURFACE_LOOK = dict(conv_floor=0.0025, conv_ref=0.006, conv_gamma=0.9, conv_gain
                     lic_px=12, lic_gain=0.26, speed_ref=25.0, theta_gain=0.62)
 
 
-def spin_range(dx_m: float) -> float:
-    """The fixed spin range for a grid spacing: ±0.01 1/s at 1 km, scaled as 1/dx (resolved vorticity grows as
-    the grid resolves smaller eddies) and rounded to the nearest 1-2-5 step: ±0.02 at 500 m, ±0.05 at 250 m (the
-    plan's range), ±0.1 at 100 m, ±0.2 at 50 m.  CM1's stock 1 km supercell peaks near 0.009 1/s at the lowest
-    level, so one range for every grid would draw the coarse runs black or saturate the fine ones."""
+def spin_scale_m(dx_m: float, lowest_m: float = 0.0) -> float:
+    """The length the spin range is set by: the grid spacing, or the lowest level's height above the ground when
+    that is greater (see :func:`spin_range`)."""
 
-    raw = 0.01 * 1000.0 / max(float(dx_m), 1.0)
+    return max(float(dx_m), float(lowest_m or 0.0), 1.0)
+
+
+def spin_range(dx_m: float, lowest_m: float = 0.0) -> float:
+    """The fixed spin range for a grid: ±0.01 1/s at 1 km, scaled as 1/dx (resolved vorticity grows as the grid
+    resolves smaller eddies) and rounded to the nearest 1-2-5 step: ±0.02 at 500 m, ±0.05 at 250 m (the plan's
+    range), ±0.1 at 100 m, ±0.2 at 50 m.  CM1's stock 1 km supercell peaks near 0.009 1/s at the lowest level, so
+    one range for every grid would draw the coarse runs black or saturate the fine ones.
+
+    A run resolves spin near the ground only as finely as its coarsest spacing there, so a lowest level higher
+    above the ground than the grid spacing (a fine grid on coarse levels) sets the range instead.  Measured: the
+    67 m supercell on 500 m levels (lowest level 250 m) peaked at 0.012 to 0.019 1/s at T+45 min in three runs,
+    which the ±0.2 of 67 m drew nearly black; at the 250 m of its lowest level the range is ±0.05.  Every preset
+    keeps its range (the 100 m supercell's 125 m lowest level rounds to the same ±0.1)."""
+
+    raw = 0.01 * 1000.0 / spin_scale_m(dx_m, lowest_m)
     exponent = math.floor(math.log10(raw))
     candidates = [f * 10.0 ** e for e in (exponent - 1, exponent, exponent + 1) for f in (1.0, 2.0, 5.0)]
     return float(min(candidates, key=lambda c: abs(math.log(c / raw))))
+
+
+#: The swirl film's spin range for a hurricane run, 1/s, unless the grid's own range is wider.  GM1's 8 km and 4 km
+#: hurricane runs peak at 0.006 to 0.008 and 0.006 to 0.010 1/s at the lowest level once grown (every saved time
+#: from about hour 40 on, measured), which the thunderstorm rule's ±0.001 at 8 km and ±0.002 at 4 km drew as one
+#: white disk over the eye.
+HURRICANE_SPIN_RANGE = 0.01
+
+
+def swirl_range(dx_m: float, lowest_m: float = 0.0, *, hurricane: bool = False) -> float:
+    """The swirl film's spin range: :func:`spin_range`, or for a hurricane run at least
+    :data:`HURRICANE_SPIN_RANGE`."""
+
+    rng = spin_range(dx_m, lowest_m)
+    return max(rng, HURRICANE_SPIN_RANGE) if hurricane else rng
+
+
+def spin_range_words(dx_m: float, lowest_m: float = 0.0, *, hurricane: bool = False) -> str:
+    """What sets a picture's spin range, in its own words: "at this dx", the lowest level's height when that
+    sets it (a range that differs from the grid spacing's own), or "for a hurricane" (:func:`swirl_range`)."""
+
+    if hurricane and swirl_range(dx_m, lowest_m, hurricane=True) != spin_range(dx_m, lowest_m):
+        return "for a hurricane"
+    if spin_range(dx_m, lowest_m) == spin_range(dx_m):
+        return "at this dx"
+    return f"for a {S.fmt_height(float(lowest_m))} lowest level"
+
+
+def spin_tick(value: float, usual: str) -> str:
+    """A spin legend's number: ``usual`` (the legend's own format) from 0.01 1/s up, as on every preset's
+    pictures, and below that every digit the number has (0.005, 0.0025, 0.001): two decimals would write a coarse
+    grid's ±0.001 as 0.00."""
+
+    if abs(value) >= 0.01:
+        return usual
+    digits = np.format_float_positional(abs(float(value)), precision=6, trim="-")
+    return (S.MINUS if value < 0 else "") + digits
 
 
 class LintError(ValueError):
@@ -260,6 +337,13 @@ def ground_ticks(img: np.ndarray, box: Box, domainlocx: float, domainlocy: float
     return (out + 0.5).astype(np.uint8), every
 
 
+def scale_bar_width(ov: S.Overlay, box: Box) -> int:
+    """How wide :func:`scale_bar` draws for ``box``, its words included (px)."""
+
+    length_m = nice_step(box.span, 6)
+    return int(length_m / box.mpp) + ov.U(10) + ov.measure(S.fmt_km(length_m), "micro")[0]
+
+
 def scale_bar(ov: S.Overlay, x: float, y: float, box: Box) -> None:
     length_m = nice_step(box.span, 6)
     L = length_m / box.mpp
@@ -267,10 +351,39 @@ def scale_bar(ov: S.Overlay, x: float, y: float, box: Box) -> None:
     ov.text((x + L + ov.U(10), y + ov.U(1)), S.fmt_km(length_m), "micro", colour="data", anchor="lm")
 
 
-def panel_label(ov: S.Overlay, box: Box, text: str, right: str | None = None, *, vertical: bool = False) -> None:
-    ov.text((box.x, box.y - ov.U(10)), text, "label", colour="text", anchor="ls")
+def label_fits(ov: S.Overlay, box: Box, text: str, right: str | None = None) -> bool:
+    """Whether a panel's title and value fit side by side over it (:func:`panel_label`)."""
+
+    return not right or ov.measure(text)[0] + ov.U(12) + ov.measure(right)[0] <= box.w
+
+
+def panel_label(ov: S.Overlay, box: Box, text: str, right: str | None = None, *, vertical: bool = False,
+                room: float | None = None, short: str | None = None, stack: bool | None = None) -> None:
+    """A panel's title over its top left corner and its value (``right``) over its top right corner.
+
+    When the two do not fit side by side (a narrow panel: a swath canvas taller than wide), the title takes its
+    ``short`` words if those fit; otherwise, or when ``stack`` says so (a neighbour that does not fit), the title
+    goes on a row above and the value under it at the right, the title ``short`` when wider than ``room`` (default:
+    the panel).  A row above is used only where the picture's heading leaves room for it.  A panel where the two
+    fit is drawn as it always was; a title a wrapped heading line would reach is a layout problem
+    (``Overlay.clear_of_head``)."""
+
+    y = box.y - ov.U(10)
+    if stack is None:
+        stack = not label_fits(ov, box, text, right)
+        if stack and short and label_fits(ov, box, short, right):
+            text, stack = short, False
+    row = int(round(ov.px("label") * 1.3))
+    if right and stack and y - row - ov.font("label").getmetrics()[0] >= ov._head_bottom:
+        if short and ov.measure(text)[0] > (box.w if room is None else room):
+            text = short
+        ov.text((box.x, y - row), text, "label", colour="text", anchor="ls")
+        ov.text((box.x + box.w, y), right, "label", colour="data", anchor="rs", vertical=vertical)
+        return
+    ov.clear_of_head(y - ov.measure(text, "label")[1], "the panel titles")
+    ov.text((box.x, y), text, "label", colour="text", anchor="ls")
     if right:
-        ov.text((box.x + box.w, box.y - ov.U(10)), right, "label", colour="data", anchor="rs", vertical=vertical)
+        ov.text((box.x + box.w, y), right, "label", colour="data", anchor="rs", vertical=vertical)
 
 
 def dbz_legend(ov: S.Overlay, x: float, y: float, w: float) -> None:
@@ -340,6 +453,9 @@ class Looks:
     def __init__(self, qf: QuickFrame, facts: RunFacts) -> None:
         self.f = qf
         self.facts = facts
+        #: What a look needs from the run beyond the frame (the radar's settings, the run's own storm motion) and
+        #: what two looks of one frame share (the radar's scan).
+        self.extras: dict[str, Any] = {}
 
     # -- words -------------------------------------------------------------------
     def data_line(self, *more: str) -> str:
@@ -368,6 +484,14 @@ class Looks:
 
         prs = self.f.pressure_level(0)
         return None if prs is None else (prs / np.float32(100.0)).astype(np.float32)
+
+    @cached_property
+    def rings(self) -> Any:
+        """A hurricane's rings around its pressure centre (:class:`.azimuthal.Rings`), or None without pressure."""
+
+        from .azimuthal import of_frame
+
+        return of_frame(self.f)
 
     @cached_property
     def pressure_edge_hpa(self) -> float | None:
@@ -443,6 +567,8 @@ class Looks:
     def statistics(self) -> dict[str, float]:
         """Domain extremes of this frame, with CM1's statistic names where CM1 has them (the time series)."""
 
+        if getattr(self.f.frame, "why_not", None) is not None:
+            return self._file_statistics()
         wmax, wmin = self.w_extremes
         th = self.theta0
         row: dict[str, float] = {
@@ -458,6 +584,41 @@ class Looks:
         if self.hurricane and self.pressure0_hpa is not None:
             # A hurricane's time series leads with its lowest pressure (at the lowest model level, not sea level).
             row["prs_sfc_min_hpa"] = float(self.pressure0_hpa.min())
+            # ... and charts its radius of maximum wind (the rings' own, about the pressure centre).
+            try:
+                rings = self.rings
+            except ValueError:
+                rings = None
+            if rings is not None:
+                row["rmw_km"] = rings.rmw_m / 1000.0
+        if "reflectivity" in self.__dict__ and self.reflectivity.available:
+            row["dbz_max"] = float(self.dbz_column.max())
+        return row
+
+    def _file_statistics(self) -> dict[str, float]:
+        """:meth:`statistics` of a CM1 netCDF file (:mod:`.ncread`): each extreme whose fields the file holds, in
+        the same order, so a file without w still charts its cold pool and its rain."""
+
+        from .frame import FieldMissing
+
+        row: dict[str, float] = {}
+
+        def put(keys: tuple[str, ...], values: Callable[[], Sequence[float]]) -> None:
+            try:
+                row.update(zip(keys, (float(v) for v in values())))
+            except FieldMissing:
+                pass
+
+        put(("wmax", "wmin"), lambda: self.w_extremes)
+        put(("uh_max",), lambda: (self.uh[0].max(),))
+        put(("thpert_sfc_min", "coldpool_area_km2_lt_minus1K"),
+            lambda: (self.theta0.min(), (self.theta0 < -1.0).sum() * self.cell_km2()))
+        put(("zeta_sfc_max",), lambda: (self.zeta0[0].max(),))
+        put(("wind_sfc_max",), lambda: (self.wind0.max(),))
+        if self.f.has("rain"):
+            row["rain_max_cm"] = float(self.f.get("rain").max())
+        if self.hurricane:
+            put(("prs_sfc_min_hpa",), lambda: () if self.pressure0_hpa is None else (self.pressure0_hpa.min(),))
         if "reflectivity" in self.__dict__ and self.reflectivity.available:
             row["dbz_max"] = float(self.dbz_column.max())
         return row
@@ -535,8 +696,7 @@ def product_reflectivity(L: Looks, out: Path) -> dict[str, Any]:
         paste(cv, img, b)
     cv = outline(outline(cv, b1), b2)
     between = f"1 km: linear in Z between the {S.fmt_height(lo)} and {S.fmt_height(hi)} levels"
-    dense = (f.config.get("dense_ice") or {}).get("category")
-    dense = dense if dense in ("hail", "graupel") else "graupel"
+    dense = dense_word(f.config)
     ov = overlay(L, "reflectivity", L.data_line(refl.operator),
                  level="1 km and column maximum", wind="",
                  notes=S.data_line(between, f"from the model's rain, snow and {dense}, not a radar", L.frame_words(),
@@ -557,7 +717,7 @@ def product_spin(L: Looks, out: Path) -> dict[str, Any]:
     u, v = L.uv0_ground
     zs = sample(zeta, box, f.dx, f.dy)
     us, vs = sample(u, box, f.dx, f.dy), sample(v, box, f.dx, f.dy)
-    rng = spin_range(f.dx)
+    rng = spin_range(f.dx, L.z0)
     base = S.RAMPS["zeta"].colours(zs, -rng, rng)
     tx, sp = streaks(us, vs, box, seed=5)
     a = (np.clip(0.55 + 0.45 * tx, 0.0, 2.0) * np.clip(sp / 25.0, 0.25, 1.4) * 0.22)[..., None]
@@ -569,7 +729,8 @@ def product_spin(L: Looks, out: Path) -> dict[str, Any]:
     z0 = L.z0
     ov = overlay(L, "spin-near-ground", L.data_line(f"lowest model level, {S.fmt_height(z0)} above ground"),
                  level=f"lowest level {S.fmt_height(z0)}", wind="ground-relative",
-                 notes=S.data_line(f"spin: vertical vorticity ({zsource}), ±{rng:g} {S.PER_S} fixed at this dx",
+                 notes=S.data_line(f"spin: vertical vorticity ({zsource}), ±{rng:g} {S.PER_S} fixed "
+                                   f"{spin_range_words(f.dx, z0)}",
                                    f"streaks: the {S.fmt_height(z0)} wind, ground-relative", L.frame_words(),
                                    f"+ fixed to the ground every {S.fmt_km(spacing)}"))
     j, i = np.unravel_index(int(np.argmax(zeta)), zeta.shape)
@@ -588,11 +749,13 @@ def product_spin(L: Looks, out: Path) -> dict[str, Any]:
     wr = ov.U(400)
     by = box.y + box.h - ov.U(40)
     ov.ramp_bar("zeta", (ov.x1 - wr, by, ov.x1, by + max(3, ov.U(7))), vmin=-rng, vmax=rng,
-                ticks=[(-rng, S.fmt_num(-rng, 2)), (0.0, "0"), (rng, f"{rng:.2f} {S.PER_S}")],
+                ticks=[(-rng, spin_tick(-rng, S.fmt_num(-rng, 2))), (0.0, "0"),
+                       (rng, f"{spin_tick(rng, f'{rng:.2f}')} {S.PER_S}")],
                 title=f"spin at {S.fmt_height(z0)}: clockwise | counter-clockwise")
     save(ov, cv, out)
     return {"height_m": z0, "dx_m": f.dx, "resolved_m": 6.0 * f.dx, "zeta_max": zmax, "zeta_min": zmin,
-            "zeta_source": zsource, "range_per_s": rng, "wind_max_ground_relative": wind,
+            "zeta_source": zsource, "range_per_s": rng,
+            "range_set_by": "dx" if rng == spin_range(f.dx) else "lowest level", "wind_max_ground_relative": wind,
             "zeta_max_xy_m": [float((i + 0.5) * f.dx), float((j + 0.5) * f.dy)]}
 
 
@@ -677,22 +840,67 @@ def product_swath(L: Looks, out: Path, swath: Any) -> dict[str, Any]:
                  notes=S.data_line(swath.method, "dim box: the domain at the start, grey box: now",
                                    f"ranges 0–{SWATH_WIND_RANGE:g} m/s ground-relative and 0–{UH_RANGE:g} m² s⁻² "
                                    "fixed"))
-    panel_label(ov, b1, f"strongest wind at {S.fmt_height(z0)} {since}",
-                f"max {facts['wind_max_ground_relative']:.0f} m/s ground-relative")
+    # A canvas taller than wide (a storm moving mostly north) makes narrow panels: each title then sits over its
+    # value (panel_label), the wind's colour legend makes room for the scale bar, and the helicity's keeps to its
+    # panel.  A canvas where everything fits is drawn as it always was.
+    uh_method = getattr(swath, "uh_method", "")
+    saved = ", saved frames" if uh_method else ""
+    # (panel, title, the title without "since ..." (the picture's own title says it), value)
+    labels = [(b1, f"strongest wind at {S.fmt_height(z0)} {since}", f"strongest wind at {S.fmt_height(z0)}",
+               f"max {facts['wind_max_ground_relative']:.0f} m/s ground-relative")]
+    if swath.uh is not None:
+        labels.append((b2, f"2–5 km updraft helicity {since}{saved}", f"2–5 km updraft helicity{saved}",
+                       f"max {S.fmt_num(facts['uh_max'])} m² s⁻²"))
+    # The two panels' titles read alike: in full beside their values, else both shorter beside them, else both on
+    # a row above their values.
+    titles = [title for _b, title, _s, _r in labels]
+    stack = not all(label_fits(ov, b, title, right) for b, title, _s, right in labels)
+    if stack and all(label_fits(ov, b, short, right) for b, _t, short, right in labels):
+        titles, stack = [short for _b, _t, short, _r in labels], False
+    panel_label(ov, b1, titles[0], labels[0][3], room=b2.x - b1.x - ov.U(12), short=labels[0][2], stack=stack)
+    free = b1.w - scale_bar_width(ov, b1)
+    legend1 = 300 if free - ov.U(300) >= ov.U(8) else max(120, int((free - ov.U(24)) / ov.u))
     ramp_legend(ov, "ice", b1, 0.0, SWATH_WIND_RANGE,
                 [(0, "0"), (SWATH_WIND_RANGE / 2, f"{SWATH_WIND_RANGE / 2:.0f}"),
-                 (SWATH_WIND_RANGE, f"{SWATH_WIND_RANGE:.0f} m/s")], title="wind, ground-relative")
+                 (SWATH_WIND_RANGE, f"{SWATH_WIND_RANGE:.0f} m/s")], title="wind, ground-relative", width=legend1)
     facts["since"] = since
     if swath.uh is not None:
-        panel_label(ov, b2, f"2–5 km updraft helicity {since}", f"max {S.fmt_num(facts['uh_max'])} m² s⁻²")
+        legend2 = 300 if b2.w >= ov.U(300) else int(b2.w / ov.u)
+        # The model's wind maximum beside a helicity built from the saved frames: the title says so, and how the
+        # helicity was made is said under the panel (or beside it, when the panel is too narrow).
+        panel_label(ov, b2, titles[1], labels[1][3], room=ov.x1 - b2.x, short=labels[1][2], stack=stack)
+        if uh_method:
+            facts["uh_method"] = uh_method
+            uh_words(ov, b2, swath, legend2)
         ramp_legend(ov, "ember", b2, 0.0, UH_RANGE, [(0, "0"), (UH_RANGE / 2, f"{UH_RANGE / 2:.0f}"),
-                                                     (UH_RANGE, f"{UH_RANGE:.0f} m² s⁻²")])
+                                                     (UH_RANGE, f"{UH_RANGE:.0f} m² s⁻²")], width=legend2)
     else:
         ov.text((b2.x + b2.w / 2, b2.y + b2.h / 2), "no updraft-helicity track in this run's frames", "label",
                 colour="muted", anchor="ms")
     scale_bar(ov, b1.x, b1.y + b1.h + ov.U(16), b1)
+    if swath.window and f.domain_moves:
+        # under the right panel, left of its key: what the files' translated swaths leave out
+        side_note(ov, WINDOW_NOTE, b2.x, b2.y + b2.h + ov.U(22), b2.w - ov.U(300) - ov.U(32))
     save(ov, cv, out)
     return facts
+
+
+def uh_words(ov: S.Overlay, box: Box, swath: Any, legend: int) -> None:
+    """How a swath's helicity built from the saved frames was made, in muted small print: its two lines under the
+    panel left of the colour legend (``legend`` layout units wide), two shorter ones when those do not fit there,
+    or, beside a panel too narrow for either, the whole sentence to its right, its last line level with the
+    panel's bottom."""
+
+    free = box.w - ov.U(legend) - ov.U(16)
+    for lines in (swath.uh_lines, swath.uh_short):
+        if lines and max(ov.measure(line, "micro")[0] for line in lines) <= free:
+            for n, line in enumerate(lines):
+                ov.text((box.x, box.y + box.h + ov.U(24 + 22 * n)), line, "micro", colour="muted", anchor="ls")
+            return
+    x = box.x + box.w + ov.U(24)
+    lines = ov.wrap(swath.uh_method, "micro", max(ov.x1 - x, ov.U(160)))
+    for n, line in enumerate(lines):
+        ov.text((x, box.y + box.h - ov.U(22) * (len(lines) - 1 - n)), line, "micro", colour="muted", anchor="ls")
 
 
 def product_surface(L: Looks, out: Path) -> dict[str, Any]:
@@ -726,6 +934,7 @@ def product_surface(L: Looks, out: Path) -> dict[str, Any]:
     ov.readout((x, y), [(f"coldest θ{S.PRIME} at {S.fmt_height(z0)}", f"{S.fmt_num(float(th.min()), 1)} K"),
                         (f"fastest wind at {S.fmt_height(z0)}", f"{wind:.0f} m/s ground-relative"),
                         (f"θ{S.PRIME} below {S.fmt_num(-1)} K", f"{area:,.0f} km²")])
+    theta_note(ov, f, x, y + ov.U(300), box.x - x - ov.U(32))
     scale_bar(ov, x, box.y + box.h - ov.U(8), box)
     wr = ov.U(400)
     by = box.y + box.h - ov.U(40)
@@ -734,6 +943,23 @@ def product_surface(L: Looks, out: Path) -> dict[str, Any]:
                 title=f"θ{S.PRIME} at {S.fmt_height(z0)}")
     save(ov, cv, out)
     return {"height_m": z0, "theta_min": float(th.min()), "wind_max_ground_relative": wind, "coldpool_km2": area}
+
+
+def theta_note(ov: S.Overlay, f: QuickFrame, x: float, y: float, width: float) -> None:
+    """Under a readout: how θ′ was formed, when a CM1 file holds θ and no base state (:attr:`.ncread.NcFrame.
+    theta_note`).  A GM1 frame's θ′ is CM1's own tha, and nothing is written."""
+
+    note = getattr(f.frame, "theta_note", "")
+    if not note:
+        return
+    side_note(ov, f"θ{S.PRIME} here: {note}, as the file holds no thpert or th0", x, y, width)
+
+
+def side_note(ov: S.Overlay, words: str, x: float, y: float, width: float) -> None:
+    """A muted note beside a picture, wrapped to ``width`` px, its first baseline at ``y``."""
+
+    for n, line in enumerate(ov.wrap(words, "micro", int(width))):
+        ov.text((x, y + n * ov.U(24)), line, "micro", colour="muted", anchor="ls")
 
 
 def product_rain(L: Looks, out: Path) -> dict[str, Any]:
@@ -865,7 +1091,8 @@ def hurricane_frame(L: Looks, product: str, draw: Callable[[Box], np.ndarray], *
     ov = overlay(L, product, data or L.data_line(), level=level, wind=wind,
                  notes=S.data_line(notes, L.frame_words(), plus))
     panel_label(ov, whole, "whole area", left)
-    panel_label(ov, zoom, f"inner {S.fmt_km(inner)} (the square on the left)", right)
+    panel_label(ov, zoom, f"inner {S.fmt_km(inner)} (the square on the left)", right,
+                short=f"inner {S.fmt_km(inner)}")
     scale_bar(ov, whole.x, whole.y + whole.h + ov.U(16), whole)
     scale_bar(ov, zoom.x, zoom.y + zoom.h + ov.U(16), zoom)
     ms = ov.px("micro")
@@ -934,8 +1161,7 @@ def _reflectivity_hurricane(L: Looks, out: Path) -> dict[str, Any]:
     refl = L.reflectivity
     one, (lo, hi) = L.dbz_1km
     col = L.dbz_column
-    dense = (f.config.get("dense_ice") or {}).get("category")
-    dense = dense if dense in ("hail", "graupel") else "graupel"
+    dense = dense_word(f.config)
     ov, cv, whole, zoom, inner = hurricane_frame(
         L, "reflectivity", lambda box: dbz_image(sample(one, box, f.dx, f.dy)),
         level="1 km above the sea", wind="",
@@ -1115,10 +1341,73 @@ def _clouds_from_above(L: Looks, out: Path) -> dict[str, Any]:
     return product_clouds(L, out)
 
 
+def _infrared(L: Looks, out: Path) -> dict[str, Any]:
+    from .infrared import product_infrared
+
+    return product_infrared(L, out)
+
+
+def _spectra(L: Looks, out: Path) -> dict[str, Any]:
+    from .spectra import product_spectra
+
+    return product_spectra(L, out)
+
+
 def _updraft_slice(L: Looks, out: Path) -> dict[str, Any]:
     from .section import product_updraft_slice
 
     return product_updraft_slice(L, out)
+
+
+def _swirl_by_radius(L: Looks, out: Path) -> dict[str, Any]:
+    from .rings import product_swirl_by_radius
+
+    return product_swirl_by_radius(L, out)
+
+
+def _warm_core(L: Looks, out: Path) -> dict[str, Any]:
+    from .rings import product_warm_core
+
+    return product_warm_core(L, out)
+
+
+def _radar_storm_relative(L: Looks, out: Path) -> dict[str, Any]:
+    from .radar import product_radar_storm_relative
+
+    return product_radar_storm_relative(L, out)
+
+
+def _radar_velocity(L: Looks, out: Path) -> dict[str, Any]:
+    from .radar import product_radar_velocity
+
+    return product_radar_velocity(L, out)
+
+
+def _side_view(L: Looks, out: Path) -> dict[str, Any]:
+    from .sideview import product_side_view
+
+    return product_side_view(L, out)
+
+
+def _water_paths(L: Looks, out: Path) -> dict[str, Any]:
+    from .sideview import product_water_paths
+
+    return product_water_paths(L, out)
+
+
+def _rotation_axis(L: Looks, out: Path) -> dict[str, Any]:
+    from .axis import product_rotation_axis
+
+    return product_rotation_axis(L, out)
+
+
+def _near_ground(pid: str) -> Callable[..., dict[str, Any]]:
+    def draw(L: Looks, out: Path) -> dict[str, Any]:
+        from .nearground import RENDERERS as NEAR_GROUND_LOOKS
+
+        return NEAR_GROUND_LOOKS[pid](L, out)
+
+    return draw
 
 
 RENDERERS: dict[str, Callable[..., dict[str, Any]]] = {
@@ -1128,12 +1417,22 @@ RENDERERS: dict[str, Callable[..., dict[str, Any]]] = {
     "surface": product_surface,
     "rain": product_rain,
     "clouds-from-above": _clouds_from_above,
+    "infrared": _infrared,
+    "spectra": _spectra,
     "updraft-slice": _updraft_slice,
     "wind-lowest": product_wind_lowest,
     "pressure-lowest": product_pressure_lowest,
+    "swirl-by-radius": _swirl_by_radius,
+    "warm-core": _warm_core,
+    "radar-storm-relative": _radar_storm_relative,
+    "radar-velocity": _radar_velocity,
+    "side-view": _side_view,
+    "water-paths": _water_paths,
+    "rotation-axis": _rotation_axis,
+    **{pid: _near_ground(pid) for pid in NEAR_GROUND},
 }
 
 
 __all__ = ["Box", "HURRICANE_ONLY", "LintError", "bilinear", "Looks", "NotDrawn", "PRODUCTS", "RENDERERS",
            "THUMB", "THUNDERSTORM_ONLY", "THUNDERSTORM_ONLY_WHY", "TITLES", "product_pressure_lowest",
-           "product_swath", "product_wind_lowest", "sample", "save", "w_range"]
+           "product_swath", "product_wind_lowest", "sample", "save", "w_range", "NEAR_GROUND"]

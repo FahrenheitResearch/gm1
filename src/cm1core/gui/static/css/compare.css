@@ -1,0 +1,27 @@
+/* Results: Compare with other runs (js/run/compare.js). Only --gm1-* variables; the pictures are never filtered,
+   clipped or re-coloured here. */
+
+.compare .cmp-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px;
+  max-height: 260px; overflow-y: auto; margin: 10px 0 12px; padding: 8px 10px; border: 1px solid var(--gm1-rule);
+  border-radius: 3px; }
+.compare .cmp-choice { display: grid; grid-template-columns: auto 1fr; gap: 0 8px; align-items: baseline;
+  cursor: pointer; min-width: 0; }
+.compare .cmp-choice .cmp-name { overflow-wrap: anywhere; color: var(--gm1-text); }
+.compare .cmp-choice .note { grid-column: 2; margin: 0; overflow-wrap: anywhere; }
+.compare .cmp-choice input:disabled + .cmp-name { color: var(--gm1-dim); }
+.compare .cmp-runs-shown { list-style: none; margin: 12px 0 4px; padding: 0; display: flex; flex-wrap: wrap;
+  gap: 4px 18px; }
+.compare .cmp-run { overflow-wrap: anywhere; }
+.compare .cmp-chip { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 2px;
+  vertical-align: baseline; }
+.compare .cmp-pics { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 14px;
+  margin-top: 10px; }
+.compare .cmp-pic { margin: 0; min-width: 0; }
+.compare .cmp-pic img { display: block; width: 100%; height: auto; border: 1px solid var(--gm1-rule); }
+.compare .cmp-pic figcaption { color: var(--gm1-muted); font-size: var(--fs-small); margin-top: 4px; }
+.compare select[hidden], .compare p[hidden] { display: none; }
+
+@media (max-width: 720px) {
+  .compare .cmp-pics { grid-template-columns: 1fr; }
+  .compare .cmp-pick { grid-template-columns: 1fr; }
+}

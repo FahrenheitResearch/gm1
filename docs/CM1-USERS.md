@@ -340,13 +340,124 @@ print("lowest-level theta' min (K):", float((ds.th - ds.th.isel(xh=0, yh=0)).ise
 ```sh
 gpuwm-cm1 quicklook runs/supercell --only reflectivity
 gpuwm-cm1 quicklook runs/supercell --slice w --height 5000
+gpuwm-cm1 quicklook runs/supercell --radar-site 40 -20 --radar-tilt 0.5
+gpuwm-cm1 quicklook runs/supercell --look updraft-time-height
 ```
 
 `quicklook` draws the pictures the GUI shows (reflectivity at 1 km, spin near the ground, updraft at 5 km, the wind
 swath, the lowest level's θ′ and wind, rain, and the time series) into `runs/supercell/quicklook/`, on the CPU at
 nice 19 with no GPU. `--slice`, `--section` and `--column` draw a horizontal slice, a vertical section or a column
-skew-T of any `cm1out` field. Every picture says SIMULATED, the GM1 version, the microphysics, the grid spacing, the
-real height of the level and the storm time.
+skew-T of any `cm1out` field. `--compare OTHER [OTHER ...]` draws the run beside up to five other run folders:
+side by side at one storm time (`--time S`, default the latest time all reached; `--box KM` for the box each storm
+is centred in), over time, and their soundings beside what each grew, into `runs/supercell/quicklook/compare/`.
+`--look updraft-time-height` and `--look spin-time-height` draw the whole run as one picture of height against time
+(the strongest rising air, and the strongest spin, near the storm's main updraft, one column per saved time;
+`quicklook/updraft-time-height/still.png`); every pass draws them too.
+Every picture says SIMULATED, the GM1 version, the microphysics, the grid spacing, the
+real height of the level and the storm time. The swath's updraft helicity is CM1's `shs` (or `shs2`) when the run
+saves it; otherwise it is the strongest of each saved time's 2-5 km updraft helicity, CM1's `uh` or, without it,
+summed from w and the winds by the picture tool with CM1's calcuh method, and the picture says which. The spin
+colours are fixed by the grid spacing, or by the lowest level's height when that is greater (a hurricane's swirl
+film by +/-0.01 per second). `--force` draws every picture again (after an update that changes how a look is
+drawn).
+
+```sh gpu
+gpuwm-cm1 render runs/supercell --list
+gpuwm-cm1 render runs/supercell --product supercell
+gpuwm-cm1 render runs/supercell --product vorticity --height 1000
+```
+
+`render` draws the same run in a second style, with GM1's native renderer, from the run's newest restart checkpoint
+(`--list` lists the restarts and `--restart N` picks another). Its products: `reflectivity` (the column maximum) and
+`reflectivity-level` (at a height, 1 km unless `--height` says otherwise), `updraft` (the strongest in each column),
+`vorticity`, `cold-pool` and `scalar --field NAME` (one level: `--level K`, 1 the lowest, or `--height M`), the
+three-panel `supercell`, two blended pictures (`vortex-composite`, `storm-fusion`), `updraft-helicity` (2-5 km),
+and the swaths CM1 keeps every step (`swath-wind`, `swath-vorticity`, `swath-pressure`, `swath-helicity`). A restart
+is the state saved at the end of a segment and at each restart interval, not at every saved time, so every picture
+says "restart checkpoint at T+..., not a history frame", with the lowest and highest value in it, its colour scale
+and how each field was made: reflectivity is CM1's `calc_refl10cm` on the CPU (Morrison runs; a WSM6 run writes its
+own to the history frames only, so `render` refuses it), vorticity is CM1's dv/dx - du/dy from the restart's winds
+(with their boundary halo at the domain's edge, as CM1 forms it), and updraft helicity is CM1's 2-5 km sum. The pictures go to `runs/supercell/quicklook/native/`, on the CPU with no GPU.
+In the GUI they are under Native pictures on the Results screen (advanced mode).
+
+The two radar looks (`radar-storm-relative`, `radar-velocity`) are one low scan of a simulated Doppler radar: the
+model's wind along the beam, storm-relative or ground-relative, beside the reflectivity the same beam sees (the
+reflectivity look's own: the scheme's dBZ, or CM1's `calc_refl10cm` for Morrison), with the beam path of the 4/3
+earth, a 0.95 degree beam, 250 m gates and 0.5 degree radials. The radar stands 40 km south-east of the storm in each
+picture (the storm is followed from one saved time to the next) until `--radar-site X Y` fixes it on the ground (km,
+in the run's own x and y at the start; `storm` puts it back) and `--radar-tilt` sets the scan's angle; both draw the
+radar looks of every saved time again. `--radar-motion U V` (m/s east and north, ground-relative) sets the storm
+motion the storm-relative look takes out; by default it is the domain's motion when the domain moves with the storm,
+else the Bunkers right mover of the starting air, or its 0-6 km mean wind where the 0-6 km shear is under 10 m/s.
+The pictures say what they are not: no attenuation, clutter or velocity folding, and no fall speed.
+
+### Pictures of CM1's own output
+
+`quicklook` draws CM1 netCDF output too (`output_format = 2`): CM1's own, or a GM1 run's `cm1out` folder. It only
+reads the files.
+
+```sh
+gpuwm-cm1 quicklook path/to/cm1run                    # a folder of cm1out_NNNNNN.nc, or a CM1 run folder
+gpuwm-cm1 quicklook path/to/cm1run/cm1out.nc          # one file that holds every saved time
+gpuwm-cm1 quicklook path/to/cm1run --slice dbz --height 1000
+gpuwm-cm1 quicklook path/to/cm1run --film reflectivity
+```
+
+Each look whose fields the files hold is drawn for each saved time into `quicklook/` beside the files
+(`cm1out-quicklook/` beside a single `cm1out.nc`, or `--out DIR`). `--slice`, `--section`, `--column`, `--fields`,
+`--look` and `--film` work as on a GM1 run, with the file's own variables under their own names.
+
+- The grid is the file's: `xh`, `xf`, `yh`, `yf`, and the real height of every level from `zh` and `zf`, stretched
+  levels included. Files that are not drawn say why: a grid stretched in x or y (`stretch_x`, `stretch_y`), a run with
+  terrain, a 2-D or axisymmetric run (`ny = 1`, `axisymm = 1`), files on two different grids in one folder, and
+  files cut into one piece per process (`output_filetype = 3`).
+- A look that needs a field the files do not hold is not drawn and says which, with the CM1 switch that writes it:
+  "cm1out_000001.nc has no vertical velocity (w) (CM1 writes it with output_w = 1)." The time series charts what
+  the files hold.
+- θ′ is CM1's `thpert`; without it, `th` minus the base state `th0` (`output_basestate`); with neither, `th` minus θ of
+  the domain's four corner columns at the first saved time, and the lowest-level look and the column skew-T say so.
+- Reflectivity is the file's own `dbz`. Without it, a Morrison run's is CM1's `calc_refl10cm` from the file's rain,
+  snow and hail, when the file also has `rho` (`output_rho = 1`) and the namelist gives `ihail`; otherwise the look
+  says what is missing.
+- With the run's `namelist.input` beside the files (or `--namelist FILE`), a hurricane run (`iinit = 7`) gets the
+  hurricane looks, and Morrison and WSM6 runs say hail or graupel as `ihail` does; without one the files are drawn
+  as a thunderstorm run, the dense ice is called "graupel or hail", and the command says so.
+- A moving domain is placed on the ground from the file's `umove` and `vmove`. The wind swath and the hail and spin
+  tracks use CM1's translated swaths (`sws2`, `shs2`, `sgs2`, `svs2`), placed under the domain at each saved time,
+  on ground that reaches back to where the domain was at the start. Each file holds them only under the domain at
+  its time: what the run added to ground the domain left before the next file is in no file (before the first
+  file, none of it is). Their strongest values are the run's, but edges can be stepped and areas smaller, and the
+  pictures say so beside them.
+- A picture of CM1's output says "CM1 r21.1" where a GM1 run's says the GM1 version, its name ends "CM1 output", and
+  the mark reads "GM1 picture": CM1 simulated the storm and GM1 made the picture. A GM1 run drawn from its `cm1out`
+  files keeps its own footer and words, and its name ends "from netCDF". Drawn from the frames or from the files, a
+  look of a GM1 run shows the same numbers and, apart from the name and a few pixels one colour level apart or on a
+  colour step, the same picture. The wind swath and the tracks are the exception, for the reason above: the same strongest values,
+  and areas that can come out a few per cent smaller (1,168 against 1,232 km² of hail track on a 2 km run whose
+  domain moved 5 km between saved times).
+
+In the GUI, **Runs, Open CM1 output** takes the folder (or the file) and a name; a GM1 run's `cm1out` folder can be
+opened the same way. The files stay where they are; the new entry opens with its looks, films and slices drawn on
+the computer's processor, and no run controls. A folder the files cannot be drawn from is refused with the reason.
+
+Three looks show the storm in depth, for every frame and every kind of run, hurricanes too:
+`--only side-view,water-paths,rotation-axis` draws just these. `side-view` cuts the storm open from west to east
+through its core (the strongest w at 5 km, or a hurricane's lowest pressure): the model's own cloud water, rain,
+cloud ice and snow, and graupel or hail (whatever the scheme carries), summed through a 20 km slab and on the cut
+itself, each on a fixed logarithmic scale. `water-paths` maps each species' column total (`rho q dz` summed over
+every level, kg/m²). `rotation-axis` draws, from the lowest level to 10 km, the centre of the circle of radius 2 km
+(or three grid spacings) with the most circulation at each height (a hurricane: with the lowest mean pressure, as
+its eye is wider than the circle), with its lean. No two centres lie further apart sideways than 1.5 km per km of
+the height between them plus 1.5 grid spacings (at least 500 m); where that rule or the least circulation the axis
+needs would be broken, the axis stops and says why. It is a picture tool's method, not a CM1 diagnostic, and a
+storm that does not rotate gets a plain reason instead of an axis. For one species on its own
+along any line, `--section qs --from XA YA --to XB YB` draws CM1's own field.
+
+On a grid of 250 m or finer it also draws the flow near the ground, with
+`--only storm-relative-flow,streamwise-spin,cold-pool-depth` to draw just those: the storm-relative flow at 0.5, 3
+and 10 km (storm motion from the run's own track, else the Bunkers estimate, and the picture says which), the
+horizontal vorticity on the w level nearest 100 m coloured by its angle to the storm-relative wind (it needs levels
+100 m apart or closer near the ground), and the depth of the air at least 1 K colder than the median θ at its height.
 
 ## Clusters and remote GPUs
 

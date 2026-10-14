@@ -84,6 +84,9 @@ function paintRan(box) {
   box.dataset.last = last.command;
 }
 
+// The run pages a folder of CM1 output opened for pictures has (Runs: Open CM1 output).
+const CM1_OUTPUT_PAGES = ["results", "commands"];
+
 function frame(page, sessionInfo) {
   const mode = api.currentMode();
   const nav = h("nav", { class: "nav", "aria-label": "Screens" });
@@ -96,9 +99,14 @@ function frame(page, sessionInfo) {
         if (mode === "guided" && !p.guided) continue;
         if (!SCREENS.has(p.name)) continue;
         const label = mode === "guided" && p.guidedLabel ? p.guidedLabel : p.label;
-        nav.append(h("a", { href: `#/${runRoute(p.name, page.run)}`, class: `step${page.screen === p.name ? " on" : ""}` },
-          label));
+        nav.append(h("a", { href: `#/${runRoute(p.name, page.run)}`, class: `step${page.screen === p.name ? " on" : ""}`,
+          dataset: { page: p.name } }, label));
       }
+      // CM1's own output opened for pictures has nothing to set up or run: its pages are Results and Commands.
+      api.get(`${api.runPath(page.run)}/status`).then((st) => {
+        if (!st || !st.cm1_output) return;
+        for (const a of nav.querySelectorAll("a.step")) a.hidden = !CM1_OUTPUT_PAGES.includes(a.dataset.page);
+      }).catch(() => { /* the screen itself says what went wrong */ });
     }
   }
   const rail = h("aside", { class: "rail" }, h("div", { class: "rail-inner" },

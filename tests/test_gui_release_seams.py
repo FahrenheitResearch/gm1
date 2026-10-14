@@ -321,14 +321,20 @@ def test_run_and_results_buttons_whose_line_depends_on_inputs_show_the_exact_lin
     parts = (js / "parts.js").read_text(encoding="utf-8")
     button = parts[parts.index("export function actionButton("):parts.index("// ---- the picture viewer")]
     assert "if (opts.watch)" in button and "liveCommand(" in button and "dryRun" not in button
-    dependent = []
+    dependent, constant = [], []
     for name in ("run.js", "results.js"):
         for action, call in _action_button_calls((js / name).read_text(encoding="utf-8")):
-            if "body:" in call:
+            if "body: ()" in call:
+                # a request built from inputs when pressed: its Show command follows them
                 assert "watch: [" in call, (name, action)
                 dependent.append(action)
+            elif "body:" in call:
+                # a fixed request (Draw every picture again): its one line is shown as it is
+                assert "command:" in call and "watch:" not in call, (name, action)
+                constant.append(action)
     # Make the film (look, format, pictures per second, blended pictures) follows its inputs too
     assert sorted(dependent) == ["convert", "film", "resume", "resume"], dependent
+    assert constant == ["look"], constant
     results = (js / "results.js").read_text(encoding="utf-8")
     assert 'runRoute("continue", id)' in results  # the Continue panel links the Continue or extend page
 

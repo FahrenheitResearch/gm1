@@ -11,13 +11,15 @@
 //             the air parcels, the swirl film), and "Save as film" under the picture.
 //
 // A plain gpuwm-cm1 cartesian output folder opens view-only: its pictures and slices, and the commands that
-// convert it, with no button that changes it.
+// convert it, with no button that changes it.  So does CM1's own netCDF output opened for pictures (Runs: Open CM1
+// output): its looks, films and slices drawn from the files where they are, and one button, Draw the pictures.
 
 import { h, num, clock, stormClock, setLongRun, parseClock, bytes, button, copyline, panel, table } from "../core.js";
 import * as api from "../api.js";
 import { register, go, notice, runRoute } from "../router.js";
 import { showCommand } from "../command.js";
 import { folderLine } from "../folder.js";
+import { comparePanel } from "./compare.js";
 import { ready as copyReady, t, looks as favouriteCopy } from "../../guided/copy.js";
 import {
   FAVOURITES, favouritesOf, LIVE_STATES, actionButton, continueClock, runExists, runNotFound, untilProblem, diskPanel, filesPanel, filmBar, filmLook,
@@ -84,7 +86,9 @@ async function guidedResults(body, id, page) {
   // Pictures still being drawn on the processor (a fast GPU ends before they do): said above the slider, so a
   // slider that ends early is not read as the storm ending there.
   const drawingNote = h("p", { class: "note", role: "status", hidden: true });
-  body.append(h("div", { class: "grid cols-main" }, h("section", { class: "panel" }, drawingNote, view), whatBox), lower);
+  const compare = comparePanel(id);
+  body.append(h("div", { class: "grid cols-main" }, h("section", { class: "panel" }, drawingNote, view), whatBox), lower,
+    compare);
 
   const looksOf = () => [...(data.looks || []).filter((l) => favourites.includes(l.id))
     .map((l) => ({ ...l, title: titles[l.id] || l.title })), ...moreLookRows(data)];
@@ -195,7 +199,7 @@ async function guidedResults(body, id, page) {
   let closed = false;
   let timer = null;
   const busy = () => Object.values(data.films || {}).some((f) => f.state === "running") || data.drawing_looks
-    || Boolean(data.pictures_behind);
+    || data.drawing_3d || Boolean(data.pictures_behind);
   async function refresh(now) {
     if (closed) return;
     clearTimeout(timer);
@@ -207,7 +211,7 @@ async function guidedResults(body, id, page) {
     if (!closed) timer = setTimeout(refresh, live || busy() ? (now ? 1500 : REFRESH_MS) : REFRESH_MS * 4);
   }
   timer = setTimeout(refresh, REFRESH_MS);
-  return () => { closed = true; clearTimeout(timer); view.stop(); };
+  return () => { closed = true; clearTimeout(timer); view.stop(); compare.stop(); };
 }
 
 // ------------------------------------------------------------------ advanced: slices
@@ -230,8 +234,18 @@ function slicesPanel(id, getTime) {
   // is opened, not on every visit; until then it offers w, which every run has.
   const fieldSel = h("select", { class: "input", style: "width:auto", "aria-label": "Field" },
     h("option", { value: "w" }, "w · vertical velocity"));
-  const levelIn = h("input", { class: "input num", type: "number", min: "0", step: "50", value: "5000", style: "width:100px",
+  const levelIn = h("input", { class: "input num", type: "number", min: "0", step: "50", value: "5000", style: "width:90px",
     "aria-label": "Height above ground (m)" });
+  // A slice by height (the nearest level) or by CM1's level number k (1 at the bottom), as --height or --level.
+  const byLevel = h("select", { class: "input", style: "width:auto", "aria-label": "Slice by" },
+    h("option", { value: "height" }, "Height"), h("option", { value: "level" }, "Level k"));
+  const levelUnit = h("span", { class: "unit" }, "m");
+  const levelHint = h("span", { class: "note" }, "");
+  let heightValue = "5000";
+  let levelValue = "1";
+  // The section's top (--top): empty keeps the default, 18 km or the model top when that is lower.
+  const topIn = h("input", { class: "input num", type: "number", min: "100", step: "500", style: "width:90px",
+    placeholder: "18000", "aria-label": "Top of the section (m)" });
   const drawH = button("Draw horizontal slice", { kind: "primary" });
   const drawV = button("Draw vertical section A–B", { disabled: true });
   const drawC = button("Draw column skew-T", {});
@@ -252,8 +266,8 @@ function slicesPanel(id, getTime) {
   const box = h("div", {},
     h("div", { class: "btns", style: "margin-bottom:10px" },
       h("label", { class: "muted" }, "Field "), fieldSel,
-      h("label", { class: "muted" }, "Height "), levelIn, h("span", { class: "unit" }, "m"),
-      drawH, drawV, drawC),
+      byLevel, levelIn, levelUnit, levelHint,
+      drawH, drawV, h("label", { class: "muted" }, "top "), topIn, h("span", { class: "unit" }, "m"), drawC),
     h("p", { class: "note" }, pointsNote),
     h("div", { class: "grid cols-3 slices" }, hFig, vFig, cFig), cmd);
 
@@ -265,6 +279,7 @@ function slicesPanel(id, getTime) {
       fieldSel.replaceChildren(...fields.map((f) => h("option", { value: f.name, selected: f.name === keep ? true : null },
         `${f.name}${f.description ? ` · ${f.description}` : ""}`)));
       if (!fields.length) fieldSel.append(h("option", { value: "w" }, "w"));
+      paintLevel();
     } catch (err) {
       fieldSel.replaceChildren(h("option", { value: "w" }, "w"));
       notice(`${err.message} ${err.fix || ""}`.trim(), "warn");
@@ -293,20 +308,63 @@ function slicesPanel(id, getTime) {
     }
   }
 
+  // The chosen field's levels (from the field list), for the level box's range and the height it names.
+  const levelsOf = () => ((fields.find((f) => f.name === (fieldSel.value || "w")) || {}).levels_m || null);
+  function paintLevel() {
+    const k = byLevel.value === "level";
+    const levels = levelsOf();
+    levelIn.setAttribute("aria-label", k ? "Level k, from 1 at the bottom (as in CM1)" : "Height above ground (m)");
+    levelIn.min = k ? "1" : "0";
+    levelIn.step = k ? "1" : "50";
+    if (k && levels) levelIn.max = String(levels.length); else levelIn.removeAttribute("max");
+    levelUnit.textContent = k ? (levels ? `of ${levels.length}` : "") : "m";
+    const n = Number(levelIn.value);
+    levelHint.textContent = k && levels && Number.isInteger(n) && n >= 1 && n <= levels.length
+      ? `${num(levels[n - 1])} m above ground` : "";
+  }
+  byLevel.addEventListener("change", () => {
+    if (byLevel.value === "level") { heightValue = levelIn.value; levelIn.value = levelValue; }
+    else { levelValue = levelIn.value; levelIn.value = heightValue; }
+    paintLevel();
+  });
+  levelIn.addEventListener("input", paintLevel);
+  fieldSel.addEventListener("change", paintLevel);
+  function levelProblem() {
+    if (byLevel.value !== "level") return null;
+    const n = Number(levelIn.value);
+    const levels = levelsOf();
+    if (!Number.isInteger(n) || n < 1) return "Level k is a whole number from 1 (the lowest level, as in CM1).";
+    if (levels && n > levels.length) return `${fieldSel.value || "w"} has levels 1 to ${levels.length}.`;
+    return null;
+  }
+
   drawH.addEventListener("click", async () => {
-    const payload = { field: fieldSel.value || "w", height_m: Number(levelIn.value || 0) };
+    const problem = levelProblem();
+    if (problem) { notice(problem, "stop"); return; }
+    const payload = { field: fieldSel.value || "w" };
+    if (byLevel.value === "level") payload.level = Number(levelIn.value);
+    else payload.height_m = Number(levelIn.value || 0);
     if (getTime() != null) payload.time_s = getTime();
     if (points.length === 2) payload.line_km = [...points[0], ...points[1]];
+    // A 2-D field has no height: its caption says what it is (composite reflectivity is no surface field).
     const r = await draw("slice", payload, hImg, hFig, hCap, (rec) =>
-      `${rec.field || payload.field} at ${rec.height_m != null ? `${num(rec.height_m)} m` : "the level asked"}` +
+      `${rec.field || payload.field}` +
+      (rec.height_m != null ? ` at ${num(rec.height_m)} m` : rec.description ? ` · ${rec.description}` : "") +
+      (rec.level != null ? ` (level ${rec.level})` : "") +
       (rec.min != null ? `, ${num(rec.min, 2)} to ${num(rec.max, 2)} ${rec.units || ""}` : ""));
     if (r) map = r.map || null;
   });
   drawV.addEventListener("click", () => {
     if (points.length < 2) return;
     const payload = { field: fieldSel.value || "w", from_km: points[0], to_km: points[1] };
+    if (topIn.value !== "") {
+      const top = Number(topIn.value);
+      if (!(top >= 100 && top <= 100000)) { notice("The top of a section is a height from 100 to 100000 m.", "stop"); return; }
+      payload.top_m = top;
+    }
     if (getTime() != null) payload.time_s = getTime();
-    draw("section", payload, vImg, vFig, vCap, (rec) => `${rec.field || payload.field} along A–B`);
+    draw("section", payload, vImg, vFig, vCap, (rec) => `${rec.field || payload.field} along A–B` +
+      (rec.top_m != null ? `, ground to ${num(rec.top_m)} m` : ""));
   });
   drawC.addEventListener("click", () => {
     const payload = {};
@@ -328,7 +386,151 @@ function slicesPanel(id, getTime) {
   let asked = null;
   const ask = () => { if (!asked) asked = loadFields(); return asked; };
   for (const kind of ["focus", "pointerdown", "keydown"]) fieldSel.addEventListener(kind, ask);
+  // Level k needs the field's levels: choosing it asks for the field list too.
+  byLevel.addEventListener("change", ask);
   box.load = ask;
+  return box;
+}
+
+// ------------------------------------------------------------------ advanced: native pictures
+
+// The native renderer's products (cm1core/render_products.py), in the words the menu shows. Each is drawn from the
+// run's restart checkpoint (the newest, or the one picked), by gpuwm-cm1 render, on the CPU.
+const NATIVE_PRODUCTS = [
+  ["reflectivity", "Composite reflectivity"],
+  ["reflectivity-level", "Reflectivity at a height"],
+  ["updraft", "Strongest updraft in each column"],
+  ["vorticity", "Vertical vorticity at a height"],
+  ["cold-pool", "Cold pool (potential temperature perturbation)"],
+  ["supercell", "Three panels: reflectivity, updraft, vorticity"],
+  ["vortex-composite", "Vortex composite (one blended picture)"],
+  ["storm-fusion", "Storm fusion (a second blend)"],
+  ["updraft-helicity", "2-5 km updraft helicity"],
+  ["swath-wind", "Wind swath since the start"],
+  ["swath-vorticity", "Spin swath since the start"],
+  ["swath-pressure", "Pressure-drop swath since the start"],
+  ["swath-helicity", "Updraft helicity swath since the start"],
+  ["scalar", "One field of the restart"],
+];
+// The products drawn on one level, which take a height (empty: the product's own, the lowest level or 1 km).
+const NATIVE_LEVEL = new Set(["reflectivity-level", "vorticity", "cold-pool", "scalar", "supercell", "vortex-composite",
+  "storm-fusion"]);
+const NATIVE_FIELDS = [["th3d", "potential temperature perturbation"], ["th", "potential temperature"],
+  ["prs", "pressure"], ["pp3d", "pressure perturbation (Exner)"], ["w3d", "vertical velocity"],
+  ["u3d", "west-east wind (domain-relative)"], ["v3d", "south-north wind (domain-relative)"], ["qv", "water vapour"],
+  ["qc", "cloud water"], ["qr", "rain"], ["qi", "cloud ice"], ["qs", "snow"], ["qg", "graupel or hail"],
+  ["tke", "subgrid turbulence"], ["zvort", "vertical vorticity (made from the winds)"]];
+
+// A refusal's reason as a sentence: capital first letter, full stop at the end.
+function sentence(text) {
+  const t = String(text || "").trim();
+  if (!t) return "";
+  return t[0].toUpperCase() + t.slice(1) + (/[.!?]$/.test(t) ? "" : ".");
+}
+
+function nativePanel(id) {
+  const productSel = h("select", { class: "input", style: "width:auto", "aria-label": "Native picture" },
+    NATIVE_PRODUCTS.map(([value, label]) => h("option", { value }, label)));
+  const restartSel = h("select", { class: "input", style: "width:auto", "aria-label": "From the restart" },
+    h("option", { value: "" }, "the newest restart"));
+  const heightIn = h("input", { class: "input num", type: "number", min: "0", step: "50", style: "width:100px",
+    placeholder: "lowest", "aria-label": "Height above ground (m)" });
+  const heightBox = h("span", {}, h("label", { class: "muted" }, "Height "), heightIn, h("span", { class: "unit" }, "m"));
+  const fieldSel = h("select", { class: "input", style: "width:auto", "aria-label": "Field" },
+    NATIVE_FIELDS.map(([value, label]) => h("option", { value }, `${value} · ${label}`)));
+  const fieldBox = h("span", { hidden: true }, h("label", { class: "muted" }, "Field "), fieldSel);
+  const drawB = button("Draw native picture", { kind: "primary" });
+  const img = h("img", { alt: "native picture" });
+  const cap = h("figcaption", {});
+  const fig = h("figure", { hidden: true, class: "native" }, h("a", { target: "_blank", rel: "noopener" }, img), cap);
+  const cmd = h("div", {});
+  const none = h("p", { class: "note", hidden: true },
+    "This run has no restart checkpoint yet. A run writes one when it ends (and every restart interval); the " +
+    "quick-looks above draw every saved frame.");
+  // The pictures the chosen restart cannot give (greyed out in the menu), and why.
+  const limits = h("p", { class: "note muted", hidden: true });
+  const box = h("div", {},
+    h("p", { class: "note" }, "A second picture style, drawn by GM1's native renderer from a restart checkpoint " +
+      "(the complete state saved where the run can be continued), not from a history frame. Each picture says so, " +
+      "with the values in it and its colour scale."),
+    h("div", { class: "btns", style: "margin-bottom:10px" },
+      h("label", { class: "muted" }, "Picture "), productSel, fieldBox, heightBox,
+      h("label", { class: "muted" }, "from "), restartSel, drawB),
+    limits, none, h("div", { class: "native-picture" }, fig), cmd);
+
+  function paintInputs() {
+    const product = productSel.value;
+    heightBox.hidden = !NATIVE_LEVEL.has(product);
+    heightIn.placeholder = product === "reflectivity-level" ? "1000" : "lowest";
+    fieldBox.hidden = product !== "scalar";
+  }
+  productSel.addEventListener("change", paintInputs);
+  paintInputs();
+
+  let rows = [];
+  // Grey out what the chosen restart (the newest when none is picked) cannot draw, from its receipt.
+  function paintProducts() {
+    const row = restartSel.value ? rows.find((r) => String(r.number) === restartSel.value) : rows[rows.length - 1];
+    const cannot = (row && row.cannot_draw) || {};
+    const words = new Map(NATIVE_PRODUCTS);
+    const why = new Map();
+    for (const option of productSel.options) {
+      const reason = cannot[option.value];
+      option.disabled = Boolean(reason);
+      option.title = reason || "";
+      option.textContent = words.get(option.value) + (reason ? " (not from this restart)" : "");
+      if (reason) why.set(reason, [...(why.get(reason) || []), words.get(option.value)]);
+    }
+    if (productSel.selectedOptions[0] && productSel.selectedOptions[0].disabled) {
+      const first = [...productSel.options].find((o) => !o.disabled);
+      if (first) productSel.value = first.value;
+    }
+    limits.hidden = why.size === 0;
+    limits.replaceChildren(...[...why].map(([reason, names]) =>
+      h("span", { style: "display:block" }, `Not from this restart: ${names.join("; ")}. ${reason}`)));
+    paintInputs();
+  }
+  restartSel.addEventListener("change", paintProducts);
+
+  let restartsKey = null;
+  box.setRestarts = (restarts) => {
+    rows = restarts || [];
+    const key = JSON.stringify(rows);
+    none.hidden = rows.length > 0;
+    drawB.disabled = rows.length === 0;
+    if (key === restartsKey) return;
+    restartsKey = key;
+    const keep = restartSel.value;
+    restartSel.replaceChildren(h("option", { value: "" }, "the newest restart"),
+      rows.map((r) => h("option", { value: String(r.number), selected: String(r.number) === keep ? true : null },
+        `restart ${r.number} (${stormClock(r.model_time_s || 0)}, segment ${String(r.segment).padStart(3, "0")})`)));
+    paintProducts();
+  };
+
+  drawB.addEventListener("click", async () => {
+    const product = productSel.value;
+    const payload = { product };
+    if (restartSel.value) payload.restart = Number(restartSel.value);
+    if (NATIVE_LEVEL.has(product) && heightIn.value !== "") payload.height_m = Number(heightIn.value);
+    if (product === "scalar") payload.field = fieldSel.value;
+    drawB.disabled = true;
+    try {
+      const reply = await api.post(`${api.runPath(id)}/render`, payload);
+      cmd.replaceChildren(showCommand(reply.command) || "");
+      if (!reply.ok) { notice(`${reply.message} ${sentence(reply.fix)}`.trim(), "stop"); return; }
+      img.src = `${reply.picture_url}?v=${Date.now()}`;
+      img.parentElement.href = reply.picture_url;
+      fig.hidden = false;
+      const r = reply.result || {};
+      cap.replaceChildren(h("b", {}, r.caveat || "Restart checkpoint, not a history frame"),
+        h("span", {}, (r.footer || [])[0] || ""));
+    } catch (err) {
+      if (err.command) cmd.replaceChildren(showCommand(err.command) || "");
+      notice(`${sentence(err.message)} ${sentence(err.fix)}`.trim(), "stop");
+    } finally {
+      drawB.disabled = rows.length === 0;
+    }
+  });
   return box;
 }
 
@@ -374,11 +576,15 @@ async function advancedResults(body, id, page) {
     h("span", { class: "n" }, "domain extremes at every saved frame")), seriesBox);
   const slicesSection = h("section", { class: "panel section" }, h("h2", { class: "cap" }, "Slices",
     h("span", { class: "n" }, "any cm1out field, at the time the slider shows")), slices);
+  const native = nativePanel(id);
+  const nativeSection = h("section", { class: "panel section" }, h("h2", { class: "cap" }, "Native pictures",
+    h("span", { class: "n" }, "the native renderer, from a restart checkpoint")), native);
+  // A run's cm1out files, receipt and disk; CM1's own output opened for pictures has none of its own.
+  const runFiles = h("div", { class: "grid cols-main section" }, filesBox, receiptBox);
+  const compare = comparePanel(id);
   body.append(viewOnly,
     h("section", { class: "panel" }, h("h2", { class: "cap" }, "Quick-looks"), view),
-    filmsBox, seriesSection, slicesSection,
-    h("div", { class: "grid cols-main section" }, filesBox, receiptBox),
-    actionsBox, bundleBox);
+    filmsBox, seriesSection, compare, slicesSection, nativeSection, runFiles, actionsBox, bundleBox);
 
   function frameWords() {
     const frames = data.frames || [];
@@ -392,7 +598,9 @@ async function advancedResults(body, id, page) {
     const actions = new Set(st.actions || []);
     // Redrawn only when what it offers changes, so a refresh never clears what is being typed.
     const none = noFrames(data);
-    const key = JSON.stringify([st.state, st.actions, data.restarts, data.converting, data.view_only, none]);
+    const key = JSON.stringify([st.state, st.actions, data.restarts, data.converting, data.view_only, none,
+      data.drawing_looks, data.trimmed, data.frames_gone, (data.looks_about_s || {}).again, data.again_why_not,
+      data.convert_why_not]);
     if (key === actionsKey) return;
     actionsKey = key;
     actionsBox.replaceChildren();
@@ -426,14 +634,30 @@ async function advancedResults(body, id, page) {
       done: () => setTimeout(refresh, 1500),
     });
     const running = LIVE_STATES.includes(st.state) || st.state === "stale";
-    convert.button.disabled = running || Boolean(none) || (data.converting || []).length > 0;
+    // Converted times whose saved frames were deleted: converting again would delete files it cannot write again.
+    convert.button.disabled = running || Boolean(none) || (data.converting || []).length > 0 ||
+      Boolean(data.convert_why_not);
     convert.button.title = running ? "while the run goes, the cm1out sidecar converts each frame as it lands" :
-      none ? "no saved frame to convert" : "";
+      none ? "no saved frame to convert" : data.convert_why_not || "";
+    // Every picture again (gpuwm-cm1 quicklook RUNDIR --force): after an update that changes how a look is drawn.
+    const again = actionButton(id, "look", "Draw again", {
+      command: (data.look_commands || {}).again, body: { look: "all", again: true },
+      confirm: "Draw every quick-look of this run again with this version? Its pictures are replaced as they are " +
+        "drawn; the films and slices are kept.",
+      done: () => setTimeout(refresh, 1500),
+    });
+    // A run whose saved frames were deleted (by hand, or by Keep pictures only), all or some, has nothing to draw
+    // those pictures again from: drawing every picture again would only delete them.
+    const gone = Boolean(data.trimmed) || Boolean(data.frames_gone) || Boolean(data.again_why_not);
+    again.button.disabled = running || Boolean(none) || gone || Boolean(data.drawing_looks);
+    again.button.title = running ? "while the run goes, its quick-look worker draws every look as frames land" :
+      none ? "no saved frame to draw" : gone ? data.again_why_not || "this run's saved frames were deleted, so " +
+        "its pictures cannot be drawn again; they are kept" : data.drawing_looks ? "the looks are being drawn now" : "";
     const reproduce = actionButton(id, "reproduce", "Write the bundle", {
       command: cmds.reproduce, title: "namelist, sounding, report, settings, deck, receipts and versions in one folder",
       done: (reply) => { data.reproduce_reply = reply; refresh(); },
     });
-    actionsBox.append(h("section", { class: "panel" }, h("h2", { class: "cap" }, "Go on, convert, bundle"),
+    actionsBox.append(h("section", { class: "panel" }, h("h2", { class: "cap" }, "Go on, convert, redraw, bundle"),
       h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, "Continue or extend"),
         h("span", { class: "note" }, "from the run's restarts; to a new end time. ",
           h("a", { href: `#/${runRoute("continue", id)}` }, "Every branch and a cluster job script")),
@@ -442,7 +666,15 @@ async function advancedResults(body, id, page) {
       h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, "Convert again"),
         h("span", { class: "note" }, "every frame to cm1out files again, on the CPU"),
         h("div", { class: "btns" }, h("label", { class: "muted" }, "as ", formatSel),
-          (data.converting || []).length ? h("span", { class: "note" }, "Converting now…") : null)), convert),
+          (data.converting || []).length ? h("span", { class: "note" }, "Converting now…") : null),
+        data.convert_why_not ? h("span", { class: "note" }, data.convert_why_not) : null), convert),
+      h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, "Draw every picture again"),
+        h("span", { class: "note" }, "every quick-look of every saved time, with this version, on the CPU" +
+          ((data.looks_about_s || {}).again ? ` (about ${(data.looks_about_s || {}).again} s)` : "") +
+          ". For pictures drawn by an earlier version; the films and slices are kept."),
+        data.drawing_looks ? h("span", { class: "note" }, "Drawing now…") : null,
+        data.again_why_not && !data.frames_gone && !data.trimmed ? h("span", { class: "note" }, data.again_why_not)
+          : null), again),
       h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, "Reproduce bundle"),
         h("span", { class: "note" }, "the namelist, sounding, report, settings, deck, receipts and versions in one " +
           "folder and a .tar.gz, with the commands that run it again")), reproduce)));
@@ -466,7 +698,12 @@ async function advancedResults(body, id, page) {
     setLongRun(st.duration_s || 0);
     page.setData([id, run.grid || gridWords(st.grid), st.label].filter(Boolean).join(" · "));
     viewOnly.replaceChildren();
-    if (data.view_only) {
+    runFiles.hidden = Boolean(data.cm1_output);
+    if (data.cm1_output) {
+      viewOnly.append(cm1OutputBanner(data.cm1_output));
+      // before its first picture, the header says how far the files go (then the slider's time takes over)
+      if (!(data.frames || []).length && st.model_time_s != null) clockEl.set(st.model_time_s, "the files' last saved time");
+    } else if (data.view_only) {
       viewOnly.append(h("div", { class: "banner warn section" },
         "A plain gpuwm-cm1 cartesian output folder: it opens view-only. Convert it or draw its quick-looks from a terminal:",
         copyline(cmds.convert || "", "convert"), copyline(cmds.quicklook || "", "quick-looks")));
@@ -475,12 +712,19 @@ async function advancedResults(body, id, page) {
     const none = noFrames(data);
     view.setEmpty(none === "ended" ? "No quick-looks: this run ended before its first saved frame, so there is " +
       "nothing to show, film, slice or convert." : none === "not_started" ? "No quick-looks: this run has not started." :
+      data.cm1_output ? (data.cm1_output.drawing ? "The looks are being drawn on the computer's processor; they " +
+        "show here as each saved time is done." : "No pictures yet: press Draw the pictures.") :
       "No quick-looks yet: they are drawn as frames land.");
     filmsBox.hidden = Boolean(none);
     seriesSection.hidden = Boolean(none);
     slicesSection.hidden = Boolean(none);
+    // A run that has not started has nothing to draw; one that has ended without a restart says so in the panel.
+    nativeSection.hidden = none === "not_started" || Boolean(data.view_only);
+    native.setRestarts(data.restarts || []);
     const swirl = filmLook(data, "swirl", ((data.more_looks || []).find((r) => r.id === "swirl") || {}).title || "Swirl near the ground");
-    view.update([...(data.looks || []), ...(swirl ? [swirl] : [])], keep);
+    // The storm in 3-D's orbit film plays beside its stills, under its own tab.
+    const turn = filmLook(data, "storm3d", "The storm in 3-D, one turn");
+    view.update([...(data.looks || []), ...(swirl ? [swirl] : []), ...(turn ? [{ ...turn, id: "storm3d-orbit" }] : [])], keep);
     paintFilmBar();
     paintFilms();
     put(seriesBox, seriesPanel(data.series_doc, { now: shownTime, tmax: st.duration_s,
@@ -500,6 +744,35 @@ async function advancedResults(body, id, page) {
     paintBundle();
   }
 
+  // CM1's own output: what it is, where the files are, and the one button (draw the looks it has not got yet).
+  function cm1OutputBanner(c) {
+    const drawn = (data.frames || []).length;
+    const b = button(drawn ? "Draw the looks not drawn yet" : "Draw the pictures", { kind: drawn ? "" : "primary",
+      disabled: Boolean(c.drawing), title: "every look of every saved time, on the computer's processor (nice 19, no GPU)" });
+    b.addEventListener("click", async () => {
+      b.disabled = true;
+      try {
+        const reply = await api.post(`${api.runPath(id)}/look`, { look: "all" });
+        notice(reply.message || "");
+        setTimeout(refresh, 1500);
+      } catch (err) {
+        notice(`${err.message} ${err.fix || ""}`.trim(), "stop");
+        b.disabled = false;
+      }
+    });
+    const draw = h("span", { class: "act", dataset: { action: "look" } }, b, h("span", { class: "cmd" },
+      showCommand(c.draw, { always: false })));
+    return h("section", { class: "panel section cm1-output" },
+      h("h2", { class: "cap" }, "CM1 output", h("span", { class: "n" }, "pictures only")),
+      h("p", { class: "text" }, "GM1 draws its looks, films and slices from these CM1 netCDF files. Nothing here runs a " +
+        "storm, and the files are not changed."),
+      h("p", { class: "note" }, "The files: ", h("code", {}, c.source)),
+      h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, c.drawing ? "Drawing now" : "Pictures"),
+        h("span", { class: "note" }, c.drawing ? "the looks appear as each saved time is done" :
+          "each look of each saved time, in the GM1 style; a look whose fields the files do not hold says which")),
+      draw));
+  }
+
   function paintFilmBar() {
     if (noFrames(data)) { put(filmSlot); return; }
     put(filmSlot, filmBar(id, data, lookNow, { always: false, refresh }));
@@ -508,13 +781,17 @@ async function advancedResults(body, id, page) {
   // Films: any look, any format, with its live Show command; the films made, and the ones being made.
   let filmsKey = null;
   function paintFilms() {
-    const key = JSON.stringify([data.film_looks, data.films, data.mp4_available, (data.more_looks || []).map((r) => [r.id, r.action])]);
+    const key = JSON.stringify([data.film_looks, data.films, data.mp4_available, data.drawing_3d,
+      (data.more_looks || []).map((r) => [r.id, r.action])]);
     if (key === filmsKey) return;
     filmsKey = key;
     const looks = data.film_looks || [];
-    const titleOf = (lid) => ((data.looks || []).find((l) => l.id === lid) || (data.more_looks || []).find((r) => r.id === lid) || {}).title || lid;
+    const titleOf = (lid) => ((data.looks || []).find((l) => l.id === lid) || (data.more_looks || []).find((r) => r.id === lid) || {}).title ||
+      (data.film_titles || {})[lid] || lid;
+    // The film menu starts on the wind swath, or on a hurricane's wind at the lowest level (its menu has no swath).
+    const first = looks.includes("swath") ? "swath" : looks.includes("wind-lowest") ? "wind-lowest" : looks[0];
     const lookSel = h("select", { class: "input", style: "width:auto", "aria-label": "Film of" },
-      looks.map((lid) => h("option", { value: lid, selected: lid === "swath" ? true : null }, titleOf(lid))));
+      looks.map((lid) => h("option", { value: lid, selected: lid === first ? true : null }, titleOf(lid))));
     const formatSel = h("select", { class: "input", style: "width:auto", "aria-label": "Film format" },
       h("option", { value: "" }, data.mp4_available ? "animated PNG and MP4" : "animated PNG and GIF"),
       h("option", { value: "apng" }, "animated PNG only"),
@@ -548,7 +825,31 @@ async function advancedResults(body, id, page) {
       const cells = [h("td", {}, titleOf(f.look)), h("td", {}, state), h("td", {}, ...links.flatMap((a, n) => (n ? [" · ", a] : [a])))];
       return h("tr", {}, ...cells);
     });
-    const draws = (data.more_looks || []).filter((r) => r.action === "all" || r.action === "look");
+    const draws = (data.more_looks || []).filter((r) => (r.action === "all" || r.action === "look") && r.kind !== "request");
+    // The storm in 3-D: a still drawn when asked (in the background, on the CPU), and its orbit is a film above.
+    const still3d = (data.more_looks || []).find((r) => r.id === "storm3d");
+    let row3d = null;
+    if (still3d && still3d.action === "look") {
+      // Its line reads no input, so a plain button with the line known before the press, as the other fixed ones.
+      const draw3d = button(words(data, "draw_3d"), {});
+      draw3d.disabled = Boolean(data.drawing_3d);
+      draw3d.addEventListener("click", async () => {
+        draw3d.disabled = true;
+        try {
+          const reply = await api.post(`${api.runPath(id)}/look`, { look: "storm3d" });
+          notice(reply.message);
+          setTimeout(refresh, 800);
+        } catch (err) {
+          notice(`${err.message} ${err.fix || ""}`.trim(), "stop");
+          draw3d.disabled = false;
+        }
+      });
+      const line3d = showCommand((data.look_commands || {}).storm3d);
+      row3d = h("div", { class: "actrow" }, h("div", { class: "what" }, h("b", {}, still3d.title),
+        h("span", { class: "note" }, data.drawing_3d ? words(data, "drawing_3d") :
+          words(data, "draw_3d_about", { about: (data.looks_about_words || {}).storm3d_still || "" }))),
+      h("span", { class: "act", dataset: { action: "look" } }, draw3d, h("span", { class: "cmd" }, line3d || "")));
+    }
     put(filmsBox, h("h2", { class: "cap" }, "Films", h("span", { class: "n" },
       "any look over time, on the CPU at nice 19; written to quicklook/films/")),
     h("div", { class: "btns" }, h("label", { class: "muted" }, "of ", lookSel), h("label", { class: "muted" }, "as ", formatSel),
@@ -557,6 +858,7 @@ async function advancedResults(body, id, page) {
     data.mp4_available ? null : h("p", { class: "note" }, words(data, "no_mp4"), " ",
       h("code", {}, data.mp4_fix || 'pip install "gpuwm-cm1[film]"')),
     rows.length ? table(["Look", "Film", "Files"], rows, { compact: true }) : null,
+    row3d,
     draws.length ? h("p", { class: "note" }, `Not drawn for this run yet: ${draws.map((r) => r.title).join(", ")}. ` +
       "Open the look above to draw it.") : null);
   }
@@ -579,11 +881,11 @@ async function advancedResults(body, id, page) {
       paintAll(true);
     } catch (_) { /* the next refresh reads it */ }
     const live = LIVE_STATES.includes((data.status || {}).state) || (data.converting || []).length ||
-      Object.values(data.films || {}).some((f) => f.state === "running") || data.drawing_looks;
+      Object.values(data.films || {}).some((f) => f.state === "running") || data.drawing_looks || data.drawing_3d;
     if (!closed) timer = setTimeout(refresh, live ? REFRESH_MS : REFRESH_MS * 6);
   }
   timer = setTimeout(refresh, REFRESH_MS);
-  return () => { closed = true; clearTimeout(timer); view.stop(); };
+  return () => { closed = true; clearTimeout(timer); view.stop(); compare.stop(); };
 }
 
 // ------------------------------------------------------------------ the screen
@@ -598,6 +900,8 @@ export async function renderResults(body, args, page = {}) {
   }
   const known = await runExists(id);
   if (!known.ok) return runNotFound(body, id, known.err);
+  // CM1's own output opens in the full view in both modes: its looks, films and slices, with nothing to run.
+  if ((known.status || {}).cm1_output) return advancedResults(body, id, frame);
   return mode === "guided" ? guidedResults(body, id, frame) : advancedResults(body, id, frame);
 }
 

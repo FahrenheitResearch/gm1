@@ -11,7 +11,7 @@ viz 2.0 environment card's; the numbers are the frame's own:
 * winds ground-relative (u + umove, v + vmove), every 1 km.
 
 The column is the one nearest the position asked for (km, run coordinates), or by default the strongest updraft on
-the w level nearest 5 km.
+the w level nearest 5 km.  A position outside the domain is refused in plain words, as a section's ends are.
 """
 
 from __future__ import annotations
@@ -135,10 +135,12 @@ def _base_state(qf: QuickFrame, first: QuickFrame | None) -> tuple[np.ndarray, n
                             axis=1)
         prs0 = None if pi0 is None else P00 * pi0 ** (CP / RD)
     qv0 = qf.base_column("qv0")
-    source = "the frame's qv0"
+    # read from a CM1 netCDF file (quicklook.ncread), it is the file's saved time, not a frame
+    held = "file" if hasattr(qf.frame, "slice_fields") else "frame"
+    source = f"the {held}'s qv0"
     if qv0 is None and first is not None and first.has_species("qv"):
         qv0 = np.median(first.species("qv").reshape(first.nz, -1), axis=1).astype(np.float64)
-        source = f"the median qv of the {S.fmt_clock(first.t)} frame"
+        source = f"the median qv of the {S.fmt_clock(first.t)} {'saved time' if held == 'file' else 'frame'}"
     elif qv0 is None:
         source = "not available"
     return th0, prs0, qv0, source
@@ -153,8 +155,18 @@ def column(qf: QuickFrame, facts: RunFacts, out: Path, *, x_km: float | None = N
         j, i = np.unravel_index(int(np.argmax(w5)), w5.shape)
         chosen = f"the strongest w at {S.fmt_height(float(qf.zf[k5]))}"
     else:
-        i = int(np.clip(math.floor((x_km * 1000.0 - ox) / qf.dx), 0, qf.nx - 1))
-        j = int(np.clip(math.floor((y_km * 1000.0 - oy) / qf.dy), 0, qf.ny - 1))
+        lx, ly = qf.extent
+        x, y = x_km * 1000.0 - ox, y_km * 1000.0 - oy
+        if not (0.0 <= x <= lx and 0.0 <= y <= ly):
+            from .slices import SliceError
+
+            raise SliceError(f"The column at x = {x_km:g}, y = {y_km:g} km is outside the domain, which runs from "
+                             f"x = {round(ox / 1000.0, 3):g} to {round((ox + lx) / 1000.0, 3):g} km and "
+                             f"y = {round(oy / 1000.0, 3):g} to {round((oy + ly) / 1000.0, 3):g} km. "
+                             "Ask for a column inside it.")
+        # a point on the far edge belongs to the last column
+        i = min(int(math.floor(x / qf.dx)), qf.nx - 1)
+        j = min(int(math.floor(y / qf.dy)), qf.ny - 1)
         chosen = "the column asked for"
     xk = (ox + (i + 0.5) * qf.dx) / 1000.0
     yk = (oy + (j + 0.5) * qf.dy) / 1000.0
@@ -219,7 +231,9 @@ def column(qf: QuickFrame, facts: RunFacts, out: Path, *, x_km: float | None = N
     where = f"x {S.fmt_num(xk, 1)} km, y {S.fmt_num(yk, 1)} km"
     ov.title("Column skew-T", S.data_line(facts.name, where, chosen, f"{S.fmt_grid(qf.dx)} grid"))
     ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
-    notes = S.data_line("T from the frame's θ and pressure; dewpoint from its qv (CM1 getcape.F gettd)",
+    # read from a CM1 netCDF file (quicklook.ncread), the file is what holds θ, the pressure and qv
+    source = "the file's" if hasattr(qf.frame, "slice_fields") else "the frame's"
+    notes = S.data_line(f"T from {source} θ and pressure; dewpoint from its qv (CM1 getcape.F gettd)",
                         f"dashed: the base state (qv0: {qv0_source})", "barbs: ground-relative wind in knots")
     ov.footer(facts.footer(t=qf.t, level="the whole column", wind="ground-relative", notes=notes))
     ov.mark()
@@ -234,6 +248,10 @@ def column(qf: QuickFrame, facts: RunFacts, out: Path, *, x_km: float | None = N
         ov.rule(kx, key_y - ov.U(6), ov.U(34), thickness=3, colour=colour)
         ov.text((kx + ov.U(44), key_y), label_text, "micro", colour="data", anchor="ls")
         kx += ov.U(44) + ov.measure(label_text, "micro")[0] + ov.U(36)
+    base_note = getattr(qf.frame, "base_note", "")
+    if base_note:
+        # a CM1 file without its base state: how the dashed lines were taken (quicklook.ncread)
+        ov.text((int(0.044 * W), key_y + ov.U(30)), base_note, "micro", colour="muted", anchor="ls")
     wcol = np.asarray(qf.view("w3d")[:, j, i], dtype=np.float64)
     kw = int(np.argmax(wcol))
     rows = [("column (x, y in the run's km)", where),

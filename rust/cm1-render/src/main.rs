@@ -49,6 +49,33 @@ struct Args {
     level: usize,
     label: String,
     valid_seconds: Option<f64>,
+    // Words and scales a caller may set. Each is optional, and a picture
+    // drawn without any of them is the picture this renderer always drew.
+    /// Replaces the header title ("GM1 ...").
+    title: Option<String>,
+    /// Replaces the single-panel title (the field name by default).
+    panel_title: Option<String>,
+    /// Replaces a composite's classification line.
+    classification: Option<String>,
+    /// One emphasised line under the picture.
+    note: Option<String>,
+    /// Plain lines under the picture, after the note.
+    footers: Vec<String>,
+    /// Colour bounds of a single-panel product, in place of its fixed scale.
+    bounds: Option<(f64, f64)>,
+    /// Updraft scale (m/s) of the three-field products.
+    w_max: Option<f64>,
+    /// Vertical vorticity scale (1/s) of the three-field products.
+    zeta_max: Option<f64>,
+    /// Width over height of the area drawn; the picture keeps it.
+    aspect: Option<f64>,
+    /// Replaces the time caption ("T+7200 S", or "RECORD N").
+    time_words: Option<String>,
+    /// Replaces the vorticity panel's title in the three-panel supercell
+    /// picture, the one panel drawn on a level the caller picks.
+    spin_title: Option<String>,
+    /// Replaces the unit word after a single-panel legend's top number.
+    units: Option<String>,
 }
 
 fn usage() -> &'static str {
@@ -56,15 +83,65 @@ fn usage() -> &'static str {
 [--contract-sha256 SHA256] \
 --output IMAGE.png --product PRODUCT --field NAME [--field NAME ...] \
 --nx N --ny N [--nz N] [--record N] [--level K] [--label TEXT] \
-[--valid-seconds S]\n\n\
+[--valid-seconds S] [--title TEXT] [--panel-title TEXT] [--classification TEXT] \
+[--note TEXT] [--footer TEXT ...] [--bounds LO:HI] [--w-max W] [--zeta-max Z] [--aspect W:H] \
+[--time-words TEXT] [--spin-title TEXT] [--units TEXT]\n\n\
 products: reflectivity | reflectivity-level | updraft | vorticity | cold-pool | scalar | supercell | vortex-composite | storm-fusion\n\
-        | updraft-helicity | swath-wind | swath-vorticity | swath-pressure | swath-helicity\n\
+        | updraft-helicity | swath-wind | swath-vorticity | swath-pressure | swath-helicity | cape | cin | lcl | lfc\n\
 reflectivity is the column maximum (CM1 calccref, misclibs.F:2259-2292); reflectivity-level is --level K \
 of the same volume; both are painted with the standard NWS dBZ scale\n\
 supercell, vortex-composite, and storm-fusion require fields in this order: reflectivity, \
 vertical velocity, vertical vorticity\n\
 the updraft-helicity and swath-* products take one CM1 output_* surface field \
-(uh, sws, svs, sps, shs) published with --nz 1 --level 0"
+(uh, sws, svs, sps, shs) published with --nz 1 --level 0\n\
+--bounds sets the colour scale of a single-panel product other than reflectivity; --w-max and --zeta-max \
+set the updraft and vertical vorticity scales of the three-field products; --aspect keeps the shape of a \
+domain that is not square; --note and --footer add lines under the picture; --spin-title names the \
+vorticity panel of supercell; --units replaces a single-panel legend's unit word"
+}
+
+fn parse_bounds(raw: OsString) -> Result<(f64, f64), String> {
+    let text = raw.to_string_lossy().to_string();
+    let (lo, hi) = text
+        .split_once(':')
+        .ok_or_else(|| "--bounds needs LO:HI".to_string())?;
+    let lo = lo
+        .trim()
+        .parse::<f64>()
+        .map_err(|_| "--bounds needs two numbers, LO:HI".to_string())?;
+    let hi = hi
+        .trim()
+        .parse::<f64>()
+        .map_err(|_| "--bounds needs two numbers, LO:HI".to_string())?;
+    if !lo.is_finite() || !hi.is_finite() || lo >= hi {
+        return Err("--bounds needs finite LO:HI with LO below HI".into());
+    }
+    Ok((lo, hi))
+}
+
+fn parse_positive(flag: &str, raw: OsString) -> Result<f64, String> {
+    let value = raw
+        .to_string_lossy()
+        .parse::<f64>()
+        .map_err(|_| format!("{flag} needs a positive number"))?;
+    if !value.is_finite() || value <= 0.0 {
+        return Err(format!("{flag} needs a finite positive number"));
+    }
+    Ok(value)
+}
+
+fn parse_aspect(raw: OsString) -> Result<f64, String> {
+    let text = raw.to_string_lossy().to_string();
+    let (width, height) = text
+        .split_once(':')
+        .ok_or_else(|| "--aspect needs W:H".to_string())?;
+    let width = parse_positive("--aspect", OsString::from(width.trim()))?;
+    let height = parse_positive("--aspect", OsString::from(height.trim()))?;
+    let ratio = width / height;
+    if !(0.05..=20.0).contains(&ratio) {
+        return Err("--aspect W:H must be between 1:20 and 20:1".into());
+    }
+    Ok(ratio)
 }
 
 fn parse_usize(flag: &str, raw: OsString) -> Result<usize, String> {
@@ -93,6 +170,18 @@ where
     let mut level = 0usize;
     let mut label = String::new();
     let mut valid_seconds = None;
+    let mut title = None;
+    let mut panel_title = None;
+    let mut classification = None;
+    let mut note = None;
+    let mut footers = Vec::new();
+    let mut bounds = None;
+    let mut w_max = None;
+    let mut zeta_max = None;
+    let mut aspect = None;
+    let mut time_words = None;
+    let mut spin_title = None;
+    let mut units = None;
 
     while let Some(flag) = it.next() {
         let text = flag.to_string_lossy();
@@ -131,6 +220,18 @@ where
                 }
                 valid_seconds = Some(parsed);
             }
+            "--title" => title = Some(value.to_string_lossy().to_string()),
+            "--panel-title" => panel_title = Some(value.to_string_lossy().to_string()),
+            "--classification" => classification = Some(value.to_string_lossy().to_string()),
+            "--note" => note = Some(value.to_string_lossy().to_string()),
+            "--footer" => footers.push(value.to_string_lossy().to_string()),
+            "--bounds" => bounds = Some(parse_bounds(value)?),
+            "--w-max" => w_max = Some(parse_positive("--w-max", value)?),
+            "--zeta-max" => zeta_max = Some(parse_positive("--zeta-max", value)?),
+            "--aspect" => aspect = Some(parse_aspect(value)?),
+            "--time-words" => time_words = Some(value.to_string_lossy().to_string()),
+            "--spin-title" => spin_title = Some(value.to_string_lossy().to_string()),
+            "--units" => units = Some(value.to_string_lossy().to_string()),
             _ => return Err(format!("unknown argument {text:?}\n{}", usage())),
         }
     }
@@ -150,6 +251,18 @@ where
         level,
         label,
         valid_seconds,
+        title,
+        panel_title,
+        classification,
+        note,
+        footers,
+        bounds,
+        w_max,
+        zeta_max,
+        aspect,
+        time_words,
+        spin_title,
+        units,
     };
     if args.nx == 0 || args.ny == 0 || args.nz == 0 {
         return Err("--nx/--ny/--nz must each be at least 1".into());
@@ -214,6 +327,35 @@ where
     }
     if args.level >= args.nz {
         return Err(format!("--level {} is outside nz={}", args.level, args.nz));
+    }
+    let three_field = required == 3;
+    if args.bounds.is_some() {
+        if three_field {
+            return Err(
+                "--bounds sets one colour scale; the three-field products take --w-max and --zeta-max".into(),
+            );
+        }
+        if matches!(args.product.as_str(), "reflectivity" | "reflectivity-level") {
+            return Err(
+                "--bounds is refused for reflectivity: it is painted with the fixed NWS dBZ classes".into(),
+            );
+        }
+    }
+    if (args.w_max.is_some() || args.zeta_max.is_some()) && !three_field {
+        return Err(
+            "--w-max and --zeta-max are for supercell, vortex-composite and storm-fusion; a single-panel product takes --bounds".into(),
+        );
+    }
+    if args.classification.is_some()
+        && !matches!(args.product.as_str(), "vortex-composite" | "storm-fusion")
+    {
+        return Err("--classification replaces the classification line of vortex-composite and storm-fusion only".into());
+    }
+    if args.spin_title.is_some() && args.product != "supercell" {
+        return Err("--spin-title names the vorticity panel of the three-panel supercell picture only".into());
+    }
+    if args.units.is_some() && three_field {
+        return Err("--units replaces the legend word of a single-panel product; the three-field products print their own".into());
     }
     Ok(args)
 }
@@ -715,10 +857,13 @@ impl Palette {
             Self::Lfc => "LEVEL OF FREE CONVECTION",
             Self::Scalar => "SCALAR FIELD",
             Self::UpdraftHelicity => "UPDRAFT HELICITY 2-5 KM AGL",
-            Self::SwathWind => "SWATH: MAX SURFACE WIND",
-            Self::SwathVorticity => "SWATH: MAX SURFACE VERTICAL VORTICITY",
-            Self::SwathPressure => "SWATH: MIN SURFACE PRESSURE PERTURBATION",
-            Self::SwathHelicity => "SWATH: MAX UPDRAFT HELICITY",
+            // CM1's swaths are kept at the lowest model level
+            // (solve3.F:855-1136), which is above the ground (25 m to 250 m
+            // on the usual grids), so the titles do not say "surface".
+            Self::SwathWind => "WIND SWATH, LOWEST MODEL LEVEL",
+            Self::SwathVorticity => "VORTICITY SWATH, LOWEST LEVEL",
+            Self::SwathPressure => "PRESSURE-DROP SWATH, LOWEST LEVEL",
+            Self::SwathHelicity => "UPDRAFT HELICITY SWATH",
         }
     }
 
@@ -1098,6 +1243,13 @@ fn glyph(ch: char) -> [u8; 7] {
         ')' => [8, 4, 2, 2, 2, 4, 8],
         '|' => [4, 4, 4, 4, 4, 4, 4],
         '_' => [0, 0, 0, 0, 0, 0, 31],
+        ',' => [0, 0, 0, 0, 12, 4, 8],
+        ';' => [0, 12, 12, 0, 12, 4, 8],
+        '%' => [24, 25, 2, 4, 8, 19, 3],
+        '=' => [0, 0, 31, 0, 31, 0, 0],
+        '<' => [2, 4, 8, 16, 8, 4, 2],
+        '>' => [8, 4, 2, 1, 2, 4, 8],
+        '\'' => [4, 4, 8, 0, 0, 0, 0],
         ' ' => [0; 7],
         _ => [31, 17, 2, 4, 0, 4, 0],
     }
@@ -1193,6 +1345,47 @@ fn draw_panel_border(canvas: &mut Canvas, x0: usize, y0: usize, width: usize, he
     );
 }
 
+/// A legend number: two decimals, as the legend has always printed them,
+/// unless two decimals would print a number more than 1 % off the scale's
+/// end (+/-0.025 printed as +/-0.03, or 0.001 as 0.00). Then as many
+/// decimals as it takes, so the legend says the scale it is drawn on.
+fn legend_number(value: f64) -> String {
+    let close = |text: &str| {
+        text.parse::<f64>()
+            .map(|parsed| (parsed - value).abs() <= 0.01 * value.abs())
+            .unwrap_or(false)
+    };
+    let two = format!("{value:.2}");
+    if value == 0.0 || !value.is_finite() || close(&two) {
+        return two;
+    }
+    for digits in 3..=8usize {
+        let text = format!("{value:.digits$}");
+        if close(&text) {
+            return text;
+        }
+    }
+    format!("{value:.3e}")
+}
+
+/// The largest rectangle of the domain's shape (width over height `aspect`)
+/// inside a `width` x `height` panel. Without an aspect the panel is used whole.
+fn fitted(width: usize, height: usize, aspect: Option<f64>) -> (usize, usize) {
+    match aspect {
+        None => (width, height),
+        Some(ratio) => {
+            let panel = width as f64 / height as f64;
+            if (ratio - panel).abs() < 1e-9 {
+                (width, height)
+            } else if ratio > panel {
+                (width, ((width as f64 / ratio).round() as usize).clamp(1, height))
+            } else {
+                (((height as f64 * ratio).round() as usize).clamp(1, width), height)
+            }
+        }
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn draw_plane(
     canvas: &mut Canvas,
@@ -1205,8 +1398,10 @@ fn draw_plane(
     height: usize,
     palette: Palette,
     title: &str,
+    bounds_override: Option<(f64, f64)>,
+    units_override: Option<&str>,
 ) {
-    let bounds = palette.bounds(plane);
+    let bounds = bounds_override.unwrap_or_else(|| palette.bounds(plane));
     for py in 0..height {
         for px in 0..width {
             let color = reconstructed_pixel_value(plane, nx, ny, px, py, width, height)
@@ -1217,15 +1412,21 @@ fn draw_plane(
     }
     draw_panel_border(canvas, x0, y0, width, height);
     canvas.rect(x0, y0.saturating_sub(28), width, 28, Rgb(16, 22, 36));
-    canvas.text(x0 + 8, y0.saturating_sub(22), title, 2, Rgb(236, 240, 247));
+    let scale = fitted_scale(title, width.saturating_sub(16), 2);
+    let top = if scale == 2 { 22 } else { 18 };
+    canvas.text(x0 + 8, y0.saturating_sub(top), title, scale, Rgb(236, 240, 247));
     let legend_y = y0 + height + 12;
     for px in 0..width {
         let value = bounds.0 + (bounds.1 - bounds.0) * px as f64 / (width - 1) as f64;
         let color = palette.color(value, bounds);
         canvas.rect(x0 + px, legend_y, 1, 14, color);
     }
-    let left = format!("{:.2}", bounds.0);
-    let right = format!("{:.2} {}", bounds.1, palette.units());
+    let left = legend_number(bounds.0);
+    let right = format!(
+        "{} {}",
+        legend_number(bounds.1),
+        units_override.unwrap_or(palette.units())
+    );
     canvas.text(x0, legend_y + 20, &left, 1, Rgb(210, 217, 229));
     let right_width = right.chars().count() * 6;
     canvas.text(
@@ -1261,7 +1462,18 @@ fn unit_interval(value: f64, lower: f64, upper: f64) -> f64 {
     ((value - lower) / (upper - lower)).clamp(0.0, 1.0)
 }
 
+#[cfg(test)]
 fn vortex_composite_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -> Rgb {
+    vortex_composite_color_scaled(reflectivity_dbz, updraft_ms, zeta_s, VORTEX_W_MAX, VORTEX_ZETA_MAX)
+}
+
+fn vortex_composite_color_scaled(
+    reflectivity_dbz: f64,
+    updraft_ms: f64,
+    zeta_s: f64,
+    w_max: f64,
+    zeta_max: f64,
+) -> Rgb {
     if !reflectivity_dbz.is_finite() || !updraft_ms.is_finite() || !zeta_s.is_finite() {
         return Rgb(90, 90, 90);
     }
@@ -1269,10 +1481,12 @@ fn vortex_composite_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -
     // These are fixed physical display scales, not per-frame normalization.
     // Consequently a weak initialized field remains weak; a red/maroon core
     // appears only when the supplied positive vertical vorticity supports it.
+    // A caller may set the updraft and vorticity scales for its grid (a
+    // finer grid resolves stronger spin); they stay fixed across frames.
     let reflectivity = unit_interval(reflectivity_dbz, -10.0, 50.0);
-    let updraft = unit_interval(updraft_ms, 0.0, 30.0);
-    let cyclonic = unit_interval(zeta_s, 0.0, 0.025);
-    let anticyclonic = unit_interval(-zeta_s, 0.0, 0.025);
+    let updraft = unit_interval(updraft_ms, 0.0, w_max);
+    let cyclonic = unit_interval(zeta_s, 0.0, zeta_max);
+    let anticyclonic = unit_interval(-zeta_s, 0.0, zeta_max);
     let reflectivity_color = interpolate_stops(
         &[
             (0.00, Rgb(13, 60, 55)),
@@ -1287,7 +1501,18 @@ fn vortex_composite_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -
     mix(signed_rotation, Rgb(177, 14, 43), cyclonic)
 }
 
+#[cfg(test)]
 fn storm_fusion_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -> Rgb {
+    storm_fusion_color_scaled(reflectivity_dbz, updraft_ms, zeta_s, FUSION_W_MAX, FUSION_ZETA_MAX)
+}
+
+fn storm_fusion_color_scaled(
+    reflectivity_dbz: f64,
+    updraft_ms: f64,
+    zeta_s: f64,
+    w_max: f64,
+    zeta_max: f64,
+) -> Rgb {
     if !reflectivity_dbz.is_finite() || !updraft_ms.is_finite() || !zeta_s.is_finite() {
         return Rgb(90, 90, 90);
     }
@@ -1296,9 +1521,9 @@ fn storm_fusion_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -> Rg
     // mesocyclone scales while remaining comparable between frames.  It is not
     // a per-frame contrast stretch and does not alter the source arrays.
     let reflectivity = unit_interval(reflectivity_dbz, -10.0, 35.0);
-    let updraft = unit_interval(updraft_ms, 0.0, 8.0);
-    let cyclonic = unit_interval(zeta_s, 0.0, 0.010);
-    let anticyclonic = unit_interval(-zeta_s, 0.0, 0.010);
+    let updraft = unit_interval(updraft_ms, 0.0, w_max);
+    let cyclonic = unit_interval(zeta_s, 0.0, zeta_max);
+    let anticyclonic = unit_interval(-zeta_s, 0.0, zeta_max);
     let reflectivity_color = interpolate_stops(
         &[
             (0.00, Rgb(0, 51, 31)),
@@ -1314,6 +1539,9 @@ fn storm_fusion_color(reflectivity_dbz: f64, updraft_ms: f64, zeta_s: f64) -> Rg
 }
 
 fn time_caption(args: &Args, record: usize) -> String {
+    if let Some(words) = &args.time_words {
+        return words.clone();
+    }
     args.valid_seconds
         .map(|seconds| format!("T+{seconds} S"))
         .unwrap_or_else(|| format!("RECORD {record}"))
@@ -1340,30 +1568,131 @@ fn reduce(product: &str, volume: &[f64], args: &Args) -> Vec<f64> {
     }
 }
 
+/// The largest text scale, at most `preferred`, at which `text` fits in
+/// `width` pixels (each glyph is 6 * scale wide). A line that fits at the
+/// preferred scale is drawn exactly as before; a longer one is drawn smaller
+/// rather than run off the canvas.
+fn fitted_scale(text: &str, width: usize, preferred: usize) -> usize {
+    let chars = text.chars().count().max(1);
+    let mut scale = preferred.max(1);
+    while scale > 1 && chars * 6 * scale > width {
+        scale -= 1;
+    }
+    scale
+}
+
+/// A scale end as the composites print it: the shortest decimal that reads
+/// back as the number (30, 7.5, 0.025, 0.0025).
+fn scale_text(value: f64) -> String {
+    format!("{value}")
+}
+
+/// Words broken into lines of at most `limit` characters.
+fn wrap_words(text: &str, limit: usize) -> Vec<String> {
+    let limit = limit.max(8);
+    let mut lines = Vec::new();
+    let mut line = String::new();
+    for word in text.split_whitespace() {
+        let mut word = word.to_string();
+        while word.chars().count() > limit {
+            if !line.is_empty() {
+                lines.push(std::mem::take(&mut line));
+            }
+            let head: String = word.chars().take(limit).collect();
+            word = word.chars().skip(limit).collect();
+            lines.push(head);
+        }
+        let needed = if line.is_empty() {
+            word.chars().count()
+        } else {
+            line.chars().count() + 1 + word.chars().count()
+        };
+        if needed > limit && !line.is_empty() {
+            lines.push(std::mem::take(&mut line));
+        }
+        if !line.is_empty() {
+            line.push(' ');
+        }
+        line.push_str(&word);
+    }
+    if !line.is_empty() {
+        lines.push(line);
+    }
+    lines
+}
+
+/// The note and footer lines under a finished picture. The picture above is
+/// copied unchanged; without a note or a footer the canvas is returned as it is.
+fn with_footer(canvas: Canvas, note: Option<&str>, footers: &[String]) -> Canvas {
+    if note.is_none() && footers.is_empty() {
+        return canvas;
+    }
+    let margin = 40usize;
+    let usable = canvas.width.saturating_sub(2 * margin).max(60);
+    let note_lines = note
+        .map(|text| wrap_words(text, usable / 12))
+        .unwrap_or_default();
+    let footer_lines: Vec<String> = footers
+        .iter()
+        .flat_map(|text| wrap_words(text, usable / 12))
+        .collect();
+    let extra = 20 + (note_lines.len() + footer_lines.len()) * 22 + 10;
+    let mut out = Canvas::new(canvas.width, canvas.height + extra, Rgb(9, 13, 23));
+    out.pixels[..canvas.pixels.len()].copy_from_slice(&canvas.pixels);
+    let mut y = canvas.height + 10;
+    out.rect(margin, y, usable, 1, Rgb(52, 64, 88));
+    y += 12;
+    for line in &note_lines {
+        out.text(margin, y, line, 2, Rgb(252, 190, 92));
+        y += 22;
+    }
+    for line in &footer_lines {
+        out.text(margin, y, line, 2, Rgb(196, 205, 220));
+        y += 22;
+    }
+    out
+}
+
+/// The header title: the caller's, else the product's own.
+fn header_title(args: &Args, default: String) -> String {
+    args.title.clone().unwrap_or(default)
+}
+
 fn render_single(args: &Args, plane: &[f64], palette: Palette, record: usize) -> Canvas {
     let size = 900usize;
-    let mut canvas = Canvas::new(1020, 1100, Rgb(9, 13, 23));
+    let (width, height) = fitted(size, size, args.aspect);
+    let mut canvas = Canvas::new(1020, 1100 - (size - height), Rgb(9, 13, 23));
     canvas.rect(0, 0, 1020, 92, Rgb(17, 25, 42));
+    let title = header_title(args, format!("GM1 {}", palette.title()));
     canvas.text(
         38,
         22,
-        &format!("GM1 {}", palette.title()),
-        4,
+        &title,
+        fitted_scale(&title, 1020 - 38 - 10, 4),
         Rgb(245, 247, 251),
     );
     let subtitle = standard_subtitle(args, record);
-    canvas.text(40, 66, &subtitle, 2, Rgb(143, 205, 255));
+    canvas.text(
+        40,
+        66,
+        &subtitle,
+        fitted_scale(&subtitle, 1020 - 40 - 10, 2),
+        Rgb(143, 205, 255),
+    );
+    let panel_title = args.panel_title.as_deref().unwrap_or(&args.fields[0]);
     draw_plane(
         &mut canvas,
         plane,
         args.nx,
         args.ny,
-        60,
+        60 + (size - width) / 2,
         142,
-        size,
-        size,
+        width,
+        height,
         palette,
-        &args.fields[0],
+        panel_title,
+        args.bounds,
+        args.units.as_deref(),
     );
     canvas
 }
@@ -1373,20 +1702,40 @@ fn render_supercell(args: &Args, planes: &[Vec<f64>], record: usize) -> Canvas {
     let margin = 35usize;
     let gap = 25usize;
     let width = margin * 2 + panel * 3 + gap * 2;
-    let mut canvas = Canvas::new(width, 700, Rgb(9, 13, 23));
+    let (panel_width, panel_height) = fitted(panel, panel, args.aspect);
+    let mut canvas = Canvas::new(width, 700 - (panel - panel_height), Rgb(9, 13, 23));
     canvas.rect(0, 0, width, 92, Rgb(17, 25, 42));
+    let title = header_title(args, "GM1 THREE-FIELD STORM DIAGNOSTICS".to_string());
     canvas.text(
         32,
         20,
-        "GM1 THREE-FIELD STORM DIAGNOSTICS",
-        4,
+        &title,
+        fitted_scale(&title, width - 32 - 10, 4),
         Rgb(245, 247, 251),
     );
     let subtitle = standard_subtitle(args, record);
-    canvas.text(34, 66, &subtitle, 2, Rgb(143, 205, 255));
+    canvas.text(
+        34,
+        66,
+        &subtitle,
+        fitted_scale(&subtitle, width - 34 - 10, 2),
+        Rgb(143, 205, 255),
+    );
     let palettes = [Palette::Reflectivity, Palette::Updraft, Palette::Vorticity];
+    let overrides = [
+        None,
+        args.w_max.map(|w| (0.0, w)),
+        args.zeta_max.map(|z| (-z, z)),
+    ];
+    // The vorticity panel is the one drawn on a level the caller picks, so
+    // its title may say which; the other two reduce the whole column.
+    let titles = [
+        palettes[0].title(),
+        palettes[1].title(),
+        args.spin_title.as_deref().unwrap_or(palettes[2].title()),
+    ];
     for index in 0..3 {
-        let x = margin + index * (panel + gap);
+        let x = margin + index * (panel + gap) + (panel - panel_width) / 2;
         draw_plane(
             &mut canvas,
             &planes[index],
@@ -1394,60 +1743,118 @@ fn render_supercell(args: &Args, planes: &[Vec<f64>], record: usize) -> Canvas {
             args.ny,
             x,
             138,
-            panel,
-            panel,
+            panel_width,
+            panel_height,
             palettes[index],
-            palettes[index].title(),
+            titles[index],
+            overrides[index],
+            None,
         );
     }
     canvas
 }
 
-fn render_vortex_composite(args: &Args, planes: &[Vec<f64>], record: usize) -> Canvas {
-    let size = 900usize;
-    let mut canvas = Canvas::new(1020, 1120, Rgb(9, 13, 23));
+/// The provenance and classification lines of the two composites.
+fn composite_header(args: &Args, canvas: &mut Canvas, title: &str, record: usize, default_class: &str) {
     canvas.rect(0, 0, 1020, 128, Rgb(17, 25, 42));
-    canvas.text(38, 18, "GM1 VORTEX-FIELD COMPOSITE", 4, Rgb(245, 247, 251));
+    let title = header_title(args, title.to_string());
+    canvas.text(
+        38,
+        18,
+        &title,
+        fitted_scale(&title, 1020 - 38 - 10, 4),
+        Rgb(245, 247, 251),
+    );
     let provenance = if args.label.is_empty() {
         format!("GM1 REAL STATE | {}", time_caption(args, record))
     } else {
         format!("{} | {}", args.label, time_caption(args, record))
     };
-    canvas.text(40, 64, &provenance, 2, Rgb(143, 205, 255));
-    let classification = if is_initialization(args) {
-        "INITIALIZATION | NOT TORNADO | NOT FORECAST"
-    } else {
-        "EVOLVED SNAPSHOT | FIELD COMPOSITE | NO TORNADO DETECTION"
+    canvas.text(
+        40,
+        64,
+        &provenance,
+        fitted_scale(&provenance, 1020 - 40 - 10, 2),
+        Rgb(143, 205, 255),
+    );
+    let classification = match &args.classification {
+        Some(text) => text.clone(),
+        None if is_initialization(args) => "INITIALIZATION | NOT TORNADO | NOT FORECAST".to_string(),
+        None => default_class.to_string(),
     };
-    canvas.text(40, 92, classification, 2, Rgb(252, 190, 92));
+    canvas.text(
+        40,
+        92,
+        &classification,
+        fitted_scale(&classification, 1020 - 40 - 10, 2),
+        Rgb(252, 190, 92),
+    );
+}
 
-    for py in 0..size {
-        for px in 0..size {
+fn paint_composite(
+    args: &Args,
+    canvas: &mut Canvas,
+    planes: &[Vec<f64>],
+    rect: (usize, usize, usize, usize),
+    color: impl Fn(f64, f64, f64) -> Rgb,
+) {
+    let (x0, y0, width, height) = rect;
+    for py in 0..height {
+        for px in 0..width {
             let reflectivity =
-                reconstructed_pixel_value(&planes[0], args.nx, args.ny, px, py, size, size);
+                reconstructed_pixel_value(&planes[0], args.nx, args.ny, px, py, width, height);
             let updraft =
-                reconstructed_pixel_value(&planes[1], args.nx, args.ny, px, py, size, size);
-            let zeta = reconstructed_pixel_value(&planes[2], args.nx, args.ny, px, py, size, size);
-            let color = match (reflectivity, updraft, zeta) {
-                (Some(reflectivity), Some(updraft), Some(zeta)) => {
-                    vortex_composite_color(reflectivity, updraft, zeta)
-                }
+                reconstructed_pixel_value(&planes[1], args.nx, args.ny, px, py, width, height);
+            let zeta = reconstructed_pixel_value(&planes[2], args.nx, args.ny, px, py, width, height);
+            let rgb = match (reflectivity, updraft, zeta) {
+                (Some(reflectivity), Some(updraft), Some(zeta)) => color(reflectivity, updraft, zeta),
                 _ => Rgb(90, 90, 90),
             };
-            canvas.set((60 + px) as i32, (146 + py) as i32, color);
+            canvas.set((x0 + px) as i32, (y0 + py) as i32, rgb);
         }
     }
-    draw_panel_border(&mut canvas, 60, 146, size, size);
-    canvas.text(
-        60,
-        1063,
-        "FIXED CHANNELS: REFL -10..50 DBZ | UPDRAFT 0..30 M/S | ZETA +/-0.025 1/S",
-        1,
-        Rgb(210, 217, 229),
+    draw_panel_border(canvas, x0, y0, width, height);
+}
+
+const VORTEX_W_MAX: f64 = 30.0;
+const VORTEX_ZETA_MAX: f64 = 0.025;
+const FUSION_W_MAX: f64 = 8.0;
+const FUSION_ZETA_MAX: f64 = 0.010;
+
+fn render_vortex_composite(args: &Args, planes: &[Vec<f64>], record: usize) -> Canvas {
+    let size = 900usize;
+    let (width, height) = fitted(size, size, args.aspect);
+    let shift = size - height;
+    let mut canvas = Canvas::new(1020, 1120 - shift, Rgb(9, 13, 23));
+    composite_header(
+        args,
+        &mut canvas,
+        "GM1 VORTEX-FIELD COMPOSITE",
+        record,
+        "EVOLVED SNAPSHOT | FIELD COMPOSITE | NO TORNADO DETECTION",
     );
+    let w_max = args.w_max.unwrap_or(VORTEX_W_MAX);
+    let zeta_max = args.zeta_max.unwrap_or(VORTEX_ZETA_MAX);
+    paint_composite(
+        args,
+        &mut canvas,
+        planes,
+        (60 + (size - width) / 2, 146, width, height),
+        |r, w, z| vortex_composite_color_scaled(r, w, z, w_max, zeta_max),
+    );
+    let channels = if args.w_max.is_none() && args.zeta_max.is_none() {
+        "FIXED CHANNELS: REFL -10..50 DBZ | UPDRAFT 0..30 M/S | ZETA +/-0.025 1/S".to_string()
+    } else {
+        format!(
+            "FIXED CHANNELS: REFL -10..50 DBZ | UPDRAFT 0..{} M/S | ZETA +/-{} 1/S",
+            scale_text(w_max),
+            scale_text(zeta_max)
+        )
+    };
+    canvas.text(60, 1063 - shift, &channels, 1, Rgb(210, 217, 229));
     canvas.text(
         60,
-        1083,
+        1083 - shift,
         "BILINEAR 2X2 DISPLAY RECONSTRUCTION | SOURCE VALUES UNCHANGED",
         1,
         Rgb(143, 205, 255),
@@ -1457,57 +1864,57 @@ fn render_vortex_composite(args: &Args, planes: &[Vec<f64>], record: usize) -> C
 
 fn render_storm_fusion(args: &Args, planes: &[Vec<f64>], record: usize) -> Canvas {
     let size = 900usize;
-    let mut canvas = Canvas::new(1020, 1160, Rgb(9, 13, 23));
-    canvas.rect(0, 0, 1020, 128, Rgb(17, 25, 42));
-    canvas.text(38, 18, "GM1 STORM-FIELD FUSION", 4, Rgb(245, 247, 251));
-    let provenance = if args.label.is_empty() {
-        format!("GM1 REAL STATE | {}", time_caption(args, record))
+    let (width, height) = fitted(size, size, args.aspect);
+    let shift = size - height;
+    let mut canvas = Canvas::new(1020, 1160 - shift, Rgb(9, 13, 23));
+    composite_header(
+        args,
+        &mut canvas,
+        "GM1 STORM-FIELD FUSION",
+        record,
+        "EVOLVED SNAPSHOT | CONTINUOUS FIELD FUSION | NO TORNADO DETECTION",
+    );
+    let w_max = args.w_max.unwrap_or(FUSION_W_MAX);
+    let zeta_max = args.zeta_max.unwrap_or(FUSION_ZETA_MAX);
+    paint_composite(
+        args,
+        &mut canvas,
+        planes,
+        (60 + (size - width) / 2, 146, width, height),
+        |r, w, z| storm_fusion_color_scaled(r, w, z, w_max, zeta_max),
+    );
+    let (updraft, cyclonic, anti) = if args.w_max.is_none() && args.zeta_max.is_none() {
+        (
+            "UPDRAFT 0..8 M/S".to_string(),
+            "CYCLONIC 0..0.010 1/S".to_string(),
+            "ANTI 0..0.010 1/S".to_string(),
+        )
     } else {
-        format!("{} | {}", args.label, time_caption(args, record))
+        (
+            format!("UPDRAFT 0..{} M/S", scale_text(w_max)),
+            format!("CYCLONIC 0..{} 1/S", scale_text(zeta_max)),
+            format!("ANTI 0..{} 1/S", scale_text(zeta_max)),
+        )
     };
-    canvas.text(40, 64, &provenance, 2, Rgb(143, 205, 255));
-    let classification = if is_initialization(args) {
-        "INITIALIZATION | NOT TORNADO | NOT FORECAST"
-    } else {
-        "EVOLVED SNAPSHOT | CONTINUOUS FIELD FUSION | NO TORNADO DETECTION"
-    };
-    canvas.text(40, 92, classification, 2, Rgb(252, 190, 92));
-
-    for py in 0..size {
-        for px in 0..size {
-            let reflectivity =
-                reconstructed_pixel_value(&planes[0], args.nx, args.ny, px, py, size, size);
-            let updraft =
-                reconstructed_pixel_value(&planes[1], args.nx, args.ny, px, py, size, size);
-            let zeta = reconstructed_pixel_value(&planes[2], args.nx, args.ny, px, py, size, size);
-            let color = match (reflectivity, updraft, zeta) {
-                (Some(reflectivity), Some(updraft), Some(zeta)) => {
-                    storm_fusion_color(reflectivity, updraft, zeta)
-                }
-                _ => Rgb(90, 90, 90),
-            };
-            canvas.set((60 + px) as i32, (146 + py) as i32, color);
-        }
-    }
-    draw_panel_border(&mut canvas, 60, 146, size, size);
-    canvas.rect(60, 1064, 18, 18, Rgb(17, 190, 101));
-    canvas.text(86, 1068, "REFLECTIVITY -10..35 DBZ", 1, Rgb(210, 217, 229));
-    canvas.rect(310, 1064, 18, 18, Rgb(0, 224, 235));
-    canvas.text(336, 1068, "UPDRAFT 0..8 M/S", 1, Rgb(210, 217, 229));
-    canvas.rect(540, 1064, 18, 18, Rgb(157, 0, 31));
-    canvas.text(566, 1068, "CYCLONIC 0..0.010 1/S", 1, Rgb(210, 217, 229));
-    canvas.rect(800, 1064, 18, 18, Rgb(19, 86, 202));
-    canvas.text(826, 1068, "ANTI 0..0.010 1/S", 1, Rgb(210, 217, 229));
+    let y = 1064 - shift;
+    canvas.rect(60, y, 18, 18, Rgb(17, 190, 101));
+    canvas.text(86, y + 4, "REFLECTIVITY -10..35 DBZ", 1, Rgb(210, 217, 229));
+    canvas.rect(310, y, 18, 18, Rgb(0, 224, 235));
+    canvas.text(336, y + 4, &updraft, 1, Rgb(210, 217, 229));
+    canvas.rect(540, y, 18, 18, Rgb(157, 0, 31));
+    canvas.text(566, y + 4, &cyclonic, 1, Rgb(210, 217, 229));
+    canvas.rect(800, y, 18, 18, Rgb(19, 86, 202));
+    canvas.text(826, y + 4, &anti, 1, Rgb(210, 217, 229));
     canvas.text(
         60,
-        1102,
+        1102 - shift,
         "FIXED PHYSICAL CHANNELS | NO PER-FRAME NORMALIZATION | SOURCE VALUES UNCHANGED",
         1,
         Rgb(210, 217, 229),
     );
     canvas.text(
         60,
-        1122,
+        1122 - shift,
         "BILINEAR 2X2 DISPLAY RECONSTRUCTION | SINGLE CONTINUOUS CANVAS",
         1,
         Rgb(143, 205, 255),
@@ -1645,6 +2052,26 @@ fn render_metadata(
     if let Some(contract_sha256) = &args.contract_sha256 {
         metadata.push(("ForecastContractSHA256", contract_sha256.clone()));
     }
+    // The words drawn under the picture, kept with it.
+    if let Some(note) = &args.note {
+        metadata.push(("Note", note.clone()));
+    }
+    if !args.footers.is_empty() {
+        metadata.push(("Footer", args.footers.join("\n")));
+    }
+    if let Some((lo, hi)) = args.bounds {
+        metadata.push(("ColourBounds", format!("{lo}:{hi}")));
+    }
+    if args.w_max.is_some() || args.zeta_max.is_some() {
+        metadata.push((
+            "ChannelScales",
+            format!(
+                "w_max={} zeta_max={}",
+                args.w_max.map(|v| v.to_string()).unwrap_or_else(|| "default".into()),
+                args.zeta_max.map(|v| v.to_string()).unwrap_or_else(|| "default".into())
+            ),
+        ));
+    }
     metadata
 }
 
@@ -1694,6 +2121,7 @@ fn run(mut args: Args) -> Result<(), String> {
         let range = finite_range(&plane);
         (render_single(&args, &plane, palette, record), vec![range])
     };
+    let canvas = with_footer(canvas, args.note.as_deref(), &args.footers);
     if let Some(parent) = args.output.parent() {
         fs::create_dir_all(parent)
             .map_err(|e| format!("create output directory {}: {e}", parent.display()))?;
@@ -1999,6 +2427,18 @@ mod tests {
             level: 1,
             label: String::new(),
             valid_seconds: None,
+            title: None,
+            panel_title: None,
+            classification: None,
+            note: None,
+            footers: Vec::new(),
+            bounds: None,
+            w_max: None,
+            zeta_max: None,
+            aspect: None,
+            time_words: None,
+            spin_title: None,
+            units: None,
         };
         let volume = vec![10.0, 60.0, 45.0, 5.0, 20.0, 15.0];
         assert_eq!(reduce("reflectivity", &volume, &args), vec![45.0, 60.0]);
@@ -2422,5 +2862,153 @@ mod tests {
         let error = decode_cm1_forecast(&render_args("rf", nz + 1)).unwrap_err();
         assert!(error.contains("reduced GM1 history profile"), "{error}");
         assert!(error.contains("prs"), "{error}");
+    }
+
+    fn grads_args(product: &str, fields: &[&str], extra: &[&str]) -> Result<Args, String> {
+        let mut words = vec![
+            "cm1-render", "--input", "planes.ctl", "--format", "grads", "--output", "out.png",
+            "--product", product,
+        ];
+        for field in fields {
+            words.push("--field");
+            words.push(field);
+        }
+        words.extend(["--nx", "4", "--ny", "3", "--nz", "1"]);
+        words.extend(extra);
+        parse_args(words.into_iter().map(OsString::from))
+    }
+
+    #[test]
+    fn a_picture_without_the_new_options_keeps_its_size_and_words() {
+        // Every option added for run folders is optional: without them the
+        // canvas, the title and the legend are what this renderer drew before.
+        let args = grads_args("updraft", &["w"], &[]).unwrap();
+        assert!(args.title.is_none() && args.note.is_none() && args.footers.is_empty());
+        let plane = vec![0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let canvas = render_single(&args, &plane, Palette::Updraft, 0);
+        assert_eq!((canvas.width, canvas.height), (1020, 1100));
+        let same = with_footer(canvas, None, &[]);
+        assert_eq!((same.width, same.height), (1020, 1100));
+        assert_eq!(fitted(900, 900, None), (900, 900));
+        assert_eq!(fitted(900, 900, Some(1.0)), (900, 900));
+    }
+
+    #[test]
+    fn a_footer_is_added_under_an_unchanged_picture() {
+        let args = grads_args("updraft", &["w"], &["--note", "restart checkpoint", "--footer", "a b c"]).unwrap();
+        let plane = vec![1.0; 12];
+        let canvas = render_single(&args, &plane, Palette::Updraft, 0);
+        let top = canvas.pixels.clone();
+        let out = with_footer(canvas, args.note.as_deref(), &args.footers);
+        assert!(out.height > 1100);
+        assert_eq!(&out.pixels[..top.len()], &top[..], "the picture above the footer changed");
+        // Long words wrap rather than run off the canvas.
+        let lines = wrap_words(&"word ".repeat(60), 20);
+        assert!(lines.iter().all(|line| line.chars().count() <= 20));
+        assert_eq!(lines.join(" ").split_whitespace().count(), 60);
+    }
+
+    #[test]
+    fn a_domain_that_is_not_square_keeps_its_shape() {
+        // 211 x 143 km drawn in a 900 x 900 panel is 900 x 610, not squeezed.
+        assert_eq!(fitted(900, 900, Some(211.0 / 143.0)), (900, 610));
+        assert_eq!(fitted(900, 900, Some(0.5)), (450, 900));
+        let args = grads_args("updraft", &["w"], &["--aspect", "211:143"]).unwrap();
+        let canvas = render_single(&args, &[1.0; 12], Palette::Updraft, 0);
+        assert_eq!((canvas.width, canvas.height), (1020, 1100 - 290));
+        assert!(grads_args("updraft", &["w"], &["--aspect", "1:0"]).is_err());
+        assert!(grads_args("updraft", &["w"], &["--aspect", "50:1"]).is_err());
+    }
+
+    #[test]
+    fn the_legend_prints_the_scale_it_is_drawn_on() {
+        // Two decimals as before where they are right ...
+        assert_eq!(legend_number(60.0), "60.00");
+        assert_eq!(legend_number(-12.0), "-12.00");
+        assert_eq!(legend_number(-3.456), "-3.46");
+        assert_eq!(legend_number(0.0), "0.00");
+        // ... and not where they would print another number.
+        assert_eq!(legend_number(-0.025), "-0.025");
+        assert_eq!(legend_number(0.001), "0.001");
+        assert_eq!(legend_number(0.0025), "0.0025");
+    }
+
+    #[test]
+    fn caller_scales_are_admitted_only_where_they_mean_something() {
+        assert_eq!(
+            grads_args("swath-vorticity", &["svs"], &["--bounds", "0:0.05"]).unwrap().bounds,
+            Some((0.0, 0.05))
+        );
+        assert!(grads_args("swath-vorticity", &["svs"], &["--bounds", "1:0"]).is_err());
+        assert!(grads_args("reflectivity", &["dbz"], &["--bounds", "0:60"]).is_err());
+        assert!(grads_args("supercell", &["a", "b", "c"], &["--bounds", "0:1"]).is_err());
+        assert!(grads_args("updraft", &["w"], &["--w-max", "20"]).is_err());
+        assert!(grads_args("updraft", &["w"], &["--classification", "x"]).is_err());
+        let three = grads_args("vortex-composite", &["a", "b", "c"], &["--w-max", "20", "--zeta-max", "0.0025"]).unwrap();
+        assert_eq!((three.w_max, three.zeta_max), (Some(20.0), Some(0.0025)));
+        assert!(grads_args("storm-fusion", &["a", "b", "c"], &["--zeta-max", "-1"]).is_err());
+    }
+
+    #[test]
+    fn composites_at_their_default_scales_paint_as_before() {
+        for (r, w, z) in [(10.0, 0.05, 0.0005), (45.0, 12.0, 0.02), (-20.0, 3.0, -0.004)] {
+            assert_eq!(
+                vortex_composite_color(r, w, z),
+                vortex_composite_color_scaled(r, w, z, 30.0, 0.025)
+            );
+            assert_eq!(storm_fusion_color(r, w, z), storm_fusion_color_scaled(r, w, z, 8.0, 0.010));
+        }
+        // A finer scale makes the same weak spin show.
+        let coarse = vortex_composite_color_scaled(10.0, 1.0, 0.002, 30.0, 0.025);
+        let fine = vortex_composite_color_scaled(10.0, 1.0, 0.002, 30.0, 0.0025);
+        assert!(fine.0 > coarse.0);
+    }
+
+    #[test]
+    fn the_spin_panel_says_its_level_and_a_legend_its_unit() {
+        // The vorticity panel's title changes; the reflectivity and updraft
+        // panels and the canvas size do not.
+        let plain = grads_args("supercell", &["a", "b", "c"], &[]).unwrap();
+        let named = grads_args(
+            "supercell",
+            &["a", "b", "c"],
+            &["--spin-title", "VERTICAL VORTICITY AT 4.75 KM"],
+        )
+        .unwrap();
+        let planes = vec![vec![1.0; 12], vec![2.0; 12], vec![0.001; 12]];
+        let before = render_supercell(&plain, &planes, 0);
+        let after = render_supercell(&named, &planes, 0);
+        assert_eq!((before.width, before.height), (after.width, after.height));
+        let third_panel_x = 35 + 2 * (500 + 25);
+        let differs: Vec<usize> = before
+            .pixels
+            .chunks_exact(3)
+            .zip(after.pixels.chunks_exact(3))
+            .enumerate()
+            .filter(|(_, (a, b))| a != b)
+            .map(|(n, _)| n % before.width)
+            .collect();
+        assert!(!differs.is_empty(), "the spin title was not drawn");
+        assert!(differs.iter().all(|&x| x >= third_panel_x), "another panel changed");
+        assert!(grads_args("vortex-composite", &["a", "b", "c"], &["--spin-title", "X"]).is_err());
+        assert!(grads_args("updraft", &["w"], &["--spin-title", "X"]).is_err());
+        // A single-panel legend may print the field's unit instead of its palette's word.
+        let scalar = grads_args("scalar", &["qr"], &["--units", "KG/KG"]).unwrap();
+        let generic = grads_args("scalar", &["qr"], &[]).unwrap();
+        let plane = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0];
+        let a = render_single(&scalar, &plane, Palette::Scalar, 0);
+        let b = render_single(&generic, &plane, Palette::Scalar, 0);
+        assert_eq!((a.width, a.height), (b.width, b.height));
+        assert_ne!(a.pixels, b.pixels);
+        assert!(grads_args("supercell", &["a", "b", "c"], &["--units", "X"]).is_err());
+    }
+
+    #[test]
+    fn a_long_title_is_drawn_smaller_rather_than_cut() {
+        assert_eq!(fitted_scale("GM1 MAXIMUM UPDRAFT", 972, 4), 4);
+        assert_eq!(fitted_scale("GM1 CONVECTIVE AVAILABLE POTENTIAL ENERGY", 972, 4), 3);
+        for ch in [',', ';', '%', '=', '<', '>', '\''] {
+            assert_ne!(glyph(ch), glyph('#'), "{ch} has no glyph");
+        }
     }
 }

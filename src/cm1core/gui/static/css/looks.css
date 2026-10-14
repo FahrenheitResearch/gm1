@@ -25,6 +25,9 @@
   border-radius: 2px; overflow: hidden; }
 .film-meter span { display: block; height: 100%; background: var(--gm1-cold); }
 .film-files a { margin: 0 2px; }
+.radar-row .radar-place { display: inline-flex; flex-wrap: wrap; gap: 6px 12px; }
+.radar-row .radar-place[hidden] { display: none; }
+.radar-row > p.note { flex-basis: 100%; }
 .note.warn { color: var(--gm1-warn); }
 
 @media (max-width: 720px) {

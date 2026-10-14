@@ -78,8 +78,12 @@ def _reflectivity_reader(qf: QuickFrame):
 
 
 def fields(qf: QuickFrame, settings: Any) -> dict[str, Field]:
-    """Every cm1out field of this run's namelist that this frame can give, by CM1 name."""
+    """Every cm1out field of this run's namelist that this frame can give, by CM1 name.  A CM1 netCDF file
+    (:mod:`.ncread`) gives every field it holds, under its own name, description and units."""
 
+    own = getattr(qf.frame, "slice_fields", None)
+    if own is not None:
+        return {name: Field(name, description, units, grid, read) for name, description, units, grid, read in own()}
     if settings is None:
         raise SliceError("The run has no CM1 namelist or GM1 deck beside its frames to say which cm1out fields it "
                          "writes; pass --namelist FILE or --deck FILE.")
@@ -100,6 +104,12 @@ def field_list(qf: QuickFrame, settings: Any) -> list[dict[str, Any]]:
         rows.append({"name": f.name, "description": f.description, "units": f.units, "grid": f.grid,
                      "levels_m": None if z is None else [round(float(v), 2) for v in z]})
     return rows
+
+
+def _owner(qf: QuickFrame) -> str:
+    """Whose field a slice shows: cm1out's (made from a GM1 frame) or, read from a netCDF file, the file's."""
+
+    return "the file's" if hasattr(qf.frame, "slice_fields") else "cm1out's"
 
 
 def _speed_frame(name: str, units: str, qf: QuickFrame) -> tuple[str, bool]:
@@ -227,20 +237,24 @@ def horizontal(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out_di
     frame_words, vertical = _speed_frame(name, fld.units, qf)
     short_frame = frame_words.split(" (")[0] if frame_words else ""
     units = _parse_units(fld.units)
-    where = ("at the surface" if z_here is None else
+    # A 2-D field (one value for each column: the surface's, a column's maximum, or a level's running maximum)
+    # is said to be one, not "at the surface", which composite reflectivity or the 5 km updraft maximum are not.
+    where = ("a 2-D field: one value for each column" if z_here is None else
              f"level {k + 1} of {len(z)} ({'w faces' if fld.grid == 'w' else 'scalar levels'}), "
              f"{S.fmt_height(z_here)} above ground")
     ov = S.Overlay((P.W, P.H))
-    title = f"{name} at the surface" if z_here is None else f"{name} at {S.fmt_height(z_here)}"
+    title = f"{name}, a 2-D field" if z_here is None else f"{name} at {S.fmt_height(z_here)}"
     ov.title(title + (", section line" if line_km is not None else ""),
              S.data_line(facts.name, f"{fld.description} ({units})", where))
     ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
     ox, oy = facts.origin_m(qf.nx, qf.ny)
-    ov.footer(facts.footer(t=qf.t, level=(f"level {S.fmt_height(z_here)}" if z_here is not None else "surface"),
+    owner = _owner(qf)
+    ov.footer(facts.footer(t=qf.t, level=(f"level {S.fmt_height(z_here)}" if z_here is not None else "2-D field"),
                            wind=short_frame,
-                           notes=S.data_line(f"cm1out's {name}", how,
+                           notes=S.data_line(f"{owner} {name}", how,
                                              "no vertical interpolation" if z_here is not None else "",
-                                             "x, y in km as the cm1out file's xh, yh",
+                                             "x, y in km as the file's xh, yh" if owner == "the file's"
+                                             else "x, y in km as the cm1out file's xh, yh",
                                              f"+ fixed to the ground every {S.fmt_km(spacing)}")))
     ov.mark()
     lo_v, hi_v = float(np.nanmin(plane)), float(np.nanmax(plane))
@@ -316,6 +330,9 @@ def vertical(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out: Pat
              a_km: tuple[float, float], b_km: tuple[float, float], top_m: float | None = None) -> dict[str, Any]:
     """A section of ``name`` along the line A-B (km, run coordinates), from the ground to ``top_m``."""
 
+    if top_m is not None and not (math.isfinite(top_m) and top_m > 0.0):
+        raise SliceError(f"The top of a section is a height above the ground in metres, more than 0 (not {top_m:g}). "
+                         "Leave it out for 18 km, or the model top when that is lower.")
     table = fields(qf, settings)
     if name not in table:
         raise SliceError(f"{name} is not a cm1out field of this run. Fields: {', '.join(sorted(table))}.")
@@ -334,7 +351,7 @@ def vertical(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out: Pat
         if not (0.0 <= x <= lx and 0.0 <= y <= ly):
             raise SliceError("A and B must both be inside the domain.")
     data = _to_mass(name, fld.grid, np.asarray(fld.read(qf.frame), dtype=np.float32))
-    top = min(float(top_m or TOP_M), float(qf.zf[-1]))
+    top = min(float(TOP_M if top_m is None else top_m), float(qf.zf[-1]))
     x0, y0, pw, ph = 150, 230, 1620, 600
     s = (np.arange(pw) + 0.5) / pw
     xs, ys = ax + s * (bx - ax), ay + s * (by - ay)
@@ -367,7 +384,7 @@ def vertical(qf: QuickFrame, facts: RunFacts, settings: Any, name: str, out: Pat
     ov.clock((getattr(facts, "clock", None) or S.fmt_clock)(qf.t))
     ov.footer(facts.footer(t=qf.t, level=f"ground to {S.fmt_height(top)}",
                            wind=frame_words.split(" (")[0] if frame_words else "",
-                           notes=S.data_line(f"cm1out's {name}", how, "bilinear between levels and columns",
+                           notes=S.data_line(f"{_owner(qf)} {name}", how, "bilinear between levels and columns",
                                              cloud_note)))
     ov.mark()
     for zk in P_levels(top):

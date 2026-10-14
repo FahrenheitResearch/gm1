@@ -1,13 +1,14 @@
 """Films of the quick-looks: ``gpuwm-cm1 quicklook RUNDIR --film LOOK``.
 
-Three kinds of film, all written under ``RUNDIR/quicklook/films/LOOK/``:
+Four kinds of film, all written under ``RUNDIR/quicklook/films/LOOK/``:
 
 * any per-frame look (the wind swath building up, reflectivity, clouds seen from above, ...): its own saved
   pictures, one per saved time, in order; nothing is drawn again;
 * ``swirl``: the spin look's streaks animated.  Each saved time, plus ``between`` pictures between two saved
   times, in which the lowest-level wind and spin are blended linearly in time (said on every picture), and a
   noise texture is carried along the wind and drawn as streaks (line-integral convolution);
-* ``parcels``: the run's air parcels at every saved parcel time (:mod:`.parcels`).
+* ``parcels``: the run's air parcels at every saved parcel time (:mod:`.parcels`);
+* ``storm3d``: one turn around the storm in 3-D, cut open, at one saved time (:mod:`.storm3d`).
 
 Always written, with no extra dependency: the pictures (``frames/``, or the look's own), and an animated PNG
 (``film.png``, APNG: every browser plays it).  An MP4 (H.264, yuv420p) is written when ``imageio_ffmpeg`` is
@@ -27,6 +28,7 @@ import json
 import math
 import os
 from pathlib import Path
+import shutil
 import struct
 import time as _time
 from typing import Any, Callable, Iterable, Sequence
@@ -42,17 +44,73 @@ INDEX = "index.json"
 INDEX_SCHEMA = "gm1.quicklook-films/v1"
 PROGRESS_SCHEMA = "gm1.quicklook-film-progress/v1"
 FORMATS = ("apng", "mp4", "gif")
-DERIVED = ("swirl", "parcels")
+DERIVED = ("swirl", "parcels", "storm3d")
 SWIRL_SIZE = (1280, 720)
 APNG_SIZE = (1280, 720)
 GIF_SIZE = (960, 540)
-DEFAULT_FPS = {"swirl": 18, "parcels": 12}
+#: Colours a look's GIF keeps exactly, whatever area they cover (look id: "module:name" in this package, a function
+#: giving RGB 0..255 triples).  The median cut gives each GIF picture's 255 colours to its largest areas, so a few
+#: pixels of the infrared look's coldest tops (purple, pink) would take the nearest large colour, a grey that the
+#: picture's colours say is warmer than -30 C.  The other looks' GIFs are made as before.
+GIF_KEEP = {"infrared": "infrared:gif_keep"}
+DEFAULT_FPS = {"swirl": 18, "parcels": 12, "storm3d": 12}
 DEFAULT_BETWEEN = 8
-TITLES = {"swirl": "Swirl near the ground", "parcels": "Air rising into the storm"}
+TITLES = {"swirl": "Swirl near the ground", "parcels": "Air rising into the storm",
+          "storm3d": "The storm in 3-D, one turn around it"}
 
 
 class FilmError(ValueError):
     """A film that cannot be made, in plain words (and the fix)."""
+
+
+class FilmKept(FilmError):
+    """A film made from the run's data that is not made again over the one it has: made now, it would show less
+    (saved frames deleted since).  Nothing is changed, its progress included."""
+
+
+def remake_refused(job: "FilmJob") -> str | None:
+    """Why a film of the swirl, the parcels or the storm in 3-D is not made again over the one the run has, or None.
+
+    These are made from the saved frames (the parcels from the track kept beside them), not from pictures: while
+    any drawn saved time has lost its frame (:func:`.render.lost_times`), a swirl or parcels film made again would
+    show less than the one it replaces, and the 3-D film it has, if its own saved time is one of those, could not be
+    made again at all."""
+
+    from .frame import frames_of, same_frame
+    from .ncread import discover
+    from .render import drawn_rows, lost_times
+
+    made = (_read_films(job.out).get(job.look) or {})
+    if not made and not (job.folder / "film.png").is_file():
+        return None
+    try:
+        layout = discover(job.target)
+    except ValueError:
+        return None          # the film's own reading says why it cannot be made
+    lineage = frames_of(layout)
+    rows = drawn_rows(job.out)
+    lost = lost_times(layout, lineage, rows)
+    if not lost:
+        return None
+    if job.look == "storm3d":
+        frame = ((made.get("facts") or {}) if isinstance(made.get("facts"), dict) else {}).get("frame")
+        if frame and any(same_frame(frame, key, None, segment) for _t, key, _p, segment in lineage):
+            return None      # its own saved time is still there: it can be made again
+        return ("The 3-D film this run has was made at a saved time whose frame was deleted, so it could not be made "
+                "again, and a new one would replace it. Nothing was changed; the film it has is kept.")
+    source = "the parcel track kept beside the saved frames" if job.look == "parcels" else "the saved frames"
+    return (f"{len(lost)} of this run's {len(rows)} drawn saved times have lost their saved frames, and this film is "
+            f"made from {source}: made again, it would show less than the one it has. Nothing was changed; the "
+            "film it has is kept.")
+
+
+def _read_films(out: Path) -> dict[str, Any]:
+    try:
+        index = json.loads((out / FILMS / INDEX).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    films = index.get("films") if isinstance(index, dict) else None
+    return films if isinstance(films, dict) else {}
 
 
 def mp4_available() -> bool:
@@ -153,12 +211,45 @@ def read_apng_frames(path: Path) -> tuple[int, int]:
     return 1, 1
 
 
-def write_gif(images: Iterable[Any], out: Path, fps: float) -> Path:
+def gif_keep(look: str) -> list[tuple[int, int, int]]:
+    """The colours ``look``'s GIF keeps exactly (:data:`GIF_KEEP`), or none."""
+
+    import importlib
+
+    where = GIF_KEEP.get(look)
+    if not where:
+        return []
+    module, name = where.split(":")
+    colours = getattr(importlib.import_module(f".{module}", __package__), name)()
+    return [(int(r), int(g), int(b)) for r, g, b in colours]
+
+
+def _gif_picture(image: Any, keep: Sequence[tuple[int, int, int]], palette: Any = None) -> Any:
+    """One GIF picture: the median cut's 255 colours, or with ``keep`` its fewer colours and those, each pixel the
+    nearest of them; given ``palette`` (a "P" image), that one palette."""
+
     from PIL import Image
 
-    frames = [image.convert("RGB").resize(GIF_SIZE, Image.LANCZOS).quantize(colors=255, method=Image.MEDIANCUT,
-                                                                            dither=Image.NONE)
-              for image in images]
+    rgb = image.convert("RGB").resize(GIF_SIZE, Image.LANCZOS)
+    if palette is not None:
+        return rgb.quantize(palette=palette, dither=Image.NONE)
+    if not keep:
+        return rgb.quantize(colors=255, method=Image.MEDIANCUT, dither=Image.NONE)
+    cut = rgb.quantize(colors=255 - len(keep), method=Image.MEDIANCUT, dither=Image.NONE)
+    palette = list(cut.getpalette() or [])[:3 * (255 - len(keep))] + [v for colour in keep for v in colour]
+    palette += palette[:3] * ((768 - len(palette)) // 3)             # unused entries repeat the first colour
+    holder = Image.new("P", (1, 1))
+    holder.putpalette(palette)
+    return rgb.quantize(palette=holder, dither=Image.NONE)
+
+
+def write_gif(images: Iterable[Any], out: Path, fps: float, palette: Any = None, *,
+              keep: Sequence[tuple[int, int, int]] = ()) -> Path:
+    """A GIF at :data:`GIF_SIZE`: each picture cut to its own 255 colours (keeping ``keep`` exactly), or, given
+    ``palette`` (a "P" image), every picture to that one palette (the storm in 3-D, whose legend colours must come
+    out exactly)."""
+
+    frames = [_gif_picture(image, keep, palette) for image in images]
     if not frames:
         raise FilmError("no pictures to make a GIF from")
     tmp = out.with_name(f".{out.name}.partial")
@@ -282,14 +373,22 @@ def swirl_picture(state: Swirl, fields: dict[str, Any], dt_s: float, facts: Any,
                            wind="domain-relative" if moving else "ground-relative",
                            notes=S.data_line(("blended between saved times" + every) if blended
                                              else "a saved time", "streaks move with the air",
-                                             f"spin ±{state.rng:g} {S.PER_S} fixed at this dx")))
+                                             f"spin ±{state.rng:g} {S.PER_S} fixed "
+                                             f"{P.spin_range_words(dx, height_m, hurricane=_hurricane(facts))}")))
     ov.mark()
     ov.ramp_bar("zeta", (box.x + box.w - ov.U(360), box.y + box.h + ov.U(16), box.x + box.w,
                          box.y + box.h + ov.U(16) + max(3, ov.U(7))), vmin=-state.rng, vmax=state.rng,
-                ticks=[(-state.rng, S.fmt_num(-state.rng, 2)), (0.0, "0"), (state.rng, f"{state.rng:.2f} {S.PER_S}")],
+                ticks=[(-state.rng, P.spin_tick(-state.rng, S.fmt_num(-state.rng, 2))), (0.0, "0"),
+                       (state.rng, f"{P.spin_tick(state.rng, f'{state.rng:.2f}')} {S.PER_S}")],
                 title="clockwise | counter-clockwise")
     save_picture(ov, cv, out)
     return {"time_s": float(fields["t"]), "blended": blended}
+
+
+def _hurricane(facts: Any) -> bool:
+    """Whether the film is of a hurricane run (its swirl range is :func:`.products.swirl_range`'s hurricane one)."""
+
+    return getattr(facts, "storm_kind", "") == "hurricane"
 
 
 def _blend(a: dict[str, Any], b: dict[str, Any], f: float) -> dict[str, Any]:
@@ -313,6 +412,11 @@ class FilmJob:
     log: Callable[[str], None] = lambda _m: None
     should_stop: Callable[[], bool] = lambda: False
     started: float = field(default_factory=_time.perf_counter)
+    #: storm3d only: the saved time (default the latest), the pictures in one turn, their size, the first bearing
+    time_s: float | None = None
+    pictures: int | None = None
+    size: tuple[int, int] | None = None
+    bearing: float | None = None
 
     @property
     def folder(self) -> Path:
@@ -325,16 +429,56 @@ class FilmJob:
         _write_json(self.folder / "progress.json", doc)
 
 
-def _index_frames(out: Path, look: str) -> list[dict[str, Any]]:
-    index = None
+def _read_index(out: Path) -> dict[str, Any]:
     try:
         index = json.loads((out / "index.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        pass
-    for product in (index or {}).get("products") or []:
+        return {}
+    return index if isinstance(index, dict) else {}
+
+
+def _index_frames(out: Path, look: str) -> list[dict[str, Any]]:
+    for product in _read_index(out).get("products") or []:
         if product.get("id") == look:
             return [f for f in product.get("frames") or [] if isinstance(f.get("file"), str)]
     return []
+
+
+def _index_not_drawn(out: Path, look: str) -> str | None:
+    """The reason the index gives for not drawing ``look`` at its latest saved time, or None."""
+
+    try:
+        index = json.loads((out / "index.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    products = (index.get("products") or []) if isinstance(index, dict) else []
+    for product in products:
+        if isinstance(product, dict) and product.get("id") == look:
+            rows = [r for r in product.get("not_drawn") or [] if isinstance(r, dict) and r.get("reason")]
+            latest = max(rows, default=None, key=lambda r: max((t for t in r.get("times_s") or []
+                                                               if isinstance(t, (int, float))), default=-1.0))
+            return None if latest is None else str(latest["reason"])
+    return None
+
+
+def why_no_pictures(out: Path, look: str, target: Path | str | None = None) -> str:
+    """Why a per-frame look has no pictures to film, in plain words: a hurricane's own look in any other run, the
+    reason it was not drawn (a look made for thunderstorms, in a hurricane run; a grid it is not drawn for), a
+    finished run whose pictures were drawn before the look was offered (with the command that draws it, given
+    ``target``), or that none has landed yet."""
+
+    index = _read_index(out)
+    run = index.get("run") if isinstance(index.get("run"), dict) else {}
+    if look in P.HURRICANE_ONLY and (run or index.get("frames")) and run.get("storm_kind") != "hurricane":
+        return f"The {look} look is drawn for hurricane runs only, and this run is not one."
+    reason = _index_not_drawn(out, look)
+    if reason:
+        return reason
+    if target is not None and index.get("run_ended") and index.get("frames"):
+        return (f"The {look} look was not drawn for this run's pictures (they were drawn before it was offered, or "
+                f"without it). Draw it first: gpuwm-cm1 quicklook {target} (in the app: Results, Draw the new "
+                "looks).")
+    return f"The {look} look has no pictures yet: they are drawn as the frames land."
 
 
 def per_frame_looks() -> tuple[str, ...]:
@@ -346,8 +490,35 @@ def film_looks() -> tuple[str, ...]:
 
 
 def make(job: FilmJob) -> dict[str, Any]:
-    """Make one film; returns the film's record (also written to ``films/index.json``)."""
+    """Make one film; returns the film's record (also written to ``films/index.json``).
 
+    A film made from the run's data (:data:`DERIVED`) draws its pictures again into ``frames/``: the ones it had
+    are set aside first and put back when the new film is not made (refused, failed or stopped by an error), so a
+    film is never left without its pictures."""
+
+    frames_dir = job.folder / "frames"
+    before = job.folder / ".frames-before"
+    if job.look in DERIVED and before.is_dir():
+        # A remake stopped part way (killed) left the pictures of the film on record set aside: they go back first,
+        # over what that remake had drawn, and are set aside again below.
+        shutil.rmtree(frames_dir, ignore_errors=True)
+        os.replace(before, frames_dir)
+    set_aside = job.look in DERIVED and frames_dir.is_dir()
+    if set_aside:
+        os.replace(frames_dir, before)
+    try:
+        record = _make(job)
+    except BaseException:
+        if set_aside:
+            shutil.rmtree(frames_dir, ignore_errors=True)
+            os.replace(before, frames_dir)
+        raise
+    if set_aside:
+        shutil.rmtree(before, ignore_errors=True)
+    return record
+
+
+def _make(job: FilmJob) -> dict[str, Any]:
     from PIL import Image
 
     look = job.look
@@ -359,6 +530,10 @@ def make(job: FilmJob) -> dict[str, Any]:
     if "mp4" in job.formats and not mp4_available():
         raise FilmError(f"An MP4 needs the optional film add-on: {_mp4_fix()}. "
                         "Leave out --format mp4 for the animated PNG and the pictures, which need nothing more.")
+    if look in DERIVED:
+        refused = remake_refused(job)
+        if refused:
+            raise FilmKept(refused)
     folder = job.folder
     folder.mkdir(parents=True, exist_ok=True)
     job.progress(0, 0, message="starting")
@@ -371,7 +546,10 @@ def make(job: FilmJob) -> dict[str, Any]:
         else:
             frames = _index_frames(job.out, look)
             if not frames:
-                raise FilmError(f"The {look} look has no pictures yet: they are drawn as the frames land.")
+                # the look's own reason when the index gives one, not "its pictures are still to come"
+                reason = _index_not_drawn(job.out, look)
+                raise FilmError(f"The {look} look has no pictures to film. {reason}" if reason
+                                else why_no_pictures(job.out, look, job.target))
             pictures = [job.out / f["file"] for f in frames]
             size = (P.W, P.H)
             facts = {"times_s": [f.get("time_s") for f in frames]}
@@ -407,7 +585,12 @@ def make(job: FilmJob) -> dict[str, Any]:
         write_mp4(images(), size, folder / "film.mp4", fps)
         files["mp4"] = os.path.relpath(folder / "film.mp4", job.out)
     if want_gif:
-        write_gif(images(), folder / "film.gif", fps)
+        palette = None
+        if look == "storm3d":
+            from . import storm3d
+
+            palette = storm3d.gif_palette(pictures)
+        write_gif(images(), folder / "film.gif", fps, palette=palette, keep=gif_keep(look))
         files["gif"] = os.path.relpath(folder / "film.gif", job.out)
     seconds = round(_time.perf_counter() - job.started, 2)
     record = {"look": look, "title": TITLES.get(look) or P.TITLES.get(look, look), "pictures": len(pictures),
@@ -430,23 +613,25 @@ def make(job: FilmJob) -> dict[str, Any]:
 
 
 def _derived(job: FilmJob) -> tuple[list[Path], tuple[int, int], dict[str, Any]]:
-    from ..cm1out import frames as _frames
-    from ..cm1out import settings as _settings
-    from .facts import run_facts
+    from .facts import read_settings, run_facts
     from .frame import QuickFrame, frames_of
+    from .ncread import discover
 
-    layout = _frames.discover(job.target)
+    layout = discover(job.target)
     lineage = frames_of(layout)
     if not lineage:
         raise FilmError(f"{job.target} has no published frames yet.")
-    try:
-        settings = _settings.resolve(layout)
-    except (_settings.SettingsError, OSError, ValueError):
-        settings = None
-    frames_dir = job.folder / "frames"
-    if frames_dir.is_dir():
-        for old in frames_dir.glob("*.png"):
-            old.unlink()
+    if layout.kind == "netcdf":
+        settings = layout.settings
+    else:
+        settings, note = read_settings(layout)
+        if note is not None:
+            job.log(note)       # one plain line: without the settings a hurricane is drawn as a thunderstorm run
+    frames_dir = job.folder / "frames"      # the pictures it had were set aside by make()
+    if job.look == "storm3d":
+        from . import storm3d
+
+        return storm3d.film_pictures(job, frames_dir)
     first = QuickFrame.open(lineage[-1][2], key=lineage[-1][1], segment=lineage[-1][3])
     try:
         facts = run_facts(layout, first.config, first.dx, first.dy, label=job.label, settings=settings)
@@ -455,6 +640,11 @@ def _derived(job: FilmJob) -> tuple[list[Path], tuple[int, int], dict[str, Any]]
         first.close()
     if job.look == "parcels":
         from . import parcels as PA
+
+        if layout.kind == "netcdf":
+            from .ncread import PARCELS_NOT_READ
+
+            raise FilmError(PARCELS_NOT_READ)
 
         ended, _end = layout.ended()
         try:
@@ -470,7 +660,7 @@ def _derived(job: FilmJob) -> tuple[list[Path], tuple[int, int], dict[str, Any]]
     # swirl
     W, H = SWIRL_SIZE
     box = P.fit_box(extent[0], extent[1], W // 2, int(H * 0.165), int(W * 0.62), int(H * 0.66))
-    rng = P.spin_range(dx)
+    rng = P.swirl_range(dx, height, hurricane=_hurricane(facts))
     state = Swirl(box, P.noise(box.h, box.w, 5), P.noise(box.h, box.w, 5), rng)
     times = [row[0] for row in lineage]
     gaps = sorted(b - a for a, b in zip(times, times[1:]) if b > a)
@@ -505,5 +695,5 @@ def _derived(job: FilmJob) -> tuple[list[Path], tuple[int, int], dict[str, Any]]
                                "between": job.between}
 
 
-__all__ = ["DERIVED", "FORMATS", "FilmError", "FilmJob", "film_looks", "make", "mp4_available", "read_apng_frames",
-           "write_apng", "write_gif", "write_mp4"]
+__all__ = ["DERIVED", "FORMATS", "FilmError", "FilmJob", "FilmKept", "film_looks", "make", "mp4_available",
+           "read_apng_frames", "remake_refused", "write_apng", "write_gif", "write_mp4"]

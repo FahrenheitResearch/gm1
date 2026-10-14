@@ -55,8 +55,11 @@ RUN_LOOKS = ("reflectivity", "updraft-5km", "surface", "rain", "swath", "spin-ne
 #: The favourite looks, in guided order.
 GUIDED_LOOKS = ("reflectivity", "spin-near-ground", "updraft-5km", "swath")
 #: The looks after them, in the More looks row's order (copy/looks.json "more_looks").
-MORE_LOOKS = ("surface", "rain", "clouds-from-above", "updraft-slice", "hail-track", "spin-track", "environment",
-              "parcels", "swirl")
+MORE_LOOKS = ("surface", "rain", "swirl-by-radius", "warm-core", "radar-storm-relative", "radar-velocity",
+              "clouds-from-above", "infrared", "updraft-slice", "hail-track", "spin-track", "spectra",
+              "updraft-time-height", "spin-time-height", "side-view", "water-paths", "rotation-axis",
+              "storm-relative-flow", "streamwise-spin", "cold-pool-depth", "environment", "run-card", "parcels", "swirl",
+              "storm3d")
 #: Receipt facts the Results screen lists, in order: (label, path in the receipt).
 RECEIPT_FACTS = (
     ("gpuwm-cm1", ("version",)),
@@ -167,6 +170,31 @@ def _log_tail(path: Path, lines: int = LOG_LINES) -> dict[str, Any] | None:
     if size > LOG_TAIL_BYTES and text:
         text = text[1:]
     return {"lines": text[-lines:], "bytes": size}
+
+
+def convert_refused(rundir: Path, index: Any = None) -> str | None:
+    """Why Convert again (``cm1out RUNDIR --force``) is not offered, or None: some of the times it converted have
+    lost their saved frames (:func:`.files.converted_missing`), so it would delete files it cannot write again
+    (``cm1out.convert.converted_lost``); or every saved frame of the run was deleted (by hand, or by Keep pictures
+    only), so it has nothing left to convert.  ``index`` is the run's quick-look index, read when not given."""
+
+    from .api import TRIMMED_FILE
+    from .files import converted_missing, converted_unrecorded, frames_gone
+
+    missing = converted_missing(rundir)
+    if missing:
+        return (f"{missing} of this run's converted times have lost their saved frames, so their files cannot be "
+                "written again: converting every frame again would delete them. They are kept.")
+    if index is None:
+        index = read_json(rundir / "quicklook" / "index.json", default=None)
+    if converted_unrecorded(rundir, index):
+        return ("The record of what this run converted is missing or cannot be read, and some of its saved frames "
+                "were deleted: converting again could write over files it cannot write again. They are kept; "
+                "convert into a new folder from a terminal with --out.")
+    if (rundir / TRIMMED_FILE).is_file() or frames_gone(rundir, index):
+        return ("This run's saved frames were deleted, so it has nothing left to convert: CM1's files are written "
+                "from the saved frames.")
+    return None
 
 
 class RunViews:
@@ -505,8 +533,12 @@ class RunViews:
         if not view_only:
             try:
                 from ..cm1run.rundir import RunDirectory
+                from ..render_products import cannot_draw
 
-                restarts = [{"number": row.number, "model_time_s": row.model_time_s, "segment": row.segment}
+                # cannot_draw: the native pictures each restart cannot give (from its receipt), which the
+                # Native pictures panel greys out with the reason instead of offering a refusal.
+                restarts = [{"number": row.number, "model_time_s": row.model_time_s, "segment": row.segment,
+                             "cannot_draw": cannot_draw(Path(row.path))}
                             for row in RunDirectory(rundir).lineage_restarts()]
             except Exception:  # noqa: BLE001 - a folder mid-write lists its restarts next time
                 restarts = []
@@ -562,20 +594,37 @@ class RunViews:
         for look, row in films.items():
             row["running_here"] = any(f" --film {look} " in f"{line} " for line in making)
         drawing = any(row.role == "looks" for row in self.api.jobs.launched(run_id))
+        # A hurricane run's film menu leaves out the looks it never draws (those made for one thunderstorm, and the
+        # parcels when it followed none), and every other run's the hurricane looks.
+        rows = LK.more_looks(run_id, rundir, index, status, films)
+        kind = LK.storm_kind_of(rundir, index)
+        filmable = LK.film_looks_for(kind, kind != "hurricane" or LK.follows_parcels(rundir, index))
+        drawing_3d = any(row.role == "storm3d" for row in self.api.jobs.launched(run_id))
         return {
-            "more_looks": LK.more_looks(run_id, rundir, index, status, films),
+            "more_looks": rows,
             "films": films,
-            "film_looks": list(LK.film_looks()),
+            "film_looks": list(filmable),
+            # The menu's words for a film look the run's rows do not list (a hurricane's parcels, before any).
+            "film_titles": LK.film_titles(),
             "film_fps": dict(LK.FILM_FPS),
             "mp4_available": LK.mp4_available(),
             "mp4_fix": film_fix(),
             "drawing_looks": drawing,
+            "drawing_3d": drawing_3d,
             "looks_ui": LK.ui_words(),
-            "looks_about_s": {"all": LK.about_seconds(index, "all"), "swirl": LK.about_seconds(index, "swirl"),
-                              "parcels": LK.about_seconds(index, "parcels")},
-            "film_commands": {look: C.display(C.film_args(rundir, look)) for look in LK.film_looks()},
+            "looks_about_s": {"all": LK.about_seconds(index, "all"), "again": LK.about_seconds(index, "again"),
+                              "swirl": LK.about_seconds(index, "swirl"), "parcels": LK.about_seconds(index, "parcels"),
+                              "storm3d": LK.about_seconds(index, "storm3d"),
+                              "storm3d_still": LK.about_seconds(index, "storm3d-still")},
+            "looks_about_words": {"storm3d": LK.about_words(LK.about_seconds(index, "storm3d")),
+                                  "storm3d_still": LK.about_words(LK.about_seconds(index, "storm3d-still"))},
+            # The radar looks' row: where the radar stands, its tilt, and the command that moves it.
+            "radar": LK.radar_state(rundir, index),
+            "film_commands": {look: C.display(C.film_args(rundir, look)) for look in filmable},
             "look_commands": {"all": C.display(C.quicklook_pass_args(rundir)),
-                              **{look: C.display(C.look_args(rundir, look)) for look in LK.ONCE_LOOKS}},
+                              "again": C.display(C.quicklook_pass_args(rundir, again=True)),
+                              **{look: C.display(C.look_args(rundir, look))
+                                 for look in LK.ONCE_LOOKS + LK.REQUEST_LOOKS}},
         }
 
     def _ended_or_refuse(self, run_id: str, rundir: Path, what: str, command: str) -> None:
@@ -597,6 +646,11 @@ class RunViews:
         self._ended_or_refuse(run_id, rundir, "Convert again", line)
         if not segment_dirs(rundir):
             raise ApiError(409, "This run has no frames to convert yet.", "Start it first.", command=line)
+        refused = convert_refused(rundir)
+        if refused:
+            # converted times whose frames are gone (converting again would delete files it cannot write again),
+            # or no saved frame left to convert
+            raise ApiError(409, refused, "Nothing was deleted.", command=line)
         with self.api.jobs.run_lock(run_id):
             busy = [row for row in self.api.jobs.launched(run_id) if row.role in ("convert", "cm1out")]
             if busy:
@@ -634,4 +688,4 @@ class RunViews:
 
 C_COMMANDS_LOG = "commands.log"
 
-__all__ = ["GUIDED_LOOKS", "MORE_LOOKS", "RUN_LOOKS", "RunViews", "receipt_summary"]
+__all__ = ["GUIDED_LOOKS", "MORE_LOOKS", "RUN_LOOKS", "RunViews", "convert_refused", "receipt_summary"]

@@ -241,6 +241,13 @@ storm and one from near its top are two different layers, so these numbers are n
 only between hours at about the same height.
 <!-- /hurricane-runs -->
 
+**The warm core on my picture is a few tenths of a degree off the table above.** The picture **Warm core by
+radius and height** measures the same thing the same way, with one difference: a grid cell that lies exactly on the
+edge between two rings belongs to the outer ring. The table was read by a script that placed some of those cells in
+the inner ring, so its numbers differ from the pictures' by up to 0.3 K at a few hours of CM1's run (by up to 0.5 K
+on an earlier 8 km GM1 run), and where two heights are almost equally warm the picture can name the other one. The
+radius of maximum wind of CM1's run is the same either way at every saved time.
+
 **My own hurricane namelist stopped early, or its import report lists the time step.** CM1's hurricane file
 lets the time step change with the storm (`adapt_dt = 1`). The import report says so under "Runs differently";
 the hurricane cards use a fixed 7.5 s step (`adapt_dt = 0`, `dtl = 7.5`), and so can you. In guided mode

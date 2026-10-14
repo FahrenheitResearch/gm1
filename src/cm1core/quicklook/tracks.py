@@ -27,7 +27,7 @@ from typing import Any, Sequence
 import numpy as np
 
 from .frame import QuickFrame
-from .swath import _merge, _round_half_away, canvas_origin
+from .swath import WINDOW_NOTE, _merge, _round_half_away, canvas_origin, reserved_canvas, window_swaths
 
 HAIL = "hail-track"
 SPIN = "spin-track"
@@ -58,6 +58,8 @@ class Track:
     source: str                    # "model" or "frames"
     method: str
     interval_s: float | None
+    #: As :attr:`.swath.Swath.window`: built from CM1 netCDF files' translated swaths under the domain.
+    window: bool = False
 
     @property
     def origin_m(self) -> tuple[float, float]:
@@ -90,7 +92,7 @@ def plane_of(qf: QuickFrame, track_id: str) -> tuple[np.ndarray, tuple[int, int]
     if qf.has(spec.model + "2"):
         origin = canvas_origin(qf)
         if origin is not None:
-            return np.maximum(qf.get(spec.model + "2"), 0.0), origin, "model"
+            return np.maximum(qf.get(spec.model + "2"), 0.0), origin, "model-window" if window_swaths(qf) else "model"
     if qf.has(spec.model) and not qf.domain_moves:
         return np.maximum(qf.get(spec.model), 0.0), (0, 0), "model-fixed"
     plane = frame_plane(qf, track_id)
@@ -112,6 +114,8 @@ class TrackBuilder:
         self.origin = (0, 0)
         self.sources: set[str] = set()
         self.dx = self.dy = 0.0
+        #: As :attr:`.swath.SwathBuilder.reserved`: the ground cells the canvas covers from its first frame on.
+        self.reserved: tuple[int, int, int, int] | None = None
         self._load()
 
     @property
@@ -155,6 +159,8 @@ class TrackBuilder:
             return
         plane, origin, source = found
         self.sources.add(source)
+        if self.values is None and self.reserved is not None:
+            self.values, self.origin = reserved_canvas(self.reserved)
         self.values, self.origin = _merge(self.values, self.origin, plane, origin)
 
     def catch_up(self, before: Sequence[tuple[float, str, Path, int]], open_frame: Any) -> None:
@@ -172,15 +178,17 @@ class TrackBuilder:
         if self.values is None:
             return None
         spec = SPECS[self.id]
-        if self.sources and self.sources <= {"model", "model-fixed"}:
-            name = spec.model + ("2" if "model" in self.sources else "")
+        if self.sources and self.sources <= {"model", "model-fixed", "model-window"}:
+            name = spec.model + ("2" if self.sources & {"model", "model-window"} else "")
             source, method = "model", f"the model's every-step maximum on the ground (CM1's {name})"
+            if "model-window" in self.sources:
+                method = f"the model's every-step maximum (the files' {name}, under the domain at each saved time)"
         else:
             every = f" (every {interval_s:g} s)" if interval_s else ""
             source = "frames"
             method = f"the {spec.what} of the saved frames only{every}, placed on the ground"
         return Track(self.values, self.origin, self.dx, self.dy, self.times[0] if self.times else 0.0,
-                     len(self.keys), source, method, interval_s)
+                     len(self.keys), source, method, interval_s, window="model-window" in self.sources)
 
 
 # ----------------------------------------------------------------------------------------------- pictures
@@ -189,11 +197,16 @@ HAIL_RANGE = (0.01, 10.0)   # g/kg, fixed, drawn on a log scale (1 km runs keep 
 TITLE = {HAIL: "Hail near the ground so far", SPIN: "Strongest near-ground spin so far"}
 
 
+#: The dense-ice words when the run does not say which (CM1 output without its namelist: ihail unknown).
+EITHER_DENSE = "graupel or hail"
+
+
 def dense_word(config: dict[str, Any]) -> str:
-    """'hail' or 'graupel': what the run's dense-ice category is (the frame's publication record)."""
+    """'hail' or 'graupel': what the run's dense-ice category is (the frame's publication record); "graupel or
+    hail" (:data:`EITHER_DENSE`) where the record says it is not known."""
 
     category = (config.get("dense_ice") or {}).get("category") if isinstance(config.get("dense_ice"), dict) else None
-    return category if category in ("hail", "graupel") else "graupel"
+    return category if category in ("hail", "graupel", EITHER_DENSE) else "graupel"
 
 
 def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict[str, Any]:
@@ -218,7 +231,8 @@ def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict
         grams = track.values * 1000.0
         values = np.log10(np.maximum(grams, 1.0e-6)).astype(np.float32)
         lo, rng, ramp, unit = math.log10(HAIL_RANGE[0]), math.log10(HAIL_RANGE[1]), "ice", "g/kg"
-        title = f"{dense.capitalize()} near the ground so far"
+        # at most six words: "Graupel or hail near the ground" when the run does not say which
+        title = f"{dense.capitalize()} near the ground" + ("" if dense == EITHER_DENSE else " so far")
         label = f"most {dense} in the air at {S.fmt_height(z0)} {since}"
         ticks = [(-2.0, "0.01"), (-1.0, "0.1"), (0.0, "1"), (1.0, "10 g/kg")]
         legend = f"{dense} mixing ratio at {S.fmt_height(z0)}, log scale"
@@ -229,16 +243,17 @@ def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict
                    ("area above 0.1 g/kg", f"{float((grams >= 0.1).sum()) * track.dx * track.dy / 1e6:,.0f} km²")]
     else:
         values = track.values
-        lo, rng, ramp, unit = 0.0, P.spin_range(f.dx), "ember", S.PER_S
+        lo, rng, ramp, unit = 0.0, P.spin_range(f.dx, z0), "ember", S.PER_S
         title = TITLE[SPIN]
         label = f"strongest counter-clockwise spin at {S.fmt_height(z0)} {since}"
-        ticks = [(0.0, "0"), (rng / 2, S.fmt_num(rng / 2, 3)), (rng, f"{rng:g} {S.PER_S}")]
-        legend = f"spin at {S.fmt_height(z0)}, fixed at this dx"
+        half = P.spin_tick(rng / 2, S.fmt_num(rng / 2, 3))
+        ticks = [(0.0, "0"), (rng / 2, half), (rng, f"{rng:g} {S.PER_S}")]
+        legend = f"spin at {S.fmt_height(z0)}, fixed {P.spin_range_words(f.dx, z0)}"
         extra = f"features smaller than about {S.fmt_km(6 * f.dx)} are not resolved"
         cmax = float(values.max())
         facts = {"zeta_max": cmax, "range_per_s": rng, "resolved_m": 6.0 * f.dx}
         readout = [("strongest spin near the ground", f"{S.fmt_num(cmax, 3)} {S.PER_S}"),
-                   (f"above half the range ({S.fmt_num(rng / 2, 3)})",
+                   (f"above half the range ({half})",
                     f"{float((values >= rng / 2).sum()) * track.dx * track.dy / 1e6:,.0f} km²")]
     sampled = P.sample(values, box, track.dx, track.dy, origin=track.origin_m)
     cv = P.canvas()
@@ -262,10 +277,15 @@ def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict
                              notes=S.data_line(track.method, "dim box: the domain at the start, grey box: now",
                                                extra)))
     ov.mark()
+    ov.clear_of_head(box.y - ov.U(10) - ov.measure(label, "label")[1], "the panel title")
     ov.text((box.x, box.y - ov.U(10)), label, "label", colour="text", anchor="ls")
     x = ov.x0
-    ov.readout((x, box.y + ov.U(10)) if box.x - x > ov.U(260) else (box.x + box.w + ov.U(30), box.y + ov.U(10)),
-               readout)
+    at = (x, box.y + ov.U(10)) if box.x - x > ov.U(260) else (box.x + box.w + ov.U(30), box.y + ov.U(10))
+    ov.readout(at, readout)
+    if track.window and f.domain_moves:
+        # under the readout: what the files' translated swaths leave out (areas from them can come out smaller)
+        room = (box.x - ov.U(32) if at[0] < box.x else ov.x1) - at[0]
+        P.side_note(ov, WINDOW_NOTE, at[0], at[1] + ov.U(170), room)
     ov.ramp_bar(ramp, (box.x + box.w - ov.U(400), box.y + box.h + ov.U(14), box.x + box.w,
                        box.y + box.h + ov.U(14) + max(3, ov.U(7))), vmin=lo, vmax=rng, ticks=ticks, title=legend)
     P.scale_bar(ov, box.x, box.y + box.h + ov.U(20), box)
@@ -275,5 +295,5 @@ def product_track(L: Any, out: Path, track: Track | None, track_id: str) -> dict
     return facts
 
 
-__all__ = ["HAIL", "HAIL_RANGE", "SPECS", "SPIN", "TRACK_IDS", "Track", "TrackBuilder", "dense_word",
+__all__ = ["EITHER_DENSE", "HAIL", "HAIL_RANGE", "SPECS", "SPIN", "TRACK_IDS", "Track", "TrackBuilder", "dense_word",
            "frame_plane", "plane_of", "product_track"]

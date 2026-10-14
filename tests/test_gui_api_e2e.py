@@ -289,6 +289,8 @@ def test_the_api_table_lists_every_action_with_its_command(live):
                           "pause", "force-stop",
                           # picture requests
                           "fields", "slice", "section", "column",
+                          # the native renderer's picture of a restart
+                          "render",
                           # the setup screens
                           "edit", "recommended", "namelist", "acknowledge", "sounding", "jobscript", "measure",
                           # guided mode
@@ -297,8 +299,12 @@ def test_the_api_table_lists_every_action_with_its_command(live):
                           "convert", "reproduce",
                           # advanced mode: Start from a preset
                           "preset-new",
-                          # A film of a look, a look drawn on request
-                          "film", "look",
+                          # A film of a look, a look drawn on request, the radar looks' radar moved
+                          "film", "look", "radar",
+                          # CM1's own netCDF output, opened for pictures
+                          "cm1-output",
+                          # Compare with other runs
+                          "compare",
                           # An environment from a WRF or ArWen run
                           "wrf-open", "wrf-column", "wrf-use",
                           # A sounding file of the user's own

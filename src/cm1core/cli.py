@@ -31,6 +31,35 @@ def _config(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("config", type=Path, help="strict UTF-8 gpuwm-cm1 TOML")
 
 
+#: The products the envelope route (an envelope given with --field) admits; doors.render_door holds the same set.
+ENVELOPE_RENDER_PRODUCTS = ("reflectivity", "reflectivity-level", "updraft", "vorticity", "cold-pool", "scalar",
+                            "supercell", "vortex-composite", "storm-fusion", "cape", "cin", "lcl", "lfc")
+
+
+def _render_products() -> dict[str, str]:
+    """The run-folder products of ``gpuwm-cm1 render``, in plain words."""
+
+    from .render_products import PRODUCT_WORDS
+
+    return dict(PRODUCT_WORDS)
+
+
+def _render_description() -> str:
+    import textwrap
+
+    lead = textwrap.fill(
+        "Draw a run with GM1's native renderer, on the CPU. Give a run folder: the picture is drawn from the run's "
+        "newest restart checkpoint (or the one --restart picks) and written to RUNDIR/quicklook/native/. A restart "
+        "is the complete state saved at the end of a segment and at each restart interval, not at every saved time "
+        "(the quick-looks draw every saved frame), so each picture says it is a restart checkpoint, not a history "
+        "frame, with the values in it, its colour scale and how each field was made.", width=100)
+    rows = [f"  {name:<20}{words}" for name, words in _render_products().items()]
+    tail = textwrap.fill(
+        "An envelope written by gpuwm-cm1 cartesian --history-envelope on (history.cm1fhs), or a restart.cm1fcp, "
+        "can also be drawn field by field as before: give the file, --field NAME and --output.", width=100)
+    return "\n".join([lead, "", "products (from a run folder):", *rows, "", tail])
+
+
 def _output(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--output", type=Path, required=True)
 
@@ -386,39 +415,67 @@ def build_parser() -> argparse.ArgumentParser:
     command.set_defaults(handler=restart_door)
 
     command = commands.add_parser(
-        "render", help="render GM1 state through the native Rust path"
+        "render",
+        help="draw a run's restart checkpoint with the native renderer (a second picture style)",
+        description=_render_description(),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
-    command.add_argument("history", type=Path)
-    _output(command)
-    command.add_argument("--format", dest="history_format")
+    command.add_argument(
+        "history", type=Path, metavar="RUNDIR",
+        help="a run folder (or one restart folder, or a restart.cm1fcp); or a .cm1fhs/.cm1fcp envelope with --field",
+    )
+    command.add_argument(
+        "--output", type=Path,
+        help="a new .png; default for a run folder: RUNDIR/quicklook/native/PRODUCT-...png (drawn again in place)",
+    )
+    command.add_argument(
+        "--restart", metavar="PICK",
+        help="which restart: latest (the default, the newest along the run), a restart NUMBER, or SEGMENT:NUMBER",
+    )
+    command.add_argument("--list", action="store_true", help="list the run's restart checkpoints and stop")
+    command.add_argument(
+        "--whole", action="store_true",
+        help="a hurricane run: draw the whole area (by default the inner 500 km, as the quick-looks show it)",
+    )
+    command.add_argument(
+        "--list-fields", action="store_true", help="list the fields a restart holds (for --product scalar)"
+    )
+    command.add_argument(
+        "--product",
+        help=("from a run folder, one of: " + ", ".join(_render_products()) + ". An envelope with --field takes "
+              + ", ".join(ENVELOPE_RENDER_PRODUCTS)),
+    )
+    command.add_argument(
+        "--field", action="append", default=[],
+        help="run folder: the field --product scalar draws (see --list-fields); envelope: each field to draw",
+    )
+    command.add_argument(
+        "--level", type=int,
+        help="run folder: the level, 1 = the lowest (as CM1 and quicklook count); envelope: the 0-based index",
+    )
+    command.add_argument(
+        "--height", type=float, metavar="M",
+        help="run folder: the level nearest this height above ground, m (reflectivity-level: interpolated)",
+    )
+    command.add_argument("--format", dest="history_format", help="envelope only: cm1fhs or cm1fcp")
     command.add_argument(
         "--contract-sha256",
         help=(
-            "forecast-contract SHA-256 from the run receipt; default: the "
+            "envelope only: forecast-contract SHA-256 from the run receipt; default: the "
             "frame's sibling history-publication.json, else the envelope "
             "header. Always checked against the header"
         ),
     )
-    command.add_argument(
-        "--product",
-        help=(
-            "reflectivity (CM1 calccref column maximum) | reflectivity-level "
-            "(--level K of the same volume) | updraft | vorticity | cold-pool | "
-            "scalar | supercell | vortex-composite | storm-fusion"
-        ),
-    )
-    command.add_argument("--field", action="append", default=[])
     for axis in ("nx", "ny", "nz"):
         command.add_argument(
             f"--{axis}",
             type=int,
-            help="default: from the requested field's shape in the envelope header; checked against it when given",
+            help="envelope only: default from the requested field's shape in the envelope header",
         )
-    command.add_argument("--record", type=int)
-    command.add_argument("--level", type=int, default=0)
-    command.add_argument("--label", default="")
-    command.add_argument("--valid-seconds", type=float)
-    command.add_argument("--json", action="store_true", help=argparse.SUPPRESS)
+    command.add_argument("--record", type=int, help="envelope only")
+    command.add_argument("--label", default="", help="envelope only: words before the time")
+    command.add_argument("--valid-seconds", type=float, help="envelope only")
+    command.add_argument("--json", action="store_true", help="print the render receipt as JSON")
     command.set_defaults(handler=render_door)
 
     command = commands.add_parser(

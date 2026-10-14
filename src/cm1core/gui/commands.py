@@ -10,9 +10,10 @@ Kinds:
 ``host``
     Host-only calls, run to completion as a subprocess with no GPU
     (``CUDA_VISIBLE_DEVICES`` empty): import, check, cartesian --plan,
-    estimate, status, the guided presets (preset list, fit, new), and the
+    estimate, status, the guided presets (preset list, fit, new), the
     one-picture quicklook calls (a slice, a section, a column skew-T, the
-    field list), which also run at nice 19.
+    field list), which also run at nice 19, and the native renderer's
+    pictures of a restart (render).
 ``launch``
     Detached in their own session so the GUI can close under them: run and
     resume own the GPU; cm1out and quicklook are the sidecars (nice 19, no
@@ -45,6 +46,7 @@ PROGRAM = "gpuwm-cm1"
 
 HOST_COMMANDS = frozenset({"import", "edit", "check", "cartesian", "estimate", "status", "jobscript", "quicklook",
                            "preset", "doctor", "reproduce",
+                           "render",  # the native renderer's pictures of a run's restart (CPU, no GPU)
                            "sounding",  # sounding times|from-wrf (reads a WRF or ArWen history; no GPU)
                            "chain"})  # chain inspect|check|new (reads a WRF or ArWen history; no GPU)
 LAUNCH_COMMANDS = frozenset({"run", "resume", "cm1out", "quicklook"})
@@ -238,8 +240,21 @@ def _num(value: float) -> str:
     return "0" if text in ("", "-0") else text
 
 
+def quicklook_target(rundir: Path) -> list[str]:
+    """What ``gpuwm-cm1 quicklook`` is given for a run folder: the folder itself, or, for CM1 output opened from
+    where it is kept (``files.cm1_output``), the files, with ``--out`` the folder's ``quicklook/`` and the folder's
+    name as the pictures' label."""
+
+    from .files import cm1_output
+
+    found = cm1_output(Path(rundir))
+    if found is None or not found["opened"]:
+        return [str(rundir)]
+    return [str(found["source"]), "--out", str(Path(rundir) / "quicklook"), "--label", Path(rundir).name]
+
+
 def fields_args(rundir: Path, time_s: float | None = None) -> list[str]:
-    args = ["quicklook", str(rundir), "--fields"]
+    args = ["quicklook", *quicklook_target(rundir), "--fields"]
     if time_s is not None:
         args += ["--time", _num(time_s)]
     return args + ["--json"]
@@ -247,7 +262,7 @@ def fields_args(rundir: Path, time_s: float | None = None) -> list[str]:
 
 def slice_args(rundir: Path, field: str, *, height_m: float | None = None, level: int | None = None,
                line_km: Sequence[float] | None = None, time_s: float | None = None) -> list[str]:
-    args = ["quicklook", str(rundir), "--slice", field]
+    args = ["quicklook", *quicklook_target(rundir), "--slice", field]
     if level is not None:
         args += ["--level", str(int(level))]
     elif height_m is not None:
@@ -261,7 +276,7 @@ def slice_args(rundir: Path, field: str, *, height_m: float | None = None, level
 
 def section_args(rundir: Path, field: str, a_km: Sequence[float], b_km: Sequence[float], *,
                  top_m: float | None = None, time_s: float | None = None) -> list[str]:
-    args = ["quicklook", str(rundir), "--section", field, "--from", *[_num(v) for v in a_km],
+    args = ["quicklook", *quicklook_target(rundir), "--section", field, "--from", *[_num(v) for v in a_km],
             "--to", *[_num(v) for v in b_km]]
     if top_m is not None:
         args += ["--top", _num(top_m)]
@@ -271,7 +286,7 @@ def section_args(rundir: Path, field: str, a_km: Sequence[float], b_km: Sequence
 
 
 def column_args(rundir: Path, at_km: Sequence[float] | None = None, time_s: float | None = None) -> list[str]:
-    args = ["quicklook", str(rundir), "--column"]
+    args = ["quicklook", *quicklook_target(rundir), "--column"]
     if at_km is not None:
         args += ["--at", *[_num(v) for v in at_km]]
     if time_s is not None:
@@ -284,7 +299,7 @@ def film_args(rundir: Path, look: str, fmt: str | None = None, fps: float | None
               between: int | None = None) -> list[str]:
     """Results' "Save as film": ``gpuwm-cm1 quicklook RUNDIR --film LOOK``, launched on the CPU at nice 19."""
 
-    args = ["quicklook", str(rundir), "--film", look]
+    args = ["quicklook", *quicklook_target(rundir), "--film", look]
     if fmt:
         args += ["--format", fmt]
     if fps is not None:
@@ -295,15 +310,53 @@ def film_args(rundir: Path, look: str, fmt: str | None = None, fps: float | None
 
 
 def look_args(rundir: Path, look: str) -> list[str]:
-    """A look drawn once per run (the environment, the air parcels), drawn now."""
+    """A look drawn once per run (the environment, the air parcels, the run card, the storm over time), drawn now."""
 
-    return ["quicklook", str(rundir), "--look", look, "--json"]
+    return ["quicklook", *quicklook_target(rundir), "--look", look, "--json"]
 
 
-def quicklook_pass_args(rundir: Path) -> list[str]:
-    """One pass of the quick-look worker: draws every look the run's pictures do not have yet."""
+def compare_args(rundir: Path, others: Sequence[Path], *, time_s: float | None = None,
+                 box_km: float | None = None) -> list[str]:
+    """Results' "Compare with other runs": ``gpuwm-cm1 quicklook RUNDIR --compare OTHER ...``, launched on the CPU at
+    nice 19 (the pictures go to RUNDIR/quicklook/compare/)."""
 
-    return ["quicklook", str(rundir)]
+    args = ["quicklook", str(rundir), "--compare", *[str(o) for o in others]]
+    if time_s is not None:
+        args += ["--time", _num(time_s)]
+    if box_km is not None:
+        args += ["--box", _num(box_km)]
+    return args + ["--json"]
+
+
+def radar_args(rundir: Path, site: Sequence[float] | str, tilt_deg: float) -> list[str]:
+    """Results' radar row: ``gpuwm-cm1 quicklook RUNDIR --radar-site X Y|storm --radar-tilt DEG --json``, which keeps
+    the radar settings beside the pictures and draws both radar looks of every saved time again (CPU, nice 19)."""
+
+    where = ["storm"] if isinstance(site, str) else [_num(float(v)) for v in site]
+    return ["quicklook", *quicklook_target(rundir), "--radar-site", *where, "--radar-tilt", _num(float(tilt_deg)),
+            "--json"]
+
+
+def render_args(rundir: Path, product: str, *, restart: int | None = None, field: str | None = None,
+                height_m: float | None = None) -> list[str]:
+    """Results' native pictures: ``gpuwm-cm1 render RUNDIR --product P``, drawn from the run's restart on the CPU
+    into RUNDIR/quicklook/native/."""
+
+    args = ["render", str(rundir), "--product", product]
+    if restart is not None:
+        args += ["--restart", str(int(restart))]
+    if field:
+        args += ["--field", field]
+    if height_m is not None:
+        args += ["--height", _num(height_m)]
+    return args + ["--json"]
+
+
+def quicklook_pass_args(rundir: Path, *, again: bool = False) -> list[str]:
+    """One pass of the quick-look worker: draws every look the run's pictures do not have yet, or with ``again``
+    every picture of every look from nothing (``--force``: the pictures drawn by an earlier version are replaced)."""
+
+    return ["quicklook", *quicklook_target(rundir), *(["--force"] if again else [])]
 
 
 def stop_args(rundir: Path, how: str = "") -> list[str]:
@@ -656,6 +709,10 @@ API: tuple[Endpoint, ...] = (
     Endpoint("POST", "/api/runs/RUN/column", "column", "host",
              "gpuwm-cm1 quicklook RUNDIR --column [--at X Y] [--time S] --json",
              "Draws RUNDIR/quicklook/slices/column-*.png, the skew-T of one column, on the CPU at nice 19."),
+    Endpoint("POST", "/api/runs/RUN/render", "render", "host",
+             "gpuwm-cm1 render RUNDIR --product PRODUCT [--restart N] [--field NAME] [--height M] --json",
+             "Draws RUNDIR/quicklook/native/PRODUCT-*.png from the run's restart (the newest, or restart N) with the "
+             "native renderer, on the CPU; the picture says it is a restart checkpoint, not a history frame."),
     Endpoint("POST", "/api/runs/RUN/convert", "convert", "launch", "gpuwm-cm1 cm1out RUNDIR --force [--format nc|grads]",
              "Results: Convert again, once the run has ended; on the CPU at nice 19 with no GPU."),
     Endpoint("POST", "/api/runs/RUN/reproduce", "reproduce", "host", "gpuwm-cm1 reproduce RUNDIR --json",
@@ -664,11 +721,29 @@ API: tuple[Endpoint, ...] = (
     Endpoint("POST", "/api/runs/RUN/film", "film", "launch",
              "gpuwm-cm1 quicklook RUNDIR --film LOOK [--format apng|mp4|gif] [--fps N] [--between K] --json",
              "Results: Save as film, on the CPU at nice 19 with no GPU, written to RUNDIR/quicklook/films/LOOK/; "
-             "{look, stop: true} stops a film this GUI started."),
+             "{look, stop: true} stops a film this GUI started; LOOK storm3d is one turn around the storm in 3-D "
+             "at the latest saved time."),
+    Endpoint("POST", "/api/cm1-output", "cm1-output", "launch",
+             "gpuwm-cm1 quicklook SOURCE --out RUNDIR/quicklook --label NAME",
+             "Runs: Open CM1 output. Checks that SOURCE (a folder of CM1 netCDF history files, or one file) can be "
+             "drawn with gpuwm-cm1 quicklook SOURCE --fields, makes RUNDIR with cm1-output.json naming SOURCE, and "
+             "draws every look on the CPU at nice 19 into RUNDIR/quicklook/. Pictures only: nothing is run."),
     Endpoint("POST", "/api/runs/RUN/look", "look", "host",
-             "gpuwm-cm1 quicklook RUNDIR --look environment|parcels --json",
-             "Results: draw a look that is drawn once per run now; {look: \"all\"} launches gpuwm-cm1 quicklook RUNDIR "
-             "(the looks a run's pictures do not have yet)."),
+             "gpuwm-cm1 quicklook RUNDIR --look environment|parcels|run-card|updraft-time-height|spin-time-height"
+             "|storm3d --json",
+             "Results: draw a look that is drawn once per run now; {look: \"storm3d\"} launches the storm in 3-D at "
+             "the latest saved time on the CPU, in the background; {look: \"all\"} launches gpuwm-cm1 quicklook "
+             "RUNDIR (the looks a run's pictures do not have yet), and {look: \"all\", again: true} gpuwm-cm1 "
+             "quicklook RUNDIR --force (every picture drawn again with this version)."),
+    Endpoint("POST", "/api/runs/RUN/radar", "radar", "launch",
+             "gpuwm-cm1 quicklook RUNDIR --radar-site X Y|storm [--radar-tilt DEG] --json",
+             "Once the run has ended, on the CPU at nice 19 with no GPU: keeps where the radar stands (x, y in km on "
+             "the ground, or storm: beside the storm in each picture) and its tilt in RUNDIR/quicklook/radar.json, "
+             "and draws both radar looks of every saved time again."),
+    Endpoint("POST", "/api/runs/RUN/compare", "compare", "launch",
+             "gpuwm-cm1 quicklook RUNDIR --compare OTHER [OTHER ...] [--time S] [--box KM] --json",
+             "Results: Compare with other runs, picked from the Runs list (one to five), on the CPU at nice 19 with "
+             "no GPU, written to RUNDIR/quicklook/compare/."),
     # A preset that runs a sounding file takes {"sounding": FILE} or {"environment": {"instability",
     # "shear", "hodograph"?}}; the reply's fit.sounding names the file, its SHA-256 and where it came from.
     # {"custom": {KNOB: VALUE}} is guided Customize's choices (--custom KNOB=VALUE; preset options ID lists them).
@@ -764,6 +839,7 @@ __all__ = [
     "doctor_args",
     "convert_args",
     "column_args",
+    "compare_args",
     "display",
     "edit_args",
     "endpoint_for",
@@ -773,6 +849,8 @@ __all__ = [
     "film_args",
     "look_args",
     "quicklook_pass_args",
+    "render_args",
+    "quicklook_target",
     "fortran_literal",
     "jobscript_args",
     "measure_args",

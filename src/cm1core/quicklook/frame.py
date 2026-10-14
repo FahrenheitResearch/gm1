@@ -11,6 +11,9 @@ Conventions:
 * winds in a frame are relative to the moving domain; the ground-relative wind is ``u + umove, v + vmove``
   (CM1 init3d.F:32-33), and ``domainlocx/domainlocy`` place the domain on the ground;
 * heights are above ground: every lane a CM1 user runs in v0.1 is flat, so ``zf`` above sea level is above ground.
+
+A saved time of a CM1 netCDF history file opens the same way (:mod:`.ncread`): its rows carry an
+:class:`.ncread.NcTime` in place of the frame directory, and its frame names the fields it lacks in plain words.
 """
 
 from __future__ import annotations
@@ -30,6 +33,11 @@ class FrameUnreadable(ValueError):
     """The frame lacks what a quick-look needs; the message says what."""
 
 
+class FieldMissing(FrameUnreadable):
+    """A CM1 netCDF file does not hold a field a look needs; the message names it and the CM1 switch that writes
+    it.  The look is not drawn, and says why (a file without it is not a broken file)."""
+
+
 @dataclass(eq=False)
 class QuickFrame:
     frame: _frames.Frame
@@ -39,6 +47,11 @@ class QuickFrame:
 
     @classmethod
     def open(cls, directory: Path | str, *, key: str = "", segment: int = 0) -> "QuickFrame":
+        opener = getattr(directory, "open_frame", None)
+        if opener is not None:
+            # one saved time of a CM1 netCDF file (.ncread.NcTime): its grid is the file's own
+            frame = opener()
+            return cls(frame, frame.geometry, key or frame.key, segment)
         frame = _frames.open_frame(directory)
         try:
             geometry = _settings.geometry(frame)
@@ -147,6 +160,9 @@ class QuickFrame:
 
     def view(self, name: str) -> np.ndarray:
         if not self.frame.has(name):
+            missing = getattr(self.frame, "missing", None)
+            if missing is not None:
+                raise FieldMissing(missing(name))
             raise FrameUnreadable(f"{self.directory.name} has no {name} carrier")
         return self.frame.array(name)
 
@@ -179,6 +195,9 @@ class QuickFrame:
         return self.has(carrier) and name in self.species_names(carrier)
 
     def species(self, name: str, index: Any = None, carrier: str = "q3d") -> np.ndarray:
+        missing = getattr(self.frame, "missing", None)
+        if missing is not None and not (self.has(carrier) and name in self.species_names(carrier)):
+            raise FieldMissing(missing(name))
         row = self.species_names(carrier).index(name)
         v = self.view(carrier)[row]
         return np.array(v if index is None else v[index], dtype=np.float32)
@@ -263,7 +282,7 @@ class QuickFrame:
                 zbar = np.maximum(np.float32(0.0), self.zeta_level(k)[0])
                 depth = np.float32(min(float(zf[k + 1]), zzt) - max(float(zf[k]), zz0))
                 out += depth * wbar * zbar
-        return out, "CM1's calcuh sum on the frame's winds"
+        return out, "CM1's calcuh sum"
 
     def theta_prime(self, k: int) -> np.ndarray:
         """θ′ at level k: CM1's tha (the frame's th3d)."""
@@ -299,12 +318,50 @@ def lineage(target: Path | str) -> tuple[_frames.RunLayout, list[tuple[float, st
     A run directory's frames are its newest segment's lineage; a later segment's frame at a time already seen
     replaces the earlier one (as ``gpuwm-cm1 cm1out`` does)."""
 
-    layout = _frames.discover(target)
+    from .ncread import discover
+
+    layout = discover(target)
     return layout, frames_of(layout)
+
+
+def frame_key(path: Path | str, root: Path | str) -> str:
+    """A saved frame's key: its folder under the run (``segments/NNN/frames/frame-XXXXXX``), the same whether the
+    run's folder was named by a relative or an absolute path; the folder alone when it is not under the run."""
+
+    import os
+
+    try:
+        return Path(path).relative_to(root).as_posix()
+    except ValueError:
+        pass
+    try:
+        return Path(os.path.abspath(path)).relative_to(os.path.abspath(root)).as_posix()
+    except ValueError:
+        return Path(path).name
+
+
+def same_frame(stored: Any, key: str, stored_segment: Any = None, segment: int | None = None) -> bool:
+    """Whether a drawn time's record names the saved frame ``key``: the same key, or the frame's folder alone, as
+    a run named by a relative path recorded it before keys were made the same either way (of the same segment, when
+    the record says which)."""
+
+    if not isinstance(stored, str) or not stored:
+        return False
+    if stored == key:
+        return True
+    if "/" in stored or Path(key).name != stored:
+        return False
+    recorded = stored_segment if isinstance(stored_segment, int) and not isinstance(stored_segment, bool) else None
+    return recorded is None or segment is None or recorded == segment
 
 
 def frames_of(layout: _frames.RunLayout) -> list[tuple[float, str, Path, int]]:
     import json
+
+    own = getattr(layout, "lineage", None)
+    if own is not None:
+        # CM1 netCDF files (.ncread.NcLayout): each saved time, oldest first
+        return own()
 
     latest: dict[float, tuple[str, Path, int]] = {}
     for segment, path in layout.frames():
@@ -315,12 +372,9 @@ def frames_of(layout: _frames.RunLayout) -> list[tuple[float, str, Path, int]]:
                 time_s = _frames.open_frame(path).model_time_s
             except (OSError, ValueError, KeyError):
                 continue
-        try:
-            key = path.relative_to(layout.root).as_posix()
-        except ValueError:
-            key = path.name
-        latest[time_s] = (key, path, segment.number)
+        # (a run directory's frames come as absolute paths: the key must not depend on how its folder was named)
+        latest[time_s] = (frame_key(path, layout.root), path, segment.number)
     return [(t, key, path, number) for t, (key, path, number) in sorted(latest.items())]
 
 
-__all__ = ["FrameUnreadable", "QuickFrame", "frames_of", "lineage"]
+__all__ = ["FieldMissing", "FrameUnreadable", "QuickFrame", "frame_key", "frames_of", "lineage", "same_frame"]

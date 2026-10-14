@@ -168,6 +168,10 @@ code.cmdline { display: block; color: var(--gm1-data); font-size: 11.5px; white-
 .viewer figure img { width: 100%; }
 .slices figure img { cursor: crosshair; }
 .slices figure a img { cursor: zoom-in; }
+/* Results: a native picture (about 1020 px wide and taller than wide), shown at most at its own size */
+.native-picture { max-width: 720px; }
+.native-picture figure a img { cursor: zoom-in; }
+.native-picture figcaption { flex-direction: column; gap: 2px; }
 .log.events { white-space: pre-wrap; }
 /* Results: one row per action (what it does and its choices, then the button and its command) */
 .actrow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 18px; align-items: start;

@@ -32,7 +32,8 @@ def storm(time_s: float, *, scale: float = 1.0, swath: str = "canvas", uh: bool 
           dbz: np.ndarray | None = None, move: tuple[float, float] = (12.5, 3.0)) -> tuple[dict[str, Any], dict[str, Any]]:
     """Carriers of CM1's 1500 s state (winds scaled by ``scale``) and the frame's clock and motion.
 
-    ``swath``: ``canvas`` (the ground-anchored sws2/shs2), ``domain`` (sws/shs only) or ``none``."""
+    ``swath``: ``canvas`` (the ground-anchored sws2/shs2), ``canvas-wind`` (sws2 and sws with no helicity
+    maximum, as GM1 writes on stretched levels), ``domain`` (sws only) or ``none``."""
 
     d = np.load(STATE)
     nz, ny, nx = 40, 24, 24
@@ -55,14 +56,15 @@ def storm(time_s: float, *, scale: float = 1.0, swath: str = "canvas", uh: bool 
         carriers["dbz"] = dbz.astype(np.float32)
     frame = dict(time_s=time_s, step=int(round(time_s / DT)), grid=REF_GRID, dt_s=DT, umove=move[0], vmove=move[1],
                  domainloc=(move[0] * time_s, move[1] * time_s))
-    if swath == "canvas":
+    if swath in ("canvas", "canvas-wind"):
         anchor = canvas_anchor(dt_s=DT, total_steps=TOTAL_STEPS, umove=move[0], vmove=move[1])
         fx = round_half_away(move[0] * DT * TOTAL_STEPS / 1000.0)
         fy = round_half_away(move[1] * DT * TOTAL_STEPS / 1000.0)
         ox = round_half_away(move[0] * time_s / 1000.0) - min(0, fx)
         oy = round_half_away(move[1] * time_s / 1000.0) - min(0, fy)
         shape = (ny + abs(fy) + 1, nx + abs(fx) + 1)
-        for name, plane in (("sws2", speed), ("shs2", carriers.get("uh", np.zeros((ny, nx), np.float32)))):
+        planes = [("sws2", speed), ("shs2", carriers.get("uh", np.zeros((ny, nx), np.float32)))]
+        for name, plane in planes[:1] if swath == "canvas-wind" else planes:
             canvas = np.zeros(shape, np.float32)
             canvas[oy:oy + ny, ox:ox + nx] = plane
             carriers[name] = canvas

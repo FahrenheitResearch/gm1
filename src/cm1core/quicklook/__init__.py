@@ -12,6 +12,9 @@ with no GPU visible, and nothing here imports CuPy.
 :mod:`.series`        the time series, with CM1's curve on CM1's stock storm
 :mod:`.slices`        horizontal and vertical slices of any cm1out field
 :mod:`.skewt`         the skew-T of one model column
+:mod:`.sideview`      the storm from the side and the water and ice in each column, from the model's own species
+:mod:`.axis`          the rotation axis from the lowest level to 10 km
+:mod:`.storm3d`       the storm in 3-D, cut open through its core: a still and an orbit film, drawn on request
 :mod:`.render`        one pass over a run's frames, and ``--follow``
 """
 
