@@ -236,6 +236,130 @@ def _pinned_quadratic_ends(np: Any, faces: Sequence[float], nk: int) -> tuple[bo
     )
 
 
+# ---------------------------------------------------------------------------
+# CM1's level count for stretch_z=1 -- param.F:7823-7877
+# ---------------------------------------------------------------------------
+
+#: The marker a caller looks for to tell that a message names the nz that fits.
+LEVEL_COUNT_HINT = "these levels need nz ="
+
+
+@dataclass(frozen=True, slots=True)
+class StretchZ1Fit:
+    """What ``param.F:7823-7877`` makes of five stretch words.
+
+    ``nk1`` layers of ``dz_bot`` lie below ``str_bot``, ``nk3`` layers of
+    ``dz_top`` above ``str_top``, and the stretched part between them holds
+    ``nk2`` layers whose mean depth is ``(dz_bot + dz_top)/2``.  CM1 stops
+    unless each part is a whole number of its layers to 0.01 m, and ``nz``
+    must then be exactly ``nk1 + nk2 + nk3``.
+    """
+
+    nk1: int
+    nk2: int
+    nk3: int
+    mean_depth_m: float
+    bottom_whole: bool
+    middle_whole: bool
+    top_whole: bool
+
+    @property
+    def nz(self) -> int | None:
+        """The one level count CM1 accepts, or ``None`` when a part is not whole."""
+
+        if self.bottom_whole and self.middle_whole and self.top_whole and self.nk2 >= 2:
+            return self.nk1 + self.nk2 + self.nk3
+        return None
+
+
+def stretch_z1_fit(
+    *, ztop_m: float, str_bot_m: float, str_top_m: float, dz_bot_m: float, dz_top_m: float
+) -> StretchZ1Fit | None:
+    """CM1's three layer counts for these stretch words, or ``None`` when they are unusable.
+
+    The arithmetic is binary32, as ``param.F:7823-7877`` is, so a part that
+    CM1 accepts to its 0.01 m is accepted here and one it stops on is not.
+    """
+
+    np = importlib.import_module("numpy")
+    try:
+        ztop, bot, top, dzb, dzt = (np.float32(float(v)) for v in (ztop_m, str_bot_m, str_top_m, dz_bot_m, dz_top_m))
+    except (TypeError, ValueError):
+        return None
+    if not all(bool(np.isfinite(v)) for v in (ztop, bot, top, dzb, dzt)):
+        return None
+    if dzb <= 0 or dzt <= 0 or ztop <= 0 or bot < 0 or top <= bot or top > ztop:
+        return None
+    mean = _mul(np, np.float32(0.5), _add(np, dzb, dzt))
+
+    def nint(value: Any) -> int:
+        # Fortran NINT of a non-negative default REAL: halves round away from zero.
+        return int(math.floor(float(value) + 0.5))
+
+    nk1 = nint(_div(np, bot, dzb))
+    nk3 = nint(_div(np, _sub(np, ztop, top), dzt))
+    nk2 = nint(_div(np, _sub(np, top, bot), mean))
+    return StretchZ1Fit(
+        nk1=nk1, nk2=nk2, nk3=nk3, mean_depth_m=float(mean),
+        bottom_whole=abs(float(_sub(np, _mul(np, np.float32(nk1), dzb), bot))) <= 0.01,
+        middle_whole=abs(float(_sub(np, _mul(np, np.float32(nk2), mean), _sub(np, top, bot)))) < 0.01,
+        top_whole=abs(float(_sub(np, _mul(np, np.float32(nk3), dzt), _sub(np, ztop, top)))) <= 0.01,
+    )
+
+
+def _plain(value: float) -> str:
+    return f"{value:.10g}"
+
+
+def stretch_z1_fit_hint(
+    *, nk: int, ztop_m: float, str_bot_m: float, str_top_m: float, dz_bot_m: float, dz_top_m: float
+) -> str:
+    """One sentence saying what would make these stretched levels fit, or ``""``.
+
+    When the three parts are whole it names the ``nz`` CM1 accepts.  When one
+    is not, it names the part and the nearest values that are.
+    """
+
+    fit = stretch_z1_fit(ztop_m=ztop_m, str_bot_m=str_bot_m, str_top_m=str_top_m,
+                         dz_bot_m=dz_bot_m, dz_top_m=dz_top_m)
+    if fit is None:
+        return ""
+    wanted = fit.nz
+    if wanted is not None:
+        if wanted == nk:
+            return ""
+        return (
+            f"nz = {nk} does not fit: {LEVEL_COUNT_HINT} {wanted} ({fit.nk1} of dz_bot below str_bot, "
+            f"{fit.nk2} stretched between str_bot and str_top, {fit.nk3} of dz_top above str_top; "
+            "param.F:7823-7877)"
+        )
+    parts = []
+    if not fit.bottom_whole:
+        below, above = (math.floor(str_bot_m / dz_bot_m) * dz_bot_m, math.ceil(str_bot_m / dz_bot_m) * dz_bot_m)
+        parts.append(
+            f"str_bot = {_plain(str_bot_m)} m is not a whole number of dz_bot = {_plain(dz_bot_m)} m layers "
+            f"(the nearest are {_plain(below)} and {_plain(above)} m)"
+        )
+    if not fit.top_whole:
+        depth = ztop_m - str_top_m
+        below, above = (math.floor(depth / dz_top_m) * dz_top_m, math.ceil(depth / dz_top_m) * dz_top_m)
+        parts.append(
+            f"ztop - str_top = {_plain(depth)} m is not a whole number of dz_top = {_plain(dz_top_m)} m layers "
+            f"(the nearest are {_plain(below)} and {_plain(above)} m)"
+        )
+    if not fit.middle_whole:
+        depth = str_top_m - str_bot_m
+        mean = fit.mean_depth_m
+        below, above = (math.floor(depth / mean) * mean, math.ceil(depth / mean) * mean)
+        parts.append(
+            f"str_top - str_bot = {_plain(depth)} m is not a whole number of layers of the mean depth "
+            f"(dz_bot + dz_top)/2 = {_plain(mean)} m (the nearest are {_plain(below)} and {_plain(above)} m)"
+        )
+    if fit.nk2 < 2 and not parts:
+        parts.append("the stretched part between str_bot and str_top must hold at least two layers")
+    return "; ".join(parts) + " (param.F:7823-7877)" if parts else ""
+
+
 def _f32(np: Any, value: Any) -> Any:
     return np.float32(value)
 
@@ -721,7 +845,11 @@ def build_vertical_levels(
         try:
             grid = build_stretch_z1_grid(parameters)
         except ValueError as error:
-            raise VerticalGridError(str(error)) from None
+            hint = "" if stretch_z == 0 else stretch_z1_fit_hint(
+                nk=nk, ztop_m=ztop_m, str_bot_m=str_bot_m, str_top_m=str_top_m,
+                dz_bot_m=dz_bot_m, dz_top_m=dz_top_m,
+            )
+            raise VerticalGridError(f"{error}: {hint}" if hint else str(error)) from None
         derived = grid.derived
         pieces = {
             "zf": grid.zf, "zh": grid.zh, "sigmaf": grid.sigmaf, "sigma": grid.sigma,
@@ -809,6 +937,10 @@ def uniform_vertical_levels(nk: int, dz_m: float) -> VerticalLevels:
 
 __all__ = (
     "ADMITTED_STRETCH_Z",
+    "LEVEL_COUNT_HINT",
+    "StretchZ1Fit",
+    "stretch_z1_fit",
+    "stretch_z1_fit_hint",
     "STRETCH_Z2_REFUSAL",
     "PINNED_FORNBERG_F32",
     "SOURCE_ANCHORS",

@@ -55,9 +55,11 @@ RUNS = json.loads((ROOT / "src/cm1core/records/GM1-HURRICANE-RUNS.json").read_te
 WORDS = RUNS["words"]
 NEEDS_MATPLOTLIB = pytest.mark.skipif(importlib.util.find_spec("matplotlib") is None,
                                       reason="the quick-looks need matplotlib")
-#: The four settings of the hurricane preset that run and are not yet compared with CM1, as the card says them.
+#: The three settings of the hurricane preset that run and are not yet compared with CM1, as the card says them.
+#: Its levels (three equal 50 m layers at the ground, 500 m ones at the top) are not among them: CM1 ran the 8 km
+#: hurricane on these levels with the same vortex, drag and Morrison (records/GM1-HURRICANE-RUNS.json), so the
+#: stretched-levels row leaves the presets' own case out (unvalidated.HURRICANE_PRESET_COLUMN).
 NOT_COMPARED = [
-    "A stretched vertical grid has not been checked against CM1 once clouds form.",
     "The large-scale pressure gradient has not been checked against CM1 in a storm.",
     "Repeating sides have not been fully checked against CM1 yet.",
     "Ground friction has been compared with CM1 in one storm on one card only: CM1's supercell on an RTX 4090 "
@@ -311,7 +313,7 @@ def test_settings_not_yet_compared_with_cm1_are_listed_and_do_not_hold_a_preset_
     assert squall["why_not"] == "Not offered yet: not run yet. Nobody has run this storm on a GPU as it is set up here."
     after_a_run = P.examine(P.load("squall-line-1km", offered_copy(tmp_path, "squall-line-1km")))
     assert after_a_run["offered"] is True and after_a_run["why_not"] is None and after_a_run["reasons"] == []
-    assert after_a_run["not_compared"] == [NOT_COMPARED[2]]
+    assert after_a_run["not_compared"] == [NOT_COMPARED[1]]
     said = P.not_compared_words(NOT_COMPARED)
     assert said == "Runs, not yet compared with CM1: " + " ".join(NOT_COMPARED)
     assert P.not_compared_words([]) is None
@@ -332,7 +334,8 @@ def test_a_refusal_and_a_missing_acknowledgment_still_block(tmp_path):
     assert refused["exit"] != 0 and refused["offered"] is False
     assert any("drag" in reason.lower() for reason in refused["reasons"]), refused["reasons"]
     assert not set(refused["reasons"]) & set(NOT_COMPARED)
-    # The stretched grid of CM1's file as it is (levels stretched from the ground) is refused too.
+    # CM1's file as it is is refused too (its sideways-stretched grid, its boundary layer scheme, its drag), though
+    # its levels, which stretch from the ground, now run.
     stock = (ROOT / "tests/data/cm1import/r21.1-hurricane_3d_cpm.namelist.input").read_text(encoding="ascii")
     as_shipped = _guided(stock, tmp_path, "stock", hurricane.sounding_path)
     assert as_shipped["exit"] != 0 and as_shipped["offered"] is False and len(as_shipped["reasons"]) >= 5
@@ -1041,7 +1044,7 @@ def test_the_gallery_card_the_budget_screen_and_results_of_a_hurricane(live):
     # The squall lines stay greyed with the plain reason, and say what is not yet compared.
     assert rows["squall-line-1km"]["offered"] is False
     assert rows["squall-line-1km"]["why_not"].startswith("Not offered yet: not run yet.")
-    assert rows["squall-line-1km"]["not_compared"] == [NOT_COMPARED[2]]
+    assert rows["squall-line-1km"]["not_compared"] == [NOT_COMPARED[1]]
     fitted = client.post("/api/fit", {"preset": HURRICANE, "budget": "1h", "custom": {"sea": 29}}).json
     assert fitted["offered"], fitted["message"]
     fit = fitted["fit"]

@@ -260,7 +260,13 @@ class CartesianFinish:
         # axis must not repair its number concentrations here.
         self.repaired_scalars = self.profile.repaired_scalars
         self.apmasscon = compile_cuda_apmasscon()
-        self.forecast = compile_cuda_gm1_forecast()
+        # The image the dynamics published the start-up rr/rf with: the sealed one, or
+        # its level variant on a column whose end layers are not equally deep.
+        from .cuda_gm1_level_density import compile_cuda_gm1_forecast_for_levels
+
+        self.forecast = compile_cuda_gm1_forecast_for_levels(
+            self.grid.levels, compile_sealed=compile_cuda_gm1_forecast
+        )
         self.eos = compile_cuda_gm1_rk3_eqtset2_remove_eos()
         self.pdefq_compiled = compile_cuda_wsm6_pdefq()
         # One workspace for the life of the runtime.  It was being allocated

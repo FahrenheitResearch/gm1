@@ -4723,51 +4723,95 @@ def require_vertical_coordinate(config: "CM1Config") -> "VerticalLevels":
     # :9004-9007 divide every node by that end's own layer depth.  The spacing
     # therefore cancels: on any column whose relevant three layers share one
     # depth the weights are analytically (1.875, -1.25, 0.375), whatever that
-    # depth is.  So the question worth asking of a coordinate is whether those
-    # three layers *are* one depth -- not whether a fresh f32 recomputation of
-    # the weights returns the pinned words bit for bit.  It was the second
-    # question that stood here, and it refused a plain uniform grid whenever dz
-    # had no exact binary32 spelling: at 40 x 333.3 m the top faces round by
-    # one f32 ulp, the recomputation returns (1.8750014, -1.2500057, 0.3750043)
-    # and the grid was turned away, while the arithmetically identical 500.0 m
-    # column passed.  A refusal that fires on valid input is a defect, so the
-    # test now reads cm1_vertical_grid's construction-level predicate, which
-    # is decided on the heights the generator was asked for, before any of them
-    # is rounded into the f32 coordinate.  The defect the refusal exists to
-    # prevent is unchanged and is named below.
+    # depth is, and the sealed kernels carry those three numbers inline.
+    #
+    # Whether an end's three layers *are* one depth is decided on the heights
+    # the generator was asked for, before any of them is rounded into the f32
+    # coordinate (cm1_vertical_grid's construction-level predicate), so a
+    # uniform grid whose dz has no exact binary32 spelling is not turned away.
+    #
+    # A column whose end layers are not equally deep (str_bot = 0 is CM1's
+    # common setting) runs on the flat Cartesian lane: the one kernel of its
+    # step that reads those numbers, the face density at the ground and the
+    # model top, is launched with the column's own cgs/cgt
+    # (cuda_gm1_level_density), and the surface pressure, the sounding surface
+    # and the nudging ghosts already took them.  What still carries the
+    # equal-spacing numbers is named below and refused by name.
     if not levels.fornberg_matches_pinned_kernels():
-        edge = "lowest" if not levels.lowest_layers_equally_spaced else "highest"
-        depths = (
-            levels.spacings_m[:3]
-            if edge == "lowest"
-            else tuple(reversed(levels.spacings_m[-3:]))
-        )
-        refuse(
-            code="CM1-CFG-VERTICAL-FORNBERG",
-            gate="support-matrix",
-            reason=(
-                f"this coordinate's {edge} three layers are {depths[0]}, "
-                f"{depths[1]} and {depths[2]} m deep, so its own "
-                "param.F:8985-9060 quadratic is fitted through three levels "
-                "that are not equally spaced, but the compiled kernels of "
-                "cuda_gm1_forecast, cuda_terrain_open_boundary, "
-                "cuda_terrain_deformation, cuda_gm1_scalar_turbulence, "
-                "cuda_gm1_child_stretched_nm_def and cuda_storm_diagnostics all "
-                f"carry {PINNED_FORNBERG_F32} inline, which is the quadratic "
-                "through three *equally* spaced nodes; rf0 at the "
-                f"{edge} face, the w-level u/v averages, the scalar and "
-                "momentum w-level interpolations and the surface stress would "
-                "each be extrapolated from a parabola fitted to the wrong "
-                "three levels"
-            ),
-            remedy=(
-                f"keep the {edge} three scalar levels uniformly spaced -- for stretch_z=1 "
-                "that is str_bot_m >= 3*dz_bot_m and ztop_m - str_top_m >= 3*dz_top_m"
-            ),
-            option="grid.stretch_z",
-            value=g.stretch_z,
-        )
+        holder = _equal_end_layers_holder(config)
+        if holder is not None:
+            what, option, value, without = holder
+            edge = "lowest" if not levels.lowest_layers_equally_spaced else "highest"
+            depths = (
+                levels.spacings_m[:3]
+                if edge == "lowest"
+                else tuple(reversed(levels.spacings_m[-3:]))
+            )
+            refuse(
+                code="CM1-CFG-VERTICAL-FORNBERG",
+                gate="support-matrix",
+                reason=(
+                    f"this coordinate's {edge} three layers are {depths[0]}, "
+                    f"{depths[1]} and {depths[2]} m deep, so its own "
+                    "param.F:8985-9060 quadratic is fitted through three levels "
+                    f"that are not equally spaced, but {what} "
+                    f"{PINNED_FORNBERG_F32} inline, which is the quadratic "
+                    "through three *equally* spaced nodes; the values at the "
+                    f"{edge} face would be extrapolated from a parabola fitted "
+                    "to the wrong three levels"
+                ),
+                remedy=(
+                    f"keep the {edge} three scalar levels uniformly spaced -- for stretch_z=1 "
+                    "that is str_bot_m >= 3*dz_bot_m and ztop_m - str_top_m >= 3*dz_top_m -- "
+                    f"or run this column without {without}"
+                ),
+                option=option,
+                value=value,
+            )
     return levels
+
+
+def _equal_end_layers_holder(config: "CM1Config") -> "tuple[str, str, Any, str] | None":
+    """What in this run still carries the equal-spacing end weights, if anything.
+
+    ``(what, option, value, without)`` for the first holder, ``None`` when the
+    run is the flat Cartesian step alone, which takes the column's own weights.
+    """
+
+    if config.run.lane is not Lane.CARTESIAN:
+        return (
+            "this lane's compiled kernels (cuda_gm1_forecast, cuda_terrain_open_boundary, "
+            "cuda_terrain_deformation, cuda_gm1_scalar_turbulence, "
+            "cuda_gm1_child_stretched_nm_def and cuda_storm_diagnostics) all carry",
+            "run.lane",
+            config.run.lane.value,
+            "this lane (run.lane = \"cartesian\" takes the column's own weights)",
+        )
+    if config.nest is not None:
+        return (
+            "a nest's child step, which runs the terrain-following kernels on the child's "
+            "own column, carries",
+            "nest",
+            "declared",
+            "the [nest] table",
+        )
+    if config.chain is not None:
+        return (
+            "a run driven by a saved ArWen history, whose terrain-following kernels are the "
+            "sealed ones, carries",
+            "chain",
+            "declared",
+            "the [chain] table",
+        )
+    if config.lagrangian is not None:
+        return (
+            "the parcel and budget outputs, which have not been run on such a column and "
+            "whose vorticity budget (cuda_storm_diagnostics) carries",
+            "lagrangian.iprcl",
+            getattr(config.lagrangian, "iprcl", "declared"),
+            "the [lagrangian] table (the parcels and the budget outputs)",
+        )
+    return None
 
 
 def parse_mapping(raw: Mapping[str, Any]) -> CM1Config:

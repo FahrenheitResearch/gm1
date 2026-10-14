@@ -436,19 +436,23 @@ def test_the_module_opens_no_numerical_runtime_on_import() -> None:
     )
 
 
-def test_a_coordinate_the_compiled_kernels_cannot_extrapolate_is_named() -> None:
-    """The guard that makes the recomputation safe to ship.
+def test_a_column_graded_inside_its_lowest_three_layers_runs_with_its_own_weights() -> None:
+    """The end-layer rule is lifted for the flat Cartesian step.
 
     Six compiled GM1 kernel families carry ``(1.875, -1.25, 0.375)`` inline as
-    the lower and upper boundary extrapolation.  That triple is only this
-    grid's own ``param.F:8985-9060`` answer while the three levels at each end
-    are equally spaced.  A deck whose column stretches inside those three is
-    refused by name rather than silently extrapolated from the wrong parabola.
+    the lower and upper boundary extrapolation.  That triple is only a grid's
+    own ``param.F:8985-9060`` answer while the three levels at each end are
+    equally spaced.  On flat ground one of those kernels acts on the result,
+    the face density (``solve3.F:678-679``), and the Cartesian lane launches
+    it with the column's own weights (``cuda_gm1_level_density``), so a deck
+    whose column stretches inside those three is admitted.  What still
+    carries the triple is refused by name.
     """
 
     import tomllib
 
     from cm1core.config import parse_mapping
+    from cm1core.cuda_gm1_level_density import boundary_density_weights
 
     raw = tomllib.loads(
         (ROOT / "examples" / "cartesian-stretched-tornado-grade-grid.toml").read_text(
@@ -464,14 +468,24 @@ def test_a_coordinate_the_compiled_kernels_cannot_extrapolate_is_named() -> None
         str_bot_m=0.0, str_top_m=0.0, dz_bot_m=0.0, dz_top_m=0.0, levels_m=faces,
     )
     raw["closures"]["upper_damping_depth_m"] = 1000.0
+    config = parse_mapping(raw)
+    levels = require_grid_extent(config).levels
+    assert not levels.lowest_layers_equally_spaced and levels.highest_layers_equally_spaced
+    ground, top = boundary_density_weights(levels)
+    assert ground == levels.cgs != PINNED_FORNBERG_F32
+    assert top == PINNED_FORNBERG_F32
+    # The parcel and budget outputs still carry the triple: refused by name.
+    with_parcels = dict(raw)
+    with_parcels["lagrangian"] = {"iprcl": 0}
     with pytest.raises(CM1Refusal) as caught:
-        parse_mapping(raw)
+        parse_mapping(with_parcels)
     detail = caught.value.detail
     assert detail.code == "CM1-CFG-VERTICAL-FORNBERG"
-    assert "cuda_gm1_forecast" in detail.reason
-    assert "rf0" in detail.reason
+    assert detail.option == "lagrangian.iprcl"
+    assert "cuda_storm_diagnostics" in detail.reason
     assert "1.875" in detail.reason
-    # The same column with its lowest three layers equal is admitted.
+    assert "20.0, 40.0 and 80.0 m deep" in detail.reason
+    # The same column with its lowest three layers equal needs no such care.
     faces = [0.0, 20.0, 40.0, 60.0]
     while len(faces) < nk + 1:
         faces.append(faces[-1] + 320.0)
@@ -479,6 +493,10 @@ def test_a_coordinate_the_compiled_kernels_cannot_extrapolate_is_named() -> None
     config = parse_mapping(raw)
     assert config.grid.stretch_z == 4
     assert require_grid_extent(config).lowest_mass_level_m == 10.0
+    assert boundary_density_weights(require_grid_extent(config).levels) is None
+    with_parcels = dict(raw)
+    with_parcels["lagrangian"] = {"iprcl": 0}
+    assert parse_mapping(with_parcels).lagrangian is not None
 
 
 @pytest.mark.parametrize(
@@ -580,8 +598,8 @@ def test_the_pinned_quadratic_follows_the_stretch_z1_segment_depths() -> None:
     assert not graded_top.fornberg_matches_pinned_kernels()
 
 
-def test_a_graded_end_triplet_is_still_refused_by_the_result_it_prevents() -> None:
-    """The named defect survives the fix: the guard still fires on real grading."""
+def test_a_graded_end_triplet_is_still_refused_where_the_triple_is_still_carried() -> None:
+    """The named defect survives the lift wherever the sealed kernels still run."""
 
     import tomllib
 
@@ -596,23 +614,26 @@ def test_a_graded_end_triplet_is_still_refused_by_the_result_it_prevents() -> No
         str_top_m=7000.0, dz_bot_m=20.0, dz_top_m=320.0,
     )
     raw["closures"]["upper_damping_depth_m"] = 1000.0
+    # The flat Cartesian step alone: admitted, with the top's own weights.
+    levels = require_grid_extent(parse_mapping(raw)).levels
+    assert levels.lowest_layers_equally_spaced and not levels.highest_layers_equally_spaced
+    # Parcels and budgets declared: refused, naming the column's own depths.
+    raw["lagrangian"] = {"iprcl": 0}
     with pytest.raises(CM1Refusal) as caught:
         parse_mapping(raw)
     detail = caught.value.detail
     assert detail.code == "CM1-CFG-VERTICAL-FORNBERG"
-    assert detail.option == "grid.stretch_z"
-    # The refusal names the concrete wrong result and this column's own depths.
+    assert detail.option == "lagrangian.iprcl"
     for fragment in (
         "highest three layers",
         "320.0, 320.0 and 312.30712890625 m deep",
-        "cuda_gm1_forecast",
         "cuda_storm_diagnostics",
-        "rf0",
-        "surface stress",
         "(1.875, -1.25, 0.375)",
+        "wrong three levels",
     ):
         assert fragment in detail.reason, fragment
     assert "str_bot_m >= 3*dz_bot_m" in detail.remedy
+    assert "without the [lagrangian] table" in detail.remedy
 
 
 # ---------------------------------------------------------------------------
@@ -626,6 +647,10 @@ def test_a_graded_end_triplet_is_still_refused_by_the_result_it_prevents() -> No
         ("stretched-column-32", "stretched-column-32"),
         ("explicit-w-levels-32", "explicit-w-levels-32"),
         ("explicit-scalar-levels-32", "explicit-scalar-levels-32"),
+        # Columns whose end layers are not equally deep (str_bot = 0, and str_top = ztop).
+        ("stretched-ground-32", "stretched-ground-32"),
+        ("stretched-both-ends-32", "stretched-both-ends-32"),
+        ("stretched-ground-drag-32", "stretched-ground-drag-32"),
     ],
 )
 def test_every_stretched_branch_reproduces_cm1s_own_written_column(

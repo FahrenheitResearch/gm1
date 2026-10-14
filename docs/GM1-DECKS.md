@@ -242,8 +242,10 @@ gpuwm-cm1 estimate runs/stretched
 - 256 x 256 x 75 at 250 m over 64 km: about 5.2 GB (an 8 GB card with little else on it).
 - Set all of the stretch values together. `stretch_z = 1` alone on CM1's file is refused, and `zd` (where the upper
   damping layer starts) must be below `ztop`: CM1's file has `zd = 15000`, which with a 15 km top is refused.
-- Label: "Not yet checked against CM1" for `stretch_z = 1`. Stretched levels match CM1 in dry comparisons; no
-  stretched run has been compared with CM1 after cloud forms. The tornado runs all used this kind of column.
+- Label: "Not yet checked against CM1" for `stretch_z = 1`. One stretched column, 53 levels from 100 m to 500 m
+  under a 19.3 km top, has been compared with CM1 in a storm with cloud ("Stretched levels" in
+  [`CM1-USERS.md`](CM1-USERS.md)); this one (ten 20 m layers at the ground, twenty-five 320 m layers at the top) has
+  not, and the row says so. The tornado runs all used this kind of column.
 - On a stretched column the updraft-helicity and vorticity swaths (`output_uh`, `output_vort`, `output_svs`,
   `output_shs`) are not written; the report lists them under "Runs differently".
 - The estimate warns that this storm nears the edge after about 28 minutes and prints a frame and bubble position
@@ -262,7 +264,7 @@ gpuwm-cm1 estimate runs/tornado-physics
 ```
 
 - Label: three "Not yet checked against CM1" rows (the report's heading counts four, because it counts keys and
-  one row has two): stretched levels with cloud; `lspgrad = 1`, compared only in
+  one row has two): the levels, as above; `lspgrad = 1`, compared only in
   a 15-minute bubble and a column; and the semi-slip ground with the surface layer, not compared in a storm on this
   kind of grid. On the uniform 1 km supercell the drag alone gave nine of ten statistics within 1.3 % of CM1's
   (release notes).

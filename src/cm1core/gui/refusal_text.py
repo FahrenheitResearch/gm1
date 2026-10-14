@@ -184,21 +184,64 @@ def _psolver(value: Any, context: Context) -> RefusalText:
     )
 
 
-def _stretch_z(value: Any, context: Context) -> RefusalText:
+def _stretch_z(value: Any, context: Context) -> RefusalText | None:
     level = _int(value)
     if level == 2:
-        cm1 = ("stretch_z = 2 is not available: CM1's own generator leaves its top face and ztop at "
-               "two different heights (param.F:9897-9937), and a GM1 grid has one model top.")
-    elif level in (3, 4):
-        cm1 = (f"stretch_z = {value} reads the vertical levels from the input_grid_z file "
-               "(param.F:8013, 8083), which the importer does not read yet.")
-    else:
-        cm1 = None
+        return RefusalText(
+            cm1=("stretch_z = 2 is not available: CM1 builds these levels by trial (param.F:9897-9937) and "
+                 "does not make them end at ztop, so its Rayleigh damping layer is measured from one model "
+                 "top and its terrain coordinate from another; a GM1 grid has one model top."),
+            fix=("Use stretch_z = 1 (CM1's analytic stretching), or 0 for even levels. To run on the levels "
+                 "CM1's stretch_z = 2 builds, write the scalar level heights from CM1's own output (zh) into "
+                 "an input_grid_z file and use stretch_z = 3; the model top is then the top of those levels."),
+            plain="This way of stretching the vertical grid is not available in GM1.",
+            plain_fix="Use even levels or the standard stretching.",
+        )
+    if level in (3, 4):
+        which = "scalar" if level == 3 else "w"
+        return RefusalText(
+            cm1=(f"stretch_z = {value} reads its {which} levels from the input_grid_z file "
+                 "(param.F:8013, 8083), and there is no input_grid_z beside the namelist."),
+            fix=("Put CM1's input_grid_z beside the namelist and import again, or use stretch_z = 1 "
+                 "(CM1's analytic stretching) or 0 for even levels."),
+            plain="This vertical grid needs its file of level heights, and the file was not found.",
+            plain_fix="Put the input_grid_z file beside the namelist, or use even levels.",
+        )
+    return _level_words(value, context)
+
+
+def _level_words(value: Any, context: Context) -> RefusalText | None:
+    """stretch_z = 1 with level words CM1 stops on: the nz that fits, or the part that is not whole."""
+
+    from ..cm1_vertical_grid import stretch_z1_fit, stretch_z1_fit_hint
+
+    if _int(context.get("stretch_z")) != 1:
+        return None
+    try:
+        words = {name: float(context[name]) for name in ("ztop", "str_bot", "str_top", "dz_bot", "dz_top")}
+        nz = int(context["nz"])
+    except (KeyError, TypeError, ValueError):
+        return None
+    keys = dict(ztop_m=words["ztop"], str_bot_m=words["str_bot"], str_top_m=words["str_top"],
+                dz_bot_m=words["dz_bot"], dz_top_m=words["dz_top"])
+    fit = stretch_z1_fit(**keys)
+    hint = stretch_z1_fit_hint(nk=nz, **keys)
+    if fit is None or not hint:
+        return None
+    if fit.nz is not None:
+        return RefusalText(
+            cm1=(f"nz = {nz} does not fit these stretched levels: CM1 needs nz = {fit.nz} here ({fit.nk1} "
+                 f"layers of dz_bot below str_bot, {fit.nk2} stretched layers between str_bot and str_top, "
+                 f"{fit.nk3} layers of dz_top above str_top; param.F:7823-7877)."),
+            fix=f"Set nz = {fit.nz}.",
+            plain=f"The number of levels does not match these stretched levels; they need {fit.nz}.",
+            plain_fix=f"Use {fit.nz} levels.",
+        )
     return RefusalText(
-        cm1=cm1,
-        fix="Use stretch_z = 1 (CM1's analytic stretching), or 0 for even levels.",
-        plain="This way of stretching the vertical grid is not available in GM1.",
-        plain_fix="Use even levels or the standard stretching.",
+        cm1=f"These stretched levels do not fit together: {hint}.",
+        fix="Change the named height so that each part is a whole number of layers, then set nz to the count.",
+        plain="These stretched levels do not fit together.",
+        plain_fix="Change the heights so each part holds a whole number of layers.",
     )
 
 
@@ -237,6 +280,12 @@ BY_KEY: Mapping[str, Entry] = {
     "psolver": _psolver,
     "stretch_x": _stretch("x"),
     "stretch_z": _stretch_z,
+    "nz": _level_words,
+    "str_bot": _level_words,
+    "str_top": _level_words,
+    "dz_bot": _level_words,
+    "dz_top": _level_words,
+    "ztop": _level_words,
     "stretch_y": _stretch("y"),
     "idiss": _fixed(
         "GM1 always includes dissipative heating (idiss = 1); idiss = {value} turns it off in CM1.",
@@ -551,9 +600,12 @@ BY_CODE: Mapping[str, Entry] = {
         "Turn the budget output off.",
     ),
     "CM1-CFG-VERTICAL-FORNBERG": _fixed(
-        None, None,
-        "This stretched vertical grid is not supported: its bottom or top layers change depth too fast.",
-        "Use a uniform vertical grid, or stretch it more gently.",
+        "These levels stretch from the ground or to the model top (the lowest or the highest three layers are "
+        "not equally deep), and GM1 does not run parcels or the budget outputs on such levels yet.",
+        "Turn the parcels and budget outputs off (iprcl = 0), or keep three equal layers at each end: str_bot "
+        "of at least 3 x dz_bot, and ztop - str_top of at least 3 x dz_top.",
+        "Levels that stretch right from the ground or right to the top do not run with parcels or nested grids yet.",
+        "Turn the parcels off, or keep the lowest three and the highest three layers equally deep.",
     ),
     "CM1-CFG-INTEGER": _fixed(
         None, None,

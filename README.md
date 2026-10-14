@@ -172,7 +172,8 @@ uninstalling, the exact tested versions (`constraints-gpu-cu13.txt`), uv, cluste
   from a terminal) with the estimate updating as you change it, the live view and results on four quick-looks; or, in advanced mode, the namelist editor, the coverage report, every
   setting, the estimator's numbers, resume and job scripts, with "Show command" beside every action.
 
-Uniform grids from 100 m to 2 km through an imported namelist (the GUI's guided mode takes any grid spacing you pick or type
+Uniform grids from 100 m to 2 km, and CM1's stretched levels (compared with CM1 in a storm), through an imported namelist
+(the GUI's guided mode takes any grid spacing you pick or type
 for a thunderstorm, and runs its hurricanes at 8 km and 4 km), and
 through GM1's own decks also stretched near-ground levels and storm-following nests ("Beyond the GUI", above); Morrison (`ptype = 5`) and WSM6 (`ptype = 7`)
 microphysics, Thompson (`ptype = 3`) after an acknowledgment (CM1's own file also needs `nt_c = 100.0` for it). What

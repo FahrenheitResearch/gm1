@@ -15,7 +15,7 @@
 #
 #   curl -LsSf https://raw.githubusercontent.com/FahrenheitResearch/gm1/main/install.sh | sh -s -- --uninstall
 #
-# Settings, as environment variables (GM1_VERSION=0.1.6 sh install.sh):
+# Settings, as environment variables (GM1_VERSION=0.1.7 sh install.sh):
 #
 #   GM1_VERSION=X.Y.Z        install this release instead of the newest
 #   GM1_WHEEL=FILE.whl       install this wheel file (a build not on PyPI yet)

@@ -8,8 +8,9 @@ from the records the runtime itself keeps, so the report and a run's receipt
 say the same thing:
 
 * ``unvalidated.py`` and ``dynamics_validation_register.py`` (the receipt's
-  ``unvalidated`` block): a stretched column with cloud, ``kdiv`` other than
-  0.10, ``lspgrad = 1``, and the others they name;
+  ``unvalidated`` block): stretched levels other than the column compared
+  with CM1 in a storm, ``kdiv`` other than 0.10, ``lspgrad = 1``, and the
+  others they name;
 * ``boundary_validation_register.py``: rigid walls, ``irbc = 1``, and the
   periodic sides' SGS-closure caveat (the fix removes it, and this row with it);
 * ``cm1_output_selection.py`` and the translation's ``output_not_admitted``:
@@ -63,13 +64,72 @@ SCHEME_NAMES: Mapping[str, str] = {
     "thompson-mp8": "Thompson",
 }
 
+#: The stretched-levels row in CM1 words, one sentence for each reason the
+#: runtime register gives (``unvalidated.stretched_levels_reasons``); the row
+#: reads "Runs. " and then the sentences of its reasons.
+STRETCHED_LEVELS_TEXT: Mapping[str, str] = {
+    "ends": (
+        "These levels are not equally deep at the ground or the top (str_bot = 0, or str_top = ztop); "
+        "compared with CM1 in a supercell on such levels with ground friction (bbc = 3, sfcmodel = 1, "
+        "cecd = 1), all ten statistics are within their bands; with a free-slip ground one statistic, max "
+        "vertical vorticity, came out 16 % high"
+    ),
+    "deeper": (
+        "These levels go higher than the one stretched column compared with CM1 in a storm (nz = 53 under "
+        "ztop = 19300, with Morrison: all ten statistics within their bands); on a 25 km column with three "
+        "equal 50 m layers at the ground a supercell with a free-slip ground had max vertical vorticity "
+        "12 % high"
+    ),
+    "levels": (
+        "These are not the stretched levels compared with CM1 in a storm (nz = 53, ztop = 19300, "
+        "str_bot = 300, str_top = 9300, dz_bot = 100, dz_top = 500, with Morrison: all ten statistics within "
+        "their bands); no storm on these levels has been compared with CM1"
+    ),
+    "scheme": (
+        "{scheme} ({ptype}) has not been run on stretched levels; the storms compared with CM1 on stretched "
+        "levels used Morrison (ptype = 5)"
+    ),
+}
+
+#: Plain words for the same row, by its first reason; a scheme other than
+#: Morrison is said first whatever the levels, since no storm has run it on
+#: stretched levels.
+STRETCHED_LEVELS_PLAIN: Mapping[str, str] = {
+    "ends": (
+        "These levels run. With ground friction they matched CM1 in a storm test; on a slippery ground "
+        "the strongest spin came out 16 % high."
+    ),
+    "deeper": (
+        "These levels run, but go higher than the one stretched set checked against CM1; on a slippery "
+        "ground the strongest spin came out 12 % high."
+    ),
+    "levels": "These levels run, but only one stretched set has been checked against CM1 in a storm, and not this one.",
+    "scheme": (
+        "These levels run, but {scheme} has not been checked against CM1 on stretched levels; the storm "
+        "checks used Morrison."
+    ),
+}
+
+
+def stretched_levels_words(record: Mapping[str, Any]) -> tuple[str, str] | None:
+    """``(text, plain)`` of the stretched-levels row for one flat record, or ``None`` when it has none."""
+
+    from ..unvalidated import stretched_levels_reasons, stretched_scheme_words
+
+    reasons = stretched_levels_reasons(record)
+    if not reasons:
+        return None
+    scheme, ptype = stretched_scheme_words(record.get("physics.component"))
+    text = "Runs. " + ". ".join(
+        STRETCHED_LEVELS_TEXT[reason].format(scheme=scheme, ptype=ptype) for reason in reasons
+    )
+    first = "scheme" if "scheme" in reasons else reasons[0]
+    plain = STRETCHED_LEVELS_PLAIN[first].format(scheme=scheme)
+    return text, plain
+
+
 #: Short texts for the runtime register's options, in CM1 words.
 UNVALIDATED_TEXT: Mapping[str, str] = {
-    "grid.stretch_z": (
-        "A stretched vertical grid matches CM1 in dry runs, but no stretched run has been compared "
-        "with CM1 once cloud forms: the rain and hail fall through layers whose depth the uniform "
-        "grid never tested"
-    ),
     "dynamics.kdiv": (
         "Divergence damping has been compared with CM1 only at kdiv = 0.10, the value every CM1 "
         "deck ships"
@@ -83,7 +143,6 @@ UNVALIDATED_TEXT: Mapping[str, str] = {
 
 #: Plain words for the same rows.
 UNVALIDATED_PLAIN: Mapping[str, str] = {
-    "grid.stretch_z": "A stretched vertical grid has not been checked against CM1 once clouds form.",
     "dynamics.kdiv": "This sound-wave damping setting has not been checked against CM1.",
     "dynamics.lspgrad": "The large-scale pressure gradient has not been checked against CM1 in a storm.",
 }
@@ -341,8 +400,8 @@ def run_rows(builder: "_Builder", component: str) -> list[Row]:
                 "and CM1's weakens (measured; the numbers are in the evidence record)"
             ),
             fix="set adapt_dt = 0 and a dtl the storm's fastest wind allows (the hurricane presets use 7.5 s)",
-            plain=("The time step that changes with the storm runs differently from CM1's on stretched levels: "
-                   "on the hurricane case it stopped early or made a much weaker storm (measured)."),
+            plain=("The time step that changes with the storm runs differently on stretched levels: the hurricane "
+                   "stopped early or was much weaker (measured)."),
             evidence="records/GM1-HURRICANE-RUNS.json",
             stage="register",
         ))
@@ -431,7 +490,8 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
     rows: list[Row] = []
     seen: set[str] = set()
 
-    def option_row(option: str, text: str, evidence: str | None, detail: str | None = None) -> None:
+    def option_row(option: str, text: str, evidence: str | None, detail: str | None = None,
+                   plain: str | None = None) -> None:
         keys = builder.cm1_keys(option) or (option,)
         if option in seen:
             return
@@ -445,12 +505,14 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
             evidence=evidence,
             option=option,
             stage="register",
-            plain=UNVALIDATED_PLAIN.get(option, "This setting has not been checked against CM1 at this value."),
+            plain=plain or UNVALIDATED_PLAIN.get(option,
+                                                 "This setting has not been checked against CM1 at this value."),
         ))
 
     for capability in unvalidated.selected(flat):
-        option_row(capability.option, UNVALIDATED_TEXT.get(capability.option, capability.not_checked),
-                   "src/cm1core/unvalidated.py", capability.not_checked)
+        words = stretched_levels_words(flat) if capability.option == "grid.stretch_z" else None
+        text, plain = words if words else (UNVALIDATED_TEXT.get(capability.option, capability.not_checked), None)
+        option_row(capability.option, text, "src/cm1core/unvalidated.py", capability.not_checked, plain)
     dynamics = SimpleNamespace(**document.get("dynamics", {}))
     for capability in unvalidated.dynamics_rows(dynamics):
         option_row(capability.option, UNVALIDATED_TEXT.get(capability.option, capability.not_checked),
@@ -551,4 +613,5 @@ def known_rows(builder: "_Builder", component: str) -> list[Row]:
     )
 
 
-__all__ = ["PARAM9_WORDS", "UNVALIDATED_TEXT", "known_rows"]
+__all__ = ["PARAM9_WORDS", "STRETCHED_LEVELS_PLAIN", "STRETCHED_LEVELS_TEXT", "UNVALIDATED_TEXT", "known_rows",
+           "stretched_levels_words"]

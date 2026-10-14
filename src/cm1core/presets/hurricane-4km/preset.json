@@ -123,7 +123,7 @@
         "key": "str_bot",
         "from": 0.0,
         "to": 150.0,
-        "why": "the lowest three levels equally spaced at 50 m, which GM1 needs"
+        "why": "the lowest three levels equally spaced at 50 m, the levels this storm was run on"
       },
       {
         "key": "str_top",

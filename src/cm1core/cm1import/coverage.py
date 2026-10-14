@@ -887,6 +887,14 @@ class _Builder:
                 self.add(self.describe(row, self.effective.get(key) if key else None))
                 if not key:
                     return None
+                if "does not build" in message and "stretch_z=1 column" in message:
+                    # One row says what is wrong with the stretched levels.  The rest of the
+                    # namelist is then read on even levels, so no later row is about a column
+                    # the user did not ask for.
+                    self.set_aside[key] = self.effective.get(key)
+                    self.set_aside["stretch_z"] = 0
+                    self.effective["stretch_z"] = 0
+                    continue
                 neutral = self.neutral_value(key)
                 if neutral is None:
                     return None
@@ -1371,6 +1379,17 @@ def _translation_key(message: str, effective: Mapping[str, Any]) -> str | None:
     import re
 
     if "stretch_z=" in message and "reads its levels from a file" in message:
+        return "stretch_z"
+    # A stretched column that does not build is about the level words, not about zd,
+    # the word whose translation happened to build it first (translate.model_top_m).
+    if "does not build" in message and "stretch_z=1 column" in message:
+        from ..cm1_vertical_grid import LEVEL_COUNT_HINT
+
+        if LEVEL_COUNT_HINT in message:
+            return "nz"
+        for word in ("str_bot", "str_top", "dz_bot", "dz_top", "ztop"):
+            if f"{word} =" in message or f"{word} -" in message:
+                return word
         return "stretch_z"
     match = re.match(r"CM1 (\w+) = ", message)
     if match:

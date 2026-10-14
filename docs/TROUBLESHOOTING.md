@@ -306,6 +306,38 @@ The usual reasons:
 - *This does not look like a sounding GM1 can read.* GM1 reads CM1's own file, a University of Wyoming text listing,
   a SHARPpy file, and a table whose first line names its columns. [`SOUNDINGS.md`](SOUNDINGS.md) shows each one.
 
+## Stretched levels (CM1 namelists)
+
+**"`nz = 40` does not fit these stretched levels".** With `stretch_z = 1` CM1 fixes the number of levels from the
+other five words, and `nz` has to be exactly that number. The message gives it ("CM1 needs `nz = 53` here"); set
+`nz` to it (`gpuwm-cm1 edit RUNDIR --set nz=53`, or the namelist screen of the GUI's advanced mode). "GM1 for CM1
+users" shows how the number is made up.
+
+**"These stretched levels do not fit together".** One of the three parts of the column is not a whole number of
+layers: `str_bot` must be a whole number of `dz_bot` layers, `ztop - str_top` a whole number of `dz_top` layers,
+and `str_top - str_bot` a whole number of layers of the mean depth `(dz_bot + dz_top) / 2`. The message names the
+part and the nearest heights that work. Change that height, then set `nz` to the number the next message gives.
+
+**"there is no input_grid_z beside the namelist".** `stretch_z = 3` and `4` read the level heights from CM1's
+`input_grid_z` file. Put the file in the same folder as the namelist and import again. It needs `nz` heights for
+`stretch_z = 3` and `nz + 1`, starting at 0, for `stretch_z = 4`, one per line, in metres, rising.
+
+**"`stretch_z = 2` is not available".** GM1 runs `stretch_z = 0`, `1`, `3` and `4`. To run on the levels CM1's
+`stretch_z = 2` builds, write the scalar-level heights from CM1's output (`zh`) into `input_grid_z` and use
+`stretch_z = 3`.
+
+**"GM1 does not run parcels or the budget outputs on such levels yet".** Levels that stretch from the ground
+(`str_bot = 0`) or to the model top (`str_top = ztop`) run, but not together with parcels (`iprcl = 1`), the budget
+outputs or a nest. Turn those off, or keep three equal layers at each end: `str_bot` of at least 3 × `dz_bot`, and
+`ztop - str_top` of at least 3 × `dz_top`.
+
+**Updraft helicity or vorticity is missing from the output.** On stretched levels an imported namelist does not
+save `output_uh`, `output_vort`, `output_shs` or `output_svs`; the report lists them under "Runs differently from
+CM1". The winds are saved, so they can be computed afterwards.
+
+**Customize this storm has no stretched levels.** Guided mode offers even levels only. Stretched levels are set
+from a namelist, as "GM1 for CM1 users" shows.
+
 ## Where things are
 
 **Your storms** are in the folder `gm1-runs` in your home folder (`~/gm1-runs`), unless you started the GUI with

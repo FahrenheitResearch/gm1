@@ -710,6 +710,13 @@ def translate(
         for name in ("stretch_z", "ztop_m", "str_bot_m", "str_top_m", "dz_bot_m", "dz_top_m", "levels_m"):
             gm1["grid"].pop(name, None)
     else:
+        if int(effective.get("stretch_z", 0)) in (3, 4):
+            # param.F:8005-8132 reads the level list and nothing else: it overwrites ztop
+            # with the generated top (:8037, :8105) and never reads str_bot, str_top, dz_bot
+            # or dz_top.  Honour the branch, as for stretch_z=0 above.
+            for name in ("ztop_m", "str_bot_m", "str_top_m", "dz_bot_m", "dz_top_m"):
+                if name in gm1["grid"]:
+                    gm1["grid"][name] = 0.0
         # calcvort and calcuh bind CM1's mh/mf vertical metric to one
         # (param.F:8170), so gpuwm-cm1 refuses these five on a non-uniform
         # column.  Set to 0 rather than removed: the group is all-or-none.

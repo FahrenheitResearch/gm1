@@ -13,7 +13,8 @@ before the release, and with a stand-in for the GPU in the CPU test suite.
 
 | CM1 | GM1 v0.1 |
 |---|---|
-| Uniform grids, 100 m to 2 km; `stretch_z` | Runs. `stretch_z` with cloud is "Not yet checked against CM1". |
+| Uniform grids, 100 m to 2 km | Runs. |
+| `stretch_z = 1`, `3`, `4` | Runs, including levels that stretch from the ground (`str_bot = 0`); compared with CM1 in a supercell ("Stretched levels", below). Levels that stretch from the ground or to the top are listed under "Not yet checked" with what that comparison found. `stretch_z = 2` is refused. |
 | `stretch_x`, `stretch_y` | Refused (every horizontal operator assumes uniform spacing); v0.2. |
 | `ptype = 5` (Morrison) | ArWen's WRF-lineage Morrison, not CM1's `morrison.F`. Matches CM1 on its supercell namelist within 5.1 % (below); the report names the one statistic past GM1's 5 % target. |
 | `ptype = 7` (WSM6) | Runs with `eqtset = 2`; CM1 forces `eqtset = 1` for WSM6, so the report says "Runs differently". |
@@ -133,6 +134,123 @@ default, false, its relative humidity falls as it is warmed, and on some soundin
 where a bubble fails either way, CM1's updraft nudging (`iinit = 12`) starts the storm with a sustained push, which
 is how the famous-day presets start theirs. Finer grids, stretched levels and nests are in
 [`GM1-DECKS.md`](GM1-DECKS.md).
+
+## Stretched levels
+
+CM1's `stretch_z = 1` puts thin layers near the ground and thicker ones aloft, and GM1 runs it as CM1 does. These
+commands take CM1's supercell from 40 even 500 m layers to 53 layers, 100 m deep at the ground and 500 m deep above
+9.3 km, check the result, price it and run it:
+
+```sh
+gpuwm-cm1 import cm1/supercell/namelist.input --out runs/stretched
+gpuwm-cm1 edit runs/stretched --set stretch_z=1 --set nz=53 --set ztop=19300.0 --set str_bot=300.0 --set str_top=9300.0 --set dz_bot=100.0 --set dz_top=500.0
+gpuwm-cm1 check runs/stretched/deck.toml
+gpuwm-cm1 estimate runs/stretched
+gpuwm-cm1 run runs/stretched
+```
+
+In the GUI the same steps are the Namelist, Settings and Run screens of `gpuwm-cm1 gui --mode advanced`.
+
+**CM1 fixes `nz`; you do not choose it.** The five words describe three parts, and CM1 counts the layers of each
+(`param.F:7823-7877`):
+
+| Part | Layers | In the example |
+|---|---|---|
+| below `str_bot`, layers of `dz_bot` | `str_bot / dz_bot` | 300 / 100 = 3 |
+| between `str_bot` and `str_top`, layers whose mean depth is `(dz_bot + dz_top) / 2` | `(str_top - str_bot) / ((dz_bot + dz_top) / 2)` | 9000 / 300 = 30 |
+| above `str_top`, layers of `dz_top` | `(ztop - str_top) / dz_top` | 10000 / 500 = 20 |
+
+`nz` must be the sum, 3 + 30 + 20 = 53, and each part must come out a whole number (CM1 allows 1 cm). `zd`, the
+bottom of the damping layer, must stay below the new `ztop`. When `nz` is not the sum, the report says which `nz`
+fits, and `gpuwm-cm1 check` says the same for a deck:
+
+```text
+Refused (1)
+  nz = 40: nz = 40 does not fit these stretched levels: CM1 needs nz = 53 here (3 layers of dz_bot
+      below str_bot, 30 stretched layers between str_bot and str_top, 20 layers of dz_top above
+      str_top; param.F:7823-7877).
+    Fix: Set nz = 53.
+```
+
+When a part is not a whole number of layers the row names it and the nearest heights that are ("`str_bot = 250` m is
+not a whole number of `dz_bot = 100` m layers (the nearest are 200 and 300 m)").
+
+**Levels that stretch from the ground.** `str_bot = 0`, CM1's common setting, has no even layers at the ground: the
+levels thicken from the first one. CM1's hurricane cases use 59 such levels, 50 m at the ground and 500 m above
+5.5 km. On the supercell:
+
+```sh
+gpuwm-cm1 import cm1/supercell/namelist.input --out runs/stretched-ground
+gpuwm-cm1 edit runs/stretched-ground --set stretch_z=1 --set nz=59 --set ztop=25000.0 --set str_bot=0.0 --set str_top=5500.0 --set dz_bot=50.0 --set dz_top=500.0 --set zd=20000.0
+```
+
+The report lists such a column under "Not yet checked against CM1", with what the comparison below found: it
+runs; with ground friction all ten statistics are within their bands; with a free-slip ground max vertical
+vorticity came out 16 % high.
+
+The same holds at the top (`str_top = ztop`). Such columns do not run with parcels (`iprcl = 1`), the budget
+outputs or a nest yet; keep three equal layers at each end for those (`str_bot` of at least 3 × `dz_bot`, and
+`ztop - str_top` of at least 3 × `dz_top`).
+
+**Levels from a file.** `stretch_z = 3` reads `nz` scalar-level heights and `stretch_z = 4` reads `nz + 1` w-level
+heights (the first is 0) from CM1's `input_grid_z`, one height in metres per line. Put the file beside the namelist
+and import; the run folder keeps a copy. `ztop`, `str_bot`, `str_top`, `dz_bot` and `dz_top` are not read on these
+two, as in CM1.
+
+**`stretch_z = 2` is refused.** CM1 builds those levels by trial and does not make them end at `ztop`, so it has
+two model tops, and GM1 has one. To run on the same levels, write CM1's scalar-level heights (`zh` in its output)
+into `input_grid_z` and use `stretch_z = 3`.
+
+**How close stretched levels are to CM1.** CM1's supercell on the 53 levels above, with Morrison, two hours, GM1 on an
+RTX 4090 against CM1 r21.1; mature-phase means over 3600-7200 s and CM1's twin as in "How close GM1 is to CM1" below.
+"5 km" is the w level nearest 5000 m.
+
+| Statistic, on the 53 stretched levels | GM1 / CM1 | Twin / CM1 |
+|---|---|---|
+| max w | 1.015 | 1.004 |
+| max 2-5 km updraft helicity | 0.989 | 1.000 |
+| updraft area, w > 10 m/s at 5 km | 1.040 | 1.010 |
+| max vertical vorticity | 0.941 | 1.000 |
+| min w | 0.997 | 0.999 |
+| lowest-level θ′ min | 0.998 | 0.999 |
+| cold-pool area, θ′ < -1 K | 0.990 | 1.000 |
+| rain area > 1 mm | 1.011 | 1.000 |
+| max rain | 1.012 | 1.000 |
+| max graupel/hail mixing ratio | 0.996 | 0.996 |
+
+Every statistic is inside its band (10 % for the updraft statistics, 15 % for the rest) and nine are within 5 %; max
+vertical vorticity is 5.9 % low. The strongest updraft's column at 5 km is within one cell of CM1's at every 15-minute
+output, and max w at 1800 s is 31.30 against CM1's 31.16 m/s. The first rain reaches the ground in the same 5-minute
+output in both models. GM1's rain total over the domain is 11 % below CM1's at 30 minutes, when there is only a trace,
+5 % below at 45 minutes, within 1.4 % from 55 minutes and 0.4 % below at the end; even levels show most of the early
+difference too (7 % and 4 %), so it comes from the microphysics scheme and not from the levels.
+
+On CM1's hurricane column (59 levels that stretch from the ground, 50 m deep there) the same supercell, with Morrison,
+was run for two hours in both models. With free slip nine of the ten statistics are within 2.4 % of CM1's and max
+vertical vorticity is 15.6 % high, outside its 10 % band (CM1 against itself: 2.0 %); that maximum is at 12 to 14 km,
+where the levels are even, in the last half hour, and the two models agree within 1 % until 75 minutes. The same storm
+on a column with three equal 50 m layers at the ground, which already ran before, gives the same picture (11.9 %
+high), and so does the run with the old ground weights, so this is not the levels at the ground. With surface drag
+(`bbc = 3`, `sfcmodel = 1`, `cecd = 1`) all ten are inside their bands, 0.987 to 1.086 of CM1's. In three 100-second
+comparisons without cloud on such columns, pressure and density agree with CM1 to 2 parts in a million of their peaks
+and the horizontal winds to 3 in 100,000, as closely as on a column with even layers at both ends.
+
+One storm on each column was compared, with Morrison. WSM6 and Thompson were not run on stretched levels.
+
+**Limits on stretched levels.**
+
+- `output_uh`, `output_vort`, `output_shs` and `output_svs` (updraft helicity, vorticity and their swaths) are not
+  saved from an imported namelist; the report lists them under "Runs differently from CM1".
+- Levels that stretch from the ground or to the top do not run with parcels, the budget outputs or a nest.
+- On CM1's hurricane column, which stretches from the ground, the supercell with a free-slip ground has max
+  vertical vorticity 15.6 % above CM1's, outside its band. No storm was compared on levels that stretch to the top.
+  The report says so for every column that stretches from the ground or to the top.
+- In a run with cloud the report also lists every other stretched column under "Not yet checked against CM1", with
+  its reason: levels that go higher than the 53 above, other levels, or WSM6 or Thompson. The 53 levels above with
+  Morrison, from the stretch words or from `input_grid_z`, and the hurricane presets' own levels in their own storm,
+  which CM1 ran at 8 km, carry no row.
+- Guided mode's **Customize this storm** offers even levels only.
+- `stretch_x` and `stretch_y` are refused.
 
 ## Check it fits
 

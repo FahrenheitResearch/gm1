@@ -519,6 +519,24 @@ class CartesianOutputProducts:
         selection, f = self.selection, self.runtime.dynamics.fields
         out: dict[str, Any] = {}
         dz = cp.float32(g.dz_m)
+
+        def column_sum(layer: Any) -> Any:
+            """The sum over levels of ``layer*dz*rmh(k)``, writeout.F:2799,2836,2874.
+
+            ``dz*rmh(k)`` is the layer's own depth.  On even levels ``rmh`` is
+            one and the product is ``layer*dz``, the expression this always
+            was; on stretched levels ``dz`` alone is the metric reference and
+            is no layer's depth, so the column's own ``rmh`` multiplies it.
+            """
+
+            layer = layer * dz
+            if int(g.stretch_z) != 0:
+                import numpy
+
+                rmh = numpy.asarray(g.levels.rmh[1 : g.nz + 1], dtype=numpy.float32)
+                layer = layer * cp.asarray(rmh)[:, None, None]
+            return layer.sum(axis=0)
+
         with self.stream:
             if selection.on("output_th"):
                 out["th"] = cp.add(f["th0"], f["th3d"])
@@ -555,14 +573,14 @@ class CartesianOutputProducts:
                 )
             if selection.on("output_pwat"):
                 out["pwat"] = cp.ascontiguousarray(
-                    (f["rho"] * f["q3d"][0] * dz).sum(axis=0) * cp.float32(1.0e-3)
+                    column_sum(f["rho"] * f["q3d"][0]) * cp.float32(1.0e-3)
                 ).astype(cp.float32)
             if selection.on("output_lwp"):
                 out["lwp"] = cp.ascontiguousarray(
-                    (f["rho"] * (f["q3d"][1] + f["q3d"][2]) * dz).sum(axis=0)
+                    column_sum(f["rho"] * (f["q3d"][1] + f["q3d"][2]))
                 ).astype(cp.float32)
                 out["cwp"] = cp.ascontiguousarray(
-                    (f["rho"] * f["q3d"][1] * dz).sum(axis=0)
+                    column_sum(f["rho"] * f["q3d"][1])
                 ).astype(cp.float32)
         return out
 

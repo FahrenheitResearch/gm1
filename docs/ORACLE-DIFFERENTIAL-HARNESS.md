@@ -300,6 +300,37 @@ it -- correctly: one such column's measured upper weights are
 compiled kernels carry inline, some sixty f32 ulp out. Choosing every face a
 multiple of 64 m makes the recursion exact and the refusal goes away.
 
+**Columns whose end layers are not equally deep.** The flat Cartesian lane
+runs them. On flat ground one kernel of its step reads the end weights, the
+face density at the ground and the model top (`solve3.F:678-679`), and it is
+launched with the column's own `cgs` and `cgt` (`cuda_gm1_level_density`,
+derived from the sealed kernel text with the weights as launch arguments). A
+column whose end layers are equally deep still launches the sealed kernel, and
+the refusal above remains with a nest, a run driven by a saved ArWen history,
+and the parcel and budget outputs. Three cases hold this to CM1:
+
+* `stretched-ground-32`: `str_bot = 0`, CM1's common setting, 35 levels from
+  100 m at the ground to 300 m;
+* `stretched-both-ends-32`: the stretched part reaches the model top as well
+  (`str_top = ztop`), 40 levels;
+* `stretched-ground-drag-32`: the first with CM1's constant-drag surface layer
+  (`bbc = 3`, `sfcmodel = 1`, `cecd = 1`), where the ground density scales the
+  surface stress.
+
+Over the five frames of all three, `max|d|/peak` is at most `prs` 1.4e-6,
+`rho` 1.8e-6, `u3d` 6.0e-6, `v3d` 2.5e-5 and `th3d` 5.8e-4, and
+`stretched-column-32` run beside them gives the same magnitudes. CM1 prints
+`cgs` and `cgt` in its log, and they are this port's binary32 words for each
+column. Under free slip the ground density multiplies a vertical velocity that
+is zero, so a run handed the equal-spacing weights instead gives the same
+fields; the weights are held to CM1 by the words themselves. Curves and
+receipts are in `evidence/oracle/stretched-ground-32/` and the two folders
+beside it.
+
+These cases also compare `pwat`. It was wrong on every stretched column until
+its sum took each layer's own depth, `dz*rmh(k)`, as `writeout.F:2874` does:
+4.3e-1 on `stretched-column-32` before, 7e-7 after.
+
 ---
 
 ## What the worked example measured

@@ -569,7 +569,13 @@ class CartesianDynamics:
             )
             self.scalar_legacy_compiled = stretched_pdef
         self.boundary_compiled = compile_cuda_gm1_rk1_post_scalar_momentum_boundary(open_compiled=self.open_compiled)
-        self.forecast_compiled = compile_cuda_gm1_forecast()
+        # solve3.F:678-679: the face density at the ground and the model top uses the
+        # column's own weights; an equally spaced end keeps the sealed kernel.
+        from .cuda_gm1_level_density import compile_cuda_gm1_forecast_for_levels
+
+        self.forecast_compiled = compile_cuda_gm1_forecast_for_levels(
+            self.geometry.levels, compile_sealed=compile_cuda_gm1_forecast
+        )
         self.child_core_compiled = compile_cuda_gm1_child_core()
         self.apmasscon_compiled = compile_cuda_apmasscon()
         self.startup_compiled = compile_cuda_cartesian_startup()

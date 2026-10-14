@@ -494,7 +494,8 @@ def run_import(
     changes some and ``reset_settings`` puts some back to CM1's value.
     """
 
-    from . import coverage, namelist as namelist_module, sounding as sounding_module, usersettings
+    from . import coverage, levels as levels_module, namelist as namelist_module, sounding as sounding_module
+    from . import usersettings
 
     source = Path(namelist).expanduser()
     if not source.is_file():
@@ -567,6 +568,25 @@ def run_import(
             sounding_path = rundir / SOUNDING
         elif located is not None:
             sounding_path = located  # the report names the missing file
+    # stretch_z = 3 and 4 read their heights from input_grid_z (param.F:8013, 8083): the
+    # file beside the namelist, or the copy this run folder already keeps.
+    levels_path = None
+    try:
+        level_branch = int(effective.get("stretch_z", 0))
+    except (TypeError, ValueError):
+        level_branch = 0
+    if level_branch in (3, 4):
+        located_levels = levels_module.locate(source, rundir)
+        if located_levels is not None:
+            try:
+                heights = levels_module.parse(located_levels.read_bytes(), stretch_z=level_branch,
+                                              nz=int(effective.get("nz", 0)))
+            except levels_module.LevelsFileError as error:
+                raise ImportDoorError(f"{located_levels}: {error}") from error
+            if located_levels.resolve() != (rundir / levels_module.LEVELS_FILE).resolve():
+                _atomic_write(rundir / levels_module.LEVELS_FILE, located_levels.read_bytes())
+            levels_path = rundir / levels_module.LEVELS_FILE
+            extra["grid.levels_m"] = list(heights)
     report = coverage.build_report(
         imported,
         sounding=sounding_path,
@@ -592,6 +612,7 @@ def run_import(
     payload["files"] = {
         "original": ORIGINAL, "namelist": NAMELIST, "diff": DIFF if original_bytes != source_bytes else None,
         "sounding": SOUNDING if sounding_path is not None and sounding_path.parent == rundir else None,
+        "levels": levels_module.LEVELS_FILE if levels_path is not None else None,
         "settings": SETTINGS, "deck": DECK if report.toml is not None else None,
     }
     text = report.text()

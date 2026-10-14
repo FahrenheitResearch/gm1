@@ -134,11 +134,6 @@ REWORDED.update({
         "6cd3514c79ca5e25e93d3a78d2262f0ec674b002db27f3a3189a135688cbab2c",
         4053,
     ),
-    "cm1core/config.py": (
-        "bdd857c43e2cbcaf852ce40d112ff8709570dafbc80b2a6cdacffa2e617a404c",
-        "7eefd2b1e28ef7c0e71382ce37cff2820cbb9b2951bddf8435a70217e5c6c922",
-        370934,
-    ),
     "cm1core/cuda_advection5.py": (
         "073f10ef9b369bce47a8df91da4a325805755b090f891b955da67104e0c7167a",
         "3b745b45b0a1d95aa926dc6cc3d9b5534c4fae23c06401826a82f2c529823222",
@@ -398,12 +393,6 @@ REWORDED.update({
         "4a7b41eb3f749e9ba5faae7de95832c2be4a0e1e9cb24bee2142359a0246a7a9",
         "a3db3d07e2e4c08b060989a2a2db34026c7ea52ff02e1ee46dd7af64bc76c5bf",
         7906,
-    ),
-    # Comments only: the pool-release note describes its measurements without the plan and run labels.
-    "cm1core/cuda_cartesian_dynamics.py": (
-        "aea13b4e4981b1d8d453093a650b0d82eafd20478776f7d477c81a6f6681482a",
-        "4ec0f51308c6272375a9fd71923582bd8d68c60a4c31f4af643e99da31b70c66",
-        71051,
     ),
 })
 

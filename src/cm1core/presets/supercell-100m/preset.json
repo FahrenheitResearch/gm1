@@ -45,7 +45,7 @@
         "key": "dz",
         "from": 500.0,
         "to": 250.0,
-        "why": "250 m levels, uniform as in CM1's file (stretched levels are not yet checked against CM1 in a storm)"
+        "why": "250 m levels, uniform as in CM1's file"
       },
       {
         "key": "dtl",

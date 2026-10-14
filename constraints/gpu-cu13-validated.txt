@@ -1,6 +1,6 @@
 # The CUDA user-space stack every GPU-verified gpuwm-cm1 run used (released as constraints-gpu-cu13.txt).
 #
-#   pip install "gpuwm-cm1==0.1.6" -c constraints-gpu-cu13.txt
+#   pip install "gpuwm-cm1==0.1.7" -c constraints-gpu-cu13.txt
 #
 # Optional: `pip install gpuwm-cm1` alone already installs CuPy for CUDA 13 and
 # holds NVRTC to 13.3.x (the kernels are compiled at run time by NVRTC, and

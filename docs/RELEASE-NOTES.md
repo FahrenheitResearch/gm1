@@ -1,5 +1,159 @@
 # gpuwm-cm1 release notes
 
+## 0.1.7
+
+Stretched levels. CM1's stretched vertical levels, thin layers near the ground and thicker ones aloft, are now
+compared with CM1 in a storm with cloud, and levels that stretch from the ground or to the model top, CM1's common
+`str_bot = 0` among them, now run. They are set from a CM1 namelist, from a terminal or in the GUI's advanced mode.
+The engine is 0.1.6's (ArWen 2.8.9), and every storm that 0.1.6 runs, 0.1.7 runs the same way; only the water
+paths saved on stretched levels change, because they are now right (below). Your own sounding, the hurricanes, any
+grid spacing on the thunderstorm presets, the 100 m supercell and ground friction in Customize stay as 0.1.6 has
+them.
+
+### What is new
+
+- **Stretched levels with cloud are compared with CM1.** CM1's stock supercell on 53 stretched levels
+  (`stretch_z = 1`: 100 m layers at the ground growing to 500 m above 9.3 km, under a 19.3 km top), with Morrison,
+  for two hours, in CM1 r21.1 and in GM1: the ten mature-phase statistics are 0.941 to 1.040 of CM1's, all inside
+  the release bands ("What was measured", below). These levels with Morrison, from the stretch words or from
+  `input_grid_z`, are no longer listed under "Not yet checked against CM1" in the import report. The hurricane
+  cards, on whose levels CM1 ran the 8 km hurricane, no longer list their stretched grid under "Runs, not yet
+  compared with CM1", and their note on `str_bot` now says these are the levels the storm was run on.
+- **Levels that stretch from the ground or to the model top run.** GM1 refused a column whose lowest three or
+  highest three layers were not equally deep, which ruled out CM1's common `str_bot = 0` and the levels of CM1's
+  own hurricane cases (59 levels: 50, 73.7, 97.4 m ... at the ground). CM1 works out the weights at the ground and
+  the top from the levels themselves, and GM1 now passes those weights to the one place its step uses them on flat
+  ground. A column with three equal layers at each end keeps the step it had, so grids that ran before give the
+  same output word for word.
+- **Such levels carry a row of their own.** The import report (in the GUI, the report beside the Namelist screen)
+  lists a column whose end layers are not equally deep (`str_bot = 0`, or `str_top = ztop`) under "Not yet checked
+  against CM1", and `gpuwm-cm1 doctor --science` names the row, with what its storm comparison found: it runs;
+  with ground friction (`bbc = 3`, `sfcmodel = 1`, `cecd = 1`) all ten statistics are within their bands; with a
+  free-slip ground one statistic, max vertical vorticity, came out 16 % high. The row does not stop the run. In a
+  run with cloud every other stretched column carries the row too, with its reason: levels that go higher than the
+  53 compared (on a 25 km column with three equal 50 m layers at the ground the free-slip supercell's max vertical
+  vorticity came out 12 % high), other levels, or WSM6 or Thompson, which no storm on stretched levels has run; only
+  the 53 levels with Morrison, and the hurricane presets' levels in their own storm, carry none.
+- **The report says which `nz` fits.** With `stretch_z = 1` CM1 fixes `nz` from the other five words. A wrong `nz`
+  used to be reported under `zd` with CM1's "0.01 m feasibility" message. It is now one row under `nz`: "CM1 needs
+  nz = 53 here (3 layers of dz_bot below str_bot, 30 stretched layers between str_bot and str_top, 20 layers of
+  dz_top above str_top)", with the fix "Set nz = 53." `gpuwm-cm1 check` says the same for a deck. When a part is
+  not a whole number of layers, the row names it and the nearest heights that are.
+- **`stretch_z = 3` and `4` import.** Put CM1's `input_grid_z` (one height in metres per line) beside the namelist;
+  the run folder keeps a copy.
+- **`stretch_z = 2` is still refused,** now with the reason in plain words (CM1 does not make those levels end at
+  `ztop`, so there would be two model tops) and a way to run the same levels: their heights in `input_grid_z` with
+  `stretch_z = 3`.
+- **Fixed: precipitable water and the liquid water paths on stretched levels.** `output_pwat` and `output_lwp`
+  (`pwat`, `lwp`, `cwp`) counted every layer with the namelist's `dz` instead of the layer's own depth, so they were
+  wrong on stretched levels (precipitable water 43 % too high on a column of 100 to 300 m layers with `dz = 200`).
+  They now match CM1's, to 1 part in a million on the same column. Even levels were never affected, the model's own
+  state was not, and no preset saves these outputs.
+- **Guides.** "GM1 for CM1 users" (`docs/CM1-USERS.md`) has a "Stretched levels" section with the commands, CM1's
+  rule for `nz` worked through, the comparison and the limits; "When GM1 does not work" (`docs/TROUBLESHOOTING.md`)
+  explains the new messages; the labels of the stretched examples in `docs/GM1-DECKS.md` now say what the report
+  says.
+
+### How to get stretched levels
+
+Stretched levels are set from a CM1 namelist. Guided mode's **Customize this storm** offers even levels only.
+
+- **Your own namelist.** One that sets `stretch_z = 1`, `3` or `4` imports and runs as it is:
+  `gpuwm-cm1 import namelist.input --out runs/mine`, then `gpuwm-cm1 check runs/mine/deck.toml`,
+  `gpuwm-cm1 estimate runs/mine` and `gpuwm-cm1 run runs/mine`. For `3` and `4`, put `input_grid_z` beside it.
+- **Stretch the levels of a run folder.** The 53 levels compared with CM1 above, on CM1's supercell:
+
+  ```sh
+  gpuwm-cm1 examples --cm1 supercell --copy cm1
+  gpuwm-cm1 import cm1/supercell/namelist.input --out runs/stretched
+  gpuwm-cm1 edit runs/stretched --set stretch_z=1 --set nz=53 --set ztop=19300.0 --set str_bot=300.0 --set str_top=9300.0 --set dz_bot=100.0 --set dz_top=500.0
+  gpuwm-cm1 run runs/stretched
+  ```
+
+- **In the GUI**, advanced mode (`gpuwm-cm1 gui --mode advanced`): import the namelist, then set the same words on
+  its Namelist screen, as text or word by word. Each Save is the `edit` above and shows the new report. From guided
+  mode, **All settings (Advanced)** under Customize makes the run folder and opens it there.
+- A preset does not take them: `gpuwm-cm1 preset new ID --set stretch_z=1 ...` stops with the `nz` the levels need,
+  and a preset's number of levels belongs to its levels setting. Use the import above.
+
+### What was measured
+
+- **CM1's supercell on the 53 stretched levels**, two hours with Morrison: CM1 r21.1 on a CPU, with a twin that
+  adds 0.0001 K at the lowest level, and GM1 on an RTX 4090 with ArWen 2.8.9 (gpuwm 2.8.9). Mature-phase means over
+  3600 to 7200 s, as in the uniform comparison:
+
+  | Statistic | GM1 / CM1 | Twin / CM1 | Band |
+  |---|---|---|---|
+  | max w | 1.015 | 1.004 | 10 % |
+  | max 2-5 km updraft helicity | 0.989 | 1.000 | 10 % |
+  | updraft area, w > 10 m/s at 5 km | 1.040 | 1.010 | 10 % |
+  | max vertical vorticity | 0.941 | 1.000 | 10 % |
+  | min w | 0.997 | 0.999 | 15 % |
+  | lowest-level potential temperature drop | 0.998 | 0.999 | 15 % |
+  | cold-pool area | 0.990 | 1.000 | 15 % |
+  | rain area > 1 mm | 1.011 | 1.000 | 15 % |
+  | max rain | 1.012 | 1.000 | 15 % |
+  | max graupel or hail | 0.996 | 0.996 | 15 % |
+
+  Nine are within 5 %; max vertical vorticity is 5.9 % low. The strongest updraft's column at 5 km is within one
+  cell of CM1's at every 15-minute output from 30 minutes on. The first rain reaches the ground in the same
+  5-minute output in both models. GM1's rain total is 11 % below CM1's at 30 minutes, when there is only a trace, 5 % below at 45 minutes,
+  within 1.4 % from 55 minutes and 0.4 % below at the end; even levels show most of that early difference too
+  (7 % and 4 %), so it comes from the microphysics scheme and not from the levels.
+- **CM1's hurricane column** (59 levels that stretch from the ground, 50 m deep there, under a 25 km top), the same
+  supercell: with surface drag (`bbc = 3`, `sfcmodel = 1`, `cecd = 1`) all ten statistics are inside their bands,
+  0.987 to 1.086 of CM1's; with free slip nine are within 2.4 % and max vertical vorticity is 1.156 of CM1's
+  (CM1's twin: 1.020), at 12 to 14 km in the last half hour. The same storm with the old ground weights gives the
+  same result, and on a column like it with three equal 50 m layers at the ground (62 levels under a 25.15 km top),
+  which ran before this release, max vertical vorticity is 1.119 of CM1's.
+- **Without cloud**, three 100-second comparisons on columns that stretch from the ground or at both ends: pressure
+  and density agree with CM1 to 2 parts in a million of their peaks and the horizontal winds to 3 in 100,000, as
+  closely as on a column with even layers at both ends.
+- **The weights are CM1's.** For four columns, the weights CM1 printed equal the ones GM1 works out, in every bit.
+- **Grids that ran before keep their words.** On an RTX 4090, 13 small cases (3 on stretched levels) and two
+  full supercells were run with release 0.1.2's code and with this work: all 116 outputs on even levels are
+  identical, on the stretched cases only the fixed water path differs, and the two supercells are identical in all
+  34 outputs.
+- For this release the ten statistics of each comparison were worked out again on a CPU from the saved output of
+  those runs, with the same numbers.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"); with pip, `pip install --upgrade gpuwm-cm1`. The engine stays at ArWen 2.8.9 (gpuwm 2.8.9 and
+gpuwm-data 2.8.9). Close GM1 and let a running storm finish first; the installer stops with a message while one
+runs. Your storms stay where they are. Finish a storm with the GM1 version that started it. A namelist that 0.1.6
+refused only for its levels (`str_bot = 0`, or `str_top = ztop`) imports now; import it again.
+
+### Known limitations
+
+- **One storm, two columns.** CM1's supercell with Morrison was compared with CM1 on the 53-level column and on
+  CM1's hurricane column, one run of each case (plus CM1's twin). WSM6 and Thompson were not run on stretched
+  levels. `stretch_z = 3` and `4` were compared with CM1 without cloud only (a two-hour GM1 storm on `stretch_z = 3`
+  levels ran to its end). No storm was compared on levels that stretch to the model top.
+- **Free slip on the 25 km column.** On CM1's hurricane column, which stretches from the ground, the supercell with
+  a free-slip ground has max vertical vorticity 15.6 % above CM1's, outside its 10 % band; the import report says
+  so for every column that stretches from the ground or to the top. On a column like it with three equal 50 m
+  layers at the ground (the kind of levels the hurricane cards use) the free-slip storm was 11.9 % above CM1's on
+  that statistic, and the report lists such a column as going higher than the one compared. The hurricane cards
+  themselves run with ocean drag (`bbc = 3`, `sfcmodel = 1`, `cecd = 1`), on levels CM1 ran the 8 km hurricane on,
+  and carry no row for them.
+- **Not with parcels, the budget outputs or a nest** on levels that stretch from the ground or to the top; keep three
+  equal layers at each end for those.
+- **Not saved from an imported namelist on stretched levels:** `output_uh`, `output_vort`, `output_shs` and
+  `output_svs` (updraft helicity, vorticity and their swaths). The report lists them under "Runs differently from
+  CM1"; the winds are saved, so they can be worked out afterwards.
+- **Guided mode offers even levels only.** Customize has no stretched levels, and a preset does not take the
+  stretch words (above).
+- **The water paths of earlier runs.** `pwat`, `lwp` and `cwp` saved on stretched levels by 0.1.6 or earlier
+  hold the old, wrong values.
+- **The GPU numbers above come from a development build** of this work on release 0.1.2's code, with ArWen 2.8.9;
+  the 0.1.7 package itself has not run a storm on a GPU.
+- `stretch_z = 2`, `stretch_x` and `stretch_y` are still refused.
+- The known limitations of 0.1.6, 0.1.5, 0.1.4, 0.1.3, 0.1.2, 0.1.1 and 0.1.0 still apply ("Known limitations" under
+  each, and "Not in v0.1" and "Further known limits" under "0.1.0", below), except that the 100 m supercell is no
+  longer greyed (since 0.1.4) and ground friction is no longer greyed in Customize (since 0.1.5).
+
 ## 0.1.6
 
 Your own sounding. A new card grows a storm in the air of a sounding file you bring: a weather balloon, a forecast

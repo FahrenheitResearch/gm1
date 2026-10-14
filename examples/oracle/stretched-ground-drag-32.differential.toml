@@ -1,0 +1,96 @@
+# The ground weights where the ground acts on the air: surface drag on a column
+# that stretches from the ground.
+#
+# Term: metric.  As stretched-ground-32, with CM1's constant-drag surface
+# layer on (bbc = 3, sfcmodel = 1, cecd = 1).  turb.F:292 extrapolates the
+# surface pressure with cgs1..3 and the surface stress is the lowest-level
+# wind times the density solve3.F:678 extrapolates to the ground with the same
+# weights, so this is the case in which a wrong ground weight reaches the
+# winds within one large step.
+#
+# The coordinate is stretched-ground-32's: 35 levels, 100 m at the ground to
+# 300 m aloft, cgs = (1.8215, -1.1378, 0.3162).
+#
+# Horizon: one advective cell crossing, 100 s, as stretched-column-32.
+
+[case]
+name = "stretched-ground-drag-32"
+term = "metric"
+notes = """CM1 r21.1 stretch_z=1 column that stretches from the ground (str_bot = 0),
+with the constant-drag surface layer (bbc = 3, sfcmodel = 1, cecd = 1):
+100 m at the ground to 300 m aloft under an 8 km top, 32x32x35 with 1 km
+horizontal spacing. One advective cell crossing."""
+
+[cm1]
+nx = 32
+ny = 32
+nz = 35
+dx = 1000.0
+dy = 1000.0
+dz = 200.0
+dtl = 1.0
+timax = 100.0
+tapfrq = 20.0
+rstfrq = 100.0
+statfrq = 20.0
+
+psolver = 3
+adapt_dt = 0
+hadvordrs = 5
+vadvordrs = 5
+hadvordrv = 5
+vadvordrv = 5
+advwenos = 2
+advwenov = 0
+weno_order = 5
+apmasscon = 1
+sgsmodel = 1
+doimpl = 1
+eqtset = 2
+
+irdamp = 1
+zd = 6000.0
+rdalpha = 3.3333333333e-3
+
+wbc = 2
+ebc = 2
+sbc = 2
+nbc = 2
+bbc = 3
+tbc = 1
+irbc = 4
+
+icor = 0
+imove = 0
+umove = 0.0
+vmove = 0.0
+
+isnd = 5
+iwnd = 2
+
+stretch_x = 0
+stretch_y = 0
+stretch_z = 1
+ztop = 8000.0
+str_bot = 0.0
+str_top = 5000.0
+dz_bot = 100.0
+dz_top = 300.0
+
+isfcflx = 0
+sfcmodel = 1
+cecd = 1
+cnstcd = 0.001
+
+[gm1]
+"run.lane" = "cartesian"
+"physics.component" = "wsm6-mp6"
+# runtime.acoustic_substeps is NOT declared: misclibs.F:818-915 derives it
+# from dtl and the grid, and the harness refuses a declaration that
+# disagrees -- handing the two codes a different number of acoustic small
+# steps per large step would measure the schedule, not the term under test.
+"runtime.tile_nx" = 32
+"runtime.tile_ny" = 32
+"runtime.warmup_steps" = 0
+"runtime.memory_budget_mib" = 2048
+"runtime.capacity_profile" = "default"
