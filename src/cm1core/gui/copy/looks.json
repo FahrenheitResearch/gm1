@@ -51,7 +51,7 @@
       "unit": "hPa"
     }
   ],
-  "this_run": "This run: {dx} grid spacing, a {width} × {depth} km area, {duration} of storm time, a saved time every {interval}.",
+  "this_run": "This run: {dx} grid spacing, {a} {width} × {depth} km area, {duration} of storm time, a saved time every {interval}.",
   "picture_rules": "Every picture carries its facts in its footer: simulated, the GM1 version, the rain and hail scheme and whether it is checked against CM1, the grid spacing, the real height of the level shown, the wind frame and the storm time.",
   "more_looks": [
     {

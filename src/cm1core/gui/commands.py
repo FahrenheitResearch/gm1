@@ -353,6 +353,39 @@ def preset_list_args() -> list[str]:
     return ["preset", "list", "--json"]
 
 
+def preset_start_args(start: str | None) -> list[str]:
+    """``--start START``: how a storm on a sounding file is started (push, bubble, strong-bubble or auto)."""
+
+    return ["--start", str(start)] if start else []
+
+
+def preset_options_args(preset: str, start: str | None = None) -> list[str]:
+    """``preset options ID [--start START]``: the Customize panel's choices, for the storm started this way."""
+
+    return ["preset", "options", preset, *preset_start_args(start), "--json"]
+
+
+def sounding_convert_args(source: Path, out: Path | None = None, *, speed_unit: str | None = None,
+                          extend: bool = False, top_of: Path | None = None, name: str | None = None,
+                          preview_png: Path | None = None, native: dict | None = None) -> list[str]:
+    """``sounding convert IN [OUT]``: a sounding file of the user's own, checked and written as input_sounding."""
+
+    args = ["sounding", "convert", str(source)]
+    if out is not None:
+        args.append(str(out))
+    if speed_unit:
+        args += ["--speed-unit", str(speed_unit)]
+    if extend:
+        args.append("--extend-top")
+    if top_of is not None:
+        args += ["--top-of", str(top_of)]
+    if name:
+        args += ["--name", str(name)]
+    if preview_png is not None:
+        args += ["--preview-png", str(preview_png)]
+    return args + _wrf_library(native) + ["--json"]
+
+
 def preset_given_args(sounding: Path | str | None = None, environment: Mapping[str, Any] | None = None) -> list[str]:
     """The flags that give a preset its sounding: ``--sounding FILE`` or the made environment's."""
 
@@ -666,6 +699,17 @@ API: tuple[Endpoint, ...] = (
              "[--wrf-frame follow] --out RUNDIR --json | gpuwm-cm1 sounding from-wrf FILE ... --out FILE --json",
              "target import: a run folder from a namelist with the column as its sounding (isnd = 7); target guided: "
              "the column kept for the gallery's storm, then How long can it run?"),
+    # A sounding file of the user's own (guided mode's Use my own sounding card)
+    Endpoint("POST", "/api/sounding/check", "sounding-check", "host",
+             "gpuwm-cm1 sounding convert FILE OUT [--speed-unit kt|ms] [--extend-top] --top-of NAMELIST --name NAME "
+             "--preview-png PNG --json",
+             "Use my own sounding: reads the file in whichever layout it has, says what is wrong with it, writes "
+             "CM1's input_sounding with its skew-T and hodograph, the numbers and how to start the storm; nothing "
+             "runs. The storm is then fitted with gpuwm-cm1 preset fit your-environment --sounding OUT --start "
+             "push|bubble."),
+    Endpoint("POST", "/api/sounding/options", "sounding-options", "host",
+             "gpuwm-cm1 preset options PRESET --start push|bubble|strong-bubble --json",
+             "Use my own sounding: the Customize choices of the storm started the chosen way."),
     # Downscaling a WRF or ArWen run (3D, the chain)
     Endpoint("POST", "/api/chain/open", "chain-open", "host",
              "gpuwm-cm1 chain inspect FILES|DIR --map-png PNG [--map-time T] --json",
@@ -739,6 +783,9 @@ __all__ = [
     "plan_args",
     "preset_fit_args",
     "preset_custom_args",
+    "preset_options_args",
+    "preset_start_args",
+    "sounding_convert_args",
     "preset_given_args",
     "preset_list_args",
     "preset_new_args",

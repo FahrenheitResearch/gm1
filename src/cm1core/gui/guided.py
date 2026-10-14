@@ -3,9 +3,10 @@
 GET  /api/copy                    every guided string (gui/copy/guided.json) and the looks' panels (looks.json)
 GET  /api/presets                 the gallery: ``gpuwm-cm1 preset list --json``, with picture URLs
 GET  /api/presets/ID/picture      the card's picture (a PNG from a real run; the list says whose)
-POST /api/fit                     {"preset", "budget", "gpu"?, "sounding"? | "environment"?, "custom"?}:
+POST /api/fit                     {"preset", "budget", "gpu"?, "sounding"? | "environment"?, "start"?, "custom"?}:
                                   ``gpuwm-cm1 preset fit ... --json``
-POST /api/guided/start            {"preset", "budget", "name"?, "gpu"?, "sounding"? | "environment"?, "custom"?}:
+POST /api/guided/start            {"preset", "budget", "name"?, "gpu"?, "sounding"? | "environment"?, "start"?,
+                                  "custom"?}:
                                   ``gpuwm-cm1 preset new ...`` then ``gpuwm-cm1 run RUNDIR`` (with its sidecars),
                                   as Start does
 
@@ -14,6 +15,9 @@ A preset that runs a sounding file (``isnd = 7``) may be given another one: ``"s
 ``{"instability", "shear", "hodograph"?}``, the Make-your-own-environment card's two sliders
 (``--instability I --shear S --hodograph H``).  The fit's reply then carries ``fit.sounding``: the file's SHA-256,
 where it came from and, for a made environment, getcape's numbers and the sentence the card shows.
+``"start"`` (``push``, ``bubble``, ``strong-bubble`` or ``auto``; ``--start``) is how the storm on a sounding file
+is started, the "Use my own sounding" card's choice; a run on a sounding that card kept is named from the name the
+user's file had.
 ``GET /api/presets/ID.SETTING/picture`` is one measured setting's picture of a card that has several.
 
 ``"custom"`` is the budget screen's "Customize this storm" panel: ``{KNOB: VALUE}`` for the knobs
@@ -227,9 +231,13 @@ def panels(facts: Mapping[str, Any], looks_copy: Mapping[str, Any]) -> dict[str,
         }
     this_run = None
     if all(facts.get(key) is not None for key in ("dx_m", "nx", "ny", "duration_s", "interval_s")):
+        from ..cm1run.fit import article
+
+        width = f"{facts['nx'] * facts['dx_m'] / 1000.0:g}"
         this_run = _fill(looks_copy.get("this_run", ""), {
             "dx": distance_words(facts["dx_m"]),
-            "width": f"{facts['nx'] * facts['dx_m'] / 1000.0:g}",
+            "a": article(width).lower(),                # "an 80 × 80 km area", as it is said
+            "width": width,
             "depth": f"{facts['ny'] * facts['dx_m'] / 1000.0:g}",
             "duration": duration_words(facts["duration_s"]),
             "interval": duration_words(facts["interval_s"]),
@@ -372,6 +380,35 @@ class Guided:
         return []
 
     @staticmethod
+    def _start_flag(payload: Mapping[str, Any]) -> list[str]:
+        """``--start START`` for a storm on a sounding file (none when the request does not say)."""
+
+        from .api import ApiError
+
+        start = payload.get("start")
+        if start in (None, ""):
+            return []
+        if start not in ("auto", "push", "bubble", "strong-bubble"):
+            raise ApiError(400, "start is push, bubble, strong-bubble or auto.", "Pick one of the starts.")
+        if payload.get("environment") not in (None, {}):
+            raise ApiError(400, "A start goes with a sounding file, not with a made environment.",
+                           "Send the start with a sounding, or leave it out.")
+        return C.preset_start_args(str(start))
+
+    @staticmethod
+    def _stem(payload: Mapping[str, Any]) -> str | None:
+        """The run-name stem of a sounding the "Use my own sounding" card kept (the name the user's file had)."""
+
+        sounding = payload.get("sounding")
+        if not isinstance(sounding, str) or not sounding:
+            return None
+        from ..cm1import.own_sounding import kept
+
+        record = kept(Path(sounding).expanduser())
+        label = (record or {}).get("label")
+        return str(label) if label and NAME_RE.match(str(label)) else None
+
+    @staticmethod
     def _custom(payload: Mapping[str, Any]) -> list[str]:
         """The Customize panel's choices as ``--custom KNOB=VALUE`` flags (none when nothing was changed)."""
 
@@ -412,7 +449,7 @@ class Guided:
 
         preset, budget, gpu = self._choice(payload)
         custom = self._custom(payload)
-        given = self._given(payload) + custom
+        given = self._given(payload) + self._start_flag(payload) + custom
         key = (preset, budget, gpu, tuple(given))
         args = C.preset_fit_args(preset, budget, self.api.root.path, gpu, given)
         self.api.jobs.stop_if_dry(args)
@@ -448,8 +485,10 @@ class Guided:
             # What Start would run, so "Show command" can show it before it is pressed.
             # Named from what the fit says changed, as run.json's case and fit.json say it (a choice at the
             # preset's own value is not a change).
-            name = unique_name(preset, self.api.root.path, custom=bool(record.get("customized")),
-                               customized=record.get("customized"))
+            stem = self._stem(payload)
+            name = (unique_name(stem, self.api.root.path) if stem else
+                    unique_name(preset, self.api.root.path, custom=bool(record.get("customized")),
+                                customized=record.get("customized")))
             rundir = self.api.root.run_path(name)
             body["start"] = {"name": name, "commands": [
                 C.display(C.preset_new_args(preset, budget, self.api.root.path, name, gpu, given)),
@@ -477,7 +516,7 @@ class Guided:
             return named or ([{"knob": "custom"}] if custom else [])
         try:
             body = self.fit({key: payload.get(key) for key in ("preset", "budget", "gpu", "sounding", "environment",
-                                                               "custom")})
+                                                               "start", "custom")})
         except ApiError:
             return []
         return list((body.get("fit") or {}).get("customized") or [])
@@ -487,13 +526,15 @@ class Guided:
 
         preset, budget, gpu = self._choice(payload)
         custom = self._custom(payload)
-        given = self._given(payload) + custom
+        given = self._given(payload) + self._start_flag(payload) + custom
         name = payload.get("name")
         root = self.api.root
         changed = self.customized_list(payload) if bool(custom) and name in (None, "") else []
         with self._lock:
             if name in (None, ""):
-                name = unique_name(preset, root.path, taken=self._starting, custom=bool(changed), customized=changed)
+                stem = self._stem(payload)
+                name = (unique_name(stem, root.path, taken=self._starting) if stem else
+                        unique_name(preset, root.path, taken=self._starting, custom=bool(changed), customized=changed))
             try:
                 require_name(str(name), "run name")
             except PathRefused as error:
@@ -525,7 +566,7 @@ class Guided:
         # time, not yet checked against CM1, or no GPU that can run it) is refused before any folder is made.
         fitted = self.fit({"preset": preset, "budget": budget, "gpu": gpu,
                            "sounding": payload.get("sounding"), "environment": payload.get("environment"),
-                           "custom": payload.get("custom")})
+                           "start": payload.get("start"), "custom": payload.get("custom")})
         if not fitted.get("offered"):
             raise ApiError(409, str(fitted.get("message") or "This storm does not fit this computer now."),
                            str(fitted.get("fix") or "Pick a longer time or another storm."),
@@ -585,6 +626,13 @@ class Guided:
         if isinstance(fit, dict):
             extra["fit"] = {key: fit.get(key) for key in ("preset", "preset_name", "budget", "budget_words", "summary",
                                                           "sentences", "facts", "customized")}
+            # A run on the user's own sounding says whose air it is, and where the file is kept.
+            from ..cm1import.own_sounding import results_words
+
+            air = results_words(fit.get("sounding"))
+            if air:
+                extra["sounding"] = {"label": (fit.get("sounding") or {}).get("label"), "words": air}
+                extra["this_run"] = " ".join(part for part in (extra.get("this_run"), air) if part)
         end = _number(status.get("model_time_s")) or facts.get("duration_s")
         if end:
             hurricane = facts.get("storm_kind") == "hurricane"

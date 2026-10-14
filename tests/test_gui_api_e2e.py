@@ -301,6 +301,8 @@ def test_the_api_table_lists_every_action_with_its_command(live):
                           "film", "look",
                           # An environment from a WRF or ArWen run
                           "wrf-open", "wrf-column", "wrf-use",
+                          # A sounding file of the user's own
+                          "sounding-check", "sounding-options",
                           # Downscaling a WRF or ArWen run (3D)
                           "chain-open", "chain-check", "chain-new"}
     assert all(row["command"].startswith("gpuwm-cm1 ") for row in posts.values())

@@ -1,0 +1,59 @@
+/* Use my own sounding: guided mode's card and its in-place panel. Only the base's --gm1-* tokens (re-pointed by
+   the Recast skin); nothing here changes a picture. */
+
+.snd-card .snd-pic { display: flex; align-items: center; justify-content: center; text-align: center; padding: 12px; }
+.snd-panel { grid-column: 1 / -1; margin: 0; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.snd-panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.snd-panel-head .cap { margin: 0; }
+.snd-step { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.snd-step[hidden] { display: none; }
+.snd-h { margin: 4px 0 0; font-size: 15px; color: var(--gm1-title); }
+.snd-say:empty { display: none; }
+
+.snd-way { display: grid; grid-template-columns: minmax(180px, 280px) minmax(0, 1fr); gap: 6px 16px; align-items: start;
+  padding-top: 10px; border-top: 1px solid var(--gm1-rule); }
+.snd-way-label { color: var(--gm1-muted); }
+.snd-way-label label { color: var(--gm1-text); }
+.snd-way-body { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.snd-way-body .hint { margin-left: 0; font-size: var(--fs-small); }
+.snd-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.snd-row .input { flex: 1 1 16em; min-width: 0; max-width: 100%; }
+.snd-file { max-width: 100%; color: var(--gm1-text); }
+.snd-paste { width: 100%; min-height: 6em; resize: vertical; }
+
+.snd-finding { margin: 0; }
+.snd-finding p { margin: 4px 0 0; }
+.snd-finding .sub { font-size: var(--fs-small); color: var(--gm1-text); }
+.snd-fix { color: var(--gm1-muted); }
+.snd-line { color: var(--gm1-muted); font-size: var(--fs-small); }
+.snd-read, .snd-ok, .snd-download, .snd-why { margin: 0; }
+.snd-remedies { align-items: center; }
+.snd-details summary { cursor: pointer; color: var(--gm1-text); }
+.snd-details[open] summary { margin-bottom: 6px; }
+.snd-text { max-height: 18em; overflow: auto; margin: 6px 0 0; padding: 8px 10px; border: 1px solid var(--gm1-rule);
+  background: var(--gm1-void); color: var(--gm1-data); font-size: var(--fs-small); white-space: pre; }
+
+.snd-skewt { margin: 0; max-width: 1280px; }
+.snd-skewt img { width: 100%; height: auto; border: 1px solid var(--gm1-rule); background: var(--gm1-void); }
+.snd-verdict { margin: 0; font-size: 16px; color: var(--gm1-title); }
+.snd-verdict .sub { display: block; margin-top: 3px; font-size: var(--fs-small); color: var(--gm1-muted); }
+.snd-motion { margin: 0; }
+
+.snd-start-list { display: flex; flex-direction: column; gap: 8px; }
+.snd-start { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: start; padding: 8px 10px;
+  border: 1px solid var(--gm1-rule); cursor: pointer; }
+.snd-start:has(input:checked) { border-color: var(--gm1-text); background: var(--gm1-hover); }
+.snd-start input { margin-top: 4px; }
+.snd-start-body { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; min-width: 0; }
+.snd-start-body strong { color: var(--gm1-title); font-weight: 600; }
+.snd-start-line { flex-basis: 100%; color: var(--gm1-text); }
+.snd-trap { margin: 0; border-left: 2px solid var(--gm1-warn); padding: 6px 12px; background: var(--gm1-ground); color: var(--gm1-text); }
+
+.snd-about { border-left: 2px solid var(--gm1-muted); padding: 6px 12px; background: var(--gm1-ground); }
+.snd-about h4 { margin: 0 0 4px; font-size: var(--fs-small); color: var(--gm1-muted); font-weight: 400; letter-spacing: .08em;
+  text-transform: uppercase; }
+.snd-about p { margin: 0; color: var(--gm1-text); }
+
+@media (max-width: 760px) {
+  .snd-way { grid-template-columns: minmax(0, 1fr); }
+}

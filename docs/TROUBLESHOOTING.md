@@ -274,6 +274,38 @@ appear by themselves within a minute or two.
 **"An MP4 needs the optional film add-on".** The installers add it; paste the installer line again to put it back.
 With pip: `pip install "gpuwm-cm1[film]"`. The animated picture works without it.
 
+## Your own sounding
+
+**My sounding makes no storm.** First look at the sentence on the card: "Stable air" or "Little instability" means
+the air itself is the reason, and no start will change that. If the card said the air can make a storm:
+
+- Check how the storm was started. On a real sounding a warm bubble often makes none: CM1's bubble is centred 1.4 km
+  above the ground, where real air is usually much drier than at the ground. Go back to the card and pick **A push
+  of rising air**, or from a terminal add `--start push`.
+- If the card said "Capped", make the push stronger: on **How long can it run?**, open **Customize this storm** and
+  raise the push.
+- Give it time. A storm takes 20 to 30 minutes of storm time to appear; watch the whole run before deciding.
+- Look at **What GM1 found** again. Levels added above a sounding that stopped low act as a lid at that height.
+- Some air makes no storm from a given start in CM1 either (measured for the warm bubble on the Norman 20 May 2013
+  balloon). Results says "No storm formed in this run" when that happens; that is the answer for that air and
+  that start.
+
+**My sounding file is refused.** The card (and `gpuwm-cm1 sounding convert FILE`) says why, with the line number.
+The usual reasons:
+
+- *The surface line is missing.* CM1's file starts with one line for the ground: pressure in hPa, potential
+  temperature in K, water vapour in g/kg. The levels come after it.
+- *There is no header line naming the numbers.* Copy a University of Wyoming listing from its `PRES HGHT TEMP DWPT`
+  line down, or add a first line naming a table's columns.
+- *Temperature in C where potential temperature belongs.* CM1's file holds potential temperature in K. If you have
+  pressure, height, temperature and dewpoint, give those as a table with a header line and GM1 converts them.
+- *The wind speed column does not say its unit.* Press the knots or metres-per-second button, or name the column
+  `speed_kt` or `speed_ms`.
+- *The sounding stops below the model top.* Press **Add levels up to the model top**, or use a sounding that
+  reaches 19750 m.
+- *This does not look like a sounding GM1 can read.* GM1 reads CM1's own file, a University of Wyoming text listing,
+  a SHARPpy file, and a table whose first line names its columns. [`SOUNDINGS.md`](SOUNDINGS.md) shows each one.
+
 ## Where things are
 
 **Your storms** are in the folder `gm1-runs` in your home folder (`~/gm1-runs`), unless you started the GUI with

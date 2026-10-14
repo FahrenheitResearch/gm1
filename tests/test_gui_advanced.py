@@ -304,6 +304,8 @@ RESULTS_WALK = {"convert", "reproduce"}
 LOOKS_WALK = {"film", "look"}
 #: The WRF column route (open, column, use), walked in tests/test_gui_wrf.py with the same Walk.
 WRF_WALK = {"wrf-open", "wrf-column", "wrf-use"}
+#: The Use my own sounding card (check, options), walked in tests/test_gui_own_sounding.py with the same Walk.
+SOUNDING_WALK = {"sounding-check", "sounding-options"}
 #: The Downscale (3D) screen (open, check, new), walked in tests/test_gui_chain.py with the same Walk.
 CHAIN_WALK = {"chain-open", "chain-check", "chain-new"}
 
@@ -375,7 +377,8 @@ def test_the_two_walks_cover_every_post_in_the_api_table():
     """A new endpoint fails this test until it joins a replay walk."""
 
     posts = _posts()
-    walked = MIXED_WALK | FAKE_WALK | (RESULTS_WALK & posts) | LOOKS_WALK | (WRF_WALK & posts) | (CHAIN_WALK & posts)
+    walked = (MIXED_WALK | FAKE_WALK | (RESULTS_WALK & posts) | LOOKS_WALK | (WRF_WALK & posts) | (CHAIN_WALK & posts)
+              | (SOUNDING_WALK & posts))
     assert posts == walked, sorted(posts ^ walked)
 
 

@@ -49,6 +49,8 @@ WHERE = {
     "wrf-open": "New run: From a WRF or ArWen run, Read the file; guided: Use a sounding from my WRF or ArWen run",
     "wrf-column": "From a WRF or ArWen run: click the map, or Show this spot",
     "wrf-use": "From a WRF or ArWen run: Import and check; guided: Next: how long can it run?",
+    "sounding-check": "Guided: Use my own sounding (a file, pasted text, or a shipped sounding)",
+    "sounding-options": "Guided: Use my own sounding, then Customize this storm",
     # Downscale a WRF or ArWen run (3D), advanced mode
     "chain-open": "Downscale (3D): Open",
     "chain-check": "Downscale (3D): Check",
@@ -89,6 +91,8 @@ run ends; a cluster job script starts the same two on the GPU node:
 | `gpuwm-cm1 examples --cm1 [CASE] [--copy DIR]` | CM1's supercell and squall-line namelists, unchanged |
 | `gpuwm-cm1 preset list` / `preset show ID` | The guided presets and whether each is offered here |
 | `gpuwm-cm1 preset environment --instability I --shear S [--hodograph curved\\|straight] [--out FILE]` | Make your own environment: the sounding the card's two sliders make, the model's own CAPE and shear for it, and which storm such air usually makes |
+| `gpuwm-cm1 sounding convert IN [OUT] [--speed-unit kt\\|ms] [--extend-top --top-m M]` | Use your own sounding: check a sounding file in whichever layout it has, and write CM1's `input_sounding` (`docs/SOUNDINGS.md`) |
+| `gpuwm-cm1 preset new your-environment --budget B --root RUNS --sounding FILE --start auto\\|push\\|bubble` | A storm on your own sounding, started the way its moisture calls for |
 | `gpuwm-cm1 run RUNDIR [--until T] [--detach]` | Start a run from a terminal (the GUI's Start adds the two helpers) |
 """
 

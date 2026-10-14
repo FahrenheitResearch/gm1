@@ -173,7 +173,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if self.command != "HEAD":
             self.wfile.write(data)
 
-    def _file(self, path: Path, cache: str = "no-store", run_file: bool = False) -> None:
+    def _file(self, path: Path, cache: str = "no-store", run_file: bool = False, download: str | None = None) -> None:
         extra: dict[str, str] = {}
         if run_file:
             kind, inline = run_file_type(path)
@@ -183,7 +183,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             inline = is_inline(kind)
         size = path.stat().st_size
         if not inline:
-            extra["Content-Disposition"] = f'attachment; filename="{download_name(path.name)}"'
+            extra["Content-Disposition"] = f'attachment; filename="{download_name(download or path.name)}"'
         self._headers(200, kind, size, extra, cache)
         if self.command == "HEAD":
             return
@@ -305,7 +305,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         reply: Reply = self.server.api.handle(method, raw_path, query, body,
                                               headers.get("content-type") or "")
         if reply.file is not None:
-            self._file(reply.file, run_file=reply.run_file)
+            self._file(reply.file, run_file=reply.run_file, download=reply.download_name)
             return
         self._json(reply.status, reply.body, reply.headers)
 

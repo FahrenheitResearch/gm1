@@ -331,10 +331,13 @@ def plain_summary(values: dict[str, Any], estimate: dict[str, Any] | None) -> di
     dx, dy = values.get("dx"), values.get("dy")
     sentences = []
     if isinstance(nx, (int, float)) and isinstance(dx, (int, float)):
+        from ..cm1run.fit import article        # the fit's own rule for "A" or "An" (no model import)
+
         width = nx * dx / 1000.0
         depth = (ny or nx) * (dy or dx) / 1000.0
+        size = f"{width:g} × {depth:g}"
         sentences.append(
-            f"A {width:g} × {depth:g} km area at {spacing_words(dx)}, "
+            f"{article(size)} {size} km area at {spacing_words(dx)}, "
             f"{storm_time_words(values.get('timax'))} of storm time.")
     if estimate:
         wall = ((estimate.get("time") or {}).get("wall_s") or {}).get("value")

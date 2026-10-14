@@ -1,5 +1,144 @@
 # gpuwm-cm1 release notes
 
+## 0.1.6
+
+Your own sounding. A new card grows a storm in the air of a sounding file you bring: a weather balloon, a forecast
+sounding or one you made, in CM1's own layout, as a University of Wyoming listing, a SHARPpy file or a table. The
+engine is 0.1.5's (ArWen 2.8.9), and every storm that 0.1.5 runs, 0.1.6 runs the same way; the hurricanes, any grid
+spacing on the thunderstorm presets, the 100 m supercell and ground friction in Customize stay as 0.1.5 has them.
+
+### What is new
+
+- **A new card, Use my own sounding**, in the gallery's Explore group. Choose a sounding file (your browser reads
+  it, so any file you can open works, on Windows too), paste its text, type a path, or start from one of the nine
+  balloon soundings GM1 ships. The card says what it found, shows the air as a skew-T and hodograph with the model's
+  own numbers (CAPE, CIN, LCL, LFC, EL, 0-6 km shear, 0-1 and 0-3 km storm-relative helicity) and one hedged
+  sentence on the storm such air usually makes, picks how to start the storm, and goes on to **How long can it
+  run?**, where the grid, the area and the storm time are fitted and can be changed as for any storm. Back from that
+  screen opens the card again on the same sounding.
+- **Four file layouts.** CM1's own `input_sounding`; a University of Wyoming text listing (`PRES HGHT TEMP DWPT ...`,
+  as text or as the saved page, wind in knots or m/s as its units line says); a SHARPpy text file (`%RAW%` to
+  `%END%`); and a table whose first line names its columns (pressure, height, temperature, dewpoint, and the wind as
+  direction and speed or as u and v). The converted file is shown and can be downloaded. The conversion is the one
+  the shipped balloon soundings were made with, and gives those nine files byte for byte from their archive pages.
+  A wind speed whose column does not say knots or m/s is asked about, not guessed. Levels out of order are put
+  in order of pressure, the lines a listing gives below the station's ground are left out and named, units on a
+  second header line are read, and a CM1 file with blank lines, commas or words after its numbers is written again
+  with the same numbers, since GM1's engine reads only the plain form.
+- **What cannot run is refused in plain words, with the line number**: a missing surface line, rows of numbers with
+  no header line, too few levels, heights out of order or in km, temperature in C where potential temperature in K
+  belongs, a surface pressure in Pa, a column that is not what its place says. The warm air just above the ground
+  that afternoon balloons have is a note; a large fall of potential temperature higher up and air holding more
+  vapour than it can are warnings, since they run. A sounding that stops below the model top (19750 m for the
+  guided storms) can be given made-up levels above its top, at the top level's temperature; the card and the run's
+  record say where they begin, and say when the sounding probably stopped below the tropopause.
+- **How the storm is started is a choice, with a default from the sounding.** A push of rising air (CM1's updraft
+  nudging, as the famous-day cards use), CM1's warm bubble, or the bubble at 3 K. On a real sounding the warm bubble
+  often makes no storm: it is centred 1.4 km above the ground, where real air is usually much drier than at the
+  ground. The default follows what GM1 has measured: where the water vapour at 1.4 km is under 80 % of the
+  surface's, as in all nine shipped balloons (43 to 77 %), the push; otherwise, as in the made environments (81 to
+  100 %), the bubble. It is a line between two groups of runs, and the card says when a sounding is close to it.
+  When a warm bubble makes no storm on air the card said could make one, Results says to try the push.
+- **The view follows the storm your sounding makes.** The storm-track check runs on your sounding, and the fit
+  screen states the motion it chose and where the storm starts. For the Norman 20 May 2013 balloon, the card's run
+  has the same motion and starting place as the famous-day card for that balloon. The check follows a warm bubble
+  only, so for the push the screen says the frame was worked out for a bubble; on a long run, watch the edges.
+- **A famous-day card runs on another sounding.** `--sounding FILE` on a card that starts with the push (a famous
+  day) was refused as drifting out of the area; its frame and place are now worked out on the new sounding, as for
+  the card above, and it keeps its own push.
+- **The run is yours.** It is named after your file, the Runs list says "Your sounding: NAME", the run folder keeps
+  the file the model read (`input_sounding`) and your own file when it was converted (`input_sounding.original`),
+  and Results says whose air it is.
+- **From a terminal.** `gpuwm-cm1 sounding convert IN [OUT]` checks a file and writes CM1's `input_sounding`
+  (`--speed-unit kt|ms`, `--extend-top --top-m M`). `gpuwm-cm1 preset fit|new ID --sounding FILE` takes the same four
+  layouts, and `--start push|bubble|strong-bubble|auto` starts the storm the chosen way on any card that starts from
+  a bubble or a push (a hurricane card refuses it). `gpuwm-cm1 preset options ID --start push` lists the settings
+  as they are with that start.
+- **A new guide**, [`docs/SOUNDINGS.md`](SOUNDINGS.md): the layouts with examples, the conversions, where to get
+  soundings, the starts and the trap, and what the numbers mean. Two example files are in `examples/soundings/`.
+- **Smaller fixes.** The fit's first line, Advanced mode's summary and Results' "This run" line say "An 80 × 80 km
+  area" for an area said with a vowel (the gust front's own, for example), as the grid spacing already did ("An
+  82.9 m grid"). On a storm that runs on a sounding file (this card's, or the column the WRF or ArWen card keeps),
+  Customize says the air is the file's in place of the two sliders of Make your own environment, which did not
+  change that air.
+
+### What was measured
+
+- **Six storms on an RTX 4090** with ArWen 2.8.9 (gpuwm 2.8.9), each the card's own storm (the Make your own
+  environment preset: a 1 km grid, 120 × 120 km, 40 levels of 500 m, 2 hours), started from the GUI as the card
+  starts it:
+  - The Birmingham 27 April 2011 balloon as a University of Wyoming listing in knots, given made-up levels above
+    18.9 km where it stopped (77 %, a close call). From the push, a supercell for the whole 2 hours: updrafts up to
+    46 m/s, 62 dBZ at 1 km, updraft helicity up to 2055 m²/s². From the warm bubble, no storm (no updraft over
+    0.9 m/s).
+  - The Norman 20 May 2013 listing in `examples/soundings/` (70 %). From the push, a storm by 10 minutes (updrafts
+    up to 67 m/s, 59 dBZ) that had rained itself out by about 60 minutes (8 dBZ left at 2 hours). From the warm
+    bubble, no storm (1.9 m/s).
+  - A made moist sounding in CM1's layout (93 %). From the warm bubble, a splitting pair of supercells from
+    20 minutes: updrafts up to 62 m/s, 64 dBZ at 1 km.
+  - Stable air with an inversion near the ground, as a table with named columns in knots (CAPE 0). From the warm
+    bubble, nothing (0.6 m/s), as the card said.
+  - What the card said beforehand, the kind of storm and the start, held in all six (measured).
+- **Staying in the area.** The main updrafts of the storms from the made sounding and from the Norman listing kept at
+  least 42 km from every edge. The storm from the push on the Birmingham balloon drifted south against the moving view by
+  about 6 m/s and was 12.5 km from the south edge at 2 hours, with its rain cut at the east edge from about 1 hour;
+  at that drift it would leave the area at about 2 h 35 min (worked out from the drift, not run).
+- **Time, memory and disk** of the card's storm on that card: 45 to 47 s of model time and 53 to 57 s from Start to
+  Finished, plus about 30 s for the pictures (the fit said about 70 s on a new install and 57 s once a run had been
+  timed); 1.22 GB of GPU memory at the peak, where the fit said 1.10 GB, and 4.15 to 4.21 GB of disk, where it said
+  3.9 GB (measured).
+- **On a CPU, with this version.** The conversion gives the nine shipped balloon files byte for byte from their
+  stored archive pages. On the card's levels, the card's CAPE is within 3 % of each balloon's record for seven of
+  the nine; the Denver balloon's is 10 % above its record and the Tallahassee balloon's 7 % below. All nine get the
+  push as their default start.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"); with pip, `pip install --upgrade gpuwm-cm1`. The engine stays at ArWen 2.8.9 (gpuwm 2.8.9 and
+gpuwm-data 2.8.9). Close GM1 and let a running storm finish first; the installer stops with a message while one
+runs. Your storms stay where they are. Finish a storm with the GM1 version that started it. The new card needs
+nothing else. The two example files are in the repository and the source package (`examples/soundings/`), not in
+the installed package; the card's list of shipped balloons and `gpuwm-cm1 preset environment --out FILE` give files
+to try.
+
+### Known limitations
+
+- **One run of each, on one card, on the card's 1 km storm.** Every GPU number above comes from one 2-hour run of
+  each case on one RTX 4090, at 1 km with 500 m levels. A sounding of your own on a finer grid, over a longer time
+  or on another card has not been run. The runs used a development build of this work, made before its last fixes
+  (the messages, the reading of untidy files and the wording of the push's frame); the 0.1.6 package itself has
+  not run a storm on a sounding of the user's own.
+- **The view follows a bubble's track.** GM1's storm-track check follows a warm bubble only. For the push, the
+  frame and the starting place are worked out for a bubble at that spot, and the fit screen says so: a storm from
+  the push can move another way, as on the Birmingham balloon above. Results offers "Run it 1 hour longer" without
+  saying how near the storm is to an edge.
+- **The default start is a line between two groups of runs.** The shipped balloons measure 43 to 77 % and the made
+  environments 81 to 100 %, so the gap is narrow; near 80 % the card says it is a close call. That none of the nine
+  balloons made a storm from the bubble and all nine did from the push was measured on the famous-day cards' grids
+  (250 m, or 500 m when fitted); on the card's 1 km storm the push has been run on two balloons.
+- **Not run on a GPU:** the 3 K bubble, a capped sounding with real instability under its lid (so the sentence
+  "Capped: needs a strong push" is untested), a SHARPpy file, a famous-day card on another balloon (now offered,
+  checked on a CPU only), and a CM1 file GM1 wrote again (blank lines, commas or extra words; checked on a CPU only).
+- **The card's storm is a 1 km quick look at every time.** About 1 hour and Overnight fit the same 1 km, 2-hour
+  storm as About 10 minutes, as for the Make your own environment card since 0.1.2; a finer grid, a larger area or
+  a longer storm time is a Customize choice.
+- **The numbers depend on the levels.** The card works them out on the storm's own 40 levels of 500 m;
+  `sounding convert --top-m` uses 250 m levels and the balloon records a 1 hPa grid, so the shear and helicity
+  differ a little among the three (Norman 20 May 2013: 0-6 km shear 28.1 m/s on the card, 26.5 m/s in the record).
+  The card's CAPE is for air lifted from the ground; the environment picture in Results gives the mixed-layer CAPE,
+  so the two can differ.
+- **The estimates run a little under** for the card's storm: memory by about 11 % and disk by about 7 % (above).
+- **What the card does not do:** lower the model top for a short sounding (it adds made-up levels; Advanced sets
+  the levels); read rows of numbers with no header line (refused, since the speed unit would be a guess); let you
+  pick one of several soundings in one file (it reads the first and says so); turn kg/kg into g/kg for you (it
+  warns); notice a mistyped pressure aloft in a listing; or take a CM1 file with its heights out of order (refused).
+  A warm bubble that keeps its relative humidity (`maintain_rh`) or sits lower is not offered. The card's picture
+  of your sounding carries GM1's "simulated" mark, though its footer says it is a sounding file, not a GM1 run.
+- The known limitations of 0.1.5, 0.1.4, 0.1.3, 0.1.2, 0.1.1 and 0.1.0 still apply ("Known limitations" under
+  each, and "Not in v0.1" and "Further known limits" under "0.1.0", below), except that the 100 m supercell is no
+  longer greyed (since 0.1.4) and ground friction is no longer greyed in Customize (since 0.1.5).
+
 ## 0.1.5
 
 Hurricanes. Two hurricane presets join the gallery, made from CM1 r21.1's own hurricane case, and ground friction

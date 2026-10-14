@@ -1218,7 +1218,8 @@ def article(words: str) -> str:
 def _summary(candidate: Candidate, estimate: Estimate, gpu: GpuInfo | None) -> str:
     width = candidate.nx * candidate.dx_m / 1000.0
     depth = candidate.ny * candidate.dx_m / 1000.0
-    area = f"A {width:.0f} × {depth:.0f} km area" if abs(width - depth) > 0.5 else f"A {width:.0f} × {width:.0f} km area"
+    size = f"{width:.0f} × {depth:.0f}" if abs(width - depth) > 0.5 else f"{width:.0f} × {width:.0f}"
+    area = f"{article(size)} {size} km area"            # "An 80 × 80 km area", "A 120 × 120 km area"
     odd_spacing = abs(candidate.dx_m / 50.0 - round(candidate.dx_m / 50.0)) > 1e-6
     if odd_spacing or abs(width - round(width)) > 0.05 or abs(depth - round(depth)) > 0.05:
         # A spacing of the user's own that is not a round number (67 m, 82.9 m), or an area that is not a whole

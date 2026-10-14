@@ -163,6 +163,12 @@ which. The same air from a terminal: `gpuwm-cm1 preset environment --instability
 
 Choose **Supercell, quick look, 1 km**.
 
+**Use my own sounding** takes a sounding file of your own: a weather balloon, a forecast sounding, or one you made.
+Choose the file (or paste its text, or start from one of the balloon soundings GM1 ships), and the card says what it
+found, shows the air as a skew-T and hodograph with its numbers, and picks how to start the storm. Then it goes on
+to the next screen like any other card. [`SOUNDINGS.md`](SOUNDINGS.md) has the file layouts GM1 reads and what the
+numbers mean.
+
 ## 6. Pick how long it may run, and press Start
 
 The next screen asks **How long can it run?** with four buttons: **About 10 minutes**, **About 1 hour**,
@@ -311,6 +317,8 @@ GUI can run is listed in [`COMMANDS.md`](COMMANDS.md).
   open the exact link it printed, with its token.
 - **"This link is out of date."** The page was opened without its key, or with an old one. Start GM1 again (Start
   menu: GM1) and use the page it opens.
+- **My own sounding makes no storm, or its file is refused.** [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) has both,
+  and [`SOUNDINGS.md`](SOUNDINGS.md) explains the file and the ways to start a storm.
 - **Anything else.** Run `gpuwm-cm1 doctor --plain` (on Windows: **GM1 check** in the Start menu) and follow its fix
   lines. In the GUI, **System** on the left shows the same check. [`TROUBLESHOOTING.md`](TROUBLESHOOTING.md) has the
   common problems with their fixes, and how to ask for help.

@@ -1,6 +1,10 @@
-"""``gpuwm-cm1 sounding``: a sounding from a WRF or ArWen run, for an idealized GM1 storm (the column route).
+"""``gpuwm-cm1 sounding``: a sounding for an idealized GM1 storm, from a WRF or ArWen run (the column route) or
+from a sounding file of your own.
 
 ::
+
+    gpuwm-cm1 sounding convert IN [OUT] [--speed-unit kt|ms] [--extend-top] [--top-m M | --top-of NAMELIST]
+                               [--name NAME] [--preview-png P] [--library L] [--json]
 
     gpuwm-cm1 sounding times FILE [--time T | --record N] [--map shear|cape --map-png P] [--library L] [--json]
     gpuwm-cm1 sounding from-wrf FILE [--time T | --record N] (--at LAT,LON | --ij I,J) --out FILE
@@ -13,6 +17,14 @@ domain coloured by 0-6 km bulk shear or CAPE.  ``from-wrf`` writes the column at
 named ``input_sounding``), and on request the skew-T and hodograph preview.  ``--top-m`` refuses a column whose
 highest level is below a deck's highest scalar level (CM1 stops on such a file); ``--top-of NAMELIST`` takes that
 level from a namelist, read by the importer's own parser (the guided card names its storm's namelist).
+
+``convert`` reads a sounding file in whichever layout it has (CM1's ``input_sounding``, a University of Wyoming
+text listing, a SHARPpy file, or a table with named columns; :mod:`.sounding_formats`), says what is wrong with it
+in plain words with the line number, and prints CM1 getcape's numbers, one hedged sentence on the storm such air
+usually makes and how to start the storm (:mod:`.own_sounding`).  With OUT it writes CM1's ``input_sounding``
+there, with its record beside it, when nothing is wrong; without OUT it only looks.  ``--top-m`` (or
+``--top-of NAMELIST``) is the model's highest level, which the sounding must reach; ``--extend-top`` adds made-up
+levels above a sounding that stops short of it.
 
 What it is: one column's environment, the same air everywhere in the domain, flat ground, no boundary forcing.
 For a GM1 domain driven by the whole run, see ``docs/WRF-DOWNSCALING.md`` (the 3D route).
@@ -219,6 +231,155 @@ def from_wrf(arguments: argparse.Namespace, *, command: str) -> dict[str, Any]:
     return payload
 
 
+def convert_command(source: Path | str, out: Path | str | None = None, *, speed_unit: str | None = None,
+                    extend: bool = False, top_m: float | None = None, top_of: Path | str | None = None,
+                    name: str | None = None, preview_png: Path | str | None = None,
+                    json_output: bool = True) -> list[str]:
+    """``sounding convert`` arguments (after the program name)."""
+
+    args = ["sounding", "convert", str(source)]
+    if out is not None:
+        args.append(str(out))
+    if speed_unit:
+        args += ["--speed-unit", str(speed_unit)]
+    if extend:
+        args.append("--extend-top")
+    if top_m is not None:
+        args += ["--top-m", f"{float(top_m):g}"]
+    elif top_of is not None:
+        args += ["--top-of", str(top_of)]
+    if name:
+        args += ["--name", str(name)]
+    if preview_png is not None:
+        args += ["--preview-png", str(preview_png)]
+    if json_output:
+        args.append("--json")
+    return args
+
+
+def convert(arguments: argparse.Namespace, *, command: str) -> dict[str, Any]:
+    """``sounding convert``: the record of :func:`.own_sounding.examine`, the file written when it can run."""
+
+    from . import coverage, own_sounding
+    from . import sounding as sounding_module
+
+    source = Path(arguments.file)
+    try:
+        data = source.read_bytes()
+    except OSError as error:
+        raise ValueError(f"{source} cannot be read: {error}") from error
+    if len(data) > own_sounding.F.MAX_BYTES:
+        raise ValueError(f"{source} is too large to be a sounding (over 4 MB)")
+    try:
+        text = data.decode("utf-8")
+    except UnicodeError:
+        text = data.decode("latin-1")
+    top = arguments.top_m
+    nz = dz = None
+    if getattr(arguments, "top_of", None) is not None:
+        effective = coverage.import_for_report(Path(arguments.top_of)).effective
+        top = sounding_module.highest_mass_level_m(effective)
+        if top is None:
+            raise ValueError(f"--top-of {arguments.top_of}: the namelist's vertical grid could not be built, so "
+                             "its top is unknown")
+        if int(effective.get("stretch_z", 0)) == 0:
+            nz, dz = int(effective["nz"]), float(effective["dz"])
+    if arguments.extend_top and top is None:
+        raise ValueError("--extend-top needs the height to reach: give --top-m M (a guided storm's highest level "
+                         "is 19750 m) or --top-of NAMELIST")
+    out = None if arguments.out is None else Path(arguments.out)
+    if out is not None and out.resolve() == source.resolve():
+        raise ValueError("OUT is the file being read; give another name for the converted sounding")
+    record = own_sounding.examine(text, name=arguments.name or source.name, speed_unit=arguments.speed_unit,
+                                  extend=bool(arguments.extend_top), nz=nz, dz_m=dz, top_needed_m=top,
+                                  library=arguments.library)
+    record["source"] = str(source)
+    record["command"] = command
+    record["written"] = None
+    if "text" in record and arguments.preview_png and not [p for p in record["problems"] if p["code"] != "top"]:
+        try:
+            record["preview"] = own_sounding.preview_png(record, arguments.preview_png)
+        except ImportError as error:        # matplotlib (a gpuwm dependency) missing from this Python
+            record["preview"] = {"file": None, "drawn": False, "why": "pictures need matplotlib, which this "
+                                 f"Python cannot import ({error}); pip install matplotlib"}
+        except (ValueError, OSError) as error:   # the numbers and the file never wait on a picture
+            record["preview"] = {"file": None, "drawn": False, "why": f"the picture could not be drawn ({error})"}
+    if record["ok"] and out is not None:
+        record["original"] = str(source.resolve())
+        record["record_file"] = str(own_sounding.write(record, out, command=command))
+        record["written"] = str(out)
+    record.pop("report", None)              # the full getcape block is for the picture; the numbers stay
+    return record
+
+
+def _convert_text(record: dict[str, Any]) -> str:
+    lines = []
+    head = f"{record.get('name')}: "
+    if record.get("format"):
+        head += (f"{record['format_words']}, {record.get('levels')} levels to "
+                 f"{float(record.get('top_m') or 0) / 1000.0:.1f} km")
+    else:
+        head += "not read"
+    lines.append(head)
+    if record.get("converted"):
+        lines.append("Converted to CM1's input_sounding:")
+        lines += [f"  - {sentence}" for sentence in record.get("conversions") or []]
+    for row in (record.get("dropped") or [])[:5]:
+        lines.append(f"  left out line {row['line']}: {row['why']}")
+    if len(record.get("dropped") or []) > 5:
+        lines.append(f"  and {len(record['dropped']) - 5} more level(s) left out")
+    for note in record.get("notes") or []:
+        lines.append(f"  {note}")
+    extension = record.get("extension") or {}
+    if extension.get("extended"):
+        lines.append(extension["sentence"])
+    for problem in record.get("problems") or []:
+        lines.append(f"Problem: {problem['text']}")
+        if problem.get("fix"):
+            lines.append(f"  What to do: {problem['fix']}")
+    for warning in record.get("warnings") or []:
+        lines.append(f"Worth knowing: {warning['text']}")
+    n = record.get("numbers") or {}
+    if n:
+        def km(value: Any) -> str:
+            return "none" if value is None else f"{float(value) / 1000.0:.1f} km"
+
+        def value(key: str, digits: int) -> str:
+            return "none" if n.get(key) is None else f"{float(n[key]):.{digits}f}"
+
+        lines.append(f"CAPE {value('cape_j_kg', 0)} J/kg, CIN {value('cin_j_kg', 0)} J/kg, "
+                     f"LCL {km(n.get('lcl_m'))}, LFC {km(n.get('lfc_m'))}, EL {km(n.get('el_m'))}")
+        if n.get("el_note"):
+            lines.append(f"  {n['el_note']}")
+        lines.append(f"0-6 km shear {value('shear_0_6km_m_s', 1)} m/s, storm-relative helicity "
+                     f"0-1 km {value('srh_0_1km_m2_s2', 0)} and 0-3 km "
+                     f"{value('srh_0_3km_m2_s2', 0)} m2/s2 ({n.get('basis')})")
+        if n.get("partial_top_m") is not None:
+            lines.append(f"  (on the part of the file up to {float(n['partial_top_m']) / 1000.0:.1f} km; numbers that "
+                         "need the air above it are left out)")
+    elif record.get("numbers_reason"):
+        lines.append(f"The numbers were not computed: {record['numbers_reason']}")
+    said = record.get("verdict")
+    if said:
+        lines.append(" ".join([said["sentence"], *said.get("more", [])]))
+        lines.append(f"  {said['note']}")
+    start = record.get("start")
+    if start:
+        chosen = next(option for option in start["options"] if option["recommended"])
+        lines.append(f"How to start the storm: {chosen['title'].lower()} (--start {chosen['id']}). {start['why']}")
+    if record.get("written"):
+        lines.append(f"wrote {record['written']} (sha256 {str(record.get('sha256'))[:12]}...); record: "
+                     f"{record.get('record_file')}")
+        lines.append("Run it: " + shlex.join(["gpuwm-cm1", "preset", "new", "your-environment", "--budget", "10m",
+                                              "--root", "RUNS", "--sounding", str(record["written"]), "--start",
+                                              "auto"]))
+    elif record.get("ok"):
+        lines.append("Nothing is wrong with it. Give OUT to write CM1's input_sounding.")
+    else:
+        lines.append("Nothing was written.")
+    return "\n".join(lines)
+
+
 def _refusal_payload(error: Exception) -> dict[str, Any]:
     from ..errors import CM1Refusal
 
@@ -232,6 +393,14 @@ def sounding_door(arguments: argparse.Namespace) -> int:
     from ..errors import CM1Refusal
 
     try:
+        if arguments.sounding_command == "convert":
+            command = shlex.join(["gpuwm-cm1", *convert_command(
+                arguments.file, arguments.out, speed_unit=arguments.speed_unit, extend=arguments.extend_top,
+                top_m=arguments.top_m, top_of=arguments.top_of, name=arguments.name,
+                preview_png=arguments.preview_png, json_output=arguments.json)])
+            payload = convert(arguments, command=command)
+            print(json.dumps(payload, indent=1, default=str) if arguments.json else _convert_text(payload))
+            return 0 if payload["ok"] else 2
         if arguments.sounding_command == "times":
             payload = times(arguments)
         else:
@@ -275,15 +444,43 @@ def add_parser(commands: Any) -> None:
 
     command = commands.add_parser(
         "sounding",
-        help="a CM1 input_sounding from one column of a WRF or ArWen run",
+        help="a CM1 input_sounding from a sounding file of your own, or from one column of a WRF or ArWen run",
         description=(
-            "Read a WRF or ArWen history file (wrfout; CDF-1, CDF-2, CDF-5 or netCDF-4) and write one column's "
+            "convert reads a sounding file of your own (CM1's input_sounding, a University of Wyoming text "
+            "listing, a SHARPpy file, or a table with named columns), checks it and writes CM1's input_sounding. "
+            "times and from-wrf read a WRF or ArWen history file (wrfout; CDF-1, CDF-2, CDF-5 or netCDF-4) and "
+            "write one column's "
             "environment as CM1's input_sounding (isnd = 7), for an idealized GM1 storm: the same air everywhere, "
             "flat ground, no boundary forcing. For a GM1 domain driven by the whole run, use "
             "gpuwm-cm1 chain."
         ),
     )
     sub = command.add_subparsers(dest="sounding_command", required=True)
+    own = sub.add_parser(
+        "convert", help="check a sounding file of your own and write it as CM1's input_sounding",
+        description=("Read a sounding file in whichever layout it has, say what is wrong with it in plain words "
+                     "with the line number, and print CM1 getcape's numbers, the storm such air usually makes "
+                     "and how to start the storm. With OUT, write CM1's input_sounding there when nothing is "
+                     "wrong. docs/SOUNDINGS.md has each layout with an example."))
+    own.add_argument("file", type=Path, help="the sounding file")
+    own.add_argument("out", type=Path, nargs="?", default=None,
+                     help="the input_sounding to write (left out: only look)")
+    own.add_argument("--speed-unit", choices=("kt", "ms"), default=None,
+                     help="the wind speed's unit, for a table whose column does not say (knots or m/s)")
+    own.add_argument("--extend-top", action="store_true",
+                     help="add made-up levels (the top level's temperature, wind and moisture) above a sounding "
+                          "that stops below --top-m; the record says where they begin")
+    own_top = own.add_mutually_exclusive_group()
+    own_top.add_argument("--top-m", type=float, default=None,
+                         help="the model's highest level, which the sounding must reach (a guided storm's is 19750)")
+    own_top.add_argument("--top-of", type=Path, default=None, metavar="NAMELIST",
+                         help="take that height, and the levels the numbers are computed on, from this namelist")
+    own.add_argument("--name", default=None, help="the name the file is known by (default: its file name)")
+    own.add_argument("--preview-png", type=Path, default=None, help="draw the skew-T and hodograph to this PNG")
+    own.add_argument("--library", type=Path, default=None,
+                     help="Rust initializer library for CM1's getcape numbers (default: installed)")
+    own.add_argument("--json", action="store_true", help="print the result as JSON")
+    own.set_defaults(handler=sounding_door, sounding_command="convert")
     for name, help_text in (("times", "what the file is and its times; optionally the domain map"),
                             ("from-wrf", "write the column at a point as input_sounding")):
         p = sub.add_parser(name, help=help_text)
@@ -311,5 +508,5 @@ def add_parser(commands: Any) -> None:
         p.set_defaults(handler=sounding_door, sounding_command=name)
 
 
-__all__ = ["add_parser", "column_words", "from_wrf", "from_wrf_command", "namelist_top_m", "record_path", "sounding_door", "times",
+__all__ = ["add_parser", "column_words", "convert", "convert_command", "from_wrf", "from_wrf_command", "namelist_top_m", "record_path", "sounding_door", "times",
            "times_command"]

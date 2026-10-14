@@ -751,6 +751,36 @@ def test_with_no_gpu_found_the_summary_says_memory_was_not_checked():
     assert "No GPU was found" not in seen["summary"]
 
 
+def test_an_area_said_with_a_vowel_takes_an_in_the_fit_in_advanced_and_in_results():
+    """The gust front's own area is 80 km: "An 80 × 80 km area at 500 m", not "A 80".  The fit's first line, Advanced
+    mode's summary and Results' "This run" line take the article as the area is said aloud, the rule the spacing
+    already followed ("An 82.9 m grid")."""
+
+    from cm1core.gui.guided import panels
+    from cm1core.gui.setup import plain_summary
+
+    _, gust = fitted("gust-front", "any")
+    assert gust["status"] == "fits", gust["reason"]
+    assert gust["summary"].startswith("An 80 × 80 km area at 500 m, "), gust["summary"]
+    for area, said in ((88.0, "An 88 × 88 km area at 1 km, "), (64.0, "A 64 × 64 km area at 1 km, ")):
+        _, mine = fitted("supercell-1km", "any", area=area)
+        assert mine["summary"].startswith(said), mine["summary"]
+    _, own = fitted("supercell-1km", "any")
+    assert own["summary"].startswith("A 120 × 120 km area at 1 km, "), own["summary"]
+    for words, said in (("80 × 80", "An"), ("88 × 80", "An"), ("11 × 11", "An"), ("18 × 18", "An"), ("8 × 8", "An"),
+                        ("120 × 120", "A"), ("100 × 100", "A"), ("110 × 110", "A"), ("180 × 180", "A")):
+        assert F.article(words) == said, words
+    summary = plain_summary({"nx": 160, "ny": 160, "dx": 500.0, "dy": 500.0, "timax": 7200.0}, None)["text"]
+    assert summary.startswith("An 80 × 80 km area at 500 m, "), summary
+    summary = plain_summary({"nx": 120, "ny": 110, "dx": 1000.0, "dy": 1000.0, "timax": 7200.0}, None)["text"]
+    assert summary.startswith("A 120 × 110 km area at 1 km, "), summary
+    copy = json.loads((ROOT / "src" / "cm1core" / "gui" / "copy" / "looks.json").read_text(encoding="utf-8"))
+    facts = {"dx_m": 500.0, "nx": 160, "ny": 160, "duration_s": 7200.0, "interval_s": 300.0}
+    assert panels(facts, copy)["this_run"].startswith("This run: 500 m grid spacing, an 80 × 80 km area, ")
+    assert panels({**facts, "nx": 240, "ny": 240}, copy)["this_run"].startswith(
+        "This run: 500 m grid spacing, a 120 × 120 km area, ")
+
+
 # ------------------------------------------------------------------ following the storm, names and labels
 
 

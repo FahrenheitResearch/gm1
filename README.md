@@ -92,6 +92,7 @@ print(ds["sws"].attrs["long_name"], float(ds["sws"].max()), ds["sws"].attrs["uni
 | [`docs/QUICKSTART.md`](docs/QUICKSTART.md) | New to storm modelling: install, open the GUI, pick a storm, press Start |
 | [`docs/CM1-USERS.md`](docs/CM1-USERS.md) | CM1 users: your own namelist, the coverage report, output, run control, clusters |
 | [`docs/INSTALL.md`](docs/INSTALL.md) | Requirements, the installers, pip or uv, updating and uninstalling, building the wheel |
+| [`docs/SOUNDINGS.md`](docs/SOUNDINGS.md) | Use your own sounding: the file layouts GM1 reads, how they are converted, how the storm is started, what the numbers mean |
 | [`docs/TROUBLESHOOTING.md`](docs/TROUBLESHOOTING.md) | Something does not work: the common problems, each with its fix, and how to ask for help |
 | [`docs/COMMANDS.md`](docs/COMMANDS.md) | Every command the GUI's "Show command" can print |
 | [`docs/GM1-DECKS.md`](docs/GM1-DECKS.md) | Beyond the GUI: GM1's own decks, the example decks and what each needs, recipes for finer grids |
@@ -164,7 +165,8 @@ uninstalling, the exact tested versions (`constraints-gpu-cu13.txt`), uv, cluste
   history, and `sounding from-wrf` makes a CM1 `input_sounding` from one of its columns.
 - **Reproduce**: `reproduce` writes a run's inputs, receipts, versions and commands as one bundle.
 - **The GUI** (`gpuwm-cm1 gui`, on 127.0.0.1 with a token): guided presets fitted to your GPU and a time budget
-  (thunderstorms, and two hurricanes at 8 km and 4 km made from CM1's own hurricane case),
+  (thunderstorms, two hurricanes at 8 km and 4 km made from CM1's own hurricane case, and a storm in the air of a
+  sounding file of your own),
   each one adjustable in guided mode ("Customize this storm": grid spacing, levels, area, storm time, picture
   interval, the air, the starting push, random bumps, Earth's rotation, air parcels; `preset ... --custom KNOB=VALUE`
   from a terminal) with the estimate updating as you change it, the live view and results on four quick-looks; or, in advanced mode, the namelist editor, the coverage report, every

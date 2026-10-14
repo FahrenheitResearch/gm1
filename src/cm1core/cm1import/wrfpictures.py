@@ -181,8 +181,12 @@ def map_png(history: WrfHistory, record: int, out: Path | str, *, field: str = "
     }
 
 
-def preview_png(column: wc.WrfColumn, report: Mapping[str, Any] | None, out: Path | str) -> dict[str, Any]:
-    """The column's skew-T, wind barbs and hodograph, with the getcape and hodograph numbers."""
+def preview_png(column: wc.WrfColumn, report: Mapping[str, Any] | None, out: Path | str, *,
+                words: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """The column's skew-T, wind barbs and hodograph, with the getcape and hodograph numbers.
+
+    ``words`` (``{"title", "line", "footer": [two lines]}``) names a column that is not from a WRF or ArWen run:
+    a sounding file the user gave (:mod:`.own_sounding`)."""
 
     import numpy as np
 
@@ -286,16 +290,20 @@ def preview_png(column: wc.WrfColumn, report: Mapping[str, Any] | None, out: Pat
 
     ov = S.Overlay((W, H))
     src = column.source
-    where = (f"{column.point['lat']:.3f}, {column.point['lon']:.3f}" if "lat" in column.point
-             else f"i {column.point['i']}, j {column.point['j']}")
-    ov.title("Your run's column", S.data_line(src["name"], f"{src['producer']}, domain {src['domain_id']}", where,
-                                               f"grid point i {column.point['i']}, j {column.point['j']}"))
-    ov.clock(_clock_text(src["times"]))
+    where = "" if words else (f"{column.point['lat']:.3f}, {column.point['lon']:.3f}" if "lat" in column.point
+                              else f"i {column.point['i']}, j {column.point['j']}")
     s = column.surface
-    ov.footer([S.data_line(S.SIMULATED + " by your " + src["producer"] + " run, not by GM1", "one column",
-                           "winds ground-relative, rotated to the earth"),
-               S.data_line("T from θ and P+PB; dewpoint from qv (CM1 getcape.F gettd)",
-                           "numbers: CM1 getcape.F via GM1's report", "hodograph 0–10 km, rings every 10 (m/s)")])
+    if words:
+        ov.title(str(words["title"]), str(words.get("line") or ""))
+        ov.footer([str(line) for line in words.get("footer") or []])
+    else:
+        ov.title("Your run's column", S.data_line(src["name"], f"{src['producer']}, domain {src['domain_id']}", where,
+                                                   f"grid point i {column.point['i']}, j {column.point['j']}"))
+        ov.clock(_clock_text(src["times"]))
+        ov.footer([S.data_line(S.SIMULATED + " by your " + src["producer"] + " run, not by GM1", "one column",
+                               "winds ground-relative, rotated to the earth"),
+                   S.data_line("T from θ and P+PB; dewpoint from qv (CM1 getcape.F gettd)",
+                               "numbers: CM1 getcape.F via GM1's report", "hodograph 0–10 km, rings every 10 (m/s)")])
     ov.mark()
     sy = int(0.175 * H)
     ov.text((int(0.042 * W), sy - ov.U(6)), "skew-T log-p", "label", colour="muted", anchor="ls")

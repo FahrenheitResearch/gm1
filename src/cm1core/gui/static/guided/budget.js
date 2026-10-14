@@ -1,7 +1,8 @@
 // Guided screen 2: How long can it run?. Four times (the last has no limit); under them "Customize this storm" (closed until opened), the
 // fitted run in one sentence, what you get (plain words, CM1's names as grey hints), what you changed, each change
 // the fit made, and one Start button with its command. A preset that runs a sounding file may be given one in the
-// route's query: #/guided/fit/ID/BUDGET?sounding=FILE (the column the WRF card keeps) or
+// route's query: #/guided/fit/ID/BUDGET?sounding=FILE (the column the WRF card keeps; with &start=push|bubble, the
+// file the Use my own sounding card keeps and how its storm is started) or
 // ?instability=I&shear=S&hodograph=H (the Make-your-own-environment card, or the air in Customize); the fit and
 // Start then carry it, and "The air" says what it is. The route also keeps the Customize choices
 // (?grid=500&area=96&...; customize.js) and ?customize=1 opens the panel, so a reload or Back shows the same fit.
@@ -11,6 +12,7 @@ import * as api from "../js/api.js";
 import { go, notice, runRoute } from "../js/router.js";
 import { showCommand } from "../js/command.js";
 import { t, term, wallWords, spanWords, gb, metres, shortGpu } from "./copy.js";
+import { startOptions } from "../js/sounding/options.js";
 import { customizePanel, customFrom, customQuery, changedKnobs, changedWords, changesStorm } from "./customize.js";
 
 // "any" is "As long as it takes": no limit on the time, for a run that needs more than overnight's 10 hours.
@@ -47,8 +49,10 @@ export function givenFrom(value) {
   const [head, query = ""] = String(value || "").split("?");
   const params = new URLSearchParams(query);
   const given = {};
-  if (params.get("sounding")) given.sounding = params.get("sounding");
-  else if (params.has("instability") && params.has("shear")) {
+  if (params.get("sounding")) {
+    given.sounding = params.get("sounding");
+    if (params.get("start")) given.start = params.get("start");
+  } else if (params.has("instability") && params.has("shear")) {
     given.environment = {
       instability: Number(params.get("instability")), shear: Number(params.get("shear")),
       hodograph: params.get("hodograph") || "curved",
@@ -73,6 +77,9 @@ function airRow(fit) {
     text = n && typeof n.cape_j_kg === "number"
       ? t("budget.air_made", { sentence: made.sentence, cape: Math.round(n.cape_j_kg), shear: Math.round(n.shear_0_6km_m_s) })
       : made.sentence;
+  } else if (snd.given && snd.own && snd.source) {
+    // A file of the user's own: its words already begin "your sounding NAME" (own_sounding.source_words).
+    text = `${snd.source.charAt(0).toUpperCase()}${snd.source.slice(1)}`;
   } else if (snd.given) {
     text = t("budget.air_file", { source: snd.source || snd.file || "" });
   } else {
@@ -162,11 +169,25 @@ export async function budget(body, args) {
   const params = new URLSearchParams(queryInBudget || queryInId || "");
   let chosen = BUDGETS.includes(budgetPart) ? budgetPart : null;
   const list = await api.get("/api/presets");
-  const p = (list.presets || []).find((x) => x.id === presetId);
+  let p = (list.presets || []).find((x) => x.id === presetId);
   if (!p) {
     body.append(h("p", { class: "banner stop" }, t("budget.back")));
     go("guided");
     return null;
+  }
+  // The user's own sounding (the Use my own sounding card): the storm's settings as they are with the start that
+  // card chose, and the sounding's own picture in place of the preset's.
+  const ownStart = given.sounding && given.start ? given.start : null;
+  const ownKey = ownStart ? (String(given.sounding).match(/[\\/]soundings[\\/]([0-9a-f]{20})[\\/]input_sounding$/) || [])[1] : null;
+  if (ownStart) {
+    const own = await startOptions(p.id, ownStart);
+    p = { ...p, customize: own || p.customize, note: t("budget.own_note"),
+      picture: ownKey ? { url: `/api/sounding/files/${ownKey}/preview.png`, caption: t("budget.own_caption") } : null };
+  }
+  // A sounding file is the air: the two sliders of Make your own environment would not change it, so the row says
+  // where the air comes from instead of offering them.
+  if (given.sounding && p.customize && p.customize.air) {
+    p = { ...p, customize: { ...p.customize, air: { available: false, why: t("budget.file_air") } } };
   }
   chosen = chosen || p.budget;
   document.getElementById("data").textContent = t("budget.data", { name: p.name, line: p.line });
@@ -185,12 +206,14 @@ export async function budget(body, args) {
     const out = {};
     if (sounding) out.sounding = sounding;
     else if (environment) out.environment = environment;
+    if (sounding && ownStart) out.start = ownStart;
     if (Object.keys(custom).length) out.custom = { ...custom };
     return out;
   };
   const request = () => requestWith(state.custom, state.environment);
   const routeFor = (b) => {
-    const query = sounding ? new URLSearchParams({ sounding }).toString() : customQuery(state.custom, state.environment);
+    const query = sounding ? new URLSearchParams({ sounding, ...(ownStart ? { start: ownStart } : {}) }).toString()
+      : customQuery(state.custom, state.environment);
     const extra = sounding && Object.keys(state.custom).length ? `&${customQuery(state.custom, null)}` : "";
     const open = state.open ? `${query || extra ? "&" : ""}customize=1` : "";
     const all = `${query}${extra}${open}`;
@@ -276,6 +299,7 @@ export async function budget(body, args) {
     if (!pic) return;
     const base = (p.picture && p.picture.caption) || "";
     const own = p.card === "environment";
+    if (ownStart) { caption.textContent = base; return; }
     const what = changedWords(state.custom, own ? null : state.environment, knobsById);
     if (!what) { caption.textContent = base; return; }
     let text = t("custom.caption", { name: p.name, what });
@@ -460,6 +484,9 @@ export async function budget(body, args) {
       }
       if (mine !== serial) return;
       const fit = reply.fit || {};
+      if (ownStart && fit.sounding && fit.sounding.label) {
+        document.getElementById("data").textContent = t("budget.own_data", { name: fit.sounding.label });
+      }
       if (panel) panel.showFit(reply, liveWords);
       const mine2 = fit.customized || [];
       if (mine2.length) {
@@ -531,6 +558,7 @@ export async function budget(body, args) {
 
   start.addEventListener("click", async () => {
     if (!current) return;
+    try { sessionStorage.removeItem("gm1.sounding.back"); } catch (_) { /* nothing kept */ }
     start.disabled = true;
     start.textContent = t("budget.starting");
     try {

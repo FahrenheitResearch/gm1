@@ -16,6 +16,7 @@ from cm1core.cm1run import rates
 from cm1core.cm1run.fit import (
     FROZEN_KEYS,
     PresetSpec,
+    article,
     fit_preset,
     set_namelist_values,
 )
@@ -267,7 +268,10 @@ def test_every_fit_honours_the_rule_and_the_guards(preset_id, budget) -> None:
         assert changed <= {"nx", "ny", "dx", "dy", "dtl", "timax", "tapfrq"}
         if changed:
             assert result.sentences and all(sentence.endswith(".") for sentence in result.sentences)
-        assert result.summary.startswith("A ") and "GPU memory" in result.summary
+        # "A 120 × 120 km area", "An 86 × 86 km area": the article the area is said with.
+        said, rest = result.summary.split(" ", 1)
+        assert said == article(rest), result.summary
+        assert "GPU memory" in result.summary
         # The tiling is the estimate's own call: tile 128 only where the whole
         # domain does not fit, or where tile 128 costs no step time.
         if "runtime.tile_nx" in result.gm1_settings:

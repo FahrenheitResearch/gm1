@@ -36,6 +36,7 @@ include docs/WRF-DOWNSCALING.md
 include docs/INSTALL.md
 include docs/QUICKSTART.md
 include docs/TROUBLESHOOTING.md
+include docs/SOUNDINGS.md
 include docs/CM1-USERS.md
 include docs/COMMANDS.md
 include docs/GM1-DECKS.md
@@ -44,6 +45,7 @@ recursive-include examples *.toml
 # The 4 m tornado run's decks and their page are repository content (docs/NESTING.md): the wheel carries the
 # top-level example decks only, and the sdist follows it.
 prune examples/tornado-4m
+recursive-include examples/soundings *.input_sounding *.txt
 prune tests
 prune tools
 # evidence/ (measurement receipts) and tools/oracle/ (the CM1 differential

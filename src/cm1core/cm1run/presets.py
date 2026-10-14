@@ -945,6 +945,9 @@ def default_name(preset: Preset, root: Path) -> str:
     stamp = time.strftime("%Y%m%d-%H%M", time.localtime())
     customized = preset.record.get("customized")
     base = f"{run_id_for(preset.id, customized)}-custom-{stamp}" if customized else f"{preset.id}-{stamp}"
+    from .own_start import run_name
+
+    base = run_name(preset, stamp) or base     # a run on the user's own sounding is named from its file
     name, number = base, 2
     while (root / name).exists():
         name, number = f"{base}-{number}", number + 1
@@ -986,6 +989,9 @@ def new_run(preset: Preset, budget: str, root: Path, name: str, *, gpu_index: in
         staged, rundir, overrides=dict(result.gm1_settings),
         original=preset.namelist_original_text.encode("ascii"), command=command, **given)
     guided = payload.get("guided") or {}
+    from .own_start import keep_original
+
+    keep_original(preset, rundir)
     _write_json(rundir / FIT_JSON, record)
     _mark_run(rundir, preset, result)
     if code != 0 or guided.get("offered") is False:
@@ -1011,6 +1017,8 @@ def given_args(preset: Preset) -> list[str]:
     custom = custom_args(preset.record.get("custom") or {})
     custom += [arg for key, value in (preset.record.get("custom_sets") or {}).items()
                for arg in ("--set", f"{key}={_set_text(value)}")]
+    if preset.record.get("start"):
+        custom += ["--start", str(preset.record["start"])]
     given = preset.sounding_given
     if not given:
         return custom
@@ -1055,6 +1063,11 @@ def _mark_run(rundir: Path, preset: Preset, result: "FitResult") -> None:
     if customized:
         record["case"] = case_words(preset.name, customized)
         record["guided"]["customized"] = [change["knob"] for change in customized]
+    from .own_start import CASE_WORDS, label_of
+
+    if label_of(preset):
+        record["case"] = CASE_WORDS.format(label=label_of(preset))
+        record["guided"]["sounding"] = label_of(preset)
     _write_json(path, record)
 
 
@@ -1079,6 +1092,8 @@ def add_preset_parser(commands: Any) -> None:
     show.add_argument("--json", action="store_true")
     choices = actions.add_parser("options", help="the settings --custom may change for one preset, and their choices")
     choices.add_argument("preset")
+    choices.add_argument("--start", choices=("push", "bubble", "strong-bubble"), default=None,
+                         help="the settings as they are with the storm started this way (see preset fit --start)")
     choices.add_argument("--json", action="store_true")
     for name, help_text in (("fit", "fit a preset to this GPU and a time budget"),
                             ("new", "fit a preset and write its run folder")):
@@ -1089,7 +1104,13 @@ def add_preset_parser(commands: Any) -> None:
                               "takes, with no limit on the time")
         sub.add_argument("--gpu", type=int, default=None, help="nvidia-smi's index of the GPU (default: the first)")
         sub.add_argument("--sounding", type=Path, default=None, metavar="FILE",
-                         help="run the preset on this input_sounding instead of its own (presets with isnd = 7)")
+                         help="run the preset on this sounding instead of its own (presets with isnd = 7): CM1's "
+                              "input_sounding, or a University of Wyoming text listing, a SHARPpy file or a table "
+                              "with named columns, which is converted (docs/SOUNDINGS.md)")
+        sub.add_argument("--start", choices=("auto", "push", "bubble", "strong-bubble"), default=None,
+                         help="how the storm is started: push (a push of rising air, CM1's updraft nudging), bubble "
+                              "(CM1's warm bubble), strong-bubble (the bubble at 3 K), or auto (chosen from the "
+                              "--sounding file's moisture); default: as the preset starts it")
         sub.add_argument("--instability", type=float, default=None, metavar="0..1",
                          help="with --shear: run the preset on the environment 'preset environment' makes")
         sub.add_argument("--shear", type=float, default=None, metavar="0..1")
@@ -1157,6 +1178,10 @@ def _door(arguments: argparse.Namespace, importer: Importer | None = None) -> in
     if action == "options":
         from .customize import options
 
+        if getattr(arguments, "start", None):
+            from .own_start import IINIT, switch_start
+
+            preset = switch_start(preset, IINIT[arguments.start])
         record = options(preset)
         print(json.dumps(record, indent=1, default=str) if arguments.json else _options_text(record))
         return 0
@@ -1202,15 +1227,28 @@ def _given_sounding(preset: Preset, arguments: argparse.Namespace) -> Preset:
             getattr(arguments, name, None) is not None for name in ("sounding", "instability", "shear")):
         # Said before anything is made: a made sounding stops far below a hurricane's 25 km top.
         raise PresetError(HURRICANE_AIR)
+    sounding = getattr(arguments, "sounding", None)
+    start = getattr(arguments, "start", None)
+    instability, shear = getattr(arguments, "instability", None), getattr(arguments, "shear", None)
+    if sounding is not None and (instability is not None or shear is not None):
+        raise PresetError("give --sounding or --instability with --shear, not both")
+    if start is not None and (instability is not None or shear is not None):
+        raise PresetError("--start goes with a sounding file (--sounding FILE) or the preset's own air, not with "
+                          "--instability and --shear")
+    if start is not None or sounding is not None:
+        # The user's own sounding in whichever layout it has, and how the storm is started (:mod:`.own_start`).
+        from .own_start import given
+
+        try:
+            return given(preset, parse(getattr(arguments, "custom", None) or ()),
+                         parse_sets(getattr(arguments, "set_values", None) or ()), sounding, start)
+        except CustomError as error:
+            raise PresetError(str(error), suggest=error.suggest) from error
     try:
         preset = apply(preset, parse(getattr(arguments, "custom", None) or ()),
                        parse_sets(getattr(arguments, "set_values", None) or ()))
     except CustomError as error:
         raise PresetError(str(error), suggest=error.suggest) from error
-    sounding = getattr(arguments, "sounding", None)
-    instability, shear = getattr(arguments, "instability", None), getattr(arguments, "shear", None)
-    if sounding is not None and (instability is not None or shear is not None):
-        raise PresetError("give --sounding or --instability with --shear, not both")
     if sounding is not None:
         # A column kept from a WRF or ArWen run says where it came from, not the kept file's path.
         from ..cm1import.sounding_door import column_words

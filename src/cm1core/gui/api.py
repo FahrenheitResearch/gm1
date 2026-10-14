@@ -135,6 +135,8 @@ class Reply:
     headers: dict[str, str] = field(default_factory=dict)
     #: The file comes from a run directory: data, served under the rules of files.run_file_type.
     run_file: bool = False
+    #: The name a downloaded file is saved as (default: its own name).
+    download_name: str | None = None
 
 
 @dataclass
@@ -233,6 +235,9 @@ class Api:
         from .wrf import WrfApi
 
         self.wrf = WrfApi(self)
+        from .sounding import SoundingApi
+
+        self.sounding = SoundingApi(self)
         from .chain import ChainApi
 
         self.chain = ChainApi(self)
@@ -356,6 +361,9 @@ class Api:
         found = self.wrf.get(parts, query)
         if found is not None:
             return found
+        found = self.sounding.get(parts, query)
+        if found is not None:
+            return found
         found = self.chain.get(parts, query)
         if found is not None:
             return found
@@ -377,6 +385,9 @@ class Api:
         if parts == ["presets", "new"]:
             return self.advanced.preset_new(payload)
         found = self.wrf.post(parts, payload)
+        if found is not None:
+            return found
+        found = self.sounding.post(parts, payload)
         if found is not None:
             return found
         found = self.chain.post(parts, payload)

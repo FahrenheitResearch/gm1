@@ -18,6 +18,7 @@ import "./run/results.js";
 import "./system.js";
 import "./advanced/index.js";
 import "./wrf/index.js";
+import "./sounding/index.js";
 import "./chain/index.js";
 
 export { register, go, notice, homeRoute, onOpenRun, openRunRoute };

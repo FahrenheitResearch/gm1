@@ -31,6 +31,7 @@ from __future__ import annotations
 import json
 import math
 from pathlib import Path
+import re
 from typing import Any, Mapping
 
 #: A picture with no reflectivity this strong anywhere shows no storm (5 dBZ is about the weakest echo a weather
@@ -266,8 +267,30 @@ def run_notes(rundir: Path, index: Any) -> dict[float, str]:
         run = json.loads((Path(rundir) / "run.json").read_text(encoding="utf-8"))
     except (OSError, ValueError):
         run = {}
-    return notes(run if isinstance(run, Mapping) else {}, index, presets_dir(),
-                 load_copy()["guided"].get("strings") or {})
+    strings = load_copy()["guided"].get("strings") or {}
+    found = notes(run if isinstance(run, Mapping) else {}, index, presets_dir(), strings)
+    ended = str((strings.get("storm.none_ended") or {}).get("text") or "")
+    hint = str((strings.get("storm.none_own_bubble") or {}).get("text") or "")
+    if ended and hint and ended in found.values() and _own_bubble(Path(rundir)):
+        found = {time_s: (f"{line} {hint}" if line == ended else line) for time_s, line in found.items()}
+    return found
+
+
+def _own_bubble(rundir: Path) -> bool:
+    """Whether the run is on the user's own sounding, started from a warm bubble, on air the card did not call
+    stable: where no storm says more about the start than about the air (the push made storms on such air)."""
+
+    try:
+        fit = json.loads((rundir / "fit.json").read_text(encoding="utf-8"))
+        namelist = (rundir / "namelist.input").read_text(encoding="ascii", errors="replace")
+    except (OSError, ValueError):
+        return False
+    own = ((fit.get("sounding") or {}).get("own") or {}) if isinstance(fit, Mapping) else {}
+    if not own:
+        return False
+    kind = (own.get("verdict") or {}).get("id") if isinstance(own.get("verdict"), Mapping) else None
+    match = re.search(r"^\s*iinit\s*=\s*(\d+)", namelist, re.M)
+    return bool(match and int(match.group(1)) == 1 and kind not in (None, "stable", "weak"))
 
 
 def note_for(notes_by_time: Mapping[float, str], time_s: Any) -> str | None:
