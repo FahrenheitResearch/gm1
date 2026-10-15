@@ -352,6 +352,11 @@ class CartesianClosure:
     #: :mod:`cm1core.cuda_gm1_flat_stretched_closure`.  ``None`` on the
     #: uniform column, which keeps the images it has always launched.
     flat_compiled: Any = None
+    #: CM1's (wbc, ebc, sbc, nbc) and whether one of them is a rigid wall;
+    #: declared here so an instance assembled another way reads four open
+    #: sides.  ``__init__`` sets both from the dynamics' lateral selection.
+    lateral_sides: tuple[int, int, int, int] = (2, 2, 2, 2)
+    rigid_walls: bool = False
 
     def _budget(self) -> Any:
         probe = self.budget_probe
@@ -413,6 +418,20 @@ class CartesianClosure:
         self._held_step = 0
         self._tke_stage = 3
         self.flat_stretched = int(g.stretch_z) != 0
+        # README.namelist:561-568: a rigid side (3 free slip, 4 no slip).  CM1
+        # forms its wall faces with the wall branches of calcdef and gettau
+        # (turb.F:4788-4970, :4131-4232) and the edge tendencies from the
+        # mirrored halo, where the closure images form an open side's words.
+        # A walled domain runs the flat closure statements -- CM1's own on an
+        # even column too -- derived for its walls
+        # (cuda_gm1_flat_wall_closure); a domain without a wall keeps the
+        # images it has always launched.
+        self.lateral_sides = tuple(
+            int(side) for side in getattr(getattr(dynamics, "lateral_selection", None), "sides", (2, 2, 2, 2))
+        )
+        from .cuda_gm1_flat_wall_closure import has_rigid_wall
+
+        self.rigid_walls = has_rigid_wall(self.lateral_sides)
         self._compile()
         self._vertical_profiles()
         self._lspgrad_profiles()
@@ -554,11 +573,18 @@ class CartesianClosure:
         # only on the real-product lane): turb.F/turbtend.F/adv.F run their
         # terrain_flag=.false. statements on rdz*mh(1,1,k) and rdz*mf, not
         # the rds/rdsf terrain words the images above were derived for.
-        self.flat_compiled = (
-            compile_cuda_gm1_flat_stretched_closure(max_nk=self.grid.nz)
-            if self.flat_stretched
-            else None
-        )
+        if self.rigid_walls:
+            from .cuda_gm1_flat_wall_closure import compile_cuda_gm1_flat_wall_closure
+
+            # The derived images answer the flat names; each tile binds its
+            # own wall edges before it launches them (_bind_tile_walls).
+            self.flat_compiled = compile_cuda_gm1_flat_wall_closure(max_nk=self.grid.nz)
+        else:
+            self.flat_compiled = (
+                compile_cuda_gm1_flat_stretched_closure(max_nk=self.grid.nz)
+                if self.flat_stretched
+                else None
+            )
         self.retained_compiled = compile_cuda_sgs_tke()
         self.scalar_compiled = compile_cuda_gm1_child_stretched_scalar_turbulence()
         self.rayleigh_compiled = compile_cuda_gm1_child_terrain_rayleigh()
@@ -644,7 +670,9 @@ class CartesianClosure:
             "ztop_f32": g.ztop_m, "dz_reference_f32": g.dz_m,
         }
         flat_column: dict[str, Any] = {}
-        if levels.stretch_z != 0:
+        # A walled even column runs the flat family too (mh = mf = 1,
+        # cuda_cartesian_dynamics.runs_flat_family): CM1's own statements there.
+        if levels.stretch_z != 0 or self.rigid_walls:
             identity["vertical_coordinate"] = levels.record()
             # The Cartesian lane is terrain_flag=.false.: its stretched operators
             # run CM1's flat statements on param.F:8467,8476's mh(1,1,k) and
@@ -1061,8 +1089,19 @@ class CartesianClosure:
             cp.copyto(self.surface_state["znt"], snapshot)
         two_part.reduce()
 
+    def _bind_tile_walls(self, spec: Gm1TileSpec) -> None:
+        """Name the wall edges of the tile about to be integrated (a walled domain only)."""
+
+        if self.rigid_walls:
+            from .cuda_gm1_flat_wall_closure import tile_wall_code
+
+            self.flat_compiled.bind(tile_wall_code(self.lateral_sides, spec, nx=self.grid.nx, ny=self.grid.ny))
+
     def _gather(self, tile: Mapping[str, Any], work: Mapping[str, Any], spec: Gm1TileSpec) -> None:
         cp, d = self.cp, self.dynamics
+        # Every per-tile pass starts here, so the closure images it launches
+        # next are bound to this tile's wall edges.
+        self._bind_tile_walls(spec)
         for name, target in tile.items():
             if name in d.fields:
                 _copy_tile(cp, target, d.fields[name], spec)
@@ -1620,6 +1659,7 @@ class CartesianClosure:
                     if self.flat_compiled is not None:
                         # adv.F:3252-3355 (iamw=.false., terrain_flag=.false.)
                         # and solve2.F:1708-1803.
+                        self._bind_tile_walls(spec)
                         self.flat_compiled.tke_kernel(((words + 127) // 128,), (128,), (*(tile[name] for name in ("tke3d", "tkea", "tketen", "c1", "c2", "rrf0", "rru", "rrv", "rrw", "divx", "output")), u(spec.cnx), u(spec.cny), u(g.nz), u(3), f(g.dx_m), f(g.dy_m), dttmp, u(nrk == 3), cp.float64(weps), self.vertical.mf, f(self.vertical.rdz_f32)), stream=self.stream)
                     else:
                         self.sgs_compiled.tke_kernels[1](((words + 127) // 128,), (128,), (*(tile[name] for name in ("tke3d", "tkea", "tketen", "c1", "c2", "rrf0", "gz", "rru", "rrv", "rrw", "divx", "output")), u(spec.cnx), u(spec.cny), u(g.nz), u(3), f(g.dx_m), f(g.dy_m), f(g.dz_m), dttmp, u(nrk == 3), cp.float64(weps), self.vertical.rds), stream=self.stream)
@@ -1633,7 +1673,9 @@ class CartesianClosure:
         self.last_receipts["tke_rk"] = {
             "schema": "gm1.cartesian-tke-rk/v1", "step": self._held_step, "nrk": nrk,
             "source_sha256": (
-                GM1_FLAT_STRETCHED_TKE_ADVECTION_SOURCE_SHA256
+                self.flat_compiled.tke_source_sha256
+                if self.rigid_walls
+                else GM1_FLAT_STRETCHED_TKE_ADVECTION_SOURCE_SHA256
                 if self.flat_compiled is not None
                 else self.sgs_compiled.tke_source_sha256
             ),

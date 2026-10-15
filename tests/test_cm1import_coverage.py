@@ -12,7 +12,8 @@ One test group each:
    exits 2 and a changed output key alone exits 3;
 4. the stock deck's report matches its golden file, carries the stock-deck ratios, has
    no ramp_sgs row, a kdiv row only off 0.10, and squall_line's periodic
-   "Not yet checked" row while the SGS closure's periodic caveat stands;
+   "Not yet checked" row, in the register's words, while the register says
+   the periodic side is not checked;
 
 and the invariants the GUI relies on: every stated setting lands in exactly
 one category, the JSON has the Check screen's shape, the exit code follows the
@@ -308,14 +309,16 @@ def test_kdiv_is_not_yet_checked_only_off_cm1s_value(kdiv: str, shown: bool, tmp
     assert report.exit_code == 0
 
 
-def test_squall_line_shows_the_periodic_row_while_the_closure_caveat_stands() -> None:
+def test_squall_line_shows_the_periodic_row_while_the_register_says_not_checked() -> None:
     from cm1core.boundary_validation_register import register
 
-    caveat = register()["wbc/ebc/sbc/nbc=1 (periodic)"]["caveat"] or ""
+    not_checked = register()["wbc/ebc/sbc/nbc=1 (periodic)"]["not_checked"]
     report = _report(SQUALL_LINE)
     row = _row(report, "not_checked", "sbc")
-    if "SGS closure" in caveat:
+    if not_checked:
         assert row is not None and row.keys == ("sbc", "nbc") and "turbtend.F" in row.text
+        # The report's detail is the register's sentence, which the receipt and doctor also print.
+        assert row.detail == not_checked and "760 to 840 words a call" in row.detail
     else:
         assert row is None
     assert report.exit_code == 0

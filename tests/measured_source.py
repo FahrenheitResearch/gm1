@@ -274,11 +274,6 @@ REWORDED.update({
         "8dc04a0ef6c1edfc3eef7cbf979e16630ca7edcaa3cde08ecf77f21a3b1ae82b",
         22997,
     ),
-    "cm1core/doctor.py": (
-        "830acbfe34ee4381a7be2f84b880413aff9e13e15732e93a34544e09a3d4dc07",
-        "bc70bb684e536a3847c03955c5a1ee5d1c908c8b3a07c7931f13c0ba80371b1e",
-        38881,
-    ),
     "cm1core/doors.py": (
         "a33225aa6915fcbf75f96e1997e8a0d6bc8d10cf54de299b3942e8f1a6da3f73",
         "2054eaec2b8b81a851e028bd33ca3fabbecab415ed5fd6952db988be4ac89315",

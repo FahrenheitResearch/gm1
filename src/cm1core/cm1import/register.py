@@ -533,22 +533,26 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
         for name, entry in selection["unvalidated"].items():
             if name.startswith("wbc/ebc/sbc/nbc=3,4"):
                 keys = tuple(side for side, value in zip(sides, lateral) if value in (3, 4))
-                text = ("Rigid walls: raw-word exact against CM1's bc.F, but no CM1-vs-GM1 run has been "
-                        "compared for a walled domain")
+                text = ("Rigid walls: every operator gives CM1's words beside a wall, and dry bubbles in a "
+                        "walled box stay within CM1's own spread for 15 minutes; a storm in a walled box has not "
+                        "passed: in CM1's supercell with walls, max updraft helicity was 1.26 times CM1's in the "
+                        "second hour (band 10 %)")
             elif name.startswith("irbc=1"):
                 keys = ("irbc",)
-                text = ("irbc = 1 (Klemp-Wilhelmson on the large step): no CM1-vs-GM1 run has been "
-                        "compared; only irbc = 2's small-step position was")
+                text = ("irbc = 1 (Klemp-Wilhelmson on the large step): the acoustic step keeps its phase "
+                        "speeds as CM1's does, word for word, but no CM1-vs-GM1 run has been compared")
             else:
                 continue
-            plain = ("Solid side walls have not been checked against CM1." if keys != ("irbc",) else
+            plain = ("Solid side walls have been checked against CM1 in dry runs; a storm boxed in by walls "
+                     "has not matched CM1 yet." if keys != ("irbc",) else
                      "This open-side setting has not been checked against CM1.")
             rows.append(Row(category="not_checked", keys=keys, value=builder.values(keys), text=text,
                             detail=entry["not_checked"], evidence="records/CM1-SUPPORT-MATRIX.csv",
                             stage="register", plain=plain))
         periodic = [side for side, value in zip(sides, lateral) if value == 1]
-        caveat = boundary_register()["wbc/ebc/sbc/nbc=1 (periodic)"].get("caveat") or ""
-        if periodic and "SGS closure" in caveat:
+        # The register's own sentence, so the report, the receipt and doctor say the same.
+        not_checked = boundary_register()["wbc/ebc/sbc/nbc=1 (periodic)"]["not_checked"]
+        if periodic and not_checked:
             rows.append(Row(
                 category="not_checked",
                 keys=tuple(periodic),
@@ -559,7 +563,7 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
                     "(turbtend.F:67-102)"
                 ),
                 plain="Repeating sides have not been fully checked against CM1 yet.",
-                detail=caveat,
+                detail=not_checked,
                 evidence="records/CM1-SUPPORT-MATRIX.csv",
                 stage="register",
             ))
@@ -580,6 +584,54 @@ def not_checked_rows(builder: "_Builder", component: str) -> list[Row]:
                    "on an RTX 4090 (measured)."),
             evidence="records/CM1-SUPPORT-MATRIX.csv",
             stage="register",
+        ))
+    return rows
+
+
+def no_open_side_rows(builder: "_Builder", component: str) -> list[Row]:
+    """``roflux = 1``, and ``irbc`` 1 or 2, with no open side: CM1 runs them, and they do nothing.
+
+    CM1 rescales the outward flow through open sides only (bc.F:2180-2391), and
+    the phase speeds ``irbc`` 1 and 2 build feed the open-side update only
+    (sound.F:274-302).  The run is CM1's; the row says the setting has no effect
+    here, as the run receipt's ``lateral_boundaries.no_effect`` does.
+    """
+
+    translation = builder.translation
+    if translation is None:
+        return []
+    boundaries = translation.gm1.get("boundaries", {})
+    lateral = [boundaries.get(side) for side in ("west", "east", "south", "north")]
+    if not all(isinstance(value, int) for value in lateral) or 2 in lateral:
+        return []
+    rows: list[Row] = []
+    if boundaries.get("roflux", 0) == 1:
+        keys = _stated(builder, ("roflux",)) or ("roflux",)
+        rows.append(Row(
+            category="same",
+            keys=keys,
+            value=builder.values(keys),
+            text=("No effect here: no side is open (none of wbc, ebc, sbc and nbc is 2), and CM1 rescales the "
+                  "outward flow through open sides only (bc.F:2180-2391), so CM1 runs it the same way"),
+            plain="This setting does nothing here, because no side is open; CM1 does the same.",
+            evidence="records/CM1-SUPPORT-MATRIX.csv",
+            stage="register",
+            family="boundaries",
+        ))
+    irbc = boundaries.get("radiative_order", 4)
+    if irbc in (1, 2):
+        keys = _stated(builder, ("irbc",)) or ("irbc",)
+        rows.append(Row(
+            category="same",
+            keys=keys,
+            value=builder.values(keys),
+            text=(f"No effect here: no side is open (none of wbc, ebc, sbc and nbc is 2), and the phase speeds "
+                  f"irbc = {irbc} builds are used by the open-side update only (sound.F:274-302), so CM1 runs "
+                  "it the same way"),
+            plain="This setting does nothing here, because no side is open; CM1 does the same.",
+            evidence="records/CM1-SUPPORT-MATRIX.csv",
+            stage="register",
+            family="boundaries",
         ))
     return rows
 
@@ -609,6 +661,7 @@ def known_rows(builder: "_Builder", component: str) -> list[Row]:
         + output_rows(builder, component)
         + run_rows(builder, component)
         + not_checked_rows(builder, component)
+        + no_open_side_rows(builder, component)
         + not_needed_rows(builder, component)
     )
 

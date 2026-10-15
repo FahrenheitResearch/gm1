@@ -5232,14 +5232,22 @@ def _validate_reflectivity(config: CM1Config) -> None:
         )
 
 
+#: CM1's lateral values in words (README.namelist:561-568), and each side's
+#: place in ``BoundaryConfig.lateral``.
+_LATERAL_NAMES = {1: "periodic", 2: "open", 3: "a free-slip wall", 4: "a no-slip wall"}
+_SIDE_INDEX = {"west": 0, "east": 1, "south": 2, "north": 3}
+
+
 def _validate_boundary_family(config: CM1Config) -> None:
     """Refuse every lateral boundary this port would integrate as another one.
 
     Each rule is one CM1 r21.1 stop, forced rewrite or absent operator.  The
     four lateral values are CM1's own (``README.namelist:561-568``): 1
     periodic, 2 open-radiative, 3 rigid free-slip, 4 rigid no-slip, and every
-    combination of them, including CM1's own mixed squall-line family
-    ``wbc=ebc=2`` with ``sbc=nbc=1``, reaches one operator.
+    combination CM1 runs, including CM1's own mixed squall-line family
+    ``wbc=ebc=2`` with ``sbc=nbc=1``, reaches one operator.  CM1 stops when
+    one side of an axis is periodic and the other is not
+    (``src/param.F:2562-2588``), and so does this port.
     """
 
     b = config.boundaries
@@ -5278,6 +5286,33 @@ def _validate_boundary_family(config: CM1Config) -> None:
             "the previous step left there, and the 5th-order advection stencil "
             "reads three of them",
         )
+    # src/param.F:2562-2588: "Can not have periodic b.c.'s on one side only!"
+    # A periodic side is the opposite side seen from across the domain, so it
+    # cannot be periodic while that side is open or a wall.  CM1 stops before
+    # it runs, so there is no CM1 run such a pair could be compared with.
+    for low_name, high_name, low, high in (
+        ("west", "east", b.west, b.east),
+        ("south", "north", b.south, b.north),
+    ):
+        if (low == 1) != (high == 1):
+            periodic, other = (low_name, high_name) if low == 1 else (high_name, low_name)
+            refuse(
+                code="CM1-CFG-PERIODIC-ONE-SIDE",
+                gate="support-matrix",
+                reason=(
+                    f"src/param.F:2562-2588 stops CM1 when one side of an axis is "
+                    f"periodic and the other is not (\"Can not have periodic b.c.'s "
+                    f"on one side only!\"): the {periodic} side would wrap onto the "
+                    f"{other} side, which is {_LATERAL_NAMES[b.lateral[_SIDE_INDEX[other]]]}; "
+                    "CM1 does not define such a pair, so no CM1 run could be compared with it"
+                ),
+                remedy=(
+                    f"make boundaries.{low_name} and boundaries.{high_name} both "
+                    "periodic (1), or neither"
+                ),
+                option=f"boundaries.{periodic}",
+                value=b.lateral[_SIDE_INDEX[periodic]],
+            )
     # src/param.F:6678-6681 -- ib* is what selects the pressure-gradient face
     # range and the ssopenbc/radbc calls; a lane that cannot express one of
     # them would integrate a side it did not name.
@@ -5381,8 +5416,8 @@ def _validate_boundary_family(config: CM1Config) -> None:
                         "would move relative to the air it is meant to bound"
                     ),
                     remedy=(
-                        f"set closures.{axis} to 0.0, or make boundaries."
-                        f"{names[0]}/{names[1]} periodic or open"
+                        f"set closures.{axis} to 0.0, or make both boundaries."
+                        f"{names[0]} and boundaries.{names[1]} periodic or open"
                     ),
                     option=f"closures.{axis}",
                     value=speed,

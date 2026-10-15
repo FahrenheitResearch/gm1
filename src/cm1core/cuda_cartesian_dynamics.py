@@ -113,7 +113,7 @@ def cartesian_dynamics_state_shapes(config: RuntimeConfig) -> dict[str, dict[str
         "constant_zero": (g.nz + 1, max(g.ny * (g.nx + 1), (g.ny + 1) * g.nx)),
         "zh_profile": (g.nz,), "zf_profile": (g.nz + 1,),
     }
-    if g.stretch_z != 0:
+    if g.stretch_z != 0 or runs_flat_family(config):
         # The profile-bound horizontal mass flux reads rho0 on the halo
         # rectangle; _publish_padded_rho0 derives it once and keeps it.  It is
         # declared here rather than at the allocation site so that the restart
@@ -289,6 +289,28 @@ def cartesian_dynamics_allocation_plan(config: RuntimeConfig) -> dict[str, Any]:
     }
 
 
+def runs_flat_family(config: Any) -> bool:
+    """Does this run integrate CM1's flat (``terrain_flag=.false.``) operator family?
+
+    A vertically stretched column always has (``grid.stretch_z != 0``).  A
+    domain with a rigid side wall (``wbc``/``ebc``/``sbc``/``nbc`` = 3 or 4)
+    does too, on an even column (``mh = mf = 1``): the flat texts are CM1's
+    own statements on every Cartesian column, word for word beside a wall
+    (evidence/oracle/walls-operators), where the even column's own texts --
+    written for a terrain-following column and handed a flat one -- agree
+    with CM1 only to rounding in the acoustic step.  A domain without a wall
+    keeps the images it has always launched.
+    """
+
+    if int(config.grid.stretch_z) != 0:
+        return True
+    from .cuda_boundary_families import DEFAULT_LATERAL_BOUNDARY_SELECTION
+    from .cuda_gm1_flat_wall_closure import has_rigid_wall
+
+    selection = getattr(config, "lateral_boundary_selection", None) or DEFAULT_LATERAL_BOUNDARY_SELECTION
+    return has_rigid_wall(selection.sides)
+
+
 class CartesianDynamics:
     """One source-initialized device state with explicit RK-phase methods."""
 
@@ -306,6 +328,9 @@ class CartesianDynamics:
     #: selected: a :class:`cm1core.cartesian_budgets.CartesianBudgetStage`
     #: that reads this stage's carriers through a write guard and writes none.
     budget_probe: Any = None
+    #: The roflux rescale in CM1's order that the flat acoustic stage launches
+    #: (compiled for a flat-family run with roflux = 1 only).
+    roflux_cm1_order_compiled: Any = None
 
     def __init__(
         self, source: IdealizedSource, config: RuntimeConfig, *, cupy: Any, stream: Any,
@@ -401,7 +426,7 @@ class CartesianDynamics:
         # uniform family clamps at the face instead and never reads this, so it
         # is uploaded only where it is consumed.
         self.stretched_metrics: Mapping[str, Any] | None = None
-        if self.geometry.stretch_z != 0:
+        if self.stretched:
             from .cuda_immutable_metrics import extend_immutable_source_metrics
 
             self.stretched_metrics = extend_immutable_source_metrics(
@@ -458,6 +483,16 @@ class CartesianDynamics:
 
             self.initiation = InitiationForcingStage(config.initiation_forcing, self)
         self._bind_stage_states()
+        # init3d.F:2147-2151 (getset): CM1 fills every lateral boundary of the
+        # initial winds and pressure before the first step.  Beside a rigid
+        # wall that fill sets the wall face itself (bc.F:564-575, u(1,j,k)=0,
+        # and v on a south or north wall), so a walled domain gets it here;
+        # without it the first large step carried the sounding's wind through
+        # the wall.  On open and periodic sides the same fills write only halo
+        # cells this port forms where they are read, and a domain without a
+        # wall is left exactly as it has always started.
+        if self._has_rigid_wall():
+            self._fill_initial_boundaries()
         # CM1 getset (init3d.F:2386-2467) rebuilds current prs/rho/rr/rf from the
         # initialized perturbation state before the model advances.  The warm
         # bubble is in th3d, so the ledger and the first closure must see it.
@@ -512,6 +547,13 @@ class CartesianDynamics:
                 )
                 for name, shape in lateral_boundary_workspace_shapes(g.nx, g.ny, g.nz).items()
             }
+        # README.namelist:595-602: the flat (stretched or walled) acoustic stage
+        # rescales the outward flux in CM1's order; nothing is compiled otherwise.
+        self.roflux_cm1_order_compiled = None
+        if self.stretched and self.lateral_selection.roflux == 1:
+            from .cuda_boundary_families import compile_cuda_boundary_roflux_cm1_order
+
+            self.roflux_cm1_order_compiled = compile_cuda_boundary_roflux_cm1_order()
         self.terrain_compiled = compile_cuda_terrain_open_boundary()
         self.lateral_compiled = compile_cuda_lateral_closure()
         self.momentum_compiled = compile_cuda_momentum_rk()
@@ -526,7 +568,7 @@ class CartesianDynamics:
             legacy.ptx, legacy.cubin, legacy.target_arch, legacy.ptx_options, legacy.cubin_options, legacy.runtime_identity,
         )
         self.scalar_legacy_compiled, self.scalar_pack_compiled = legacy, pack
-        if self.geometry.stretch_z != 0:
+        if self.stretched:
             # The Cartesian lane is terrain_flag=.false. (config.py admits
             # grid.terrain only on the real-product lane), so a stretched
             # column runs CM1's flat statements: rdz*mh(1,1,k) and
@@ -710,7 +752,10 @@ class CartesianDynamics:
         from .cuda_boundary_families import LateralBoundaryStep
 
         return LateralBoundaryStep(
-            self.lateral_selection, self.family_compiled, self.lateral_workspace
+            self.lateral_selection, self.family_compiled, self.lateral_workspace,
+            # The flat stage rescales in CM1's order (bc.F:2254, :2360); the
+            # uniform stage keeps the image it has always launched.
+            roflux_cm1_order=self.roflux_cm1_order_compiled,
         )
 
     @property
@@ -735,9 +780,14 @@ class CartesianDynamics:
 
     @property
     def stretched(self) -> bool:
-        """Is this run's vertical coordinate anything but param.F:7789-7811's?"""
+        """Does this run integrate CM1's flat (``terrain_flag=.false.``) operator family?
 
-        return self.geometry.stretch_z != 0
+        A vertical coordinate other than param.F:7789-7811's always does; so
+        does a domain with a rigid side wall, on its even column
+        (:func:`runs_flat_family`).
+        """
+
+        return runs_flat_family(self.config)
 
     def _stretched_vertical(self) -> Any:
         """The device sigma/sigmaf/rds/rdsf this run's coordinate generated."""
@@ -790,6 +840,47 @@ class CartesianDynamics:
         from .moisture_species import require_cm1_mass_prefix
 
         return q3d[: require_cm1_mass_prefix(self.config.profile)]
+
+    def _has_rigid_wall(self) -> bool:
+        from .cuda_boundary_families import DEFAULT_LATERAL_BOUNDARY_SELECTION
+        from .cuda_gm1_flat_wall_closure import has_rigid_wall
+
+        # The run's own selection, as _compile_operators binds it.
+        selection = getattr(self.config, "lateral_boundary_selection", None) or DEFAULT_LATERAL_BOUNDARY_SELECTION
+        return has_rigid_wall(selection.sides)
+
+    @_on_stream
+    def _fill_initial_boundaries(self) -> None:
+        """init3d.F:2147-2151: bcu(ua), bcv(va), bcw(wa,1) and bcs(ppi) on the initial state.
+
+        The fills the dynamics applies after every RK stage
+        (:meth:`momentum_boundaries`, :meth:`scalar_boundaries`), bound to this
+        run's lateral family, on the A-level and the current winds and on the
+        pressure, once, before the first step.
+        """
+
+        g, cp, a = self.geometry, self.cupy, self.arrays
+        kfwe, kfsn, rigid = self.open_compiled.kernels[5:8]
+        common = (cp.uint32(g.nx), cp.uint32(g.ny), cp.uint32(g.nz), cp.uint32(3))
+        block = (256, 1, 1)
+        for u, v, w in (("ua", "va", "wa"), ("u3d", "v3d", "w3d")):
+            words = max(int(a[name].size) for name in (u, v, w))
+            grid = ((words + 255) // 256, 1, 1)
+            kfwe(grid, block, (a[u], *common, cp.uint32(1)), stream=self.stream)
+            kfsn(grid, block, (a[u], *common, cp.uint32(1)), stream=self.stream)
+            kfsn(grid, block, (a[v], *common, cp.uint32(2)), stream=self.stream)
+            kfwe(grid, block, (a[v], *common, cp.uint32(2)), stream=self.stream)
+            kfwe(grid, block, (a[w], *common, cp.uint32(3)), stream=self.stream)
+            kfsn(grid, block, (a[w], *common, cp.uint32(3)), stream=self.stream)
+            rigid(grid, block, (a[w], *common), stream=self.stream)
+        # The pressure at the A level and the current pressure, which the
+        # first step starts from the same words.
+        for name in ("ppi", "pp3d"):
+            value = a[name]
+            grid = ((int(value.size) + 127) // 128, 1, 1)
+            for kernel in self.open_compiled.kernels[3:5]:
+                kernel(grid, (128, 1, 1), (value, cp.uint32(g.nx), cp.uint32(g.ny), cp.uint32(g.nz)),
+                       stream=self.stream)
 
     def _publish_startup_thermodynamics(self) -> Mapping[str, Any]:
         """CM1 init3d.F getset, psolver<=3 moist branch, run exactly once."""
@@ -1067,12 +1158,10 @@ class CartesianDynamics:
             # document declared.
             from dataclasses import replace as _replace
 
-            from .cuda_gm1_child_psolver3_open import (
-                DEFAULT_GM1_CHILD_PSOLVER3_OPEN_SELECTION,
-                launch_cuda_gm1_child_psolver3_open_stage,
-            )
+            from .cuda_gm1_child_psolver3_open import DEFAULT_GM1_CHILD_PSOLVER3_OPEN_SELECTION
+            from .cuda_gm1_flat_lateral_acoustic import launch_cuda_gm1_flat_acoustic_stage
 
-            launch = launch_cuda_gm1_child_psolver3_open_stage(
+            launch = launch_cuda_gm1_flat_acoustic_stage(
                 self.arrays, self.metrics, ni=g.nx, nj=g.ny, nk=g.nz, nrk=nrk,
                 dt=self.config.dt_s, nsound=self.config.acoustic_substeps,
                 dx=g.dx_m, dy=g.dy_m, vertical=self._stretched_vertical(),
@@ -1095,6 +1184,11 @@ class CartesianDynamics:
                 # sides only, and the pressure gradient on a periodic side's
                 # boundary face -- the family the bound fills apply.
                 lateral_sides=bound_lateral_sides(self.open_compiled),
+                # sound.F:260-302's irbc=2 phase speeds and roflux=1 rescale,
+                # and no Durran-Klemp production under irbc=1/2, as the
+                # uniform stage below is handed them.  None (the sealed
+                # all-open family) enqueues nothing extra.
+                lateral=self.lateral_step,
             )
         else:
             launch = launch_cuda_psolver3_terrain_open_stage(self.arrays, self.metrics, ni=g.nx, nj=g.ny, nk=g.nz, nrk=nrk, dt=self.config.dt_s, nsound=self.config.acoustic_substeps, dx=g.dx_m, dy=g.dy_m, dz=g.dz_m, ablations=TerrainOpenSoundAblations(stage_family_fills=False), stream=self.stream, compiled=self.psolver_compiled, terrain_compiled=self.terrain_compiled, open_compiled=self.open_compiled, lateral_compiled=self.lateral_compiled, lateral=self.lateral_step, workspace=self._acoustic_workspace, alph=self.config.alph, kdiv=self.config.kdiv, nest_substep=nest_substep)

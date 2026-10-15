@@ -4,9 +4,12 @@ Every CM1 r21.1 lateral capability this port can select is listed here with the
 check that was actually performed on it.  A capability whose ``differential``
 entry is ``None`` is *exposed but not differentially validated*: it runs, it is
 selectable from a document, and no CM1-vs-GM1 comparison has been executed for
-it.  ``unvalidated_for`` turns one run's selection into the machine-readable
-list a receipt and ``gpuwm-cm1 doctor`` both publish, so a reader never has to
-infer from a lane name which parts of a boundary were measured.
+it.  A capability with a differential and a ``not_checked`` sentence was
+compared with CM1, and the comparison found a part that does not give CM1's
+words; it is not checked either, and is published as such.
+``unvalidated_for`` turns one run's selection into the machine-readable list a
+receipt and ``gpuwm-cm1 doctor`` both publish, so a reader never has to infer
+from a lane name which parts of a boundary were measured.
 
 Silence is the failure mode this module exists to prevent.
 """
@@ -23,7 +26,8 @@ BOUNDARY_VALIDATION_SCHEMA = "gpuwm-cm1.boundary-validation-register/v1"
 #: One entry per selectable capability.  ``checked`` is what was measured and
 #: ``differential`` names the CM1-vs-GM1 comparison, or is ``None`` when none
 #: has been run.  ``not_checked`` says, in one sentence, what a reader must not
-#: assume.
+#: assume; it is ``None`` only when nothing the capability runs is known to
+#: differ from CM1 beyond the stated caveat.
 _REGISTER: Mapping[str, Mapping[str, Any]] = MappingProxyType(
     {
         "wbc/ebc/sbc/nbc=2 (open-radiative)": MappingProxyType(
@@ -40,24 +44,24 @@ _REGISTER: Mapping[str, Mapping[str, Any]] = MappingProxyType(
                 "cm1": "src/bc.F:180-1143 periodic branches; src/sound.F:388 with param.F:6678 ibw=0",
                 "checked": "raw-word against the src/bc.F transcription for every carrier; a CM1 differential at 140 s (1.5 acoustic transits) and 600 s (6.75 transits), which agrees with CM1 to within 2% of the all-open control's own disagreement on every field; advu/advv/advw's boundary faces (adv.F i1/i2, j1/j2, doitw..doitn) word for word against CM1's compiled routines on periodic and mixed families (the uniform text's open-side inflow edits differ by rounding, evidence/oracle/periodic-momentum-faces); and horizontally uniform periodic columns whose columns stay bit-identical on both vertical families (8x8x115 stretched and 12x12x115 uniform free-slip to 1800 s, 32x32x40 uniform to 600 s), once the uniform lane's acoustic step advances the periodic faces before it forms the divergence (sound.F:386-406 before :446-530); the flat (stretched) lane's small step word for word against CM1's compiled sound on periodic and mixed families (ssopenbc on open sides only, sound.F:274-302; param.F:9182-9219's dtu0/dtv0 pressure-gradient masks), and a bubble beside a periodic corner whose two boundary-face copies stay one word on both vertical families",
                 "differential": "evidence/oracle/boundary-families/boundary-periodic-32, boundary-periodic-600, boundary-open-x-periodic-y-32; evidence/oracle/periodic-momentum-faces",
-                "caveat": "the 32x32x40 differentials at dx=1000 m predate the momentum boundary-face fix (faces 1 and ni+1 got no advection there) and the uniform lane's acoustic face order (the divergence read the previous small step's boundary face); no LES-resolution or long-equilibration periodic run has been compared with CM1; the SGS closure still applies the open-side edge treatment on every family (turbtend.F:67-102 copies the boundary flux only for wbc=2), so on a periodic side the turbulent flux divergence of the edge columns and rows is dropped: a warm bubble moved by whole cells moves every step-1 held tendency except the w and theta words in the edge column or row beside it (evidence/oracle/periodic-momentum-faces, tests/test_cartesian_periodic_column_gpu.py)",
-                "not_checked": None,
+                "caveat": "the 32x32x40 differentials at dx=1000 m predate the momentum boundary-face fix (faces 1 and ni+1 got no advection there) and the uniform lane's acoustic face order (the divergence read the previous small step's boundary face); no LES-resolution or long-equilibration periodic run has been compared with CM1; the SGS closure still applies the open-side edge treatment on every family (turbtend.F:67-102 copies the boundary flux only for wbc=2), so on a periodic side the turbulent flux divergence of the edge columns and rows is dropped: a warm bubble moved by whole cells moves every step-1 held tendency except the w and theta words in the edge column or row beside it (evidence/oracle/periodic-momentum-faces, tests/test_cartesian_periodic_column_gpu.py); compared word for word with CM1's compiled turb.F, turbtend.F and adv.F on 24x20x20 periodic-in-x grids, the deformation, the stresses, the stress divergence, the scalar diffusion and the TKE advection all differ from CM1 in the whole edge column beside a periodic side (760 to 840 words a call, on both column families, with or without walls on the other sides; evidence/oracle/walls-operators)",
+                "not_checked": "the turbulence scheme's edge column beside a periodic side: GM1's closure still applies the open-side edge treatment there, where CM1 does not (turbtend.F:67-102), and compared word for word with CM1's compiled turb.F, turbtend.F and adv.F on 24x20x20 periodic-in-x grids the deformation, the stresses, the stress divergence, the scalar diffusion and the TKE advection differ from CM1 in the whole edge column beside a periodic side, 760 to 840 words a call, on both column families, with or without walls on the other sides (evidence/oracle/walls-operators); no whole run has measured what this does to a storm",
             }
         ),
         "wbc/ebc/sbc/nbc=3,4 (rigid walls)": MappingProxyType(
             {
-                "cm1": "src/bc.F:180-1143 rigid branches",
-                "checked": "raw-word against the src/bc.F transcription -- mirrored scalars, a zeroed wall face and an antisymmetric normal velocity, for every carrier -- advu/advv/advw word for word against CM1's compiled routines beside a wall (no inflow edit there, adv.F doitw..doitn), the flat (stretched) lane's small step against CM1's compiled sound beside a wall (no ssopenbc, dtu0 = 0 on the wall face), and one 140 s GPU integration whose published normal velocity is exactly 0.0 on all four walls with 43 m/s in the interior",
+                "cm1": "src/bc.F:180-1143 rigid branches; src/turb.F calcdef and gettau wall branches; src/turbtend.F; src/adv.F; src/init3d.F:2147-2151",
+                "checked": "every operator a walled domain runs, word for word against CM1 r21.1's compiled routines on 24x20x20 domains with free-slip, no-slip and mixed walls on even and stretched columns: the deformation, the stresses and the stress divergence (turb.F calcdef and gettau, turbtend.F turbu, turbv, turbw, turbt, turbs), the eddy coefficients, the TKE advection, the u, v, w and scalar advection, the positive-definite step, the lateral fills and the whole acoustic RK stage (evidence/oracle/walls-operators); the initial fill of the wall faces (init3d.F:2147-2151); and 15-minute dry warm bubbles in a 64 km box with a 10 m/s wind into the walls, against CM1 run on the CPU: with free-slip or no-slip walls in a stable layer GM1 stays within 4e-5 of each field's peak, and with free-slip, no-slip, or both on a stretched column in a neutral layer, where the thermal turns turbulent against the walls, within 3.4 times CM1's own spread from 1e-4 K added to its sounding, and within 2.3 times it in root-mean-square (evidence/oracle/walls-and-lateral-runs)",
                 "differential": None,
                 "caveat": None,
-                "not_checked": "no CM1-vs-GM1 run has been compared for a walled domain, and the SGS fluxes at a lateral wall have not been examined; the closure applies the open-side edge treatment on every family (measured on periodic sides), where CM1 forms a wall flux from the mirrored halo",
+                "not_checked": "a storm in a walled box: in CM1's two-hour supercell with free-slip walls west and east and no-slip walls south and north, GM1 follows CM1 to within 2 cells for the first 70 minutes, but the mature-phase max 2-5 km updraft helicity is 1.26 times CM1's (band 10 %), the max-w column is 12 cells from CM1's at 75 minutes and farther later, and the other nine statistics are 0.964 to 1.110; CM1 against its 1e-4 K twin is 0.982 to 1.031 within 2 cells (evidence/oracle/walls-and-lateral-runs)",
             }
         ),
         "irbc=2 (Klemp-Wilhelmson on small steps) with cstar": MappingProxyType(
             {
                 "cm1": "src/bc.F:1948-2053; src/sound.F:260-268",
-                "checked": "raw-word radbcew/radbcns against the src/bc.F transcription, then a CM1 differential at 280 s (three acoustic transits) with cstar=100 m/s",
-                "differential": "evidence/oracle/boundary-families/boundary-irbc2-32",
+                "checked": "raw-word radbcew/radbcns against the src/bc.F transcription, then a CM1 differential at 280 s (three acoustic transits) with cstar=100 m/s; the stretched column's acoustic stage, which was handed no lateral step before, word for word against CM1's compiled sound with irbc=2 on open, walled and periodic sides; and CM1's two-hour supercell on 53 stretched levels with irbc=2, whose ten mature-phase statistics are 0.963 to 1.010 of CM1's",
+                "differential": "evidence/oracle/boundary-families/boundary-irbc2-32; evidence/oracle/walls-operators; evidence/oracle/walls-and-lateral-runs",
                 "caveat": "the option's own effect on this case is at the two codes' baseline rounding disagreement, so the differential shows GM1's response is the same order and sign as CM1's rather than resolving it to a fraction",
                 "not_checked": None,
             }
@@ -65,18 +69,18 @@ _REGISTER: Mapping[str, Mapping[str, Any]] = MappingProxyType(
         "irbc=1 (Klemp-Wilhelmson on large steps) with cstar": MappingProxyType(
             {
                 "cm1": "src/bc.F:1948-2053; src/solve1.F:402-409",
-                "checked": "the same raw-word radbcew/radbcns kernels irbc=2 uses, called once per large step from the A-level winds, and one 140 s GPU integration that completes",
+                "checked": "the same raw-word radbcew/radbcns kernels irbc=2 uses, called once per large step from the A-level winds, one 140 s GPU integration that completes, and the acoustic stage beside it word for word against CM1's compiled sound on even and stretched columns: the stage keeps irbc=1's phase speeds, where the stretched column's stage used to overwrite them with the Durran-Klemp ones (evidence/oracle/walls-operators)",
                 "differential": None,
                 "caveat": None,
-                "not_checked": "no CM1-vs-GM1 run has been compared for the large-step call position; only irbc=2's small-step position was measured",
+                "not_checked": "no CM1-vs-GM1 run has been compared with irbc=1; the large-step call itself is checked against the transcription of bc.F, not against CM1's own run",
             }
         ),
         "roflux=1 (restrict outward mass flux)": MappingProxyType(
             {
                 "cm1": "src/bc.F:2180-2391; src/sound.F:283-302",
-                "checked": "raw-word against the src/bc.F transcription including the double-precision per-level reduction and the t3 ratio, then a CM1 differential at 280 s and 600 s",
-                "differential": "evidence/oracle/boundary-families/boundary-roflux-32, boundary-roflux-600",
-                "caveat": "the rescale is a near-identity on this case (CM1's own response is 2e-5 of the field), so the differential shows the option is live and does not disturb the agreement; the switch-response residual is dominated by amplified rounding at the boundary face",
+                "checked": "raw-word against the src/bc.F transcription including the double-precision per-level reduction and the t3 ratio, then a CM1 differential at 280 s and 600 s; the stretched column's acoustic stage, which was handed no lateral step before, word for word against CM1's compiled sound with roflux=1 on open, walled and periodic sides, the rescale in CM1's own order (bc.F:2254, rho0*u3d rounded to binary32 first); and CM1's two-hour supercell on 53 stretched levels with roflux=1, whose ten mature-phase statistics are 0.955 to 1.011 of CM1's",
+                "differential": "evidence/oracle/boundary-families/boundary-roflux-32, boundary-roflux-600; evidence/oracle/walls-operators; evidence/oracle/walls-and-lateral-runs",
+                "caveat": "the rescale is a near-identity on this case (CM1's own response is 2e-5 of the field), so the differential shows the option is live and does not disturb the agreement; the switch-response residual is dominated by amplified rounding at the boundary face; on an even column the acoustic stage forms rho0*u3d in double precision where CM1 rounds it to binary32 first, which agrees with CM1 to rounding (with the lateral settings, at most 2.2e-3 of a field's peak over one stage) and not word for word; in a storm the rescale moves no statistic beyond CM1's own spread, so the storm alone cannot tell it from a no-op",
                 "not_checked": None,
             }
         ),
@@ -130,7 +134,8 @@ def _selected(boundaries: Any, closures: Any) -> list[str]:
         names.append("irbc=2 (Klemp-Wilhelmson on small steps) with cstar")
     if 2 in lateral and boundaries.radiative_order == 1:
         names.append("irbc=1 (Klemp-Wilhelmson on large steps) with cstar")
-    if boundaries.roflux == 1:
+    # CM1 rescales the outward flow through open sides only (bc.F:2180-2391).
+    if 2 in lateral and boundaries.roflux == 1:
         names.append("roflux=1 (restrict outward mass flux)")
     if boundaries.nudgeobc == 1:
         names.append("nudgeobc=1 with alphobc")
@@ -141,12 +146,26 @@ def _selected(boundaries: Any, closures: Any) -> list[str]:
     return names
 
 
+def is_unvalidated(name: str) -> bool:
+    """True when part of the capability has not been checked against CM1.
+
+    That is a capability with no CM1-vs-GM1 differential, and one whose
+    differential found a part that does not give CM1's words (``not_checked``
+    stated beside a differential).
+    """
+
+    entry = _REGISTER[name]
+    return entry["differential"] is None or entry["not_checked"] is not None
+
+
 def unvalidated_for(boundaries: Any, closures: Any) -> dict[str, Any]:
     """The receipt block for one run's lateral boundaries.
 
     ``capabilities`` is every selectable boundary capability this run turned
-    on; ``unvalidated`` is the subset for which no CM1-vs-GM1 differential has
-    been run, each with the sentence naming what was not checked.
+    on; ``unvalidated`` is the subset with a part not checked against CM1 (no
+    CM1-vs-GM1 differential, or one that found a part differing from CM1),
+    each with the sentence naming what was not checked, and the differential
+    and its caveat when there is one; ``validated`` is the rest.
     """
 
     selected = _selected(boundaries, closures)
@@ -155,9 +174,14 @@ def unvalidated_for(boundaries: Any, closures: Any) -> dict[str, Any]:
             "cm1": _REGISTER[name]["cm1"],
             "checked": _REGISTER[name]["checked"],
             "not_checked": _REGISTER[name]["not_checked"],
+            **(
+                {"differential": _REGISTER[name]["differential"], "caveat": _REGISTER[name]["caveat"]}
+                if _REGISTER[name]["differential"] is not None
+                else {}
+            ),
         }
         for name in selected
-        if _REGISTER[name]["differential"] is None
+        if is_unvalidated(name)
     }
     return {
         "schema": BOUNDARY_VALIDATION_SCHEMA,
@@ -170,7 +194,7 @@ def unvalidated_for(boundaries: Any, closures: Any) -> dict[str, Any]:
                 "caveat": _REGISTER[name]["caveat"],
             }
             for name in selected
-            if _REGISTER[name]["differential"] is not None
+            if not is_unvalidated(name)
         },
         "unvalidated": unvalidated,
         "unvalidated_count": len(unvalidated),
@@ -179,6 +203,7 @@ def unvalidated_for(boundaries: Any, closures: Any) -> dict[str, Any]:
 
 __all__ = [
     "BOUNDARY_VALIDATION_SCHEMA",
+    "is_unvalidated",
     "register",
     "unvalidated_for",
 ]

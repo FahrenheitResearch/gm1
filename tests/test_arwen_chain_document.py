@@ -181,7 +181,10 @@ def test_table_refusals(tmp_path, overrides, code):
     ("replace", "code"),
     [
         ((("nx = 15", "nx = 16"),), "CM1-CFG-CHAIN-GRID"),
-        ((("west = 2", "west = 1"),), "CM1-CFG-CHAIN-LATERAL"),
+        # Both sides of an axis: a periodic side whose opposite side is open is
+        # refused before the chain's own check, as CM1 stops (param.F:2562-2588).
+        ((("west = 2\neast = 2", "west = 1\neast = 1"),), "CM1-CFG-CHAIN-LATERAL"),
+        ((("west = 2", "west = 3"),), "CM1-CFG-CHAIN-LATERAL"),
         ((("moving_frame = false\nu_move_m_s = 0.0", "moving_frame = true\nu_move_m_s = 10.0"),), "CM1-CFG-CHAIN-MOVING-FRAME"),
         ((("isnd = 7\niwnd = 0", "isnd = 5\niwnd = 2"),), "CM1-CFG-CHAIN-INITIALIZATION"),
     ],

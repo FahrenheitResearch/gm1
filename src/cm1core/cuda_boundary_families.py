@@ -149,6 +149,32 @@ class LateralBoundarySelection:
     def any_open(self) -> bool:
         return OPEN_RADIATIVE in self.sides
 
+    def no_effect(self) -> dict[str, str]:
+        """The open-side settings this selection turns on with no open side.
+
+        CM1 accepts them and they change nothing: ``restrict_openbc`` rescales
+        the outward flow through a side whose value is 2 only
+        (``src/bc.F:2180-2391``), and the phase speeds ``irbc = 1`` and ``2``
+        build feed ``ssopenbc``, which runs on such a side only
+        (``src/sound.F:274-302``).  The run is CM1's either way, and the
+        record says so rather than name an effect the run never had.
+        """
+
+        if self.any_open:
+            return {}
+        notes: dict[str, str] = {}
+        if self.roflux == 1:
+            notes["roflux"] = (
+                "no effect: no side is open, and CM1 rescales the outward flow through open sides only "
+                "(src/bc.F:2180-2391)"
+            )
+        if self.irbc in (1, 2):
+            notes["irbc"] = (
+                f"no effect: no side is open, and the phase speeds irbc = {self.irbc} builds are used by the "
+                "open-side update only (src/sound.F:274-302)"
+            )
+        return notes
+
     # src/param.F:6678-6681.  ib* is 1 on a side this rank owns whose value is
     # not periodic.  Serial GM1 owns every side, so ib* is purely wbc/=1.
     @property
@@ -183,6 +209,9 @@ class LateralBoundarySelection:
             "ibs": self.ibs,
             "ibn": self.ibn,
             "source_anchors": dict(SOURCE_ANCHORS),
+            # Only when a setting is on with no open side, so every other
+            # selection records exactly what it recorded before.
+            **({"no_effect": no_effect} if (no_effect := self.no_effect()) else {}),
         }
 
 
@@ -756,6 +785,50 @@ CUDA_BOUNDARY_FAMILIES_SOURCE_SHA256 = (
 )
 
 
+#: bc.F:2254-2256 and :2266-2268 (and :2360-2362, :2372-2374 for v):
+#:     u1=rho0(1,j,k)*u3d(i,j,k)
+#:     if(u1.lt.0.0) u3d(i,j,k)=u1*t3/rho0(1,j,k)
+#: ``u1`` is double precision but ``rho0*u3d`` is a product of two default
+#: REALs, so CM1 rounds it to binary32 before it widens it; the rescale above
+#: widens both factors first and keeps the exact product.  The two rescale
+#: kernels in CM1's order, derived from the sealed text (which stays what the
+#: uniform column's acoustic stage launches); the flat stage launches these.
+CUDA_BOUNDARY_ROFLUX_CM1_ORDER_KERNEL_NAMES = (
+    "cm1_bc_roflux_apply_we_cm1order_f32_v1",
+    "cm1_bc_roflux_apply_sn_cm1order_f32_v1",
+)
+
+
+def _roflux_cm1_order_source() -> str:
+    text = CUDA_BOUNDARY_FAMILIES_SOURCE
+    head = text[: text.index("// ---------------------------------------------------------------------------\n// src/bc.F:180-1143.")]
+    start = text.index('extern "C" __global__\nvoid cm1_bc_roflux_apply_we_f32_v1(')
+    stop = text.index("// src/solve2.F:726-822.")
+    body = text[start:stop]
+    for old, new, count in (
+        ("// gpuwm-cm1.cuda-boundary-families-kernels/v1\n", "// gpuwm-cm1.cuda-boundary-roflux-cm1-order-kernels/v1\n", 1),
+    ):
+        if head.count(old) != count:
+            raise RuntimeError("the boundary-family header changed; derive the roflux rescale again")
+        head = head.replace(old, new)
+    for old, new, count in (
+        ("void cm1_bc_roflux_apply_we_f32_v1(", "void cm1_bc_roflux_apply_we_cm1order_f32_v1(", 1),
+        ("void cm1_bc_roflux_apply_sn_f32_v1(", "void cm1_bc_roflux_apply_sn_cm1order_f32_v1(", 1),
+        ("const double u1=(double)rho0[m]*(double)u3d[x];", "const double u1=(double)m32(rho0[m],u3d[x]);", 2),
+        ("const double v1=(double)rho0[m]*(double)v3d[y];", "const double v1=(double)m32(rho0[m],v3d[y]);", 2),
+    ):
+        if body.count(old) != count:
+            raise RuntimeError(f"roflux rescale derivation: {old!r} found {body.count(old)} times")
+        body = body.replace(old, new)
+    return head + body
+
+
+CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE = _roflux_cm1_order_source()
+CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE_SHA256 = hashlib.sha256(
+    CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE.encode("utf-8")
+).hexdigest()
+
+
 def _validate_dimensions(ni: int, nj: int, nk: int, ng: int) -> None:
     for name, value, lower in (("ni", ni, 4), ("nj", nj, 4), ("nk", nk, 3), ("ng", ng, 1)):
         if isinstance(value, bool) or not isinstance(value, int) or value < lower:
@@ -1201,6 +1274,18 @@ class CompiledBoundaryFamilyKernels:
 def compile_cuda_boundary_families() -> CompiledBoundaryFamilyKernels:
     if hashlib.sha256(CUDA_BOUNDARY_FAMILIES_SOURCE_BYTES).hexdigest() != CUDA_BOUNDARY_FAMILIES_SOURCE_SHA256:
         raise RuntimeError("packaged boundary-family CUDA source differs from its pin")
+    return _compile_family_image(CUDA_BOUNDARY_FAMILIES_SOURCE, CUDA_BOUNDARY_FAMILIES_KERNEL_NAMES,
+                                 "cm1_boundary_families", CUDA_BOUNDARY_FAMILIES_SOURCE_SHA256)
+
+
+def compile_cuda_boundary_roflux_cm1_order() -> CompiledBoundaryFamilyKernels:
+    """The roflux rescale in CM1's order (bc.F:2254, :2360), for the flat acoustic stage."""
+
+    return _compile_family_image(CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE, CUDA_BOUNDARY_ROFLUX_CM1_ORDER_KERNEL_NAMES,
+                                 "cm1_boundary_roflux_cm1_order", CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE_SHA256)
+
+
+def _compile_family_image(source: str, names: tuple[str, ...], stem: str, digest: str) -> CompiledBoundaryFamilyKernels:
     cupy = importlib.import_module("cupy")
     compiler = importlib.import_module("cupy.cuda.compiler")
     function = importlib.import_module("cupy.cuda.function")
@@ -1213,24 +1298,24 @@ def compile_cuda_boundary_families() -> CompiledBoundaryFamilyKernels:
     if int(nvrtc[0]) >= 12:
         common += ("--device-as-default-execution-space",)
     ptx, _ = compiler._NVRTCProgram(
-        CUDA_BOUNDARY_FAMILIES_SOURCE, "cm1_boundary_families_ptx.cu", method="ptx"
+        source, f"{stem}_ptx.cu", method="ptx"
     ).compile(common + (f"--gpu-architecture=compute_{arch}",))
     cubin, _ = compiler._NVRTCProgram(
-        CUDA_BOUNDARY_FAMILIES_SOURCE, "cm1_boundary_families_cubin.cu", method="cubin"
+        source, f"{stem}_cubin.cu", method="cubin"
     ).compile(common + (f"--gpu-architecture=sm_{arch}",))
     ptx = ptx.encode("utf-8") if isinstance(ptx, str) else bytes(ptx)
     cubin = cubin.encode("latin-1") if isinstance(cubin, str) else bytes(cubin)
     ptx_text = ptx.decode("utf-8")
     if not all(
         re.search(rf"\.entry\s+{name}(?:\s|\()", ptx_text)
-        for name in CUDA_BOUNDARY_FAMILIES_KERNEL_NAMES
+        for name in names
     ):
         raise ValueError("compiled PTX lacks a boundary-family entry point")
     module = function.Module()
     module.load(cubin)
-    kernels = tuple(module.get_function(name) for name in CUDA_BOUNDARY_FAMILIES_KERNEL_NAMES)
+    kernels = tuple(module.get_function(name) for name in names)
     return CompiledBoundaryFamilyKernels(
-        module, kernels, ptx, cubin, arch, CUDA_BOUNDARY_FAMILIES_SOURCE_SHA256
+        module, kernels, ptx, cubin, arch, digest
     )
 
 
@@ -1317,12 +1402,20 @@ class LateralBoundaryStep:
     selection: LateralBoundarySelection
     compiled: CompiledBoundaryFamilyKernels
     workspace: Mapping[str, Any]
+    #: The roflux rescale in CM1's order (compile_cuda_boundary_roflux_cm1_order),
+    #: which the flat acoustic stage launches; ``None`` keeps the sealed one.
+    roflux_cm1_order: CompiledBoundaryFamilyKernels | None = None
 
     def record(self) -> dict[str, Any]:
         return {
             "selection": self.selection.record(),
             "kernel_source_sha256": self.compiled.source_sha256,
             "workspace": sorted(self.workspace),
+            **(
+                {"roflux_rescale_source_sha256": self.roflux_cm1_order.source_sha256}
+                if self.roflux_cm1_order is not None
+                else {}
+            ),
         }
 
 
@@ -1457,12 +1550,18 @@ def enqueue_restrict_outward_flux(
     selection: LateralBoundarySelection,
     compiled: CompiledBoundaryFamilyKernels,
     stream: Any,
+    apply_compiled: CompiledBoundaryFamilyKernels | None = None,
 ) -> None:
     """``src/bc.F:2180-2391`` in CM1's own ``src/sound.F:283-302`` position.
 
     West/east first and south/north second, each with its own reduction, is
-    CM1's order: the south/north ratio is measured on the ``u3d`` the west/east
-    rescale has already written.
+    CM1's order.  The two are independent: ``restrict_openbc_we`` reduces and
+    rescales ``u3d`` alone and ``restrict_openbc_sn`` ``v3d`` alone
+    (``restrict_openbc_sn(ruh,rmh,rho0,v3d)``), so neither reads what the other
+    wrote.  With no open side nothing is enqueued.  ``apply_compiled`` is the
+    rescale in CM1's order (:func:`compile_cuda_boundary_roflux_cm1_order`);
+    ``None`` launches the sealed rescale, which widens ``rho0`` and ``u3d``
+    before multiplying.
     """
 
     cupy = importlib.import_module("cupy")
@@ -1483,7 +1582,7 @@ def enqueue_restrict_outward_flux(
             stream=stream,
         )
         compiled.kernels[8](one, one, (workspace["temout"], workspace["temin"], workspace["t3"], u32(nk)), stream=stream)
-        compiled.kernels[9](
+        (compiled.kernels[9] if apply_compiled is None else apply_compiled.kernels[0])(
             apply_grid, threads,
             (rho0, arrays["u3d"], workspace["t3"], *common, u32(selection.west), u32(selection.east)),
             stream=stream,
@@ -1496,7 +1595,7 @@ def enqueue_restrict_outward_flux(
             stream=stream,
         )
         compiled.kernels[8](one, one, (workspace["temout"], workspace["temin"], workspace["t3"], u32(nk)), stream=stream)
-        compiled.kernels[10](
+        (compiled.kernels[10] if apply_compiled is None else apply_compiled.kernels[1])(
             apply_grid, threads,
             (rho0, arrays["v3d"], workspace["t3"], *common, u32(selection.south), u32(selection.north)),
             stream=stream,
@@ -1647,6 +1746,9 @@ __all__ = [
     "CUDA_BOUNDARY_FAMILIES_SCHEMA",
     "CUDA_BOUNDARY_FAMILIES_SOURCE",
     "CUDA_BOUNDARY_FAMILIES_SOURCE_SHA256",
+    "CUDA_BOUNDARY_ROFLUX_CM1_ORDER_KERNEL_NAMES",
+    "CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE",
+    "CUDA_BOUNDARY_ROFLUX_CM1_ORDER_SOURCE_SHA256",
     "CompiledBoundaryFamilyKernels",
     "DEFAULT_LATERAL_BOUNDARY_SELECTION",
     "KIND_SCALAR",
@@ -1664,6 +1766,7 @@ __all__ = [
     "bind_lateral_families",
     "bound_lateral_sides",
     "compile_cuda_boundary_families",
+    "compile_cuda_boundary_roflux_cm1_order",
     "cpu_domain_average_uvt",
     "cpu_family_sn_inplace",
     "cpu_family_we_inplace",

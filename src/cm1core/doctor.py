@@ -86,11 +86,11 @@ def _boundary_validation_findings() -> list[Finding]:
     blocking: the capability runs, and the claim about it is bounded.
     """
 
-    from .boundary_validation_register import register
+    from .boundary_validation_register import is_unvalidated, register
 
     findings: list[Finding] = []
     for name, entry in register().items():
-        if entry["differential"] is not None:
+        if not is_unvalidated(name):
             findings.append(
                 Finding(
                     f"CM1 lateral boundary: {name}",
@@ -100,15 +100,22 @@ def _boundary_validation_findings() -> list[Finding]:
                 )
             )
             continue
+        # A differential that found a part differing from CM1 is named beside it.
+        compared = (
+            f"differential against CM1 r21.1: {entry['differential']}; " if entry["differential"] is not None else ""
+        )
         findings.append(
             Finding(
                 f"CM1 lateral boundary: {name}",
                 UNVALIDATED,
-                f"selectable and running; checked: {entry['checked']}; NOT checked: {entry['not_checked']}",
+                f"selectable and running; {compared}checked: {entry['checked']}; NOT checked: {entry['not_checked']}",
                 required=False,
                 remedy=(
                     "run tools/oracle/differential.py against CM1 r21.1 with this "
                     f"capability selected ({entry['cm1']}) and record the comparison"
+                    if entry["differential"] is None
+                    else "give the part named above CM1's own treatment and compare it with "
+                    f"CM1 r21.1 again ({entry['cm1']})"
                 ),
             )
         )

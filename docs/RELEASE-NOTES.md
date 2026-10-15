@@ -1,5 +1,137 @@
 # gpuwm-cm1 release notes
 
+## 0.1.9
+
+Fixes to released behaviour at the side boundaries. Rigid side walls now give CM1's results next to the wall;
+`irbc = 1`, `irbc = 2` and `roflux = 1` now act on stretched levels; a periodic side whose opposite side is not
+periodic is refused, as CM1 refuses it; the import report, the run receipt and `gpuwm-cm1 doctor` now agree that
+periodic sides are not yet checked; and the report and the receipt say when a setting does nothing. The engine is
+0.1.8's (ArWen 2.8.9). A storm with no rigid wall and without those settings on stretched levels runs exactly as in
+0.1.8, word for word, and the pictures are 0.1.8's.
+
+### What changed
+
+- **Rigid side walls now give CM1's results next to the wall.** In released versions up to 0.1.8 a domain with a
+  rigid side wall (`wbc`, `ebc`, `sbc` or `nbc` = 3 for free slip, 4 for no slip) ran differently from CM1 in two
+  ways. The import report listed walls under "Not yet checked against CM1" and said no run had been compared; it
+  did not say they were wrong.
+  - **The first step pushed the sounding's wind through the walls.** CM1 sets the wind across a wall to zero
+    before the first step. GM1 did not, so during the whole first large step air flowed in and out through the
+    walls. In a dry warm bubble in a 64 km box with a 10 m/s wind toward two of the walls, GM1's winds and
+    pressure differed from CM1's by most of each field's largest value within the first minute, and stayed that
+    far off.
+  - **Next to a wall the turbulence scheme treated the wall as an open side.** In the cells beside a wall the
+    deformation, the stresses and their divergence, the mixing of temperature and moisture, and the transport of
+    turbulence energy were computed the way they are beside an open side, not the way CM1 computes them beside a
+    wall. Compared with CM1 on the same input, those cells were wrong by up to the whole size of the field.
+
+  Now a walled domain starts from CM1's boundary values and computes every cell beside a wall with CM1's own
+  formulas. Every part of the step was compared with a compiled copy of CM1 r21.1 on the same input, on even and
+  on stretched levels, with free-slip, no-slip and mixed walls, and gives CM1's results to the last bit. The dry
+  bubbles in the walled box now stay within 4 parts in 100,000 of each field's largest value of CM1's for 15
+  minutes when the air is stable, and when it is neutral, so that the rising air turns turbulent against the
+  walls, within 3.4 times the spread CM1 itself shows when 0.0001 K is added to its sounding. A domain with a wall
+  now runs the step GM1 uses on stretched levels (on even levels too, where it is CM1's step exactly). A walled
+  run started with 0.1.8 or earlier cannot be continued with this version; start it again.
+- **`irbc = 1`, `irbc = 2` and `roflux = 1` now act on stretched levels.** In released versions up to 0.1.8, on
+  stretched vertical levels (`stretch_z` 1, 3 or 4) the small acoustic steps were never given these open boundary
+  settings, and nothing said so: the import report listed neither. `irbc = 2` and `roflux = 1` changed nothing at
+  all (0.1.7 gives the same output, word for word, for CM1's supercell on stretched levels with either one, and
+  0.1.8 runs the model as 0.1.7 does), and with `irbc = 1` or `2` the open sides used the outflow speeds of the
+  default `irbc = 4`. Even levels were not affected. The small steps now make CM1's boundary calls at CM1's points
+  in the step, and rescale the outward flow in CM1's own rounding order. Compared with CM1 on the same input they
+  give CM1's results to the last bit, beside open, walled and periodic sides. CM1's two-hour supercell on 53
+  stretched levels is inside the release bands with `irbc = 2` (the ten statistics are 0.963 to 1.010 of CM1's)
+  and with `roflux = 1` (0.955 to 1.011). A nested grid keeps its parent's `irbc`, as it always has on even levels,
+  so on stretched levels a nest with `irbc = 1` or `2` now makes these calls too (below).
+- **A periodic side needs a periodic opposite side.** CM1 r21.1 stops when one side of an axis is periodic and the
+  other is not (`param.F:2562-2588`, "Can not have periodic b.c.'s on one side only!"). Releases up to 0.1.8
+  imported such a namelist (`wbc = 1` with `ebc = 2`, say) as "Runs" and ran a boundary CM1 does not define. It is
+  now refused by name (`CM1-CFG-PERIODIC-ONE-SIDE`), with the fix "make wbc and ebc both periodic (1), or neither".
+  None of CM1's shipped namelists and none of GM1's examples has such a pair. A run folder made from one by an
+  earlier version is refused when it is run; import the namelist again with both sides periodic or neither.
+- **Periodic sides are "Not yet checked" everywhere.** The import report has listed a periodic side under "Not yet
+  checked against CM1", because the turbulence scheme still treats the edge column beside it as an open side's.
+  The run receipt listed periodic sides as checked, and `gpuwm-cm1 doctor` printed OK for them. Both now say they
+  are not checked, with what was measured: compared with CM1 on the same input, the deformation, the stresses, the
+  turbulent mixing and the turbulence energy transport differ in the whole edge column, 760 to 840 values a call.
+  The run itself is unchanged.
+- **`roflux = 1`, and `irbc = 1` or `2`, with no open side are said to do nothing.** With every side periodic or a
+  wall these settings run, in CM1 too, and change nothing, because CM1 applies them to open sides only. They stay
+  accepted. The import report now lists them under "Same as CM1" with "No effect here" and the reason, and the run
+  receipt carries a `no_effect` note for each instead of recording the outward-flow rescale as on.
+- **A clearer fix for a moving domain with walls.** That refusal's fix read "make wbc/east periodic or open" in the
+  import report; it now reads "make both wbc and ebc periodic or open".
+
+### What was checked
+
+- **Runs without a wall give 0.1.8's output word for word.** On one RTX 4090, release 0.1.8 and this release ran the
+  same decks with the same native tools: the 33 comparison decks without a wall that run publish the same 355
+  frames, word for word. They cover even and stretched levels, periodic sides, `irbc = 1` and `2`, `roflux = 1` and
+  `nudgeobc` on even levels (the `roflux` decks on 32 and 600 cells among them), `hrdamp`, `irdamp = 2`, Coriolis,
+  the adaptive time step, and the stretched and balance-column decks. One more is refused by both versions at the
+  same check before it starts. The deck with rigid walls changes, as it should. A nested run on even levels with
+  `irbc = 2` gives 0.1.8's output word for word, child included, and so does one on stretched levels with
+  `irbc = 4`; on stretched levels with `irbc = 2` the parent and the child both change (after 100 s, the vertical
+  wind by up to 1.3 % of its largest value in the parent and 0.25 % in the child).
+- **Every operator beside a wall, and the small step with every lateral setting**, gives a compiled copy of CM1
+  r21.1's results to the last bit on the same input, on even and stretched levels. Four of GM1's kernel texts are
+  built from other texts when GM1 starts (the wall closure, its turbulence energy transport, the outward-flow
+  rescale and the small step with the lateral calls); they are now recorded by digest beside those comparisons, a
+  test holds the shipped texts to them, and the 248 comparisons they drive were run again from the shipped texts
+  and came out as recorded.
+- **The tests.** The full test suites, on the development tree and on the public snapshot, have no failure that
+  0.1.8's did not have.
+
+### How to update
+
+Run the install line again: on Windows the PowerShell line, on Linux the `curl` line (`docs/INSTALL.md`, "Update
+and uninstall"); with pip, `pip install --upgrade gpuwm-cm1`. The engine stays at ArWen 2.8.9 (gpuwm 2.8.9 and
+gpuwm-data 2.8.9). Close GM1 and let a running storm finish first; the installer stops with a message while one
+runs. Your storms and their pictures stay where they are. Finish a storm with the GM1 version that started it: a
+walled run started with 0.1.8 or earlier is refused if continued with this version. A storm with rigid walls, or
+with `irbc = 1`, `irbc = 2` or `roflux = 1` on stretched levels, run with an earlier version ran the old way; run it
+again to get these fixes.
+
+### Known limitations
+
+- **A storm in a box with rigid walls is still "Not yet checked against CM1".** In CM1's two-hour supercell with
+  free-slip walls on the west and east and no-slip walls on the south and north, GM1 follows CM1 within 2 grid
+  cells for the first 70 minutes. In the second hour, when the storm has reached the walls and weakened, the
+  largest updraft helicity is 1.26 times CM1's (its band is 10 %) and the strongest updraft is in another place;
+  the other nine statistics are 0.964 to 1.110 of CM1's. CM1 against itself with 0.0001 K added stays within
+  3.1 %. The import report, the run receipt and `gpuwm-cm1 doctor` say so for every walled domain.
+- **`irbc = 1`** has no whole run compared with CM1; its small steps match CM1's to the last bit.
+- **Repeating (periodic) sides:** the turbulence scheme still treats the edge column beside a periodic side as an
+  open side's. Compared with CM1 on the same input, the deformation, the stresses and the turbulent mixing differ
+  in that whole edge column, with or without walls on the other sides. Periodic sides stay under "Not yet checked
+  against CM1", now in the receipt and `gpuwm-cm1 doctor` too.
+- **A nested grid on stretched levels with `irbc = 1` or `2`** now makes the small-step lateral calls in the child
+  as in the parent. No nested run can be compared with CM1, which has no nests; this one was run only to see that
+  it runs and what changes.
+- On even levels without a wall, the small steps agree with CM1 to rounding, not to the last bit, as before; with
+  `roflux = 1` the outward flow is rescaled in a different rounding order than CM1's.
+- **Pictures, from 0.1.8.** A run whose saved frames were removed, all or some (Keep pictures only, or deleted by
+  hand), keeps its pictures and its converted `cm1out` files, but the times whose frames are gone cannot get the
+  new looks or the fixes; its Results offer nothing that would delete those pictures or files or draw over them
+  from fewer saved times, and the commands refuse with the reason. To redraw or convert such a run from what is
+  left, use a new folder (`--out`).
+- **Pictures that a redraw can still lose, from 0.1.8.** Pictures and converted `cm1out` files of times whose saved
+  frames you deleted are kept when you delete whole frame folders, except a film made with `--film` on a run that
+  had no other pictures yet: made again, it is made from the frames left. Other ways of removing data can still let
+  a redraw delete them, or draw them again from fewer frames or with less of what the run recorded: deleting only
+  a frame's data file (`history-carriers.f32`) while keeping its folder; deleting or changing GM1's own records in
+  the run folder (the quick-look record, the `cm1out` record, a comparison's `compare.json`, `receipt.json`,
+  `import-report.json` or `run.json`); or deleting the run's parcel track. On such a run, do not use Draw the new
+  looks, Draw every picture again or Convert again, or the commands behind them, and do not make its films or
+  comparisons again; draw or convert into a new folder with `--out` instead.
+- Draw every picture again (`gpuwm-cm1 quicklook RUNDIR --force`) removes a run's pictures before drawing them
+  again. If it is stopped part way, the run keeps only the times drawn so far; while the frames are still there,
+  run it again to finish, and do that before Keep pictures only, which deletes the frames.
+- When you draw the output folder of a deck run (`gpuwm-cm1 cartesian`), name it the same way each time: always its
+  `frames` folder, as `docs/GM1-DECKS.md` does, or always the folder that holds it, not one and then the other.
+- The other known limitations of 0.1.8 and of earlier releases still apply, as their sections below say.
+
 ## 0.1.8
 
 Pictures. Eleven sets of new pictures and picture fixes: CM1's own curves and two new looks for a hurricane, native

@@ -28,7 +28,7 @@ before the release, and with a stand-in for the GPU in the CPU test suite.
 | `isnd` 1, 8, 12-14, 18-23 (CM1's other analytic soundings) | Shown only (`iconly = 1`): the base state is CM1's word for word, but GM1's run from it has not been compared with CM1's yet, so a run is refused. `isnd` 2 and 3 are dry: shown only (`imoist = 0`, `iconly = 1`). `isnd` 6 and 15 are refused, as CM1 has no base state for 6 and 15 needs other constants. |
 | `isnd` 4, 10 (a base state with cloud in it) and 11 | Shown only (`iconly = 1`): the base state is CM1's word for word, but GM1's run from it does not match CM1's yet (over 15 minutes, both on Morrison, w and theta' differed from the first minute), so a run is refused. |
 | `ibalance` 0, 1, 2 | Runs; with 2 (the anelastic balance) the first 15 minutes matched CM1's. |
-| Open-radiative, periodic, `irbc = 2`, rigid walls | Runs; rigid walls and repeating sides are "Not yet checked". |
+| Open-radiative, periodic, `irbc` 1 and 2, `roflux`, rigid walls | Runs; repeating sides, `irbc = 1` and a storm boxed in by rigid walls are "Not yet checked". A repeating side needs a repeating opposite side, as in CM1. |
 | Radiation, PBL, cumulus, `sfcmodel` 2-7 | Refused or not coupled. |
 | `sfcmodel = 1`, `bbc = 3`, Coriolis, `lspgrad`, `imove` | Runs; some combinations are "Not yet checked". |
 | `&param9` output words | Honoured; the words GM1 does not produce are listed (`kmh`, `kmv`, `khh`, `khv`, `rain2`). |

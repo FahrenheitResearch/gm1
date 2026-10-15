@@ -349,24 +349,51 @@ CARTESIAN_OPERATOR_FAMILIES = MappingProxyType({
 })
 
 
-def cartesian_operator_family(stretch_z: int) -> dict[str, str]:
-    """The operator family this ``stretch_z`` reaches, by phase."""
+def cartesian_operator_family(stretch_z: int, *, rigid_walls: bool = False) -> dict[str, str]:
+    """The operator family this ``stretch_z`` reaches, by phase.
 
+    ``rigid_walls``: a domain with a rigid side wall (3 or 4) runs the flat
+    family on any column, with the closure derived for its walls
+    (cuda_cartesian_dynamics.runs_flat_family, cuda_gm1_flat_wall_closure).
+    """
+
+    if rigid_walls:
+        family = dict(CARTESIAN_OPERATOR_FAMILIES["stretched"])
+        family["closure"] = (
+            "cuda_gm1_flat_wall_closure.gm1_flatwall_* (flat, mh/mf bound, each tile's rigid wall edges: "
+            "turb.F:4788-4970, :4131-4232; turbtend.F's edges on an open side only)"
+        )
+        if stretch_z == 0:
+            family["vertical_metric"] = (
+                "rdz*mh(1,1,k), rdz*mf(1,1,k) with mh = mf = 1 on the even column "
+                "(param.F:6327,8170,8467,8476; terrain_flag=.false.), the family a rigid side wall selects"
+            )
+        return family
     return dict(CARTESIAN_OPERATOR_FAMILIES["uniform" if stretch_z == 0 else "stretched"])
 
 
-def cartesian_vertical_operator_record(grid: CartesianGridGeometry) -> dict[str, Any]:
+def lateral_sides_have_rigid_wall(sides: Any) -> bool:
+    """Is any of CM1's ``(wbc, ebc, sbc, nbc)`` a rigid wall (3 or 4)?"""
+
+    from .cuda_gm1_flat_wall_closure import has_rigid_wall
+
+    return has_rigid_wall(sides)
+
+
+def cartesian_vertical_operator_record(grid: CartesianGridGeometry, *, rigid_walls: bool = False) -> dict[str, Any]:
     """Which vertical-metric operator family this grid selects, and why.
 
     The receipt carries this so a reader can tell, from the document alone,
-    which of the two families integrated the run.
+    which of the two families integrated the run.  A domain with a rigid side
+    wall runs the profile-bound (flat) family on an even column too.
     """
 
-    stretched = grid.stretch_z != 0
+    stretched = grid.stretch_z != 0 or rigid_walls
     return {
         "stretch_z": grid.stretch_z,
         "family": "profile-bound" if stretched else "uniform-dz",
         "authority": "src/param.F:7789-7811" if not stretched else "src/param.F:7814-8209",
+        **({"selected_by": "a rigid side wall (wbc/ebc/sbc/nbc = 3 or 4)"} if rigid_walls and grid.stretch_z == 0 else {}),
         "operators": [
             {
                 "uniform_dz": uniform,
@@ -3959,7 +3986,8 @@ def cartesian_plan_payload(
         "initialization": selection.record(),
         "initialization_declared": selection_declared,
         "moving_frame": moving_frame_record(moving_frame),
-        "vertical_operator_family": cartesian_vertical_operator_record(grid),
+        "vertical_operator_family": cartesian_vertical_operator_record(
+            grid, rigid_walls=lateral_sides_have_rigid_wall(config.boundaries.lateral)),
         # Every capability is selectable, and anything this
         # run selected that nothing has measured is named here rather than
         # left to look validated by silence -- the same rows a run's receipt
@@ -4391,7 +4419,8 @@ def _run_cartesian(
             "initialization_validation": unvalidated,
             "moving_frame": moving_frame_record(moving_frame),
             "frame_mode": cartesian_frame_mode_record(moving_frame, adaptive_frame_binding),
-            "vertical_operator_family": cartesian_vertical_operator_record(runtime_config.grid),
+            "vertical_operator_family": cartesian_vertical_operator_record(
+                runtime_config.grid, rigid_walls=lateral_sides_have_rigid_wall(config.boundaries.lateral)),
             # Every capability is selectable, and anything
             # this run selected that nothing has measured is named here rather
             # than left to look validated by silence -- the capability rows,
@@ -4733,7 +4762,8 @@ def _run_cartesian(
         # grid.stretch_z alone.  Without it a reader cannot tell a stretched
         # run that multiplied by rdz*mh(1,1,k) from one that used a scalar dz.
         "vertical_coordinate": runtime_config.grid.levels.record(),
-        "operator_family": cartesian_operator_family(runtime_config.grid.stretch_z),
+        "operator_family": cartesian_operator_family(
+            runtime_config.grid.stretch_z, rigid_walls=lateral_sides_have_rigid_wall(config.boundaries.lateral)),
         "measured_steps": steps,
         "warmup_steps": config.runtime.warmup_steps,
         "initialization": selection.record(),
@@ -4743,7 +4773,8 @@ def _run_cartesian(
         "initialization_validation": unvalidated,
         "moving_frame": moving_frame_record(moving_frame),
         "frame_mode": cartesian_frame_mode_record(moving_frame, adaptive_frame_binding),
-        "vertical_operator_family": cartesian_vertical_operator_record(runtime_config.grid),
+        "vertical_operator_family": cartesian_vertical_operator_record(
+            runtime_config.grid, rigid_walls=lateral_sides_have_rigid_wall(config.boundaries.lateral)),
         # Every capability is selectable, and anything this
         # run selected that nothing has measured is named here rather than
         # left to look validated by silence -- the capability rows, the column
@@ -5049,6 +5080,7 @@ __all__ = [
     "NestBinding",
     "build_runtime_config",
     "cartesian_operator_family",
+    "lateral_sides_have_rigid_wall",
     "CARTESIAN_INITIAL_CONDITION_SCHEMA",
     "cartesian_plan_payload",
     "cartesian_door",

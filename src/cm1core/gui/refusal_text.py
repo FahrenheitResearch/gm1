@@ -612,6 +612,11 @@ BY_CODE: Mapping[str, Entry] = {
         "This setting needs a whole number in range.",
         "Use a whole number in range.",
     ),
+    "CM1-CFG-PERIODIC-ONE-SIDE": _fixed(
+        None, None,
+        "Repeating sides come in pairs: west with east, and south with north.",
+        "Make both sides of that direction repeat, or neither.",
+    ),
     "CM1-CFG-MOVING-FRAME-INACTIVE": _fixed(
         None, None,
         "A moving-domain speed is set, but the moving domain is off.",
